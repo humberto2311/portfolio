@@ -4,10 +4,41 @@
   overflow: hidden;
   margin-top: -50px;
   position: relative;
+
+  .arrows {
+    position: absolute;
+    top: 80%;
+    right: 18%;
+    width: 300px;
+    min-width: 30%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 100;
+
+    button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #eee4;
+      border: none;
+      font-family: monospace;
+      color: #ffff;
+      font-weight: bold;
+      font-size: large;
+      transition: 0.5s;
+    }
+    button:hover {
+      background-color: #eee;
+      color: #555;
+    }
+  }
+
   .list {
     .items {
       position: absolute;
       inset: 0 0 0 0;
+      z-index: 1;
 
       img {
         width: 100%;
@@ -25,14 +56,45 @@
         box-sizing: border-box;
         color: #ffff;
         text-shadow: 0 5px 10px #0004;
+
         .Title {
           font-weight: bold;
           letter-spacing: 10px;
+          transform: translateY(50px);
+          filter: blur(20px);
+          animation: showContent 0.5s 1s linear 1 forwards;
+          animation-delay: 1.2s;
         }
         .topic {
           font-weight: bold;
-          font-size: 5em;
+          font-size: 3em;
+          color: #f1683a;
           list-style: 1.3em;
+          transform: translateY(50px);
+          filter: blur(20px);
+          animation: showContent 0.5s 1s linear 1 forwards;
+          animation-delay: 1.4s;
+        }
+        .des {
+          font-weight: normal;
+          font-size: 1.5em;
+          transform: translateY(50px);
+          filter: blur(20px);
+          animation: showContent 0.5s 1s linear 1 forwards;
+          animation-delay: 1.6s;
+          font-weight: normal;
+          font-size: 1.5em;
+          transform: translateY(50px);
+          filter: blur(20px);
+          animation: showContent 0.5s 1s linear 1 forwards;
+          animation-delay: 1.6s;
+          /* Sombra detrás del texto */
+          text-shadow: 2px 2px 10px rgba(0, 0, 1, 1.9);
+          /* Cuadro de iluminación alrededor del texto */
+          padding: 10px; /* Añade espacio alrededor de las letras para que el efecto de iluminación tenga espacio */
+          background-color: rgba(134, 134, 134, 0.336); /* Fondo blanco semi-transparente */
+
+          border-radius: 5px; /* Opcional: redondear bordes del cuadro */
         }
         .buttons {
           display: grid;
@@ -40,6 +102,17 @@
           grid-template-rows: 40px;
           gap: 5px;
           margin-top: 20px;
+          transform: translateY(50px);
+          filter: blur(20px);
+          animation: showContent 0.5s 1s linear 1 forwards;
+          animation-delay: 1.8s;
+        }
+        @keyframes showContent {
+          to {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+          }
         }
         button {
           border: none;

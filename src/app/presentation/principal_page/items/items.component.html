@@ -1,18 +1,47 @@
-<!-- Carrusel--->
-<div class="Carousel">
-  <!-- items--->
 
+
+<div class="Carousel">
+  <div class="list">
+    <div class="items">
+      <img [src]="items[currentIndex].image" alt="" />
+      <div class="content">
+        <div class="Title">{{ items[currentIndex].title }}</div>
+        <div class="topic">{{ items[currentIndex].topic }}</div>
+        <div class="des">{{ items[currentIndex].description }}</div>
+        <div class="buttons">
+          <button>SEE MORE</button>
+          <button>FOLLOW</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="arrows">
+    <button id="prev" (click)="prev()"><</button>
+    <button id="next" (click)="next()">></button>
+  </div>
+</div>
+
+
+
+
+
+
+<!-- Carrusel--->
+<!--<div class="Carousel">-->
+  <!-- items--->
+<!--
   <div class="list">
     <div class="items">
       <img src="/assets/images/SanFelipe.jpg" alt="" />
       <div class="content">
         <div class="Title">Humberto</div>
-        <div class="topic">presenting</div>
+        <div class="topic">Systems Engineer | Backend Developer</div>
         <div class="des">
-          My name is Rene Humberto Jose Lozano Verbel, I live in Colombia and I
-          am a dedicated Frontend programmer who strives to always learn more
-          and improve myself, independent and calm when working under pressure,
-          being very responsible in my day-to-day duties.
+          Welcome to my portfolio! I am a proactive systems engineer with 
+          experience in developing software solutions that solve real-world
+           problems. I work with technologies like Java, Spring Boot, Angular, 
+           and I have knowledge in relational and non-relational databases like MySQL and MongoDB. 
+           I'm constantly looking to learn and improve my skills.
         </div>
         <div class="buttons">
           <button>SEE MORE</button>
@@ -21,4 +50,11 @@
       </div>
     </div>
   </div>
+  <div>
+    <div class="arrows">
+      <button id="prev"><</button>
+      <button id="next">></button>
+    </div>
+  </div>
 </div>
+-->

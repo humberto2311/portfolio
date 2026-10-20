@@ -6,7 +6,7 @@ import { CarruselComponent } from "./presentation/principal_page/carrusel/carrus
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CardComponent, CarruselComponent],
+  imports: [ CarruselComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

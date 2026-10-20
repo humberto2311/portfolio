@@ -30,7 +30,7 @@ export class ItemsComponent {
       topic: 'Another Topic',
       description: 'Description for another item.',
     },
-    // Agrega más items según sea necesario
+   
   ];
 
   next() {

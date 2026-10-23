@@ -1,65 +1,138 @@
-<section class="perfil">
+<div class="dashboard-container">
 
-  <!-- ============================
-       CABECERA / HERO
-       ============================ -->
-  <header class="perfil-hero">
-    <div class="perfil-hero__avatar">
-      <img src="assets/images/avatar.png" alt="Foto de {{ nombre }}">
-    </div>
-    <div class="perfil-hero__info">
-      <h1>{{ nombre }}</h1>
-      <h2>{{ cargo }}</h2>
-      <p>{{ descripcion }}</p>
-    </div>
-  </header>
+  <!-- 1. SIDEBAR CON NAVEGACIÓN INTERNA -->
+   <!-- 1. SIDEBAR CON NAVEGACIÓN INTERNA -->
+  <aside class="sidebar">
+    <div class="logo">HL.</div>
+    <nav class="menu">
+      <!-- Enlaces con (click) para hacer scroll -->
+      <a href="#" (click)="scrollTo('inicio', $event)" class="active">📊 Overview</a>
+      <a href="#" (click)="scrollTo('perfil', $event)">👤 Sobre mí</a>
+      <a href="#" (click)="scrollTo('experiencia', $event)">💼 Experiencia</a>
+      <a href="#" (click)="scrollTo('estudios', $event)">🎓 Estudios</a>
+      <a href="#" (click)="scrollTo('stack', $event)">🛠️ Stack</a>
+      <hr style="border-color: #2c2c2c; margin: 1rem 0;">
+      
+      <!-- Estos sí son RouterLink (otras páginas) -->
+      <a routerLink="/proyectos">📁 Proyectos</a>
+      <a [href]="resumePdfUrl" target="_blank" rel="noopener noreferrer" class="highlight-link">📄 Hoja de Vida</a>
+    </nav>
+  </aside>
 
-  <!-- ============================
-       DATOS PERSONALES
-       ============================ -->
-  <section class="perfil-bloque">
-    <h3 class="perfil-bloque__titulo">📌 Datos personales</h3>
-    <ul class="datos-lista">
-      <li *ngFor="let dato of datosPersonales" class="dato-item">
-        <span class="dato-item__icono">{{ dato.icono }}</span>
-        <span class="dato-item__etiqueta">{{ dato.etiqueta }}:</span>
-        <span class="dato-item__valor">{{ dato.valor }}</span>
-      </li>
-    </ul>
-  </section>
+  <!-- 2. MAIN CONTENT -->
+  <main class="main-content">
+    
+    <header class="topbar" id="inicio">
+      <div class="user-profile">
+        <!-- Botón rápido para descargar el PDF -->
+        <a [href]="resumePdfUrl" download class="btn-download" title="Descargar HV">⬇️ PDF</a>
+      <!-- Reemplaza tu avatar en el HTML por este -->
+<img src="https://ui-avatars.com/api/?name=Humberto+Lozano&background=1e293b&color=10b981&bold=true" alt="Avatar" class="mini-avatar"> </div>
+    </header>
 
-  <!-- ============================
-       HABILIDADES
-       ============================ -->
-  <section class="perfil-bloque">
-    <h3 class="perfil-bloque__titulo">🚀 Habilidades</h3>
-    <div class="habilidades">
-      <div *ngFor="let h of habilidades" class="habilidad">
-        <div class="habilidad__cabecera">
-          <span class="habilidad__nombre">{{ h.nombre }}</span>
-          <span class="habilidad__nivel">{{ h.nivel }}%</span>
+    <div class="grid-layout">
+
+      <!-- TARJETA DE BIENVENIDA -->
+      <div class="card welcome-card">
+        <div class="welcome-text">
+          <h2>Bienvenido a mi portafolio 👋</h2>
+          <h1>{{ nombre }}</h1>
+          <p>{{ rol }}</p>
+          
+          <div class="action-buttons">
+            <button class="btn-primary" routerLink="/proyectos">Ver Proyectos</button>
+            <a [href]="resumePdfUrl" target="_blank" rel="noopener noreferrer" class="btn-secondary">Ver Hoja de Vida</a>
+          </div>
         </div>
-        <div class="habilidad__barra">
-          <div class="habilidad__progreso" [style.width.%]="h.nivel"></div>
+        <div class="welcome-image">
+          <div class="avatar-grande">
+            <img src="https://ui-avatars.com/api/?name=Humberto+Lozano&size=200&background=1a237e&color=fff" alt="Foto">
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ============================
-       EXPERIENCIA
-       ============================ -->
-  <section class="perfil-bloque">
-    <h3 class="perfil-bloque__titulo">💼 Experiencia</h3>
-    <div class="experiencia">
-      <article *ngFor="let exp of experiencia" class="experiencia-item">
-        <h4>{{ exp.cargo }}</h4>
-        <p class="experiencia-item__empresa">
-          {{ exp.empresa }} · <span>{{ exp.periodo }}</span>
-        </p>
-        <p class="experiencia-item__descripcion">{{ exp.descripcion }}</p>
-      </article>
-    </div>
-  </section>
+      <!-- TARJETA DE CONTACTO -->
+      <div class="card profile-card">
+        <h3>Información de Contacto</h3>
+        <ul class="contact-list">
+          <li *ngFor="let c of contacto">
+            <span class="icon">{{ c.icono }}</span>
+            <span class="text">{{ c.texto }}</span>
+          </li>
+        </ul>
+        <div class="status">
+          <span class="dot"></span> Disponible para nuevos retos
+        </div>
+      </div>
 
-</section>
+      <!-- PERFIL PROFESIONAL (Con ID) -->
+      <div class="card resumen-card" id="perfil">
+        <h3>Perfil Profesional</h3>
+        <p class="resumen-texto">{{ perfilProfesional }}</p>
+      </div>
+
+      <!-- TARJETAS DE MÉTRICAS -->
+      <div class="metricas-grid">
+        <div class="card metrica-card" *ngFor="let m of metricas">
+          <div class="metrica-header">
+            <span class="metrica-icon" [style.color]="m.color">{{ m.icono }}</span>
+            <span class="metrica-tendencia" [style.color]="m.color">{{ m.tendencia }}</span>
+          </div>
+          <h3 class="metrica-valor">{{ m.valor }}</h3>
+          <p class="metrica-titulo">{{ m.titulo }}</p>
+        </div>
+      </div>
+
+      <!-- NUEVO: EXPERIENCIA LABORAL SIMPLIFICADA (Con ID) -->
+      <div class="card experiencia-card" id="experiencia">
+        <h3>Experiencia Laboral</h3>
+        <div class="empresas-grid">
+          <div class="empresa-item" *ngFor="let exp of experiencia">
+            <div class="empresa-icono">🏢</div>
+            <div class="empresa-info">
+              <h4>{{ exp.empresa }}</h4>
+              <p class="empresa-cargo">{{ exp.cargo }}</p>
+            </div>
+            <div class="empresa-fecha">
+              <span>{{ exp.fecha }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMACIÓN ACADÉMICA (Con ID) -->
+      <div class="card formacion-card" id="estudios">
+        <h3>Formación Académica</h3>
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let f of formacion">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <span class="year">{{ f.year }}</span>
+              <h4>{{ f.titulo }}</h4>
+              <p>{{ f.institucion }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARRUSEL DE TECNOLOGÍAS (Con ID) -->
+      <div class="card carrusel-card" id="stack">
+        <h3>Stack Tecnológico</h3>
+        <div class="carrusel-wrapper">
+          <div class="carrusel-track">
+            <div class="tech-item" *ngFor="let tech of tecnologias">
+              <i [class]="tech.icono"></i>
+              <span>{{ tech.nombre }}</span>
+            </div>
+            <!-- Duplicado -->
+            <div class="tech-item" *ngFor="let tech of tecnologias">
+              <i [class]="tech.icono"></i>
+              <span>{{ tech.nombre }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

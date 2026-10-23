@@ -40,38 +40,7 @@
           </a>
         </li>
 
-        <!-- 3. Generador de Hojas de Vida -->
-        <li>
-          <a 
-            [routerLink]="['/generador-cv']" 
-            routerLinkActive="active-link"
-            class="cv-generator-link"
-            (click)="closeMenus()">
-            <span class="sparkle-icon">✨</span> Generador de CV
-          </a>
-        </li>
-
-        <!-- 4. Canales de Comunicación (Dropdown) -->
-        <li class="dropdown-item">
-          <button 
-            class="dropdown-toggle" 
-            (click)="toggleContactDropdown()"
-            [class.active]="isContactDropdownOpen">
-            Contacto ▾
-          </button>
-
-          <div class="dropdown-menu" [class.show]="isContactDropdownOpen">
-            <a [href]="'mailto:' + email" (click)="closeMenus()">
-              ✉️ Enviar Email
-            </a>
-            <a [href]="linkedinUrl" target="_blank" rel="noopener noreferrer" (click)="closeMenus()">
-              💼 LinkedIn
-            </a>
-            <a [href]="githubUrl" target="_blank" rel="noopener noreferrer" (click)="closeMenus()">
-              💻 GitHub
-            </a>
-          </div>
-        </li>
+        
       </ul>
     </div>
 

@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding: 0;
+  margin: 0;
 }
 
 app-navbar {
@@ -11,7 +13,10 @@ app-navbar {
 .app-content {
   flex: 1 1 auto;
   min-height: 0;
-  display: block;
+  display: flex; /* Cambiado a flex para que el hijo ocupe todo */
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
 }
 
 app-footer {

@@ -1,0 +1,65 @@
+<section class="perfil">
+
+  <!-- ============================
+       CABECERA / HERO
+       ============================ -->
+  <header class="perfil-hero">
+    <div class="perfil-hero__avatar">
+      <img src="assets/images/avatar.png" alt="Foto de {{ nombre }}">
+    </div>
+    <div class="perfil-hero__info">
+      <h1>{{ nombre }}</h1>
+      <h2>{{ cargo }}</h2>
+      <p>{{ descripcion }}</p>
+    </div>
+  </header>
+
+  <!-- ============================
+       DATOS PERSONALES
+       ============================ -->
+  <section class="perfil-bloque">
+    <h3 class="perfil-bloque__titulo">📌 Datos personales</h3>
+    <ul class="datos-lista">
+      <li *ngFor="let dato of datosPersonales" class="dato-item">
+        <span class="dato-item__icono">{{ dato.icono }}</span>
+        <span class="dato-item__etiqueta">{{ dato.etiqueta }}:</span>
+        <span class="dato-item__valor">{{ dato.valor }}</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============================
+       HABILIDADES
+       ============================ -->
+  <section class="perfil-bloque">
+    <h3 class="perfil-bloque__titulo">🚀 Habilidades</h3>
+    <div class="habilidades">
+      <div *ngFor="let h of habilidades" class="habilidad">
+        <div class="habilidad__cabecera">
+          <span class="habilidad__nombre">{{ h.nombre }}</span>
+          <span class="habilidad__nivel">{{ h.nivel }}%</span>
+        </div>
+        <div class="habilidad__barra">
+          <div class="habilidad__progreso" [style.width.%]="h.nivel"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================
+       EXPERIENCIA
+       ============================ -->
+  <section class="perfil-bloque">
+    <h3 class="perfil-bloque__titulo">💼 Experiencia</h3>
+    <div class="experiencia">
+      <article *ngFor="let exp of experiencia" class="experiencia-item">
+        <h4>{{ exp.cargo }}</h4>
+        <p class="experiencia-item__empresa">
+          {{ exp.empresa }} · <span>{{ exp.periodo }}</span>
+        </p>
+        <p class="experiencia-item__descripcion">{{ exp.descripcion }}</p>
+      </article>
+    </div>
+  </section>
+
+</section>

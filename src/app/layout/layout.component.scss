@@ -1,0 +1,19 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+app-navbar {
+  flex: 0 0 auto;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: block;
+}
+
+app-footer {
+  flex: 0 0 auto;
+}

@@ -1,0 +1,116 @@
+<!-- SECCIÓN PRINCIPAL -->
+<section class="proyectos-contenedor">
+  
+  <header class="proyectos-header">
+    <h1>Proyectos y Código</h1>
+    <p>Explora mis repositorios y despliegues recientes.</p>
+  </header>
+
+  <!-- ESTADO: CARGANDO -->
+  <div *ngIf="cargando" class="estado-carga">
+    <div class="spinner"></div>
+    <p>Conectando con la API...</p>
+  </div>
+
+  <!-- ESTADO: ERROR -->
+  <div *ngIf="error" class="estado-error">
+    <p>⚠️ {{ error }}</p>
+    <button (click)="cargarProyectos()">Reintentar</button>
+  </div>
+
+  <!-- GRID DE PROYECTOS -->
+  <div class="grid-proyectos" *ngIf="!cargando && !error">
+    <article 
+      *ngFor="let p of proyectos" 
+      class="tarjeta-proyecto" 
+      (click)="abrirPanel(p)">
+      
+      <div class="tarjeta-imagen-contenedor">
+        <img [src]="p.imagenUrl" [alt]="p.nombre" class="tarjeta-imagen" loading="lazy">
+      </div>
+      
+      <div class="tarjeta-footer">
+        <span class="tarjeta-nombre">{{ p.nombre }}</span>
+        <span class="tarjeta-tag">{{ p.tag }}</span>
+      </div>
+    </article>
+  </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- CORTINA ITALIANA (OVERLAY)                 -->
+<!-- IMPORTANTE: Este div va FUERA de la sección principal -->
+<!-- ========================================== -->
+<div class="overlay-cortina" [class.abierto]="panelAbierto" (click)="cerrarPanel()">
+  
+  <div class="cortina-contenido" (click)="$event.stopPropagation()" *ngIf="proyectoActivo">
+    
+    <div class="cortina-header">
+      <div class="cortina-titulo">
+        <span class="dot-red"></span>
+        <span class="dot-yellow"></span>
+        <span class="dot-green"></span>
+        <span class="nombre-repo">{{ proyectoActivo.nombre }}</span>
+      </div>
+      <button class="btn-cerrar" (click)="cerrarPanel()">✕</button>
+    </div>
+
+    <div class="tabs-github">
+      <button 
+        class="tab" 
+        [class.active]="pestanaActiva === 'codigo'" 
+        (click)="cambiarPestana('codigo')">
+        <span class="icono">📄</span> Código
+      </button>
+      <button 
+        class="tab" 
+        [class.active]="pestanaActiva === 'git'" 
+        (click)="cambiarPestana('git')">
+        <span class="icono">🌿</span> Clonar / Ramas
+      </button>
+    </div>
+
+    <!-- PESTAÑA CÓDIGO -->
+    <div class="tab-contenido" *ngIf="pestanaActiva === 'codigo'">
+      <p class="descripcion">{{ proyectoActivo.descripcion }}</p>
+      
+      <div class="tecnologias">
+        <span *ngFor="let tech of proyectoActivo.tecnologias" class="tech-badge">{{ tech }}</span>
+      </div>
+
+      <div class="bloque-codigo">
+        <pre><code>{{ proyectoActivo.codigoEjemplo }}</code></pre>
+      </div>
+    </div>
+
+    <!-- PESTAÑA GIT -->
+    <div class="tab-contenido" *ngIf="pestanaActiva === 'git'">
+      <p class="instruccion">Usa este comando para clonar el repositorio en tu máquina local:</p>
+      
+      <div class="terminal-git">
+        <div class="terminal-header">
+          <span>HTTPS</span>
+          <span class="rama-actual">Rama actual: <strong>{{ proyectoActivo.ramaPrincipal }}</strong></span>
+        </div>
+        <div class="terminal-body">
+          <span class="prompt">$</span>
+          <span class="comando">{{ comandoClonar }}</span>
+          <button class="btn-copiar" title="Copiar" (click)="copiarComando()">📋</button>
+        </div>
+      </div>
+
+      <div class="info-ramas">
+        <h4>Ramas disponibles en el repo:</h4>
+        <ul>
+          <li><span class="rama-tag">{{ proyectoActivo.ramaPrincipal }}</span> (Principal)</li>
+        </ul>
+
+        <a [href]="proyectoActivo.urlRepositorio" target="_blank" class="btn-github">
+          Ver repositorio en GitHub ↗
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>

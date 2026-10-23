@@ -1,0 +1,352 @@
+// ==========================================
+// VARIABLES
+// ==========================================
+$bg-dark: #0a0a0a;
+$card-bg: #1f2121;
+$text-light: #ffffff;
+$text-muted: #8b949e;
+$accent: #ff6f00;
+$border-color: #30363d;
+$terminal-bg: #0d1117;
+$terminal-header: #161b22;
+
+// ==========================================
+// CONTENEDOR PRINCIPAL
+// ==========================================
+.proyectos-contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  min-height: 100vh;
+  background-color: $bg-dark;
+  color: $text-light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  .proyectos-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: $text-light !important; // Forzar color
+    }
+    p { 
+      color: $text-muted; 
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// ==========================================
+// GRID Y TARJETAS
+// ==========================================
+.grid-proyectos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+}
+
+.tarjeta-proyecto {
+  width: 100%;
+  max-width: 340px;
+  background-color: $card-bg;
+  border-radius: 16px;
+  padding: 0.75rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .tarjeta-imagen-contenedor {
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+
+    .tarjeta-imagen {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: contrast(75%) grayscale(20%);
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+  }
+
+  &:hover .tarjeta-imagen {
+    filter: contrast(100%) grayscale(0%);
+    transform: scale(1.05);
+  }
+
+  .tarjeta-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0.5rem 0.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+
+    .tarjeta-nombre { 
+      color: $text-light !important; 
+      font-weight: 600; 
+    }
+    .tarjeta-tag { 
+      color: $text-muted !important; 
+    }
+  }
+}
+
+// ==========================================
+// CORTINA ITALIANA (OVERLAY)
+// ==========================================
+.overlay-cortina {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 9999; // Asegura que esté por encima de todo
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  
+  // Efecto cortina
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease;
+
+  &.abierto {
+    opacity: 1;
+    visibility: visible;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+.cortina-contenido {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 900px;
+  background: $terminal-bg;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 80vh;
+  color: $text-light;
+}
+
+// Header tipo Mac
+.cortina-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: $terminal-header;
+  border-bottom: 1px solid $border-color;
+
+  .cortina-titulo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .dot-red, .dot-yellow, .dot-green {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    
+    .nombre-repo {
+      margin-left: 1rem;
+      font-family: monospace;
+      font-size: 1rem;
+      color: $text-light !important;
+    }
+  }
+
+  .btn-cerrar {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    font-size: 1.2rem;
+    cursor: pointer;
+    &:hover { color: #fff; }
+  }
+}
+
+// Tabs
+.tabs-github {
+  display: flex;
+  background: $terminal-header;
+  border-bottom: 1px solid $border-color;
+  padding: 0 1rem;
+
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: $text-muted !important;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+
+    &:hover { color: $text-light !important; }
+
+    &.active {
+      color: $text-light !important;
+      border-bottom-color: $accent;
+    }
+  }
+}
+
+// Contenido de las pestañas
+.tab-contenido {
+  padding: 2rem;
+  overflow-y: auto;
+  color: $text-muted;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  .descripcion { 
+    font-size: 1rem; 
+    margin-bottom: 1.5rem; 
+    color: $text-light !important;
+  }
+  
+  .bloque-codigo {
+    background: #000;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 1.5rem;
+    
+    pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #79c0ff;
+      overflow-x: auto;
+    }
+  }
+
+  .terminal-git {
+    background: #000;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: $terminal-header;
+      font-size: 0.8rem;
+      color: $text-muted;
+      border-bottom: 1px solid $border-color;
+
+      .rama-actual strong { color: $accent; }
+    }
+
+    .terminal-body {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.95rem;
+
+      .prompt { color: #27c93f; margin-right: 0.5rem; }
+      .comando { color: $text-light; flex: 1; }
+      
+      .btn-copiar {
+        background: transparent;
+        border: 1px solid $border-color;
+        color: $text-muted;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+        &:hover { color: $text-light; border-color: $text-light; }
+      }
+    }
+  }
+
+  .info-ramas {
+    h4 { color: $text-light; margin-bottom: 0.75rem; }
+    ul {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 0.5rem;
+      
+      li {
+        display: flex; align-items: center; gap: 0.5rem;
+        .rama-tag {
+          background: rgba(255,111,0,0.2);
+          color: $accent;
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          font-family: monospace;
+          font-size: 0.85rem;
+        }
+      }
+    }
+  }
+  
+  .btn-github {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: $text-light;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+// ==========================================
+// ESTADOS DE CARGA
+// ==========================================
+.estado-carga, .estado-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: $text-muted;
+  font-size: 1.1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

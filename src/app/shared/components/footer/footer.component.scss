@@ -1,0 +1,168 @@
+// Variables de diseño
+$bg-primary: #0d1117;
+$bg-secondary: #161b22;
+$text-primary: #f0f6fc;
+$text-secondary: #8b949e;
+$accent-color: #58a6ff;
+$accent-hover: #79c0ff;
+$border-color: #30363d;
+
+.portfolio-footer {
+  background-color: $bg-primary;
+  color: $text-primary;
+  border-top: 1px solid $border-color;
+  padding-top: 3rem;
+  padding-bottom: 1.5rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2.5rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+
+  .footer-col {
+    h3, h4 {
+      color: $text-primary;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.25rem;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      border-bottom: 2px solid $border-color;
+      padding-bottom: 0.4rem;
+      display: inline-block;
+    }
+
+    .brand-role {
+      color: $accent-color;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-location {
+      color: $text-secondary;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .email-link {
+      color: $text-primary;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $accent-hover;
+      }
+    }
+
+    // Listas de navegación
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.6rem;
+
+        a {
+          color: $text-secondary;
+          text-decoration: none;
+          font-size: 0.95rem;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: $accent-hover;
+          }
+
+          &.highlight-link {
+            color: $accent-color;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    // Enlaces a Redes
+    .social-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+
+      a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: $text-secondary;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+
+        .social-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        &:hover {
+          color: $accent-hover;
+        }
+      }
+    }
+
+    // Botón para descarga de CV
+    .btn-pdf-download {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      color: $accent-color;
+      border: 1px solid $accent-color;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: rgba($accent-color, 0.1);
+        color: $accent-hover;
+      }
+    }
+  }
+
+  // Barra de copyright inferior
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 2.5rem auto 0 auto;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+    border-top: 1px solid $border-color;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: $text-secondary;
+
+    @media (min-width: 600px) {
+      flex-direction: row;
+    }
+
+    .tech-stack {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+  }
+}

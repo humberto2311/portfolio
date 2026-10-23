@@ -1,0 +1,24 @@
+<div class="Carousel">
+  
+  <div class="background-image">
+    <img [src]="items[currentIndex].image" alt="Fondo" />
+  </div>
+
+  <div class="content">
+    <div class="Title">{{ items[currentIndex].title }}</div>
+    <div class="topic">{{ items[currentIndex].topic }}</div>
+    <div class="des">{{ items[currentIndex].description }}</div>
+    
+    <div class="buttons">
+      <button>SEE MORE</button>
+      <button>FOLLOW</button>
+    </div>
+  </div>
+
+  <!-- Las flechas van aquí, independientes -->
+  <div class="arrows">
+    <button id="prev" (click)="prev()"><</button>
+    <button id="next" (click)="next()">></button>
+  </div>
+
+</div>

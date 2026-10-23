@@ -1,23 +1,26 @@
 import { Component } from '@angular/core';
-interface CarouselItem {
+
+interface CarouselItems {
   image: string;
   title: string;
   topic: string;
   description: string;
+
+
 }
-
-
 @Component({
-  selector: 'app-items',
+  selector: 'app-carrusel',
   standalone: true,
   imports: [],
-  templateUrl: './items.component.html',
-  styleUrl: './items.component.scss'
+  templateUrl: './carrusel.component.html',
+  styleUrl: './carrusel.component.scss'
 })
-export class ItemsComponent {
-  currentIndex = 0;
 
-  items: CarouselItem[] = [
+export class CarruselComponent {
+
+    currentIndex = 0;
+
+  items: CarouselItems[] = [
     {
       image: '/assets/images/SanFelipe.jpg',
       title: 'Humberto',
@@ -40,4 +43,6 @@ export class ItemsComponent {
   prev() {
     this.currentIndex = (this.currentIndex - 1 + this.items.length) % this.items.length;
   }
+
 }
+

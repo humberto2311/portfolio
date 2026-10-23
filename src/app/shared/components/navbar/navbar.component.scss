@@ -1,0 +1,186 @@
+$bg-navbar: rgba(13, 17, 23, 0.85);
+$bg-dropdown: #161b22;
+$text-primary: #f0f6fc;
+$text-secondary: #8b949e;
+$accent-color: #58a6ff;
+$accent-hover: #79c0ff;
+$border-color: #30363d;
+
+.navbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: $bg-navbar;
+  backdrop-filter: blur(10px); // Efecto esmerilado/glassmorphism
+  border-bottom: 1px solid $border-color;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  .navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  // Branding
+  .navbar-brand {
+    color: $text-primary;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+
+    .brand-code {
+      color: $accent-color;
+    }
+  }
+
+  // Enlaces de navegación (Desktop)
+  .navbar-links {
+    ul {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        position: relative;
+
+        a, .dropdown-toggle {
+          color: $text-secondary;
+          text-decoration: none;
+          font-size: 0.95rem;
+          font-weight: 500;
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: color 0.2s ease;
+
+          &:hover, &.active-link {
+            color: $accent-hover;
+          }
+        }
+
+        // Destacado para el Generador de CV
+        .cv-generator-link {
+          color: $text-primary;
+          background-color: rgba($accent-color, 0.15);
+          border: 1px solid rgba($accent-color, 0.4);
+          padding: 0.4rem 0.8rem;
+          border-radius: 6px;
+
+          &:hover {
+            background-color: rgba($accent-color, 0.25);
+            border-color: $accent-hover;
+          }
+        }
+      }
+    }
+
+    // Dropdown de Canales de Comunicación
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 120%;
+      right: 0;
+      background-color: $bg-dropdown;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      padding: 0.5rem 0;
+      min-width: 160px;
+      flex-direction: column;
+
+      &.show {
+        display: flex;
+      }
+
+      a {
+        padding: 0.6rem 1rem;
+        color: $text-primary;
+        font-size: 0.9rem;
+        display: block;
+
+        &:hover {
+          background-color: rgba($accent-color, 0.1);
+          color: $accent-hover;
+        }
+      }
+    }
+  }
+
+  // Botón Hamburguesa (Mobile)
+  .mobile-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    .hamburger-bar {
+      height: 2px;
+      width: 100%;
+      background-color: $text-primary;
+      border-radius: 2px;
+    }
+  }
+
+  // Estilos Responsivos
+  @media (max-width: 768px) {
+    .mobile-toggle {
+      display: flex;
+    }
+
+    .navbar-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: $bg-navbar;
+      border-bottom: 1px solid $border-color;
+      padding: 1.5rem;
+
+      &.active {
+        display: block;
+      }
+
+      ul {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+
+        .dropdown-menu {
+          position: static;
+          box-shadow: none;
+          background-color: transparent;
+          border: none;
+          padding-left: 1rem;
+        }
+      }
+    }
+  }
+}
+// Branding y Logo
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+
+    .brand-logo {
+      height: 70px; // Ajusta este valor según la altura deseada en tu diseño
+      width: auto;  // Mantiene la relación de aspecto original
+      object-fit: contain;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.03); // Ligero efecto interactivo al pasar el cursor
+      }
+    }
+  }

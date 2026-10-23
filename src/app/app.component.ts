@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CardComponent } from "./presentation/principal_page/card/card.component";
-import { CarruselComponent } from "./presentation/principal_page/carrusel/carrusel.component";
-
+import { FooterComponent } from './shared/components/footer/footer.component';
+import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { CarruselComponent } from './shared/components/carrusel/carrusel.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ CarruselComponent],
+  imports: [CarruselComponent, FooterComponent, RouterOutlet, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

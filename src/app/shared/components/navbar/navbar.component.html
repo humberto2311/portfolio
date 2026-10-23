@@ -1,0 +1,79 @@
+<header class="navbar-header">
+  <nav class="navbar-container">
+    
+    <!-- Branding / Logo con Imagen -->
+    <a [routerLink]="['/']" class="navbar-brand" (click)="closeMenus()">
+      <img src="assets/images/logo.png" alt="Logo Humberto Lozano" class="brand-logo">
+    </a>
+
+    <!-- Botón Hamburguesa para Mobile -->
+    <button 
+      class="mobile-toggle" 
+      (click)="toggleMobileMenu()" 
+      [attr.aria-expanded]="isMobileMenuOpen"
+      aria-label="Abrir menú de navegación">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+
+    <!-- Menú Principal de Enlaces -->
+    <div class="navbar-links" [class.active]="isMobileMenuOpen">
+      <ul>
+        <!-- 1. Información Personal -->
+        <li>
+          <a 
+            [routerLink]="['/informacion-personal']" 
+            routerLinkActive="active-link"
+            (click)="closeMenus()">
+            Información Personal
+          </a>
+        </li>
+
+        <!-- 2. Repositorio / Códigos Desplegados -->
+        <li>
+          <a 
+            [routerLink]="['/proyectos']" 
+            routerLinkActive="active-link"
+            (click)="closeMenus()">
+            Proyectos & Código
+          </a>
+        </li>
+
+        <!-- 3. Generador de Hojas de Vida -->
+        <li>
+          <a 
+            [routerLink]="['/generador-cv']" 
+            routerLinkActive="active-link"
+            class="cv-generator-link"
+            (click)="closeMenus()">
+            <span class="sparkle-icon">✨</span> Generador de CV
+          </a>
+        </li>
+
+        <!-- 4. Canales de Comunicación (Dropdown) -->
+        <li class="dropdown-item">
+          <button 
+            class="dropdown-toggle" 
+            (click)="toggleContactDropdown()"
+            [class.active]="isContactDropdownOpen">
+            Contacto ▾
+          </button>
+
+          <div class="dropdown-menu" [class.show]="isContactDropdownOpen">
+            <a [href]="'mailto:' + email" (click)="closeMenus()">
+              ✉️ Enviar Email
+            </a>
+            <a [href]="linkedinUrl" target="_blank" rel="noopener noreferrer" (click)="closeMenus()">
+              💼 LinkedIn
+            </a>
+            <a [href]="githubUrl" target="_blank" rel="noopener noreferrer" (click)="closeMenus()">
+              💻 GitHub
+            </a>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </nav>
+</header>

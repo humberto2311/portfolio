@@ -1,6 +1,13 @@
-<div class="dashboard-container">
+<!-- 1. ESTADO DE CARGA (Mientras llegan los datos de PostgreSQL) -->
+<div class="loading-screen" *ngIf="loading">
+  <div class="spinner"></div>
+  <h2>Cargando Portafolio desde la Base de Datos...</h2>
+</div>
 
-  <!-- 1. SIDEBAR -->
+<!-- 2. CONTENIDO PRINCIPAL (Se muestra cuando loading es false) -->
+<div class="dashboard-container" *ngIf="!loading">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
       <span class="logo-mark">HL</span>
@@ -43,7 +50,7 @@
     </div>
   </aside>
 
-  <!-- 2. MAIN CONTENT -->
+  <!-- MAIN CONTENT -->
   <main class="main-content">
 
     <header class="topbar" id="inicio">
@@ -72,9 +79,7 @@
           </div>
           <h1>{{ nombre }}</h1>
           <p class="welcome-role">{{ rol }}</p>
-          <p class="welcome-desc">
-            Ingeniero de Sistemas especializado en backend enterprise, arquitecturas limpias y APIs de alto rendimiento.
-          </p>
+          <p class="welcome-desc">{{ welcomeDesc }}</p>
 
           <div class="action-buttons">
             <button class="btn-primary" routerLink="/proyectos">

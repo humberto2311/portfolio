@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ResumeService } from '../../core/services/resume.service'; // Ajusta tu ruta
+import { ResumeProfile, ResumeSection } from '../../core/models/resume.model'; // Ajusta tu ruta
 
 @Component({
   selector: 'app-informacion-personal',
@@ -9,77 +11,102 @@ import { RouterLink } from '@angular/router';
   templateUrl: './informacion-personal.component.html',
   styleUrls: ['./informacion-personal.component.scss']
 })
-export class InformacionPersonalComponent {
+export class InformacionPersonalComponent implements OnInit {
+  private resumeService = inject(ResumeService);
   
-  public nombre = 'Humberto Lozano Verbel';
-  public rol = 'Ingeniero de Sistemas | Desarrollador Backend';
+  public loading = true;
+  public profileId = 1; // El ID que creaste en la BD
 
-  // Rutas de tu Hoja de Vida
-  public resumeRoute: string = '/hoja-de-vida';
-  public resumePdfUrl: string = 'assets/docs/HOJADEVIDA-HUMBERTOLOZANOVERBEL.pdf';
+  // Variables dinámicas
+  public nombre = '';
+  public rol = '';
+  public perfilProfesional = '';
+  public resumePdfUrl = 'assets/docs/HOJADEVIDA-HUMBERTOLOZANOVERBEL.pdf'; // Fallback
 
-  // Texto exacto basado en tu perfil del PDF
-  public perfilProfesional = 'Ingeniero de Sistemas y estudiante de Postgrado en Ingeniería de Software con más de 3 años de experiencia en desarrollo backend enterprise con Java y Spring Boot. Especializado en Arquitectura Hexagonal, diseño de APIs RESTful de alto rendimiento, procesamiento multihilo y tuning de bases de datos relacionales. Con base full-stack: experiencia en Angular y JavaScript y formación en desarrollo full-stack a través de MinTIC.';
+  public contacto: any[] = [];
+  public experiencia: any[] = [];
+  public formacion: any[] = [];
+  public tecnologias: any[] = [];
+  public welcomeDesc = '';
 
-  public metricas = [
-  { titulo: 'Experiencia', valor: '3+ Años', tendencia: 'Enterprise Backend', icono: '💼', color: '#00f2fe' },
-  { titulo: 'Especialidad', valor: 'Java / Spring', tendencia: 'Arq. Hexagonal', icono: '⚙️', color: '#4facfe' },
-  { titulo: 'Pruebas Unitarias', valor: '> 80%', tendencia: 'JUnit 5 / Mockito', icono: '🧪', color: '#a78bfa' }
-];
+  // Mantenemos las métricas estáticas por ahora (o las puedes guardar en BD después)
+  public metricas: any[] = [];
 
-  // Formación resumida de tu HV
-  public formacion = [
-    { titulo: 'Postgrado en Ingeniería de Software', institucion: 'Universidad Tecnológica de Bolívar', year: '2025 - Presente' },
-    { titulo: 'Ingeniería de Sistemas', institucion: 'Tecnológico Comfenalco', year: '2024' },
-    { titulo: 'Programador Full-Stack', institucion: 'MinTIC', year: '2024' },
-    { titulo: 'Programador Java', institucion: 'Alura Latam', year: '2024' }
-  ];
+  ngOnInit() {
+    this.loadData();
+  }
 
-  // NUEVO: Experiencia simplificada (Solo empresa, cargo y fecha)
-  public experiencia = [
-    {
-      empresa: 'Security Cast S.A.S',
-      cargo: 'Desarrollador Backend',
-      fecha: '2023 - Presente'
-    },
-    {
-      empresa: 'LYC Soluciones Empresariales',
-      cargo: 'Desarrollador Backend',
-      fecha: '2023'
-    },
-    {
-      empresa: 'Zabud',
-      cargo: 'Pasante Desarrollo de Software',
-      fecha: 'Feb - Ago 2023'
+  loadData() {
+    this.resumeService.getFullResume(this.profileId).subscribe({
+      next: ({ profile, sections }) => {
+        this.mapProfile(profile);
+        this.mapSections(sections);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando el CV:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  private mapProfile(profile: ResumeProfile) {
+    this.nombre = profile.fullName;
+    this.rol = profile.headline;
+    this.perfilProfesional = profile.summary;
+    this.welcomeDesc = profile.shortBio || '';
+    if (profile.resumePdfUrl) this.resumePdfUrl = profile.resumePdfUrl;
+
+    // Armamos el array de contacto para el HTML
+    this.contacto = [
+      { icono: '✉️', texto: profile.email },
+      { icono: '📞', texto: profile.phone },
+      { icono: '📍', texto: profile.location },
+      { icono: '💻', texto: profile.githubUrl }
+    ];
+  }
+
+
+
+private mapSections(sections: ResumeSection[]) {
+  sections.forEach(sec => {
+    if (sec.sectionKey === 'experience') {
+      this.experiencia = sec.items?.map(item => ({
+        empresa: item.content.empresa,
+        cargo: item.content.cargo,
+        fecha: item.content.fecha
+      })) || [];
+    } 
+    else if (sec.sectionKey === 'education') {
+      this.formacion = sec.items?.map(item => ({
+        year: item.content.year,
+        titulo: item.content.titulo,
+        institucion: item.content.institucion
+      })) || [];
     }
-  ];
+    else if (sec.sectionKey === 'skill') {
+      this.tecnologias = sec.items?.map(item => ({
+        nombre: item.content.nombre,
+        icono: item.content.icono
+      })) || [];
+    }
+    // 2. 👇 NUEVO: Mapeamos las métricas desde la BD
+    else if (sec.sectionKey === 'metric') {
+      this.metricas = sec.items?.map(item => ({
+        titulo: item.content.titulo,
+        valor: item.content.valor,
+        tendencia: item.content.tendencia,
+        icono: item.content.icono,
+        color: item.content.color
+      })) || [];
+    }
+  });
+}
 
-  public tecnologias = [
-    { nombre: 'Java', icono: 'devicon-java-plain colored' },
-    { nombre: 'Spring Boot', icono: 'devicon-spring-plain colored' },
-    { nombre: 'Angular', icono: 'devicon-angularjs-plain colored' },
-    { nombre: 'TypeScript', icono: 'devicon-typescript-plain colored' },
-    { nombre: 'Oracle / SQL', icono: 'devicon-oracle-original colored' },
-    { nombre: 'PostgreSQL', icono: 'devicon-postgresql-plain colored' },
-    { nombre: 'Docker', icono: 'devicon-docker-plain colored' },
-    { nombre: 'Git', icono: 'devicon-git-plain colored' },
-    { nombre: 'JUnit 5', icono: 'devicon-java-plain' }, 
-    { nombre: 'JavaScript', icono: 'devicon-javascript-plain colored' }
-  ];
-
-  public contacto = [
-    { icono: '✉️', texto: 'humbertojoc@gmail.com' },
-    { icono: '📞', texto: '(+57) 311 840 6566' },
-    { icono: '📍', texto: 'Bogotá, Colombia' },
-    { icono: '💻', texto: 'github.com/humberto2311' }
-  ];
-
-    // Función para hacer scroll suave a las secciones
   scrollTo(id: string, event: Event) {
-    event.preventDefault(); // Evita que la página se recargue
+    event.preventDefault();
     const element = document.getElementById(id);
     if (element) {
-      // Hacemos el scroll calculando la posición del elemento
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }

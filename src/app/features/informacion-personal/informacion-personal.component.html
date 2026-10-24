@@ -108,6 +108,7 @@
         </h3>
 
         <ul class="contact-list">
+          <!-- Aquí solo se renderizarán los que pasaron el filtro -->
           <li *ngFor="let c of contacto">
             <span class="icon">{{ c.icono }}</span>
             <span class="text">{{ c.texto }}</span>

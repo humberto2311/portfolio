@@ -9,9 +9,9 @@ import { Proyecto } from '../models/proyecto';
 export class ProyectosService {
 
   private http = inject(HttpClient);
-  
-  // Asegúrate de que el puerto sea el correcto (8081 o el que estés usando)
-  private readonly API_URL = 'http://localhost:8081/api/cards';
+
+ private readonly rawEnvApiUrl = (import.meta.env?.['API_URL'] || import.meta.env?.['VITE_API_URL'] || '').trim();
+  private readonly API_URL = (this.rawEnvApiUrl || 'http://localhost:8081') + '/api/resume';
 
   getProyectos(): Observable<Proyecto[]> {
     return this.http.get<Proyecto[]>(this.API_URL);

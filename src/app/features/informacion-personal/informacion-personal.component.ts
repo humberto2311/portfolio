@@ -57,15 +57,16 @@ export class InformacionPersonalComponent implements OnInit {
     this.welcomeDesc = profile.shortBio || '';
     if (profile.resumePdfUrl) this.resumePdfUrl = profile.resumePdfUrl;
 
-    // Armamos el array de contacto para el HTML
-    this.contacto = [
+    // Armamos el array de contacto y filtramos los nulos/vacíos
+    const contactoRaw = [
       { icono: '✉️', texto: profile.email },
       { icono: '📞', texto: profile.phone },
       { icono: '📍', texto: profile.location },
       { icono: '💻', texto: profile.githubUrl }
     ];
-  }
 
+    this.contacto = contactoRaw.filter(c => c.texto != null && c.texto.trim() !== '');
+  }
 
 
 private mapSections(sections: ResumeSection[]) {

@@ -13,7 +13,7 @@ export class NavbarComponent {
   public isMobileMenuOpen: boolean = false;
   public isScrolled: boolean = false;
 
-  public githubUrl: string = 'https://github.com/jonnytedire-web';
+  public githubUrl: string = 'https://github.com/humberto2311';
 
   @HostListener('window:scroll', [])
   onWindowScroll(): void {

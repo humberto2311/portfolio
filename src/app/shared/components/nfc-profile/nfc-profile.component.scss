@@ -371,7 +371,7 @@ $accent-blue: #4facfe;
     gap: 2rem;
 
     @media (min-width: 1024px) {
-      grid-template-columns: 4fr 8fr;
+      grid-template-columns: 1fr 1fr; // Cambiado a 1fr 1fr para que ambas tarjetas sean iguales
     }
   }
 
@@ -441,139 +441,109 @@ $accent-blue: #4facfe;
     }
   }
 
-  .repos-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  // ===== PANEL ¿CÓMO FUNCIONA V1? =====
+  .how-it-works {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%;
 
-    @media (min-width: 640px) {
-      grid-template-columns: 1fr 1fr;
+    .how-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.05rem;
+      color: #fff;
+      margin: 0;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-weight: 700;
+
+      svg { 
+        color: $accent-cyan; 
+        flex-shrink: 0;
+      }
     }
 
-    .repo-card {
-      padding: 1.25rem;
+    .how-intro {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+      margin: 0;
+      padding-bottom: 0.5rem;
+
+      strong { 
+        color: $accent-cyan; 
+        font-weight: 700; 
+      }
+    }
+
+    .how-steps {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 0.75rem;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      flex-grow: 1;
 
-      .repo-top {
+      .how-step {
         display: flex;
-        justify-content: space-between;
+        gap: 1rem;
         align-items: flex-start;
-        gap: 0.5rem;
 
-        .repo-name {
-          font-size: 0.85rem;
-          font-weight: 700;
+        .step-num {
+          flex-shrink: 0;
+          width: 2.2rem;
+          height: 2.2rem;
+          border-radius: 0.6rem;
+          background: rgba(0, 242, 254, 0.1);
+          border: 1px solid rgba(0, 242, 254, 0.3);
           color: $accent-cyan;
           font-family: 'JetBrains Mono', monospace;
-          margin: 0;
-          
-          // Estilo añadido para el enlace del nombre
-          a {
-            color: inherit;
-            text-decoration: none;
-            &:hover { color: $accent-blue; text-decoration: underline; }
-          }
-        }
-
-        .repo-badge {
-          font-size: 0.62rem;
-          font-family: 'JetBrains Mono', monospace;
-          padding: 0.15rem 0.5rem;
-          border-radius: 0.3rem;
-          background: #1e293b;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: #cbd5e1;
-          white-space: nowrap;
-        }
-      }
-
-      .repo-desc {
-        font-size: 0.75rem;
-        color: $text-muted;
-        line-height: 1.5;
-        margin: 0;
-      }
-
-      .repo-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 0.75rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        font-size: 0.68rem;
-        font-family: 'JetBrains Mono', monospace;
-        color: #64748b;
-
-        .repo-lang {
-          display: inline-flex;
+          font-size: 0.75rem;
+          font-weight: 700;
+          display: flex;
           align-items: center;
-          gap: 0.35rem;
-
-          .lang-dot {
-            width: 0.45rem;
-            height: 0.45rem;
-            border-radius: 50%;
-            background: #f59e0b;
-          }
-
-          &[data-lang="Dart"] .lang-dot { background: $accent-cyan; }
-          &[data-lang="Python"] .lang-dot { background: #facc15; }
-          &[data-lang="Java"] .lang-dot { background: #f97316; }
-          &[data-lang="TypeScript"] .lang-dot { background: #3b82f6; }
+          justify-content: center;
+          box-shadow: 0 4px 12px -4px rgba($accent-cyan, 0.2);
         }
 
-        // Estilo añadido para las tecnologías secundarias
-        .repo-stack {
-          color: #64748b;
+        div {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        h4 {
+          font-size: 0.85rem;
+          color: #fff;
+          margin: 0;
+          font-weight: 600;
+        }
+
+        p {
+          font-size: 0.76rem;
+          color: $text-muted;
+          line-height: 1.55;
+          margin: 0;
         }
       }
     }
 
-    // ===== AÑADIDOS PARA LA API (SKELETON Y ERROR) =====
-    .skeleton {
-      min-height: 130px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      justify-content: center;
+    .how-note {
+      font-size: 0.78rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0.85rem 1rem;
+      background: rgba(0, 242, 254, 0.08);
+      border-left: 3px solid $accent-cyan;
+      border-radius: 0.5rem;
+      margin-top: auto;
 
-      .skeleton-line {
-        height: 0.75rem;
-        border-radius: 0.35rem;
-        background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.4s infinite;
-
-        &.w-40 { width: 40%; }
-        &.w-60 { width: 60%; }
-        &.w-90 { width: 90%; }
-      }
-    }
-
-    .repos-error {
-      grid-column: 1 / -1;
-      padding: 2rem;
-      text-align: center;
-      color: $text-muted;
-
-      .btn-retry {
-        margin-top: 0.75rem;
-        padding: 0.5rem 1rem;
-        background: $accent-cyan;
-        color: $bg-dark;
-        border: none;
-        border-radius: 0.5rem;
-        font-family: 'JetBrains Mono', monospace;
+      strong { 
+        color: $accent-cyan; 
         font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.2s;
-
-        &:hover {
-          transform: scale(1.05);
-        }
       }
     }
   }

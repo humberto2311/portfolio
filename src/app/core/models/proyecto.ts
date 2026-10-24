@@ -1,11 +1,11 @@
 export interface Proyecto {
   id: number;
-  nombre: string;
-  tag: string;
-  imagenUrl: string;
-  descripcion: string;
-  ramaPrincipal: string;
-  urlRepositorio: string;
-  tecnologias: string[];
-  codigoEjemplo: string;
+  name: string;          // Antes 'nombre'
+  description: string;   // Antes 'descripcion'
+  cloneUrl: string;      // Antes 'urlRepositorio'
+  homepage: string;
+  imageUrl: string;
+  lastCommitDate: string;      // Antes 'imagenUrl'
+  stack: string[];       // Antes 'tecnologias'
+  branches: string[];    // Antes 'ramaPrincipal' (ahora es un array)
 }

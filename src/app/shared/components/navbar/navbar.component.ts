@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -11,24 +11,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class NavbarComponent {
   public isMobileMenuOpen: boolean = false;
-  public isContactDropdownOpen: boolean = false;
+  public isScrolled: boolean = false;
 
-  // Enlaces externos
   public githubUrl: string = 'https://github.com/jonnytedire-web';
-  public linkedinUrl: string = 'https://linkedin.com/in/tu-perfil';
-  public email: string = 'aacendra@ugpp.gov.co';
 
-  // Métodos para controlar el estado UI
+  @HostListener('window:scroll', [])
+  onWindowScroll(): void {
+    this.isScrolled = window.scrollY > 20;
+  }
+
   public toggleMobileMenu(): void {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
 
-  public toggleContactDropdown(): void {
-    this.isContactDropdownOpen = !this.isContactDropdownOpen;
-  }
-
   public closeMenus(): void {
     this.isMobileMenuOpen = false;
-    this.isContactDropdownOpen = false;
   }
 }

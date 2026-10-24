@@ -1,37 +1,64 @@
-<!-- SECCIÓN PRINCIPAL -->
+<!-- ========================================== -->
+<!-- FONDO CREATIVO (CYBER-GRID)                -->
+<!-- ========================================== -->
+<div class="cyber-background">
+  <div class="grid-overlay"></div>
+  <div class="glow-orb cyan"></div>
+  <div class="glow-orb blue"></div>
+</div>
+
+<!-- ========================================== -->
+<!-- SECCIÓN PRINCIPAL                          -->
+<!-- ========================================== -->
 <section class="proyectos-contenedor">
   
   <header class="proyectos-header">
-    <h1>Proyectos y Código</h1>
-    <p>Explora mis repositorios y despliegues recientes.</p>
+    <div class="header-badge">
+      <span class="pulse-dot"></span>
+      PORTAFOLIO DE CÓDIGO
+    </div>
+    <h1 class="gradient-text">Proyectos y Código</h1>
+    <p>Explora mis repositorios, arquitecturas y despliegues recientes.</p>
   </header>
 
   <!-- ESTADO: CARGANDO -->
   <div *ngIf="cargando" class="estado-carga">
     <div class="spinner"></div>
-    <p>Conectando con la API...</p>
+    <p>Conectando con la API de GitHub...</p>
   </div>
 
   <!-- ESTADO: ERROR -->
   <div *ngIf="error" class="estado-error">
-    <p>⚠️ {{ error }}</p>
-    <button (click)="cargarProyectos()">Reintentar</button>
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button (click)="cargarProyectos()" class="btn-retry">Reintentar conexión</button>
   </div>
 
   <!-- GRID DE PROYECTOS -->
   <div class="grid-proyectos" *ngIf="!cargando && !error">
     <article 
       *ngFor="let p of proyectos" 
-      class="tarjeta-proyecto" 
+      class="tarjeta-proyecto glass-panel" 
+      (mousemove)="onCardTilt($event, p)"
+      (mouseleave)="resetCardTilt(p)"
+      [id]="'card-' + p.name"
       (click)="abrirPanel(p)">
       
       <div class="tarjeta-imagen-contenedor">
-        <img [src]="p.imagenUrl" [alt]="p.nombre" class="tarjeta-imagen" loading="lazy">
+        <!-- Usamos imageUrl o una por defecto si es null -->
+        <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop'" [alt]="p.name" class="tarjeta-imagen" loading="lazy">
+        <div class="imagen-overlay">
+          <span class="ver-detalle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            Ver Detalles
+          </span>
+        </div>
       </div>
       
       <div class="tarjeta-footer">
-        <span class="tarjeta-nombre">{{ p.nombre }}</span>
-        <span class="tarjeta-tag">{{ p.tag }}</span>
+        <span class="tarjeta-nombre">{{ p.name }}</span>
+        <!-- Mostramos la primera tecnología como Tag -->
+        <span class="tarjeta-tag">#{{ p.stack && p.stack.length > 0 ? p.stack[0] : 'GIT' }}</span>
       </div>
     </article>
   </div>
@@ -39,48 +66,64 @@
 </section>
 
 <!-- ========================================== -->
-<!-- CORTINA ITALIANA (OVERLAY)                 -->
-<!-- IMPORTANTE: Este div va FUERA de la sección principal -->
+<!-- CORTINA ITALIANA (MODAL)                   -->
 <!-- ========================================== -->
 <div class="overlay-cortina" [class.abierto]="panelAbierto" (click)="cerrarPanel()">
   
-  <div class="cortina-contenido" (click)="$event.stopPropagation()" *ngIf="proyectoActivo">
+  <div class="cortina-contenido glass-panel" (click)="$event.stopPropagation()" *ngIf="proyectoActivo">
     
+    <!-- Header Ventana Tipo Mac/Terminal -->
     <div class="cortina-header">
       <div class="cortina-titulo">
-        <span class="dot-red"></span>
-        <span class="dot-yellow"></span>
-        <span class="dot-green"></span>
-        <span class="nombre-repo">{{ proyectoActivo.nombre }}</span>
+        <div class="window-controls">
+          <span class="dot-red"></span>
+          <span class="dot-yellow"></span>
+          <span class="dot-green"></span>
+        </div>
+        <span class="separator">|</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="folder-icon"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        <span class="nombre-repo">{{ proyectoActivo.name }}</span>
       </div>
-      <button class="btn-cerrar" (click)="cerrarPanel()">✕</button>
+      <button class="btn-cerrar" (click)="cerrarPanel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
     </div>
 
+    <!-- Pestañas -->
     <div class="tabs-github">
       <button 
         class="tab" 
         [class.active]="pestanaActiva === 'codigo'" 
         (click)="cambiarPestana('codigo')">
-        <span class="icono">📄</span> Código
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        Código
       </button>
       <button 
         class="tab" 
         [class.active]="pestanaActiva === 'git'" 
         (click)="cambiarPestana('git')">
-        <span class="icono">🌿</span> Clonar / Ramas
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        Clonar / Ramas
       </button>
     </div>
 
     <!-- PESTAÑA CÓDIGO -->
     <div class="tab-contenido" *ngIf="pestanaActiva === 'codigo'">
-      <p class="descripcion">{{ proyectoActivo.descripcion }}</p>
+      <p class="descripcion">{{ proyectoActivo.description || 'Sin descripción disponible.' }}</p>
       
       <div class="tecnologias">
-        <span *ngFor="let tech of proyectoActivo.tecnologias" class="tech-badge">{{ tech }}</span>
+        <span class="tech-label">Stack:</span>
+        <span *ngFor="let tech of proyectoActivo.stack" class="tech-badge">{{ tech }}</span>
       </div>
 
       <div class="bloque-codigo">
-        <pre><code>{{ proyectoActivo.codigoEjemplo }}</code></pre>
+        <div class="code-header">
+          <span class="file-name">Ejemplo de implementación</span>
+        </div>
+        <!-- Como no tenemos código en BD, mostramos un texto simulado -->
+        <pre><code>// Repositorio: {{ proyectoActivo.name }}
+// Clona el proyecto para ver el código completo.
+console.log("Happy Coding!");</code></pre>
       </div>
     </div>
 
@@ -90,23 +133,31 @@
       
       <div class="terminal-git">
         <div class="terminal-header">
-          <span>HTTPS</span>
-          <span class="rama-actual">Rama actual: <strong>{{ proyectoActivo.ramaPrincipal }}</strong></span>
+          <span class="terminal-title">Terminal</span>
+          <span class="rama-actual">Rama: <strong>{{ proyectoActivo.branches && proyectoActivo.branches.length > 0 ? proyectoActivo.branches[0] : 'main' }}</strong></span>
         </div>
         <div class="terminal-body">
-          <span class="prompt">$</span>
+          <span class="prompt">➜</span>
           <span class="comando">{{ comandoClonar }}</span>
-          <button class="btn-copiar" title="Copiar" (click)="copiarComando()">📋</button>
+          <button class="btn-copiar" title="Copiar" (click)="copiarComando()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+          </button>
         </div>
       </div>
 
       <div class="info-ramas">
-        <h4>Ramas disponibles en el repo:</h4>
+        <h4>Ramas disponibles:</h4>
         <ul>
-          <li><span class="rama-tag">{{ proyectoActivo.ramaPrincipal }}</span> (Principal)</li>
+          <!-- Iteramos sobre las ramas que trajo JGit -->
+          <li *ngFor="let rama of proyectoActivo.branches">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="branch-icon"><path d="M17 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zM7 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zM12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/><path d="M12 7v6M7 13v2c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="rama-tag">{{ rama }}</span>
+          </li>
         </ul>
 
-        <a [href]="proyectoActivo.urlRepositorio" target="_blank" class="btn-github">
+        <!-- Botón para ir a GitHub (Usamos el cloneUrl y le quitamos el .git) -->
+        <a [href]="proyectoActivo.cloneUrl ? proyectoActivo.cloneUrl.replace('.git', '') : '#'" target="_blank" class="btn-github">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
           Ver repositorio en GitHub ↗
         </a>
       </div>

@@ -1,140 +1,258 @@
-$bg-navbar: rgba(13, 17, 23, 0.85);
-$bg-dropdown: #161b22;
-$text-primary: #f0f6fc;
-$text-secondary: #8b949e;
-$accent-color: #58a6ff;
-$accent-hover: #79c0ff;
-$border-color: #30363d;
+// ==========================================
+// PALETA NFC-SOFT
+// ==========================================
+$bg-navbar: rgba(11, 15, 25, 0.75);
+$bg-navbar-scrolled: rgba(8, 13, 24, 0.95);
+$text-primary: #f1f5f9;
+$text-secondary: #94a3b8;
+$accent-cyan: #00f2fe;
+$accent-blue: #4facfe;
+$border-soft: rgba(255, 255, 255, 0.08);
 
 .navbar-header {
   position: sticky;
   top: 0;
   z-index: 1000;
   background-color: $bg-navbar;
-  backdrop-filter: blur(10px); // Efecto esmerilado/glassmorphism
-  border-bottom: 1px solid $border-color;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid $border-soft; /* LÍNEA DE DIVISIÓN RESTAURADA */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+  // Línea inferior con glow cyan
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 242, 254, 0.4) 50%, transparent 100%);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  &.is-scrolled {
+    background-color: $bg-navbar-scrolled;
+    box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.5);
+    border-bottom-color: rgba(0, 242, 254, 0.15);
+  }
 
   .navbar-container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 0.85rem 1.5rem;
+    padding: 0.65rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
   }
 
-  // Branding
+  // ==========================================
+  // BRANDING (Empresa + Persona)
+  // ==========================================
   .navbar-brand {
-    color: $text-primary;
-    font-size: 1.2rem;
-    font-weight: 700;
+    display: flex;
+    align-items: center;
     text-decoration: none;
+    gap: 1.25rem;
+    transition: all 0.2s ease;
 
-    .brand-code {
-      color: $accent-color;
+    &:hover {
+      .brand-logo {
+        filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.6));
+      }
+      .person-name {
+        color: $accent-cyan;
+      }
+    }
+
+    .brand-company {
+      display: flex;
+      align-items: center;
+      .brand-logo {
+        height: 44px; 
+        width: auto;
+        object-fit: contain;
+        transition: filter 0.3s ease;
+      }
+    }
+
+    .brand-divider {
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(to bottom, transparent, rgba(0, 242, 254, 0.4), transparent);
+    }
+
+    .brand-personal {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.15;
+
+      .person-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: $text-primary;
+        letter-spacing: -0.01em;
+        transition: color 0.2s ease;
+      }
+
+      .person-role {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.6rem;
+        color: $accent-cyan;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-top: 2px;
+      }
     }
   }
 
-  // Enlaces de navegación (Desktop)
+  // ==========================================
+  // LINKS
+  // ==========================================
   .navbar-links {
     ul {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 0.5rem;
       list-style: none;
       margin: 0;
       padding: 0;
 
       li {
-        position: relative;
-
-        a, .dropdown-toggle {
+        a {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
           color: $text-secondary;
           text-decoration: none;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           font-weight: 500;
+          padding: 0.5rem 0.85rem;
+          border-radius: 0.5rem;
           background: none;
-          border: none;
+          border: 1px solid transparent;
           cursor: pointer;
-          transition: color 0.2s ease;
-
-          &:hover, &.active-link {
-            color: $accent-hover;
-          }
-        }
-
-        // Destacado para el Generador de CV
-        .cv-generator-link {
-          color: $text-primary;
-          background-color: rgba($accent-color, 0.15);
-          border: 1px solid rgba($accent-color, 0.4);
-          padding: 0.4rem 0.8rem;
-          border-radius: 6px;
+          transition: all 0.2s ease;
+          font-family: inherit;
 
           &:hover {
-            background-color: rgba($accent-color, 0.25);
-            border-color: $accent-hover;
+            color: $text-primary;
+            background: rgba(0, 242, 254, 0.06);
+            border-color: rgba(0, 242, 254, 0.15);
+          }
+
+          // Estado Activo (RouterLinkActive)
+          &.active-link {
+            color: $accent-cyan;
+            background: rgba(0, 242, 254, 0.1);
+            border-color: rgba(0, 242, 254, 0.3);
+            position: relative;
+
+            &::before {
+              content: '';
+              position: absolute;
+              left: 50%;
+              bottom: -1px;
+              transform: translateX(-50%);
+              width: 60%;
+              height: 2px;
+              background: linear-gradient(90deg, transparent, $accent-cyan, transparent);
+              border-radius: 2px;
+            }
           }
         }
-      }
-    }
 
-    // Dropdown de Canales de Comunicación
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 120%;
-      right: 0;
-      background-color: $bg-dropdown;
-      border: 1px solid $border-color;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      padding: 0.5rem 0;
-      min-width: 160px;
-      flex-direction: column;
+        // CTA Gradiente (Generar CV)
+        .cv-generator-link {
+          color: #0b0f19;
+          background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+          border: none;
+          font-weight: 700;
+          padding: 0.55rem 1rem;
+          box-shadow: 0 4px 14px -4px rgba(0, 242, 254, 0.5);
+          margin-left: 0.5rem;
 
-      &.show {
-        display: flex;
-      }
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px -4px rgba(0, 242, 254, 0.7);
+            color: #0b0f19;
+            background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+            border-color: transparent;
+          }
 
-      a {
-        padding: 0.6rem 1rem;
-        color: $text-primary;
-        font-size: 0.9rem;
-        display: block;
+          svg { filter: brightness(0.15); }
+        }
 
-        &:hover {
-          background-color: rgba($accent-color, 0.1);
-          color: $accent-hover;
+        // GitHub (Outline Cyan)
+        .github-link {
+          color: $accent-cyan;
+          background: rgba(0, 242, 254, 0.06);
+          border: 1px solid rgba(0, 242, 254, 0.3);
+
+          &:hover {
+            background: rgba(0, 242, 254, 0.12);
+            border-color: rgba(0, 242, 254, 0.5);
+            color: $accent-cyan;
+          }
+        }
+
+        // LOGIN (Estilo secundario oscuro)
+        .login-link {
+          color: $text-primary;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          font-weight: 600;
+          margin-left: 0.25rem;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: $accent-cyan;
+            color: $accent-cyan;
+          }
         }
       }
     }
   }
 
-  // Botón Hamburguesa (Mobile)
+  // ==========================================
+  // HAMBURGUESA Y RESPONSIVE
+  // ==========================================
   .mobile-toggle {
     display: none;
     flex-direction: column;
     justify-content: space-between;
-    width: 24px;
+    width: 26px;
     height: 18px;
     background: transparent;
     border: none;
     cursor: pointer;
+    padding: 0;
 
     .hamburger-bar {
       height: 2px;
       width: 100%;
       background-color: $text-primary;
       border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+
+    &[aria-expanded="true"] {
+      .hamburger-bar:nth-child(1) { transform: translateY(8px) rotate(45deg); background-color: $accent-cyan; }
+      .hamburger-bar:nth-child(2) { opacity: 0; }
+      .hamburger-bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); background-color: $accent-cyan; }
     }
   }
 
-  // Estilos Responsivos
   @media (max-width: 768px) {
-    .mobile-toggle {
-      display: flex;
+    .mobile-toggle { display: flex; }
+
+    .navbar-brand {
+      .brand-divider, .brand-personal { display: none; }
+      .brand-company .brand-logo { height: 38px; }
     }
 
     .navbar-links {
@@ -142,45 +260,39 @@ $border-color: #30363d;
       position: absolute;
       top: 100%;
       left: 0;
+      right: 0;
       width: 100%;
-      background-color: $bg-navbar;
-      border-bottom: 1px solid $border-color;
-      padding: 1.5rem;
+      background-color: rgba(8, 13, 24, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 242, 254, 0.15);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.6);
 
       &.active {
         display: block;
+        animation: slideDown 0.25s ease-out;
       }
 
       ul {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 1.25rem;
+        align-items: stretch;
+        gap: 0.35rem;
 
-        .dropdown-menu {
-          position: static;
-          box-shadow: none;
-          background-color: transparent;
-          border: none;
-          padding-left: 1rem;
+        li {
+          a {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            justify-content: flex-start;
+          }
+          .cv-generator-link { justify-content: center; margin-left: 0; margin-top: 0.5rem; }
+          .login-link { justify-content: center; margin-left: 0; margin-top: 0.25rem; }
         }
       }
     }
   }
 }
-// Branding y Logo
-  .navbar-brand {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
 
-    .brand-logo {
-      height: 70px; // Ajusta este valor según la altura deseada en tu diseño
-      width: auto;  // Mantiene la relación de aspecto original
-      object-fit: contain;
-      transition: transform 0.2s ease;
-
-      &:hover {
-        transform: scale(1.03); // Ligero efecto interactivo al pasar el cursor
-      }
-    }
-  }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

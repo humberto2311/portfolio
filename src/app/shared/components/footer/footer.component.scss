@@ -1,117 +1,272 @@
-// Variables de diseño
-$bg-primary: #0d1117;
-$bg-secondary: #161b22;
-$text-primary: #f0f6fc;
-$text-secondary: #8b949e;
-$accent-color: #58a6ff;
-$accent-hover: #79c0ff;
-$border-color: #30363d;
+// ==========================================
+// PALETA NFC-SOFT (Coherente con Navbar/Dashboard)
+// ==========================================
+$bg-footer: #080d18;
+$bg-card: rgba(15, 23, 42, 0.4);
+$text-primary: #f1f5f9;
+$text-secondary: #94a3b8;
+$accent-cyan: #00f2fe;
+$accent-blue: #4facfe;
+$border-soft: rgba(255, 255, 255, 0.08);
+$border-glow: rgba(0, 242, 254, 0.2);
 
 .portfolio-footer {
-  background-color: $bg-primary;
+  position: relative;
+  background-color: $bg-footer;
   color: $text-primary;
-  border-top: 1px solid $border-color;
-  padding-top: 3rem;
-  padding-bottom: 1.5rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+
+  // Línea superior con glow (igual al navbar)
+  .footer-glow-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 242, 254, 0.4) 50%, transparent 100%);
+    opacity: 0.8;
+  }
+
+  // Efecto de luz radial de fondo muy sutil
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 800px;
+    height: 300px;
+    background: radial-gradient(ellipse at bottom, rgba(0, 242, 254, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
   .footer-container {
+    position: relative;
+    z-index: 1;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    gap: 2.5rem;
+    gap: 3rem;
 
     @media (min-width: 768px) {
       grid-template-columns: 2fr 1fr 1fr;
     }
   }
 
+  // ==========================================
+  // COLUMNAS Y TIPOGRAFÍA
+  // ==========================================
   .footer-col {
-    h3, h4 {
+    .footer-title {
       color: $text-primary;
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-
-    h3 {
-      font-size: 1.35rem;
-      margin-bottom: 0.25rem;
-    }
-
-    h4 {
-      font-size: 1.1rem;
-      border-bottom: 2px solid $border-color;
-      padding-bottom: 0.4rem;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
       display: inline-block;
-    }
 
-    .brand-role {
-      color: $accent-color;
-      font-size: 0.95rem;
-      margin-bottom: 0.5rem;
+      // Pequeña línea cyan debajo del título
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 24px;
+        height: 2px;
+        background: $accent-cyan;
+        border-radius: 2px;
+        box-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
+      }
     }
+  }
 
-    .brand-location {
-      color: $text-secondary;
-      font-size: 0.9rem;
+  // ==========================================
+  // COLUMNA 1: BRANDING
+  // ==========================================
+  .brand-col {
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       margin-bottom: 1rem;
-    }
 
-    .email-link {
-      color: $text-primary;
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
+      // El contenedor de tu logo (idéntico al del Navbar)
+      .brand-company {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 48px;
+        padding: 0 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(0, 242, 254, 0.15);
+        border-radius: 8px;
+        flex-shrink: 0;
 
-      &:hover {
-        color: $accent-hover;
+        .brand-logo {
+          height: 32px;
+          width: auto;
+          object-fit: contain;
+          filter: drop-shadow(0 0 6px rgba(0, 242, 254, 0.3));
+        }
+      }
+
+      .brand-text {
+        display: flex;
+        flex-direction: column;
+
+        .brand-name {
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: $text-primary;
+          margin: 0;
+          line-height: 1.2;
+        }
+
+        .brand-role {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          color: $accent-cyan;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          margin: 2px 0 0 0;
+        }
       }
     }
 
-    // Listas de navegación
+    .brand-desc {
+      color: $text-secondary;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      max-width: 320px;
+
+      strong {
+        color: $text-primary;
+      }
+    }
+
+    .brand-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: $text-secondary;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+
+      svg { color: $accent-cyan; }
+    }
+
+    // Caja del email con estilo Glassmorphism
+    .cta-box {
+      .email-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: $bg-card;
+        backdrop-filter: blur(10px);
+        border: 1px solid $border-soft;
+        border-radius: 8px;
+        color: $text-primary;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-family: 'JetBrains Mono', monospace;
+        transition: all 0.2s ease;
+
+        svg { color: $accent-cyan; }
+
+        &:hover {
+          background: rgba(0, 242, 254, 0.08);
+          border-color: rgba(0, 242, 254, 0.3);
+          color: $accent-cyan;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  // ==========================================
+  // COLUMNA 2: NAVEGACIÓN
+  // ==========================================
+  .nav-col {
     ul {
       list-style: none;
       padding: 0;
       margin: 0;
 
       li {
-        margin-bottom: 0.6rem;
+        margin-bottom: 0.85rem;
 
         a {
           color: $text-secondary;
           text-decoration: none;
-          font-size: 0.95rem;
-          transition: color 0.2s ease;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+          position: relative;
 
-          &:hover {
-            color: $accent-hover;
+          &::before {
+            content: '→';
+            position: absolute;
+            left: -16px;
+            opacity: 0;
+            color: $accent-cyan;
+            transition: all 0.2s ease;
           }
 
+          &:hover {
+            color: $text-primary;
+            padding-left: 4px;
+
+            &::before {
+              opacity: 1;
+              left: -12px;
+            }
+          }
+
+          // Link de la Hoja de Vida (destacado)
           &.highlight-link {
-            color: $accent-color;
-            font-weight: 500;
+            color: $accent-cyan;
+            font-weight: 600;
+            
+            &:hover {
+              text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+            }
           }
         }
       }
     }
+  }
 
-    // Enlaces a Redes
+  // ==========================================
+  // COLUMNA 3: REDES SOCIALES
+  // ==========================================
+  .social-col {
     .social-links {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
 
-      a {
+      .social-btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
         color: $text-secondary;
         text-decoration: none;
-        font-size: 0.95rem;
-        transition: color 0.2s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        width: fit-content;
 
         .social-icon {
           width: 18px;
@@ -119,50 +274,99 @@ $border-color: #30363d;
         }
 
         &:hover {
-          color: $accent-hover;
+          color: $text-primary;
+          background: rgba(255, 255, 255, 0.03);
+          border-color: $border-soft;
+          transform: translateX(4px);
         }
+        
+        // Toque especial para GitHub
+        &.github:hover { color: $accent-cyan; border-color: rgba(0, 242, 254, 0.3); }
+        // Toque especial para LinkedIn
+        &.linkedin:hover { color: #4facfe; border-color: rgba(79, 172, 254, 0.3); }
       }
     }
 
-    // Botón para descarga de CV
+    // Botón PDF (mismo gradiente del Navbar)
     .btn-pdf-download {
-      display: inline-block;
-      padding: 0.5rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+      color: #0b0f19;
+      font-weight: 700;
       font-size: 0.85rem;
-      color: $accent-color;
-      border: 1px solid $accent-color;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
+      box-shadow: 0 4px 14px -4px rgba(0, 242, 254, 0.4);
       transition: all 0.2s ease;
 
       &:hover {
-        background-color: rgba($accent-color, 0.1);
-        color: $accent-hover;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(0, 242, 254, 0.6);
       }
     }
   }
 
-  // Barra de copyright inferior
+  // ==========================================
+  // BARRA INFERIOR (Copyright)
+  // ==========================================
   .footer-bottom {
+    position: relative;
+    z-index: 1;
     max-width: 1200px;
-    margin: 2.5rem auto 0 auto;
+    margin: 3.5rem auto 0 auto;
     padding: 1.5rem 1.5rem 0 1.5rem;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid $border-soft;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 0.85rem;
+    gap: 1rem;
+    font-size: 0.8rem;
     color: $text-secondary;
 
     @media (min-width: 600px) {
       flex-direction: row;
     }
 
+    .copyright {
+      margin: 0;
+
+      strong {
+        color: $text-primary;
+        font-weight: 700;
+      }
+    }
+
     .tech-stack {
-      font-size: 0.8rem;
-      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+
+      // Puntito verde/cyan indicando "activo"
+      .dot {
+        width: 6px;
+        height: 6px;
+        background: $accent-cyan;
+        border-radius: 50%;
+        box-shadow: 0 0 8px $accent-cyan;
+        animation: pulse 2s infinite;
+      }
     }
   }
+}
+
+// ==========================================
+// ANIMACIONES
+// ==========================================
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
 }

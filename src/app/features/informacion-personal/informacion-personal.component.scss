@@ -1,74 +1,189 @@
 // ==========================================
-// NUEVA PALETA PROFESIONAL (Slate & Emerald)
+// PALETA (NFC-Soft style)
 // ==========================================
-$bg-main: #0f172a;       // Fondo general (Slate 900)
-$bg-card: #1e293b;       // Fondo de tarjetas (Slate 800)
-$bg-sidebar: #0b1120;    // Sidebar un poco más oscuro
-$text-main: #f8fafc;     // Blanco roto
-$text-muted: #94a3b8;    // Gris azulado para textos
-$accent: #10b981;        // Verde Esmeralda (Acento principal)
-$accent-hover: #059669;  // Verde más oscuro para hover
-$border: #334155;        // Bordes sutiles   
+$bg-dark: #0b0f19;
+$bg-main: #0f172a;
+$bg-card: rgba(15, 23, 42, 0.75);
+$bg-sidebar: #080d18;
+$text-main: #f1f5f9;
+$text-muted: #94a3b8;
+$accent-cyan: #00f2fe;
+$accent-blue: #4facfe;
+$border-color: rgba(0, 242, 254, 0.2);
+$border-soft: rgba(255, 255, 255, 0.08);
 
-// Scroll suave para los enlaces del sidebar
-html {
-  scroll-behavior: smooth;
-}
-
-* {
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
+// Acento secundario (manteniendo coherencia con tu HV)
+$accent-warning: #fbbf24;
+$accent-danger: #f87171;
 
 // ==========================================
-// 2. LAYOUT PRINCIPAL (Sidebar + Main)
+// GLOBAL
+// ==========================================
+:host {
+  display: block;
+  background-color: $bg-dark;
+  color: $text-main;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+html { scroll-behavior: smooth; }
+
+* { box-sizing: border-box; }
+
+// ==========================================
+// GLASS PANEL BASE
+// ==========================================
+.glass-panel {
+  background: $bg-card;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $border-soft;
+  border-radius: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: rgba($accent-cyan, 0.3);
+    box-shadow: 0 12px 35px -10px rgba($accent-cyan, 0.2);
+  }
+}
+
+// ==========================================
+// LAYOUT
 // ==========================================
 .dashboard-container {
   display: flex;
-  min-height: 100%; /* Para que llene el espacio */
-  background-color: #0f172a;
-  color: #f8fafc;
-  margin-top: 0; /* <--- ELIMINA O PON EN 0 ESTO */
-  padding-top: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, rgba(0, 242, 254, 0.06) 0%, transparent 50%), $bg-dark;
 }
 
 .sidebar {
-  width: 250px;
-  background-color: $bg-sidebar;
-  padding: 2rem 1rem;
-  border-right: 1px solid $border;
+  width: 260px;
+  background: $bg-sidebar;
+  border-right: 1px solid $border-soft;
+  padding: 1.75rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 
   .logo {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #27c93f;
-    padding-left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0.75rem;
+
+    .logo-mark {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: $accent-cyan;
+      box-shadow: 0 0 10px $accent-cyan;
+    }
   }
 
   .menu {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
+    flex: 1;
+
+    .menu-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem 0.25rem;
+    }
+
+    .menu-divider {
+      border: none;
+      border-top: 1px solid $border-soft;
+      margin: 0.75rem 0;
+    }
 
     a {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
       color: $text-muted;
       text-decoration: none;
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
+      padding: 0.6rem 0.85rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
 
-      &:hover, &.active {
-        background-color: rgba(255, 255, 255, 0.05);
+      .menu-icon {
+        font-size: 1rem;
+        width: 1.25rem;
+        display: inline-flex;
+        justify-content: center;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.03);
         color: $text-main;
       }
+
       &.active {
-       background-color: rgba(16, 185, 129, 0.1); // Verde esmeralda muy transparente
-  color: #10b981; // El texto verde
-  border-left: 4px solid #10b981; 
+        background: rgba(0, 242, 254, 0.08);
+        color: $accent-cyan;
+        border-left-color: $accent-cyan;
+      }
+
+      &.highlight-link {
+        color: $accent-cyan;
+        background: rgba(0, 242, 254, 0.05);
+        border: 1px solid rgba(0, 242, 254, 0.2);
+
+        &:hover {
+          background: rgba(0, 242, 254, 0.1);
+          border-color: rgba(0, 242, 254, 0.4);
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid $border-soft;
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: $accent-cyan;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+
+      .dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: $accent-cyan;
+        box-shadow: 0 0 8px $accent-cyan;
       }
     }
   }
@@ -78,82 +193,267 @@ html {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  min-width: 0;
 }
 
-// Topbar
+// ==========================================
+// TOPBAR
+// ==========================================
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid $border-soft;
+
+  .topbar-title {
+    .eyebrow {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: $accent-cyan;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+    }
+  }
 
   .user-profile {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.85rem;
 
-    .mini-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid $border; }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid $border-soft;
+      border-radius: 0.5rem;
+      color: $text-main;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(0, 242, 254, 0.08);
+        border-color: rgba(0, 242, 254, 0.4);
+        color: $accent-cyan;
+      }
+    }
+
+    .mini-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 242, 254, 0.3);
+    }
   }
 }
 
 // ==========================================
-// 3. GRID LAYOUT Y TARJETAS BASE
+// GRID LAYOUT
 // ==========================================
 .grid-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr; 
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
 }
 
 .card {
-  background-color: $bg-card;
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 1.5rem;
-  border: 1px solid $border;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    scroll-margin-top: 90px; 
+  scroll-margin-top: 90px;
 }
 
-// TARJETA DE BIENVENIDA
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem 0;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid $border-soft;
+
+  svg { color: $accent-cyan; }
+}
+
+// ==========================================
+// WELCOME CARD
+// ==========================================
 .welcome-card {
   grid-column: 1 / 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, rgba(200, 230, 201, 0.1) 0%, rgba(31, 31, 31, 1) 100%);
-  border: 1px solid rgba(200, 230, 201, 0.2);
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.08) 0%, rgba(15, 23, 42, 0.95) 60%);
 
   .welcome-text {
-    h2 { font-size: 1.2rem; color: $text-muted; margin: 0 0 0.5rem 0; }
-    h1 { font-size: 2.5rem; margin: 0 0 1rem 0; color: $text-main; }
-    p { color: $text-muted; max-width: 400px; line-height: 1.5; margin-bottom: 1.5rem; }
+    flex: 1;
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      background: rgba(8, 51, 68, 0.6);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      border-radius: 999px;
+      color: $accent-cyan;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+
+      .pulse-dot {
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 50%;
+        background: $accent-cyan;
+        animation: pulse 2s infinite;
+      }
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .welcome-role {
+      color: $accent-cyan;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      margin: 0 0 0.85rem 0;
+    }
+
+    .welcome-desc {
+      color: $text-muted;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin: 0 0 1.5rem 0;
+      max-width: 32rem;
+    }
   }
 
   .welcome-image {
     .avatar-grande {
-      width: 150px;
-      height: 150px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       overflow: hidden;
-      border: 4px solid rgba(200, 230, 201, 0.3);
-      box-shadow: 0 0 30px rgba(0, 200, 83, 0.2);
-      
-      img { width: 100%; height: 100%; object-fit: cover; }
+      border: 3px solid rgba(0, 242, 254, 0.3);
+      box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
   }
 }
 
-// TARJETA DE PERFIL
+// ==========================================
+// BOTONES
+// ==========================================
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+    color: #0b0f19;
+    box-shadow: 0 8px 24px -8px rgba($accent-cyan, 0.5);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -8px rgba($accent-cyan, 0.6);
+    }
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: $text-main;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba($accent-cyan, 0.4);
+      color: $accent-cyan;
+    }
+  }
+}
+
+// ==========================================
+// PROFILE CARD (CONTACTO)
+// ==========================================
 .profile-card {
   grid-column: 2 / 3;
-  
-  h3 { margin-top: 0; color: $text-main; font-size: 1.1rem; border-bottom: 1px solid $border; padding-bottom: 0.8rem; }
-  
+
   .contact-list {
-    list-style: none; padding: 0; margin: 1rem 0;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+
     li {
-      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; color: $text-muted;
-      .icon { font-size: 1.2rem; }
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0;
+      font-size: 0.82rem;
+      color: $text-muted;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+      &:last-child { border-bottom: none; }
+
+      .icon {
+        font-size: 1rem;
+        width: 1.5rem;
+        display: inline-flex;
+        justify-content: center;
+      }
+
+      .text {
+        word-break: break-all;
+      }
     }
   }
 
@@ -161,18 +461,30 @@ html {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(39, 201, 63, 0.1);
-    color: #27c93f;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    background: rgba(0, 242, 254, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    color: $accent-cyan;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    margin-top: 1rem;
 
-    .dot { width: 8px; height: 8px; background: #27c93f; border-radius: 50%; box-shadow: 0 0 10px #27c93f; }
+    .dot {
+      width: 0.45rem;
+      height: 0.45rem;
+      background: $accent-cyan;
+      border-radius: 50%;
+      box-shadow: 0 0 10px $accent-cyan;
+      animation: pulse 2s infinite;
+    }
   }
 }
 
-// TARJETAS DE MÉTRICAS
+// ==========================================
+// MÉTRICAS
+// ==========================================
 .metricas-grid {
   grid-column: 1 / 3;
   display: grid;
@@ -188,47 +500,210 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.85rem;
 
     .metrica-icon { font-size: 1.5rem; }
-    .metrica-tendencia { font-size: 0.85rem; font-weight: bold; }
+
+    .metrica-tendencia {
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.2rem 0.55rem;
+      border-radius: 0.3rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
   }
 
   .metrica-valor {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin: 0 0 0.2rem 0;
-    color: $text-main;
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0 0 0.25rem 0;
+    color: #fff;
+    letter-spacing: -0.02em;
   }
 
   .metrica-titulo {
     margin: 0;
     color: $text-muted;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
 // ==========================================
-// 4. CARRUSEL DE TECNOLOGÍAS
+// RESUMEN PROFESIONAL
+// ==========================================
+.resumen-card {
+  grid-column: 1 / 3;
+  background: linear-gradient(to right, rgba(0, 242, 254, 0.04), rgba(15, 23, 42, 0.95));
+  border-left: 3px solid $accent-cyan !important;
+
+  .resumen-texto {
+    color: #cbd5e1;
+    line-height: 1.7;
+    font-size: 0.88rem;
+    margin: 0;
+    text-align: justify;
+  }
+}
+
+// ==========================================
+// EXPERIENCIA
+// ==========================================
+.experiencia-card {
+  grid-column: 1 / 3;
+
+  .empresas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .empresa-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid $border-soft;
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: rgba($accent-cyan, 0.35);
+      background: rgba(0, 242, 254, 0.04);
+    }
+
+    .empresa-icono {
+      font-size: 1.4rem;
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+    }
+
+    .empresa-info {
+      flex: 1;
+
+      h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .empresa-cargo {
+        margin: 0.2rem 0 0 0;
+        color: $text-muted;
+        font-size: 0.75rem;
+      }
+    }
+
+    .empresa-fecha {
+      span {
+        background: rgba(0, 242, 254, 0.08);
+        color: $accent-cyan;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.35rem;
+        font-size: 0.68rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+// ==========================================
+// FORMACIÓN (TIMELINE)
+// ==========================================
+.formacion-card {
+  grid-column: 1 / 3;
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    padding-left: 1rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 1.15rem;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(0, 242, 254, 0.4), rgba(0, 242, 254, 0.05));
+    }
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      background: $accent-cyan;
+      border-radius: 50%;
+      margin-top: 6px;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+      flex-shrink: 0;
+    }
+
+    .timeline-content {
+      display: flex;
+      flex-direction: column;
+
+      .year {
+        font-size: 0.72rem;
+        color: $accent-cyan;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 0.15rem;
+      }
+
+      h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      p {
+        margin: 0.15rem 0 0 0;
+        color: $text-muted;
+        font-size: 0.78rem;
+      }
+    }
+  }
+}
+
+// ==========================================
+// CARRUSEL DE TECNOLOGÍAS
 // ==========================================
 .carrusel-card {
   grid-column: 1 / 3;
   overflow: hidden;
 
-  h3 { margin-top: 0; margin-bottom: 1.5rem; }
-
   .carrusel-wrapper {
     width: 100%;
     overflow: hidden;
     position: relative;
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
   }
 
   .carrusel-track {
     display: flex;
-    gap: 2rem;
+    gap: 1.25rem;
     width: max-content;
-    animation: scroll 25s linear infinite;
+    animation: scroll 30s linear infinite;
 
     &:hover {
       animation-play-state: paused;
@@ -236,25 +711,31 @@ html {
   }
 
   .tech-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.8rem 2rem;
-    border-radius: 30px;
-    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid $border-soft;
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
     font-weight: 600;
     color: $text-main;
     white-space: nowrap;
     display: flex;
     align-items: center;
-    gap: 0.75rem; 
+    gap: 0.6rem;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: rgba($accent-cyan, 0.4);
+      background: rgba(0, 242, 254, 0.05);
+    }
 
     i {
-      font-size: 1.8rem; 
+      font-size: 1.4rem;
       transition: transform 0.3s ease;
     }
 
     &:hover i {
-      transform: scale(1.2); 
+      transform: scale(1.15);
     }
   }
 }
@@ -264,215 +745,80 @@ html {
   100% { transform: translateX(-50%); }
 }
 
-// ==========================================
-// 5. ESTILOS DE BOTONES, CV Y FORMACIÓN
-// ==========================================
-.btn-download {
-  background: rgba(255, 255, 255, 0.1);
-  color: $text-main;
-  text-decoration: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  border: 1px solid $border;
-  transition: background 0.2s;
-
-  &:hover { background: rgba(255, 255, 255, 0.2); }
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-.btn-primary {
-  background-color: #10b981;
-  color: #ffffff; // Letras blancas
-  font-weight: 600;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); // Sombra verde
-
-  &:hover { 
-    background-color: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-  }
-}
-  .btn-secondary {
-    background: transparent;
-    color: $text-main;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 0.8rem 1.5rem;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: background 0.2s;
-    cursor: pointer;
-
-    &:hover { background: rgba(255, 255, 255, 0.1); }
-  }
-}
-
-.resumen-card {
-  grid-column: 1 / 3;
-  background: linear-gradient(to right, rgba(31, 31, 31, 1), rgba(20, 20, 20, 1));
-  border-left: 4px solid $accent;
-
-  h3 { margin-top: 0; color: $text-main; font-size: 1.1rem; }
-  
-  .resumen-texto {
-    color: $text-muted;
-    line-height: 1.6;
-    font-size: 1rem;
-    text-align: justify;
-  }
-}
-
-.formacion-card {
-  grid-column: 1 / 3;
-  background-color: $bg-card;
-
-  h3 { margin-top: 0; color: $text-main; font-size: 1.1rem; margin-bottom: 1.5rem;}
-
-  .timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    position: relative;
-    padding-left: 1rem;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 1.1rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 1.5rem;
-    position: relative;
-
-    .timeline-dot {
-      width: 12px;
-      height: 12px;
-      background: #ff6f00;
-      border-radius: 50%;
-      margin-top: 5px;
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 0 10px rgba(255, 111, 0, 0.5);
-    }
-
-    .timeline-content {
-      display: flex;
-      flex-direction: column;
-
-      .year {
-        font-size: 0.85rem;
-        color: #ff6f00;
-        font-weight: bold;
-        margin-bottom: 0.2rem;
-      }
-
-      h4 { margin: 0; color: $text-main; font-size: 1rem; }
-      p { margin: 0.2rem 0 0 0; color: $text-muted; font-size: 0.9rem; }
-    }
-  }
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
 }
 
 // ==========================================
-// 6. NUEVO: ESTILOS DE EXPERIENCIA SIMPLIFICADA
-// ==========================================
-.experiencia-card {
-  grid-column: 1 / 3;
-  background-color: $bg-card;
-
-  h3 { margin-top: 0; color: $text-main; font-size: 1.1rem; margin-bottom: 1.5rem; }
-
-  .empresas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .empresa-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid $border;
-    padding: 1rem 1.2rem;
-    border-radius: 12px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-
-    &:hover {
-      transform: translateY(-3px);
-      border-color: #27c93f;
-      background: rgba(39, 201, 63, 0.05);
-    }
-
-    .empresa-icono {
-      font-size: 1.8rem;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.5rem;
-      border-radius: 10px;
-    }
-
-    .empresa-info {
-      flex: 1;
-      
-      h4 {
-        margin: 0;
-        color: $text-main;
-        font-size: 1rem;
-      }
-      
-      .empresa-cargo {
-        margin: 0.2rem 0 0 0;
-        color: $text-muted;
-        font-size: 0.85rem;
-      }
-    }
-
-    .empresa-fecha {
-      span {
-        background: rgba(255, 255, 255, 0.1);
-        color: $text-muted;
-        padding: 0.3rem 0.6rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        white-space: nowrap;
-      }
-    }
-  }
-}
-
-// ==========================================
-// 7. RESPONSIVE
+// RESPONSIVE
 // ==========================================
 @media (max-width: 1024px) {
   .grid-layout { grid-template-columns: 1fr; }
-  .welcome-card { grid-column: 1; }
-  .profile-card { grid-column: 1; }
-  .metricas-grid { grid-template-columns: repeat(2, 1fr); }
-  .resumen-card, .formacion-card, .experiencia-card { grid-column: 1; }
+  .welcome-card,
+  .profile-card,
+  .resumen-card,
+  .formacion-card,
+  .experiencia-card,
+  .carrusel-card {
+    grid-column: 1;
+  }
+  .metricas-grid {
+    grid-column: 1;
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .dashboard-container { flex-direction: column; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid $border; padding: 1rem; flex-direction: row; align-items: center; justify-content: space-between; }
-  .sidebar .menu { flex-direction: row; overflow-x: auto; }
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+
+    .menu {
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 0.35rem;
+
+      .menu-label,
+      .menu-divider { display: none; }
+
+      a {
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+
+        &.active {
+          border-left: none;
+          border-bottom-color: $accent-cyan;
+        }
+      }
+    }
+
+    .sidebar-footer { display: none; }
+  }
+
+  .main-content { padding: 1.25rem; }
+
   .metricas-grid { grid-template-columns: 1fr; }
-  .welcome-card { flex-direction: column-reverse; text-align: center; }
-  .welcome-text p { margin: 0 auto 1.5rem auto; }
-  .action-buttons { justify-content: center; }
+
+  .welcome-card {
+    flex-direction: column-reverse;
+    text-align: center;
+
+    .welcome-desc { margin-left: auto; margin-right: auto; }
+    .action-buttons { justify-content: center; }
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 }

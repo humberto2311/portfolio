@@ -1,14 +1,70 @@
 // ==========================================
-// VARIABLES
+// PALETA NFC-SOFT
 // ==========================================
-$bg-dark: #0a0a0a;
-$card-bg: #1f2121;
-$text-light: #ffffff;
-$text-muted: #8b949e;
-$accent: #ff6f00;
-$border-color: #30363d;
-$terminal-bg: #0d1117;
-$terminal-header: #161b22;
+$bg-dark: #0b0f19;
+$bg-card: rgba(15, 23, 42, 0.6);
+$text-light: #f1f5f9;
+$text-muted: #94a3b8;
+$accent-cyan: #00f2fe;
+$accent-blue: #4facfe;
+$border-soft: rgba(255, 255, 255, 0.08);
+$terminal-bg: #0d1322;
+$terminal-header: #131c2f;
+
+// ==========================================
+// FONDO CREATIVO (CYBER-GRID)
+// ==========================================
+.cyber-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-color: $bg-dark;
+  overflow: hidden;
+
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(0, 242, 254, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.35;
+    animation: float 12s infinite ease-in-out alternate;
+
+    &.cyan {
+      width: 600px;
+      height: 600px;
+      background: rgba(0, 242, 254, 0.15);
+      top: -15%;
+      left: -10%;
+    }
+
+    &.blue {
+      width: 500px;
+      height: 500px;
+      background: rgba(79, 172, 254, 0.15);
+      bottom: -15%;
+      right: -10%;
+      animation-delay: -6s;
+    }
+  }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 60px) scale(1.1); }
+}
 
 // ==========================================
 // CONTENEDOR PRINCIPAL
@@ -16,26 +72,71 @@ $terminal-header: #161b22;
 .proyectos-contenedor {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 4rem 1.5rem;
   min-height: 100vh;
-  background-color: $bg-dark;
+  background-color: transparent;
   color: $text-light;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  position: relative;
+  z-index: 1;
 
   .proyectos-header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 4rem;
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      border-radius: 999px;
+      color: $accent-cyan;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.25rem;
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: $accent-cyan;
+        animation: pulse 2s infinite;
+      }
+    }
 
     h1 {
       font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      color: $text-light !important; // Forzar color
+      font-weight: 900;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
     }
+    
     p { 
       color: $text-muted; 
-      font-size: 1.1rem;
+      font-size: 1.05rem;
     }
   }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// ==========================================
+// GLASS PANEL BASE
+// ==========================================
+.glass-panel {
+  background: $bg-card;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $border-soft;
 }
 
 // ==========================================
@@ -46,29 +147,72 @@ $terminal-header: #161b22;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
   justify-items: center;
+  perspective: 1000px; // CLAVE para el efecto 3D
 }
 
 .tarjeta-proyecto {
   width: 100%;
   max-width: 340px;
-  background-color: $card-bg;
-  border-radius: 16px;
+  border-radius: 1rem;
   padding: 0.75rem;
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   display: flex;
   flex-direction: column;
+  position: relative;
+  
+  // Transición para que el reset sea suave (en JS es 0.1s para el seguimiento)
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+
+  // Brillo dinámico que sigue al mouse
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(0, 242, 254, 0.08),
+      transparent 40%
+    );
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 242, 254, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 
+                0 0 20px rgba(0, 242, 254, 0.15);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .tarjeta-imagen {
+      filter: contrast(100%) grayscale(0%);
+      transform: scale(1.05);
+    }
+
+    .imagen-overlay {
+      opacity: 1;
+    }
+  }
+
+  .tarjeta-imagen-contenedor,
+  .tarjeta-footer {
+    position: relative;
+    z-index: 1;
+    transform: translateZ(20px); // Efecto de profundidad
   }
 
   .tarjeta-imagen-contenedor {
     aspect-ratio: 3 / 4;
-    border-radius: 12px;
+    border-radius: 0.75rem;
     overflow: hidden;
     background: #000;
     position: relative;
@@ -77,14 +221,36 @@ $terminal-header: #161b22;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: contrast(75%) grayscale(20%);
-      transition: filter 0.3s ease, transform 0.3s ease;
+      filter: contrast(85%) grayscale(40%);
+      transition: filter 0.4s ease, transform 0.4s ease;
     }
-  }
 
-  &:hover .tarjeta-imagen {
-    filter: contrast(100%) grayscale(0%);
-    transform: scale(1.05);
+    .imagen-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(11, 15, 25, 0.9) 0%, transparent 50%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+
+      .ver-detalle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(0, 242, 254, 0.15);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(0, 242, 254, 0.3);
+        color: $accent-cyan;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+      }
+    }
   }
 
   .tarjeta-footer {
@@ -92,15 +258,20 @@ $terminal-header: #161b22;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 0.5rem 0.5rem;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
 
     .tarjeta-nombre { 
-      color: $text-light !important; 
+      color: $text-light; 
       font-weight: 600; 
     }
     .tarjeta-tag { 
-      color: $text-muted !important; 
+      color: $accent-cyan;
+      background: rgba(0, 242, 254, 0.08);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      font-size: 0.7rem;
     }
   }
 }
@@ -114,16 +285,14 @@ $terminal-header: #161b22;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
-  z-index: 9999; // Asegura que esté por encima de todo
+  background: rgba(8, 13, 24, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease, visibility 0.3s ease;
   
-  // Efecto cortina
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-  transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease;
 
   &.abierto {
     opacity: 1;
@@ -134,48 +303,60 @@ $terminal-header: #161b22;
 
 .cortina-contenido {
   position: absolute;
-  top: 10vh;
+  top: 8vh;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
+  width: 92%;
   max-width: 900px;
-  background: $terminal-bg;
-  border: 1px solid $border-color;
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  border-radius: 1rem;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 242, 254, 0.1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  max-height: 80vh;
-  color: $text-light;
+  max-height: 84vh;
+  background: $terminal-bg;
 }
 
-// Header tipo Mac
+// Header
 .cortina-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 0.85rem 1.25rem;
   background: $terminal-header;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid $border-soft;
 
   .cortina-titulo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     
-    .dot-red, .dot-yellow, .dot-green {
-      width: 12px; height: 12px; border-radius: 50%;
+    .window-controls {
+      display: flex;
+      gap: 0.4rem;
+      
+      .dot-red, .dot-yellow, .dot-green {
+        width: 12px; height: 12px; border-radius: 50%;
+      }
+      .dot-red { background: #ff5f56; }
+      .dot-yellow { background: #ffbd2e; }
+      .dot-green { background: #27c93f; }
     }
-    .dot-red { background: #ff5f56; }
-    .dot-yellow { background: #ffbd2e; }
-    .dot-green { background: #27c93f; }
+
+    .separator {
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 1.2rem;
+    }
+
+    .folder-icon {
+      color: $accent-cyan;
+    }
     
     .nombre-repo {
-      margin-left: 1rem;
-      font-family: monospace;
-      font-size: 1rem;
-      color: $text-light !important;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: $text-light;
+      font-weight: 500;
     }
   }
 
@@ -183,9 +364,18 @@ $terminal-header: #161b22;
     background: transparent;
     border: none;
     color: $text-muted;
-    font-size: 1.2rem;
     cursor: pointer;
-    &:hover { color: #fff; }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    &:hover { 
+      color: #fff; 
+      background: rgba(255, 95, 86, 0.15);
+    }
   }
 }
 
@@ -193,63 +383,121 @@ $terminal-header: #161b22;
 .tabs-github {
   display: flex;
   background: $terminal-header;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid $border-soft;
   padding: 0 1rem;
+  gap: 0.5rem;
 
   .tab {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 1rem 1.5rem;
+    padding: 0.85rem 1rem;
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
-    color: $text-muted !important;
-    font-size: 0.95rem;
+    color: $text-muted;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    transition: all 0.2s;
 
-    &:hover { color: $text-light !important; }
+    &:hover { color: $text-light; }
 
     &.active {
-      color: $text-light !important;
-      border-bottom-color: $accent;
+      color: $accent-cyan;
+      border-bottom-color: $accent-cyan;
+      background: rgba(0, 242, 254, 0.04);
     }
   }
 }
 
-// Contenido de las pestañas
+// Contenido
 .tab-contenido {
   padding: 2rem;
   overflow-y: auto;
   color: $text-muted;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
 
   .descripcion { 
-    font-size: 1rem; 
+    font-size: 0.95rem; 
+    line-height: 1.6;
     margin-bottom: 1.5rem; 
-    color: $text-light !important;
+    color: $text-light;
+  }
+
+  .tecnologias {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+
+    .tech-label {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: $text-muted;
+      text-transform: uppercase;
+      margin-right: 0.25rem;
+    }
+
+    .tech-badge {
+      background: rgba(0, 242, 254, 0.08);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      color: $accent-cyan;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
   }
   
   .bloque-codigo {
-    background: #000;
-    border: 1px solid $border-color;
-    border-radius: 8px;
-    padding: 1.5rem;
+    background: #060a12;
+    border: 1px solid rgba(0, 242, 254, 0.15);
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    .code-header {
+      padding: 0.5rem 1rem;
+      background: rgba(0, 242, 254, 0.04);
+      border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+      
+      .file-name {
+        font-size: 0.7rem;
+        font-family: 'JetBrains Mono', monospace;
+        color: $accent-cyan;
+      }
+    }
     
     pre {
       margin: 0;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      color: #79c0ff;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: #a5d6ff;
       overflow-x: auto;
     }
   }
 
+  .instruccion {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
   .terminal-git {
-    background: #000;
-    border: 1px solid $border-color;
-    border-radius: 8px;
+    background: #060a12;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.5rem;
     overflow: hidden;
     margin-bottom: 2rem;
 
@@ -257,96 +505,161 @@ $terminal-header: #161b22;
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 1rem;
-      background: $terminal-header;
-      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
       color: $text-muted;
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
-      .rama-actual strong { color: $accent; }
+      .rama-actual strong { color: $accent-cyan; }
     }
 
     .terminal-body {
       display: flex;
       align-items: center;
       padding: 1rem;
-      font-family: monospace;
-      font-size: 0.95rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      gap: 0.75rem;
 
-      .prompt { color: #27c93f; margin-right: 0.5rem; }
-      .comando { color: $text-light; flex: 1; }
+      .prompt { color: $accent-cyan; font-weight: bold; }
+      .comando { color: $text-light; flex: 1; word-break: break-all; }
       
       .btn-copiar {
-        background: transparent;
-        border: 1px solid $border-color;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         color: $text-muted;
         border-radius: 4px;
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem;
         cursor: pointer;
-        &:hover { color: $text-light; border-color: $text-light; }
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+
+        &:hover { 
+          color: $accent-cyan; 
+          border-color: rgba(0, 242, 254, 0.3); 
+          background: rgba(0, 242, 254, 0.08);
+        }
       }
     }
   }
 
   .info-ramas {
-    h4 { color: $text-light; margin-bottom: 0.75rem; }
+    h4 { 
+      color: $text-light; 
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem; 
+    }
+
     ul {
-      list-style: none; padding: 0; margin: 0;
-      display: flex; flex-direction: column; gap: 0.5rem;
+      list-style: none; 
+      padding: 0; 
+      margin: 0 0 1.5rem 0;
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.5rem;
       
       li {
-        display: flex; align-items: center; gap: 0.5rem;
+        display: flex; 
+        align-items: center; 
+        gap: 0.6rem;
+        font-size: 0.85rem;
+
+        .branch-icon { color: $accent-cyan; }
+
         .rama-tag {
-          background: rgba(255,111,0,0.2);
-          color: $accent;
+          background: rgba(0, 242, 254, 0.1);
+          color: $accent-cyan;
           padding: 0.2rem 0.6rem;
-          border-radius: 20px;
-          font-family: monospace;
-          font-size: 0.85rem;
+          border-radius: 4px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.75rem;
+          border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+
+        .rama-desc {
+          color: $text-muted;
+          font-size: 0.78rem;
         }
       }
     }
   }
   
   .btn-github {
-    display: inline-block;
-    margin-top: 1.5rem;
-    padding: 0.6rem 1.2rem;
-    background: rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: $text-light;
     text-decoration: none;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    transition: background 0.2s ease;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.3);
+      color: $accent-cyan;
     }
   }
 }
 
 // ==========================================
-// ESTADOS DE CARGA
+// ESTADOS DE CARGA Y ERROR
 // ==========================================
 .estado-carga, .estado-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 0;
+  padding: 5rem 0;
   color: $text-muted;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  gap: 1rem;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.1);
-  border-top-color: $accent;
+  border: 3px solid rgba(0, 242, 254, 0.1);
+  border-top-color: $accent-cyan;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
 }
 
+.estado-error {
+  .error-icon { font-size: 2rem; }
+
+  .btn-retry {
+    margin-top: 1rem;
+    padding: 0.6rem 1.25rem;
+    background: rgba(0, 242, 254, 0.1);
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    color: $accent-cyan;
+    border-radius: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: rgba(0, 242, 254, 0.2); }
+  }
+}
+
+// ==========================================
+// ANIMACIONES
+// ==========================================
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
 }

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router'; 
 import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-footer',
   standalone: true,
@@ -13,7 +14,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
-// Propiedades públicas accesibles desde la plantilla HTML
+  // Propiedades públicas accesibles desde la plantilla HTML
   public currentYear: number = new Date().getFullYear();
   public developerName: string = 'Humberto Lozano';
   public location: string = 'Bogotá, Colombia';

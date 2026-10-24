@@ -12,23 +12,23 @@ import { Proyecto } from '../../core/models/proyecto';
 })
 export class ProyectosComponent implements OnInit {
   
-  // Inyectamos el servicio
   private proyectosService = inject(ProyectosService);
 
-  // Variables de estado
   public proyectos: Proyecto[] = [];
   public cargando: boolean = true;
   public error: string | null = null;
 
-  // Variables de la cortina
   public panelAbierto: boolean = false;
   public proyectoActivo: Proyecto | null = null;
   public pestanaActiva: 'codigo' | 'git' = 'codigo';
 
-  // Comando de clonación dinámico basado en la URL del proyecto
   get comandoClonar(): string {
     if (!this.proyectoActivo) return '';
-    return `git clone -b ${this.proyectoActivo.ramaPrincipal} ${this.proyectoActivo.urlRepositorio}.git`;
+    // Usamos la URL de clonación real y la primera rama (o 'main' por defecto)
+    const rama = this.proyectoActivo.branches && this.proyectoActivo.branches.length > 0 
+      ? this.proyectoActivo.branches[0] 
+      : 'main';
+    return `git clone -b ${rama} ${this.proyectoActivo.cloneUrl}`;
   }
 
   ngOnInit() {
@@ -45,7 +45,7 @@ export class ProyectosComponent implements OnInit {
         this.cargando = false;
       },
       error: (err) => {
-        this.error = 'Hubo un error al cargar los proyectos.';
+        this.error = 'Hubo un error al cargar los proyectos desde la base de datos.';
         this.cargando = false;
         console.error(err);
       }
@@ -77,5 +77,32 @@ export class ProyectosComponent implements OnInit {
         alert('¡Comando copiado al portapapeles!');
       });
     }
+  }
+
+  // ==========================================
+  // LÓGICA DE LA TARJETA 3D
+  // ==========================================
+  onCardTilt(event: MouseEvent, proyecto: Proyecto): void {
+    const card = document.getElementById('card-' + proyecto.name);
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = event.clientX - rect.left - rect.width / 2;
+    const y = event.clientY - rect.top - rect.height / 2;
+    
+    const rotateX = (-y / 15); 
+    const rotateY = (x / 15);
+
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    
+    card.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`);
+    card.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);
+  }
+
+  resetCardTilt(proyecto: Proyecto): void {
+    const card = document.getElementById('card-' + proyecto.name);
+    if (!card) return;
+    
+    card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
   }
 }

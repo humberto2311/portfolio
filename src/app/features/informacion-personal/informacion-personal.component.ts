@@ -22,10 +22,10 @@ export class InformacionPersonalComponent {
   public perfilProfesional = 'Ingeniero de Sistemas y estudiante de Postgrado en Ingeniería de Software con más de 3 años de experiencia en desarrollo backend enterprise con Java y Spring Boot. Especializado en Arquitectura Hexagonal, diseño de APIs RESTful de alto rendimiento, procesamiento multihilo y tuning de bases de datos relacionales. Con base full-stack: experiencia en Angular y JavaScript y formación en desarrollo full-stack a través de MinTIC.';
 
   public metricas = [
-    { titulo: 'Experiencia', valor: '3+ Años', tendencia: 'Enterprise Backend', icono: '💼', color: '#27c93f' },
-    { titulo: 'Especialidad', valor: 'Java / Spring', tendencia: 'Arq. Hexagonal', icono: '⚙️', color: '#ffbd2e' },
-    { titulo: 'Pruebas Unitarias', valor: '> 80%', tendencia: 'JUnit 5 / Mockito', icono: '🧪', color: '#ff5f56' }
-  ];
+  { titulo: 'Experiencia', valor: '3+ Años', tendencia: 'Enterprise Backend', icono: '💼', color: '#00f2fe' },
+  { titulo: 'Especialidad', valor: 'Java / Spring', tendencia: 'Arq. Hexagonal', icono: '⚙️', color: '#4facfe' },
+  { titulo: 'Pruebas Unitarias', valor: '> 80%', tendencia: 'JUnit 5 / Mockito', icono: '🧪', color: '#a78bfa' }
+];
 
   // Formación resumida de tu HV
   public formacion = [

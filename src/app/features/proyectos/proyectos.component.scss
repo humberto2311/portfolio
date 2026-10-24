@@ -1,5 +1,5 @@
 // ==========================================
-// PALETA NFC-SOFT
+// PALETA NFC-SOFT (Variables obligatorias)
 // ==========================================
 $bg-dark: #0b0f19;
 $bg-card: rgba(15, 23, 42, 0.6);
@@ -130,6 +130,83 @@ $terminal-header: #131c2f;
 }
 
 // ==========================================
+// BARRA DE BÚSQUEDA
+// ==========================================
+.buscador-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  animation: fadeIn 0.5s ease;
+
+  .buscador-input {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+
+    svg {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 3rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid $border-soft;
+      border-radius: 999px;
+      color: $text-light;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(16px);
+
+      &::placeholder {
+        color: #64748b;
+      }
+
+      &:focus {
+        border-color: rgba(0, 242, 254, 0.5);
+        box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+        background: rgba(15, 23, 42, 0.9);
+      }
+    }
+  }
+}
+
+.sin-resultados {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 1rem;
+  color: $text-muted;
+  font-family: 'JetBrains Mono', monospace;
+  
+  strong { color: $accent-cyan; }
+
+  .btn-retry {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    color: $accent-cyan;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: rgba(0, 242, 254, 0.1); }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ==========================================
 // GLASS PANEL BASE
 // ==========================================
 .glass-panel {
@@ -144,15 +221,15 @@ $terminal-header: #131c2f;
 // ==========================================
 .grid-proyectos {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem; 
   justify-items: center;
-  perspective: 1000px; // CLAVE para el efecto 3D
+  perspective: 1000px; 
 }
 
 .tarjeta-proyecto {
   width: 100%;
-  max-width: 340px;
+  max-width: 280px;
   border-radius: 1rem;
   padding: 0.75rem;
   cursor: pointer;
@@ -160,21 +237,19 @@ $terminal-header: #131c2f;
   flex-direction: column;
   position: relative;
   
-  // Transición para que el reset sea suave (en JS es 0.1s para el seguimiento)
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), 
               border-color 0.3s ease, 
               box-shadow 0.3s ease;
   transform-style: preserve-3d;
   will-change: transform;
 
-  // Brillo dinámico que sigue al mouse
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: 1rem;
     background: radial-gradient(
-      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
       rgba(0, 242, 254, 0.08),
       transparent 40%
     );
@@ -186,8 +261,8 @@ $terminal-header: #131c2f;
 
   &:hover {
     border-color: rgba(0, 242, 254, 0.4);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 
-                0 0 20px rgba(0, 242, 254, 0.15);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.7), 
+                0 0 15px rgba(0, 242, 254, 0.1);
 
     &::before {
       opacity: 1;
@@ -195,7 +270,7 @@ $terminal-header: #131c2f;
 
     .tarjeta-imagen {
       filter: contrast(100%) grayscale(0%);
-      transform: scale(1.05);
+      transform: scale(1.03);
     }
 
     .imagen-overlay {
@@ -207,11 +282,11 @@ $terminal-header: #131c2f;
   .tarjeta-footer {
     position: relative;
     z-index: 1;
-    transform: translateZ(20px); // Efecto de profundidad
+    transform: translateZ(10px);
   }
 
   .tarjeta-imagen-contenedor {
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 1 / 1;
     border-radius: 0.75rem;
     overflow: hidden;
     background: #000;
@@ -222,7 +297,7 @@ $terminal-header: #131c2f;
       height: 100%;
       object-fit: cover;
       filter: contrast(85%) grayscale(40%);
-      transition: filter 0.4s ease, transform 0.4s ease;
+      transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     }
 
     .imagen-overlay {
@@ -426,11 +501,84 @@ $terminal-header: #131c2f;
     border-radius: 3px;
   }
 
-  .descripcion { 
-    font-size: 0.95rem; 
+  .readme-content {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+    white-space: pre-wrap; 
+    font-family: 'Inter', sans-serif;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    max-height: 250px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 242, 254, 0.2);
+      border-radius: 3px;
+    }
+  }
+
+  .info-item h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $accent-cyan;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+  }
+
+  .short-bio-text {
+    font-size: 0.85rem;
     line-height: 1.6;
-    margin-bottom: 1.5rem; 
-    color: $text-light;
+    margin: 0;
+    padding: 1rem;
+    background: rgba(0, 242, 254, 0.05);
+    border-left: 2px solid $accent-cyan;
+    border-radius: 0.5rem;
+    color: #cbd5e1;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .meta-box {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    .meta-label {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: $text-muted;
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      font-size: 0.85rem;
+      color: $text-light;
+      font-weight: 500;
+    }
+
+    .meta-link {
+      font-size: 0.85rem;
+      color: $accent-cyan;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover { text-decoration: underline; }
+    }
   }
 
   .tecnologias {
@@ -448,6 +596,12 @@ $terminal-header: #131c2f;
       margin-right: 0.25rem;
     }
 
+    .tech-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
     .tech-badge {
       background: rgba(0, 242, 254, 0.08);
       border: 1px solid rgba(0, 242, 254, 0.2);
@@ -457,35 +611,6 @@ $terminal-header: #131c2f;
       font-size: 0.72rem;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
-    }
-  }
-  
-  .bloque-codigo {
-    background: #060a12;
-    border: 1px solid rgba(0, 242, 254, 0.15);
-    border-radius: 0.5rem;
-    overflow: hidden;
-
-    .code-header {
-      padding: 0.5rem 1rem;
-      background: rgba(0, 242, 254, 0.04);
-      border-bottom: 1px solid rgba(0, 242, 254, 0.1);
-      
-      .file-name {
-        font-size: 0.7rem;
-        font-family: 'JetBrains Mono', monospace;
-        color: $accent-cyan;
-      }
-    }
-    
-    pre {
-      margin: 0;
-      padding: 1.25rem;
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 0.8rem;
-      line-height: 1.6;
-      color: #a5d6ff;
-      overflow-x: auto;
     }
   }
 
@@ -504,6 +629,7 @@ $terminal-header: #131c2f;
     .terminal-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 0.5rem 1rem;
       background: rgba(255, 255, 255, 0.02);
       font-size: 0.72rem;
@@ -512,6 +638,37 @@ $terminal-header: #131c2f;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
       .rama-actual strong { color: $accent-cyan; }
+    }
+
+    .rama-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+
+      select {
+        background: #060a12;
+        color: $accent-cyan;
+        border: 1px solid rgba(0, 242, 254, 0.3);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: inherit;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover, &:focus {
+          border-color: $accent-cyan;
+          box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        option {
+          background: #0d1322;
+          color: $text-light;
+        }
+      }
     }
 
     .terminal-body {

@@ -34,34 +34,55 @@
     <button (click)="cargarProyectos()" class="btn-retry">Reintentar conexión</button>
   </div>
 
-  <!-- GRID DE PROYECTOS -->
-  <div class="grid-proyectos" *ngIf="!cargando && !error">
-    <article 
-      *ngFor="let p of proyectos" 
-      class="tarjeta-proyecto glass-panel" 
-      (mousemove)="onCardTilt($event, p)"
-      (mouseleave)="resetCardTilt(p)"
-      [id]="'card-' + p.name"
-      (click)="abrirPanel(p)">
-      
-      <div class="tarjeta-imagen-contenedor">
-        <!-- Usamos imageUrl o una por defecto si es null -->
-        <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop'" [alt]="p.name" class="tarjeta-imagen" loading="lazy">
-        <div class="imagen-overlay">
-          <span class="ver-detalle">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            Ver Detalles
-          </span>
+  <!-- BARRA DE BÚSQUEDA Y GRID -->
+  <ng-container *ngIf="!cargando && !error">
+    
+    <!-- BUSCADOR -->
+    <div class="buscador-wrapper">
+      <div class="buscador-input">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input 
+          type="text" 
+          placeholder="Buscar por nombre, tecnología o descripción..." 
+          [(ngModel)]="busqueda"
+          name="busqueda">
+      </div>
+    </div>
+
+    <!-- GRID DE PROYECTOS -->
+    <div class="grid-proyectos">
+      <article 
+        *ngFor="let p of proyectosFiltrados" 
+        class="tarjeta-proyecto glass-panel" 
+        (mousemove)="onCardTilt($event, p)"
+        (mouseleave)="resetCardTilt(p)"
+        [id]="'card-' + p.name"
+        (click)="abrirPanel(p)">
+        
+        <div class="tarjeta-imagen-contenedor">
+          <img [src]="p.imageUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop'" [alt]="p.name" class="tarjeta-imagen" loading="lazy">
+          <div class="imagen-overlay">
+            <span class="ver-detalle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              Ver Detalles
+            </span>
+          </div>
         </div>
+        
+        <div class="tarjeta-footer">
+          <span class="tarjeta-nombre">{{ p.name }}</span>
+          <span class="tarjeta-tag">#{{ p.stack && p.stack.length > 0 ? p.stack[0] : 'GIT' }}</span>
+        </div>
+      </article>
+
+      <!-- Mensaje si no hay resultados -->
+      <div *ngIf="proyectosFiltrados.length === 0" class="sin-resultados">
+        <p>No se encontraron proyectos que coincidan con "<strong>{{ busqueda }}</strong>".</p>
+        <button (click)="busqueda = ''" class="btn-retry">Limpiar búsqueda</button>
       </div>
-      
-      <div class="tarjeta-footer">
-        <span class="tarjeta-nombre">{{ p.name }}</span>
-        <!-- Mostramos la primera tecnología como Tag -->
-        <span class="tarjeta-tag">#{{ p.stack && p.stack.length > 0 ? p.stack[0] : 'GIT' }}</span>
-      </div>
-    </article>
-  </div>
+    </div>
+
+  </ng-container>
 
 </section>
 
@@ -91,40 +112,53 @@
 
     <!-- Pestañas -->
     <div class="tabs-github">
-      <button 
-        class="tab" 
-        [class.active]="pestanaActiva === 'codigo'" 
-        (click)="cambiarPestana('codigo')">
+      <button class="tab" [class.active]="pestanaActiva === 'codigo'" (click)="cambiarPestana('codigo')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-        Código
+        Información
       </button>
-      <button 
-        class="tab" 
-        [class.active]="pestanaActiva === 'git'" 
-        (click)="cambiarPestana('git')">
+      <button class="tab" [class.active]="pestanaActiva === 'git'" (click)="cambiarPestana('git')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
         Clonar / Ramas
       </button>
     </div>
 
-    <!-- PESTAÑA CÓDIGO -->
+    <!-- PESTAÑA INFORMACIÓN -->
     <div class="tab-contenido" *ngIf="pestanaActiva === 'codigo'">
-      <p class="descripcion">{{ proyectoActivo.description || 'Sin descripción disponible.' }}</p>
       
-      <div class="tecnologias">
-        <span class="tech-label">Stack:</span>
-        <span *ngFor="let tech of proyectoActivo.stack" class="tech-badge">{{ tech }}</span>
+      <div class="info-grid">
+        <div class="info-item main-desc">
+          <h3>Descripción / README</h3>
+          <div class="readme-content">{{ proyectoActivo.description || 'Sin descripción detallada.' }}</div>
+        </div>
+
+        <div class="info-item short-bio" *ngIf="proyectoActivo.shortBio">
+          <h3>Resumen (Short Bio)</h3>
+          <p class="short-bio-text">{{ proyectoActivo.shortBio }}</p>
+        </div>
       </div>
 
-      <div class="bloque-codigo">
-        <div class="code-header">
-          <span class="file-name">Ejemplo de implementación</span>
+      <div class="meta-grid">
+        <div class="meta-box">
+          <span class="meta-label">Último Commit</span>
+          <span class="meta-value">{{ formatearFecha(proyectoActivo.lastCommitDate) }}</span>
         </div>
-        <!-- Como no tenemos código en BD, mostramos un texto simulado -->
-        <pre><code>// Repositorio: {{ proyectoActivo.name }}
-// Clona el proyecto para ver el código completo.
-console.log("Happy Coding!");</code></pre>
+        <div class="meta-box" *ngIf="proyectoActivo.userProfile">
+          <span class="meta-label">Autor</span>
+          <span class="meta-value">{{ proyectoActivo.userProfile?.name || 'No asignado' }}</span>
+        </div>
+        <div class="meta-box" *ngIf="proyectoActivo.homepage">
+          <span class="meta-label">Demo / Homepage</span>
+          <a [href]="proyectoActivo.homepage" target="_blank" class="meta-link">Visitar enlace ↗</a>
+        </div>
       </div>
+
+      <div class="tecnologias">
+        <span class="tech-label">Stack:</span>
+        <div class="tech-list">
+          <span *ngFor="let tech of proyectoActivo.stack" class="tech-badge">{{ tech }}</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- PESTAÑA GIT -->
@@ -134,8 +168,19 @@ console.log("Happy Coding!");</code></pre>
       <div class="terminal-git">
         <div class="terminal-header">
           <span class="terminal-title">Terminal</span>
-          <span class="rama-actual">Rama: <strong>{{ proyectoActivo.branches && proyectoActivo.branches.length > 0 ? proyectoActivo.branches[0] : 'main' }}</strong></span>
+          
+          <!-- Selector de ramas limpio -->
+          <div class="rama-selector">
+            <span>Rama: </span>
+            <select [(ngModel)]="ramaSeleccionada" name="rama">
+              <option *ngFor="let rama of proyectoActivo.branches" [value]="rama">
+                {{ limpiarNombreRama(rama) }}
+              </option>
+              <option *ngIf="!proyectoActivo.branches || proyectoActivo.branches.length === 0" value="main">main</option>
+            </select>
+          </div>
         </div>
+        
         <div class="terminal-body">
           <span class="prompt">➜</span>
           <span class="comando">{{ comandoClonar }}</span>
@@ -148,15 +193,13 @@ console.log("Happy Coding!");</code></pre>
       <div class="info-ramas">
         <h4>Ramas disponibles:</h4>
         <ul>
-          <!-- Iteramos sobre las ramas que trajo JGit -->
           <li *ngFor="let rama of proyectoActivo.branches">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="branch-icon"><path d="M17 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zM7 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zM12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 2.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/><path d="M12 7v6M7 13v2c0 .6.4 1 1 1h8c.6 0 1-.4 1-1v-2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-            <span class="rama-tag">{{ rama }}</span>
+            <span class="rama-tag">{{ limpiarNombreRama(rama) }}</span>
           </li>
         </ul>
 
-        <!-- Botón para ir a GitHub (Usamos el cloneUrl y le quitamos el .git) -->
-        <a [href]="proyectoActivo.cloneUrl ? proyectoActivo.cloneUrl.replace('.git', '') : '#'" target="_blank" class="btn-github">
+        <a [href]="enlaceGithubRama" target="_blank" class="btn-github">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
           Ver repositorio en GitHub ↗
         </a>

@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Archivo de entorno generado en build (Vercel)
+src/environments/environment.prod.ts

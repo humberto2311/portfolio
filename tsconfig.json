@@ -23,8 +23,7 @@
       "dom"
     ],
     "types": [
-      "jasmine", 
-      "vite/client"
+      "jasmine"
     ]
   },
   "angularCompilerOptions": {

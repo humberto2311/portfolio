@@ -1,0 +1,22 @@
+.private-layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #0b0f19;
+  color: #cfd6e4;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px;
+  }
+}

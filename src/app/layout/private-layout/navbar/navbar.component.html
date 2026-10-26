@@ -1,0 +1,44 @@
+<header class="navbar-header">
+  <nav class="navbar-container">
+    <a routerLink="/app" class="navbar-brand" (click)="isMobileMenuOpen.set(false)">
+      <div class="brand-company">
+        <img src="assets/images/logo.png" alt="NFC-Soft Logo" class="brand-logo">
+      </div>
+      <div class="brand-divider"></div>
+      <div class="brand-personal">
+        <!-- Aquí van los datos del usuario -->
+        <span class="person-name">{{ user()?.fullName }}</span>
+        <span class="person-role">{{ (user()?.role ?? 'USUARIO').replace('ROLE_', '').replace('ROL_', '') }}</span>
+      </div>
+    </a>
+
+    <!-- 2. BOTÓN HAMBURGUESA (Solo visible en móvil) -->
+    <button class="mobile-toggle" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen()">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+
+    <!-- 3. CONTENEDOR DESPLEGABLE -->
+    <div class="navbar-collapse" [class.active]="isMobileMenuOpen()">
+      
+      <!-- Buscador -->
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Buscar..." 
+          [(ngModel)]="searchQuery" 
+          (keyup.enter)="onSearch()" 
+        />
+        <button (click)="onSearch()" aria-label="Buscar">🔍</button>
+      </div>
+
+      <!-- Módulos y Avatar -->
+      <div class="navbar-actions">
+        <app-dropdown-menu />
+        <app-user-menu />
+      </div>
+
+    </div>
+  </nav>
+</header>

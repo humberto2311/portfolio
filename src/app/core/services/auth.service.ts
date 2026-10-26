@@ -1,15 +1,16 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthUser } from '../models/AuthUser';
-import { environment } from '../../../environments/environment'; 
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID); // 👈 Inyectamos el ID de plataforma
 
-  // Definimos la URL base
   private readonly API_URL = `${environment.apiUrl}/api/auth`;
 
   readonly currentUser = signal<AuthUser | null>(null);
@@ -18,20 +19,22 @@ export class AuthService {
   readonly error = signal<string | null>(null);
 
   constructor() {
-    // Restaurar sesión si el usuario recarga la página (F5)
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        this.currentUser.set({
-          id: payload.id ? String(payload.id) : '0',
-          fullName: payload.sub, 
-          email: payload.sub,
-          role: payload.role || 'ROLE_USER'
-        });
-        this.isAuthenticated.set(true);
-      } catch (e) {
-        localStorage.removeItem('token');
+    // 👇 Verificamos que estemos en el navegador antes de usar localStorage
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.currentUser.set({
+            id: payload.id ? String(payload.id) : '0',
+            fullName: payload.fullName || 'Usuario', 
+            email: payload.sub,
+            role: payload.role || 'ROLE_USER'
+          });
+          this.isAuthenticated.set(true);
+        } catch (e) {
+          localStorage.removeItem('token');
+        }
       }
     }
   }
@@ -89,14 +92,18 @@ export class AuthService {
   // ---- OAuth Success Callback ----
   handleOAuthSuccess(token: string) {
     this.isLoading.set(true);
-    localStorage.setItem('token', token);
+    
+    // Verificamos que estemos en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('token', token);
+    }
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       
       const user: AuthUser = {
         id: payload.id ? String(payload.id) : '0',
-        fullName: payload.sub, 
+        fullName: payload.fullName || payload.sub, // Si no hay fullName, usa el email
         email: payload.sub,
         role: payload.role || 'ROLE_USER'
       };
@@ -105,7 +112,6 @@ export class AuthService {
       this.isAuthenticated.set(true);
       this.isLoading.set(false);
       
-      // 👇 CAMBIO: Redirige al layout privado
       this.router.navigate(['/app']); 
     } catch (e) {
       this.error.set('Error al procesar el token de autenticación');
@@ -115,19 +121,22 @@ export class AuthService {
   }
 
   private handleSuccess(res: { token: string; user: AuthUser }) {
-    console.log('Respuesta cruda del backend:', res);
-    localStorage.setItem('token', res.token);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('token', res.token);
+    }
+    
     this.currentUser.set(res.user);
     this.isAuthenticated.set(true);
     this.isLoading.set(false);
-    
-    // 👇 CAMBIO: Redirige al layout privado
     this.router.navigate(['/app']);
   }
 
   logout() {
-    localStorage.removeItem('token');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('token');
+    }
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
+    this.router.navigate(['/']);
   }
 }

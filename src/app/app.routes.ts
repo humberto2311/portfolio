@@ -19,7 +19,8 @@ export const routes: Routes = [
     canActivate: [publicGuard], // <-- PROTEGIDO: Si estás logueado, te bota a /app
     children: [
       { path: '', component: NfcProfileComponent },
-      // { path: 'sobre-mi', component: ... } // Tus otras rutas públicas
+     { path: 'informacion-personal', component: InformacionPersonalComponent }, // 👈
+      { path: 'proyectos', component: ProyectosComponent }
     ]
   },
 

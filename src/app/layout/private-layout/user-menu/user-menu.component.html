@@ -1,0 +1,20 @@
+<div class="user-menu-wrapper">
+  <button class="avatar-btn" (click)="toggleMenu()" aria-label="Menú de usuario">
+    <span class="initials">{{ getInitials() }}</span>
+  </button>
+
+  @if (menuOpen()) {
+    <div class="dropdown" (click)="$event.stopPropagation()">
+      <div class="dropdown-header">
+        <strong>{{ user()?.fullName }}</strong>
+        <small>{{ user()?.email }}</small>
+      </div>
+      <hr />
+      <button (click)="goTo('/ajustes/perfil')">👤 Mi perfil</button>
+      <button (click)="goTo('/ajustes/cuenta')">⚙️ Ajustes de cuenta</button>
+      <button (click)="goTo('/ajustes/seguridad')">🔒 Seguridad</button>
+      <hr />
+      <button class="logout" (click)="logout()">🚪 Cerrar sesión</button>
+    </div>
+  }
+</div>

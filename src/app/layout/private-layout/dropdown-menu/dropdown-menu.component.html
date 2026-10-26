@@ -1,0 +1,18 @@
+<div class="dropdown-wrapper">
+  <button class="menu-trigger" (click)="toggle()">
+    ☰ Módulos
+  </button>
+
+  @if (open()) {
+    <div class="dropdown-panel" (click)="$event.stopPropagation()">
+      @for (item of items; track item.route) {
+        <a [routerLink]="item.route" 
+           routerLinkActive="active" 
+           (click)="open.set(false)">
+          <span class="icon">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </div>
+  }
+</div>

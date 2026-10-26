@@ -1,18 +1,19 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
+import { Observable, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ResumeProfile, ResumeSection, ResumeItem } from '../models/resume.model';
-import { environment } from '../../../../src/environments/environments'; // ajusta la ruta
-
+import { environment } from '../../../../src/environments/environments'; 
 @Injectable({
   providedIn: 'root'
 })
 export class ResumeService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   private readonly API_URL = `${environment.apiUrl}/api/resume`;
 
-  // 1. Obtener el perfil (usaremos el ID 1 que creaste en Postman)
+  // 1. Obtener el perfil
   getProfile(profileId: number): Observable<ResumeProfile> {
     return this.http.get<ResumeProfile>(`${this.API_URL}/profiles/${profileId}`);
   }
@@ -27,8 +28,19 @@ export class ResumeService {
     return this.http.get<ResumeItem[]>(`${this.API_URL}/items/section/${sectionId}`);
   }
 
-  // 🔥 4. MAGIA: Unir todo (Perfil + Secciones + Ítems)
+  // 🔥 4. Unir todo (Perfil + Secciones + Ítems)
   getFullResume(profileId: number): Observable<{ profile: ResumeProfile, sections: ResumeSection[] }> {
+    
+    // 🛑 BLOQUEO DE SSR: Si estamos en el servidor (Vercel build), devolvemos datos vacíos.
+    // Esto evita las peticiones a localhost y los errores en los logs de Vercel.
+    if (!isPlatformBrowser(this.platformId)) {
+      return of({ 
+        profile: {} as ResumeProfile, 
+        sections: [] 
+      });
+    }
+
+    // 🌐 SI ESTAMOS EN EL NAVEGADOR: Hacemos las peticiones reales
     return this.getProfile(profileId).pipe(
       switchMap(profile => {
         return this.getSections(profileId).pipe(

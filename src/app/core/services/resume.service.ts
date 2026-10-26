@@ -4,7 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable, forkJoin, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ResumeProfile, ResumeSection, ResumeItem } from '../models/resume.model';
-import { environment } from '../../../../src/environments/environments'; 
+import { environment } from '../../../environments/environment'; 
 @Injectable({
   providedIn: 'root'
 })

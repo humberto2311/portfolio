@@ -11,7 +11,8 @@ import { environment } from '../../../environments/environment';
 export class ProyectosService {
   private http = inject(HttpClient);
 
-  private readonly API_URL = `${environment.apiUrl}/api/resume`;
+  private readonly API_URL = `${environment.apiUrl}/api/cards`;
+  
 
   getProyectos(): Observable<Proyecto[]> {
     return this.http.get<Proyecto[]>(this.API_URL);

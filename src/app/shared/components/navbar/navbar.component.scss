@@ -200,17 +200,25 @@ $border-soft: rgba(255, 255, 255, 0.08);
           }
         }
 
-        // LOGIN (Estilo secundario oscuro)
+             // LOGIN (Estilo secundario oscuro)
         .login-link {
-          color: $text-primary;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          font-weight: 600;
-          margin-left: 0.25rem;
+          display: inline-flex;       /* Alinea el ícono y el texto */
+          align-items: center;        /* Centrado vertical */
+          gap: 0.4rem;                /* Espacio entre ícono y texto */
+          color: $accent-cyan;
+          background: rgba(0, 242, 254, 0.06);
+          border: 1px solid rgba(0, 242, 254, 0.3);
+          font-family: inherit;       /* Hereda la fuente del navbar */
+          font-size: 0.85rem;
+          font-weight: 500;
+          padding: 0.5rem 0.85rem;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
 
           &:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: $accent-cyan;
+            background: rgba(0, 242, 254, 0.12);
+            border-color: rgba(0, 242, 254, 0.5);
             color: $accent-cyan;
           }
         }

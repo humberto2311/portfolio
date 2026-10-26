@@ -1,6 +1,9 @@
-import { Component, HostListener } from '@angular/core';
+// src/app/shared/components/navbar/navbar.component.ts
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ModalService } from '../../../core/services/modal.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,21 +13,32 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  public isMobileMenuOpen: boolean = false;
-  public isScrolled: boolean = false;
+  private modalSvc = inject(ModalService);
+  auth = inject(AuthService);
 
-  public githubUrl: string = 'https://github.com/humberto2311';
+  readonly isScrolled = signal(false);
+  readonly isMobileMenuOpen = signal(false);
 
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    this.isScrolled = window.scrollY > 20;
+  @HostListener('window:scroll')
+  onScroll() {
+    this.isScrolled.set(window.scrollY > 20);
   }
 
-  public toggleMobileMenu(): void {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
   }
 
-  public closeMenus(): void {
-    this.isMobileMenuOpen = false;
+  closeMenus() {
+    this.isMobileMenuOpen.set(false);
+  }
+
+  openLogin(tab: 'login' | 'register' = 'login') {
+    this.closeMenus();
+    this.modalSvc.openLogin(tab);
+  }
+
+  logout() {
+    this.closeMenus();
+    this.auth.logout();
   }
 }

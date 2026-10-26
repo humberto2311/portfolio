@@ -1,0 +1,179 @@
+:host { display: contents; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 25, 0.75);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  animation: fadeIn .2s ease;
+}
+
+.modal-card {
+  position: relative;
+  width: min(440px, 92vw); /* Un poco más ancho para los nuevos campos */
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #12161f;
+  border: 1px solid rgba(0, 220, 255, 0.18);
+  border-radius: 16px;
+  padding: 2rem 1.75rem 1.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+  animation: slideUp .25s ease;
+
+  /* Scrollbar estilizado para el modo oscuro */
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+}
+
+.modal-close {
+  position: absolute;
+  top: .85rem;
+  right: .85rem;
+  background: transparent;
+  border: none;
+  color: #8891a3;
+  cursor: pointer;
+  padding: .25rem;
+  &:hover { color: #00dcff; }
+}
+
+.modal-tabs {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+
+  button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #8891a3;
+    padding: .65rem 0;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: .2s;
+
+    &.active { color: #00dcff; border-bottom-color: #00dcff; }
+  }
+}
+
+.oauth-buttons {
+  display: grid;
+  gap: .55rem;
+  margin-bottom: 1.25rem;
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  padding: .7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: #1a1f2b;
+  color: #e6ebf5;
+  font-weight: 500;
+  cursor: pointer;
+  transition: .2s;
+
+  &:hover { background: #202636; border-color: rgba(0,220,255,.35); }
+  &.github:hover  { border-color: #fff; }
+  &.google:hover  { border-color: #4285F4; }
+  &.microsoft:hover { border-color: #00a4ef; }
+}
+
+.divider {
+  display: flex; align-items: center; gap: .75rem;
+  color: #566074; font-size: .8rem; margin: 1rem 0;
+
+  &::before, &::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08);
+  }
+}
+
+.email-form {
+  display: grid;
+  gap: .85rem;
+
+  label { display: grid; gap: .35rem; font-size: .85rem; color: #a3adc2; }
+
+  input, select {
+    width: 100%;
+    padding: .65rem .8rem;
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    color: #e6ebf5;
+    font-size: .92rem;
+    transition: border-color .2s;
+    font-family: inherit;
+
+    &:focus { outline: none; border-color: #00dcff; }
+  }
+
+  /* Estilos específicos para el select */
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238891a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1em;
+  }
+
+  /* Cambiar color del icono del calendario a blanco */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.5;
+    cursor: pointer;
+    &:hover { opacity: 1; }
+  }
+}
+
+/* Fila para Teléfono y Género */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.input-password {
+  position: relative;
+  button {
+    position: absolute;
+    right: .5rem; top: 50%; transform: translateY(-50%);
+    background: transparent; border: none; cursor: pointer; font-size: 1rem;
+    color: #8891a3;
+    &:hover { color: #00dcff; }
+  }
+}
+
+.error { color: #ff5c7a; font-size: .82rem; margin: 0; }
+
+.submit-btn {
+  margin-top: .35rem;
+  padding: .75rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00dcff, #0090ff);
+  color: #001018;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+  font-family: inherit;
+  font-size: .95rem;
+
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,220,255,.35); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
+}
+
+.forgot { text-align: center; font-size: .82rem; color: #8891a3; &:hover { color: #00dcff; } }
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }

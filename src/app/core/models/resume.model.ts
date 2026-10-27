@@ -27,4 +27,5 @@ export interface ResumeProfile {
   githubUrl: string;
   resumePdfUrl?: string;
   publicSlug?: string;
+  photoUrl?: string; 
 }

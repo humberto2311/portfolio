@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private platformId = inject(PLATFORM_ID); // 👈 Inyectamos el ID de plataforma
+  private platformId = inject(PLATFORM_ID);
 
   private readonly API_URL = `${environment.apiUrl}/api/auth`;
 

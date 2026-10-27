@@ -28,6 +28,8 @@ export class InformacionPersonalComponent implements OnInit {
   public formacion: any[] = [];
   public tecnologias: any[] = [];
   public welcomeDesc = '';
+  public iniciales = '';
+  public photoUrl: string | null = null;
 
   // Mantenemos las métricas estáticas por ahora (o las puedes guardar en BD después)
   public metricas: any[] = [];
@@ -52,12 +54,14 @@ export class InformacionPersonalComponent implements OnInit {
 
   private mapProfile(profile: ResumeProfile) {
     this.nombre = profile.fullName;
+    this.iniciales = this.generarIniciales(profile.fullName); 
+    this.photoUrl = profile.photoUrl?.trim() || null; 
     this.rol = profile.headline;
     this.perfilProfesional = profile.summary;
     this.welcomeDesc = profile.shortBio || '';
     if (profile.resumePdfUrl) this.resumePdfUrl = profile.resumePdfUrl;
 
-    // 👇 CAMBIAMOS LOS EMOJIS POR CLASES DE FONTAWESOME
+  
     const contactoRaw = [
       { icono: 'fas fa-envelope', texto: profile.email },
       { icono: 'fas fa-phone', texto: profile.phone },
@@ -68,6 +72,21 @@ export class InformacionPersonalComponent implements OnInit {
     this.contacto = contactoRaw.filter(c => c.texto != null && c.texto.trim() !== '');
   }
 
+  private generarIniciales(fullName: string): string {
+  if (!fullName || fullName.trim() === '') return '?';
+
+  const partes = fullName.trim().split(/\s+/).filter(p => p.length > 0);
+
+  if (partes.length === 1) {
+    return partes[0].charAt(0).toUpperCase();
+  }
+
+  // Primera letra del primer nombre + primera letra del primer apellido
+  const primerNombre = partes[0].charAt(0);
+  const primerApellido = partes[1].charAt(0);
+
+  return (primerNombre + primerApellido).toUpperCase();
+}
 
 private mapSections(sections: ResumeSection[]) {
   sections.forEach(sec => {

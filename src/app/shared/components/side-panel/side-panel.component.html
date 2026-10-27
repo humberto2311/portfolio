@@ -1,0 +1,53 @@
+<app-floating-buttons />
+
+<div class="side-backdrop" [class.active]="svc.isOpen()" (click)="svc.close()"></div>
+
+<aside class="side-panel" [class.open]="svc.isOpen()">
+  <!-- Header -->
+  <header class="panel-header">
+    @if (svc.activeView() === 'contacts') {
+      <div class="header-inner">
+        <div class="icon-box indigo"><i class="fa-solid fa-address-book"></i></div>
+        <div>
+          <h3>Contactos</h3>
+          <p>{{ svc.contacts().length }} contactos</p>
+        </div>
+      </div>
+    }
+
+    @if (svc.activeView() === 'chat') {
+      @if (svc.activeContact(); as contact) {
+        <div class="header-inner">
+          <button class="back-btn" (click)="svc.backToContacts()">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="avatar-wrap">
+            <img [src]="contact.avatar" [alt]="contact.name" />
+            <span class="status-dot" [class.online]="contact.status === 'online'" [class.ai]="contact.isAi"></span>
+          </div>
+          <div>
+            <div class="name-row">
+              <h3>{{ contact.name }}</h3>
+              @if (contact.isAi) { <span class="ai-badge">IA</span> }
+            </div>
+            <p [class.ai-text]="contact.isAi">{{ contact.statusText }}</p>
+          </div>
+        </div>
+      }
+    }
+
+    <button class="close-btn" (click)="svc.close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </header>
+
+  <!-- Body -->
+  <div class="panel-body">
+    @if (svc.activeView() === 'contacts') {
+      <app-contacts-list />
+    }
+    @if (svc.activeView() === 'chat') {
+      <app-chat-view />
+    }
+  </div>
+</aside>

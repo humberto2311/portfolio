@@ -1,3 +1,4 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 .private-layout-container {
   display: flex;
   flex-direction: column;
@@ -19,4 +20,10 @@
   .main-content {
     padding: 16px;
   }
+}
+.private-layout-container {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  will-change: auto !important;
 }

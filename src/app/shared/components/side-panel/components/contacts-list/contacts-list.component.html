@@ -1,0 +1,28 @@
+<div class="search-wrap">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="text" placeholder="Buscar contacto..."
+    [ngModel]="search()" (ngModelChange)="onSearch($event)" />
+</div>
+
+<div class="list">
+  @for (contact of filtered; track contact.id) {
+    <div class="contact-item" (click)="select(contact)">
+      <div class="avatar-wrap">
+        <img [src]="contact.avatar" [alt]="contact.name" />
+        <span class="status-dot" [class.online]="contact.status === 'online'"></span>
+      </div>
+      <div class="info">
+        <div class="top-row">
+          <h4>{{ contact.name }}</h4>
+          <span class="time">{{ contact.time }}</span>
+        </div>
+        <p class="preview">{{ contact.lastMsg }}</p>
+      </div>
+      @if (contact.unread > 0) {
+        <span class="badge">{{ contact.unread }}</span>
+      }
+    </div>
+  } @empty {
+    <p class="empty">Sin resultados</p>
+  }
+</div>

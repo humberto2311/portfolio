@@ -1,0 +1,99 @@
+@import '../../../../shared/styles/variables';
+.info-card {
+  @include card-base;
+
+  h3 {
+    color: $cyan-main;
+    font-size: 1rem;
+    margin: 0 0 1rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    border-bottom: 1px solid $bg-border;
+    padding-bottom: 0.8rem;
+  }
+
+  h4 {
+    font-size: 0.8rem;
+    color: $cyan-main;
+    font-family: monospace;
+    text-transform: uppercase;
+    margin: 0 0 0.8rem;
+    letter-spacing: 1px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.entry {
+  border-left: 2px solid $cyan-main;
+  padding-left: 0.7rem;
+  margin-bottom: 1rem;
+
+  .title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin: 0;
+    span { color: $cyan-main; }
+  }
+
+  .period {
+    font-size: 0.72rem;
+    color: $text-muted;
+    margin: 0.15rem 0;
+    font-family: monospace;
+  }
+
+  .detail {
+    font-size: 0.8rem;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.stack {
+  margin-bottom: 0.9rem;
+
+  .stack-title {
+    font-size: 0.78rem;
+    color: $text-light;
+    margin: 0 0 0.4rem;
+    font-weight: 600;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  font-size: 0.7rem;
+  background: $cyan-dim;
+  color: $cyan-main;
+  border: 1px solid $border-cyan;
+  padding: 0.15rem 0.6rem;
+  border-radius: 10px;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: $text-muted;
+    padding: 0.35rem 0;
+
+    i { color: $cyan-main; width: 16px; }
+  }
+}

@@ -1,3 +1,6 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+
 .dropdown-wrapper {
   position: relative;
 }
@@ -12,6 +15,11 @@
   font-weight: 500;
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  
+  /* Alineación del icono y texto */
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
   &:hover {
     background: rgba(0, 242, 254, 0.2);
@@ -55,7 +63,11 @@
     }
 
     .icon {
-      font-size: 1.1rem;
+      font-size: 1rem;
+      width: 16px; /* Ancho fijo para alinear los textos */
+      text-align: center;
+      display: flex;
+      justify-content: center;
     }
   }
 }

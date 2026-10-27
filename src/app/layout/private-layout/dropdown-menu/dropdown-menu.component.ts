@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface MenuItem {
   label: string;
-  icon: string;
+  icon: string; // Ahora recibe clases de FontAwesome
   route: string;
 }
 
@@ -19,11 +19,17 @@ export class DropdownMenuComponent {
   private elRef = inject(ElementRef);
   readonly open = signal(false);
 
+  // RUTAS ACTUALIZADAS CON EL PREFIJO /app Y ICONOS FONTAWESOME
   readonly items: MenuItem[] = [
-    { label: 'Dashboard', icon: '📊', route: '/dashboard' },
-    { label: 'Información personal', icon: '👤', route: '/informacion-personal' },
-    { label: 'Proyectos', icon: '🚀', route: '/proyectos' },
-    { label: 'Reportes', icon: '📈', route: '/reportes' },
+    { label: 'Comunidad', icon: 'fa-solid fa-globe', route: '/app/comunidad' }, 
+    { label: 'construir', icon: 'fa-solid fa-fire', route: '/app/portafolio' },
+    { label: 'cv', icon: 'fa-solid fa-handshake' , route: '/app/informacion-personal' },
+    { label: 'Hub de Enlaces', icon: 'fas fa-network-wired', route: '/app/hub' },
+    { label: 'Perfil', icon: 'fas fa-id-badge', route: '/app/perfil' }, 
+    { label: 'Proyectos', icon: 'fas fa-project-diagram', route: '/app/proyectos' },
+    { label: 'panel', icon: 'fas fa-chart-pie', route: '/app' },
+    
+    // { label: 'Reportes', icon: 'fas fa-chart-line', route: '/app/reportes' },
   ];
 
   toggle() { 

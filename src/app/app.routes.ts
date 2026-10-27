@@ -7,41 +7,61 @@ import { ProyectosComponent } from './features/proyectos/proyectos.component';
 import { NfcProfileComponent } from './shared/components/nfc-profile/nfc-profile.component';
 import { OAuthCallbackComponent } from '../app/features/auth/outh-callback/outh-callback.component';
 
+// 👇 IMPORTAMOS TUS NUEVOS COMPONENTES DE PORTAFOLIO
+import { PortafolioComponent } from './features/portafolio/portafolio.component'; 
+// import { PortafolioPublicoComponent } from './features/portafolio-publico/portafolio-publico.component'; // Si lo separaste
+import { LinkHubComponent } from './features/link-hub/link-hub.component';
 // Tus guards
 import { authGuard } from './core/guards/auth.guard';
-import { publicGuard } from './core/guards/public.guard'; // <-- Importas el nuevo
+import { publicGuard } from './core/guards/public.guard';
+import { PerfilComponent } from './features/perfil/perfil.component';
+import { FeedComponent } from './features/feed/feed.component';
 
 export const routes: Routes = [
-  // 1. LAYOUT PÚBLICO (Portafolio)
+
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [publicGuard], // <-- PROTEGIDO: Si estás logueado, te bota a /app
+    canActivate: [publicGuard], 
     children: [
       { path: '', component: NfcProfileComponent },
-     { path: 'informacion-personal', component: InformacionPersonalComponent }, // 👈
-      { path: 'proyectos', component: ProyectosComponent }
+      { path: 'informacion-personal', component: InformacionPersonalComponent },
+      { path: 'proyectos', component: ProyectosComponent },
+      { path: 'perfil', component: PerfilComponent },
     ]
   },
-
-  // 2. OAUTH CALLBACK (No lleva guard para que pueda procesar el token)
   { 
     path: 'oauth2/callback', 
     component: OAuthCallbackComponent 
   },
 
-  // 3. LAYOUT PRIVADO (Aplicación)
+  
+  // 3. VISTA PÚBLICA DEL PORTAFOLIO (Sin Navbars)
+  // La ruta es /u/humbertojoc (o el slug del usuario)
+  {
+    path: 'u/:username', 
+    // component: PortafolioPublicoComponent, // 👈 Aquí va tu componente de solo lectura
+    // Por ahora, si estás usando el mismo PortafolioComponent para probar:
+    component: PortafolioComponent, 
+  },
+
+  
+  // 4. LAYOUT PRIVADO (Editor con tu nuevo Navbar)
+
   {
     path: 'app',
     component: PrivateLayoutComponent,
-    canActivate: [authGuard], // <-- PROTEGIDO: Si NO estás logueado, te bota a /
+    canActivate: [authGuard], 
     children: [
-      { path: '', component: HomeComponent }, 
+      { path: '', component: FeedComponent }, // Página principal del feed
       { path: 'informacion-personal', component: InformacionPersonalComponent },
-      { path: 'proyectos', component: ProyectosComponent }
+      { path: 'proyectos', component: ProyectosComponent },
+      { path: 'perfil', component: PerfilComponent },
+      { path: 'portafolio', component: PortafolioComponent } , 
+      { path: 'hub', component: LinkHubComponent }
     ]
   },
 
-  // 4. Redirección
+  // Redirección
   { path: '**', redirectTo: '' }
 ];

@@ -17,29 +17,29 @@
     <nav class="menu">
       <span class="menu-label">Navegación</span>
       <a href="#" (click)="scrollTo('inicio', $event)" class="active">
-        <span class="menu-icon">📊</span> Overview
+        <i class="fas fa-chart-pie menu-icon"></i> Overview
       </a>
       <a href="#" (click)="scrollTo('perfil', $event)">
-        <span class="menu-icon">👤</span> Sobre mí
+        <i class="fas fa-user menu-icon"></i> Sobre mí
       </a>
       <a href="#" (click)="scrollTo('experiencia', $event)">
-        <span class="menu-icon">💼</span> Experiencia
+        <i class="fas fa-briefcase menu-icon"></i> Experiencia
       </a>
       <a href="#" (click)="scrollTo('estudios', $event)">
-        <span class="menu-icon">🎓</span> Estudios
+        <i class="fas fa-graduation-cap menu-icon"></i> Estudios
       </a>
       <a href="#" (click)="scrollTo('stack', $event)">
-        <span class="menu-icon">🛠️</span> Stack
+        <i class="fas fa-tools menu-icon"></i> Stack
       </a>
 
       <hr class="menu-divider">
 
       <span class="menu-label">Recursos</span>
       <a routerLink="/proyectos">
-        <span class="menu-icon">📁</span> Proyectos
+        <i class="fas fa-folder menu-icon"></i> Proyectos
       </a>
       <a [href]="resumePdfUrl" target="_blank" rel="noopener noreferrer" class="highlight-link">
-        <span class="menu-icon">📄</span> Hoja de Vida
+        <i class="fas fa-file-pdf menu-icon"></i> Hoja de Vida
       </a>
     </nav>
 
@@ -110,7 +110,7 @@
         <ul class="contact-list">
           <!-- Aquí solo se renderizarán los que pasaron el filtro -->
           <li *ngFor="let c of contacto">
-            <span class="icon">{{ c.icono }}</span>
+            <span class="icon"><i [class]="c.icono"></i></span>
             <span class="text">{{ c.texto }}</span>
           </li>
         </ul>
@@ -133,7 +133,8 @@
       <div class="metricas-grid">
         <div class="card metrica-card glass-panel" *ngFor="let m of metricas">
           <div class="metrica-header">
-            <span class="metrica-icon" [style.color]="m.color">{{ m.icono }}</span>
+            <!-- Se asume que m.icono ahora trae la clase ej: 'fas fa-check' -->
+            <span class="metrica-icon" [style.color]="m.color"><i [class]="m.icono"></i></span>
             <span class="metrica-tendencia" [style.color]="m.color">{{ m.tendencia }}</span>
           </div>
           <h3 class="metrica-valor">{{ m.valor }}</h3>
@@ -150,7 +151,7 @@
 
         <div class="empresas-grid">
           <div class="empresa-item" *ngFor="let exp of experiencia">
-            <div class="empresa-icono">🏢</div>
+            <div class="empresa-icono"><i class="fas fa-building"></i></div>
             <div class="empresa-info">
               <h4>{{ exp.empresa }}</h4>
               <p class="empresa-cargo">{{ exp.cargo }}</p>

@@ -57,12 +57,12 @@ export class InformacionPersonalComponent implements OnInit {
     this.welcomeDesc = profile.shortBio || '';
     if (profile.resumePdfUrl) this.resumePdfUrl = profile.resumePdfUrl;
 
-    // Armamos el array de contacto y filtramos los nulos/vacíos
+    // 👇 CAMBIAMOS LOS EMOJIS POR CLASES DE FONTAWESOME
     const contactoRaw = [
-      { icono: '✉️', texto: profile.email },
-      { icono: '📞', texto: profile.phone },
-      { icono: '📍', texto: profile.location },
-      { icono: '💻', texto: profile.githubUrl }
+      { icono: 'fas fa-envelope', texto: profile.email },
+      { icono: 'fas fa-phone', texto: profile.phone },
+      { icono: 'fas fa-map-marker-alt', texto: profile.location },
+      { icono: 'fab fa-github', texto: profile.githubUrl } // fab para logos de marcas
     ];
 
     this.contacto = contactoRaw.filter(c => c.texto != null && c.texto.trim() !== '');

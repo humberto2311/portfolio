@@ -1,0 +1,61 @@
+<article class="post-card">
+  <header class="post-head">
+    <div class="avatar">{{ post.iniciales }}</div>
+    <div class="head-info">
+      <h4>{{ post.autor }}</h4>
+      <p class="meta">{{ post.tiempo }} • <i class="fa-solid fa-globe"></i></p>
+    </div>
+    <button class="more"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+  </header>
+
+  <p class="post-text">{{ post.texto }}</p>
+
+  @if (post.imagen) {
+    <div class="post-image">
+      <img [src]="post.imagen" alt="post" />
+    </div>
+  }
+
+  <div class="metrics">
+    <span class="likes">
+      <i class="fa-solid fa-thumbs-up"></i> {{ post.likes }}
+    </span>
+    <span>{{ post.comentarios.length }} comentarios · {{ post.compartidos }} compartidos</span>
+  </div>
+
+  <div class="reactions">
+    <button [class.liked]="post.liked" (click)="toggleLike()">
+      <i class="fa-thumbs-up" [class.fa-solid]="post.liked" [class.fa-regular]="!post.liked"></i>
+      Me gusta
+    </button>
+    <button (click)="toggleComentarios()">
+      <i class="fa-regular fa-comment"></i> Comentar
+    </button>
+    <button><i class="fa-regular fa-paper-plane"></i> Compartir</button>
+  </div>
+
+  @if (mostrarComentarios()) {
+    <div class="comments">
+      @for (c of post.comentarios; track c.id) {
+        <div class="comment">
+          <div class="avatar-sm">{{ c.iniciales }}</div>
+          <div class="bubble">
+            <strong>{{ c.autor }}</strong>
+            <p>{{ c.texto }}</p>
+          </div>
+        </div>
+      }
+      <div class="comment-input">
+        <div class="avatar-sm">HL</div>
+        <input
+          type="text"
+          [(ngModel)]="nuevoComentario"
+          placeholder="Escribe un comentario..."
+          (keyup.enter)="enviarComentario()" />
+        <button (click)="enviarComentario()">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  }
+</article>

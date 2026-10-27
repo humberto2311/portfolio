@@ -1,0 +1,8 @@
+<div class="fotos-card">
+  <h3><i class="fa-solid fa-images"></i> Galería</h3>
+  <div class="grid">
+    @for (f of fotos; track f) {
+      <img [src]="f" alt="foto" loading="lazy">
+    }
+  </div>
+</div>

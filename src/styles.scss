@@ -1,3 +1,32 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Fondos */
+  --bg-dark: #0b0f19;
+  --bg-main: #0f172a; 
+  --bg-navbar: rgba(15, 23, 42, 0.85);
+  --bg-navbar-scrolled: rgba(8, 13, 24, 0.95);
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-sidebar: #080d18;
+  
+  /* Textos */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  
+  /* Acentos */
+  --accent-cyan: #00f2fe;
+  --accent-blue: #4facfe;
+  
+  /* Bordes */
+  --border-soft: #1e293b; 
+  --border-cyan: rgba(0, 242, 254, 0.2);
+  
+  /* Fuentes */
+  --font-main: 'Poppins', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,7 +36,9 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow-x: hidden; /* Evita desbordamientos horizontales */
-  font-family: 'Poppins', sans-serif; /* O la fuente que uses */
-  background-color: #0f172a; // El mismo color de tu dashboard
-  border-bottom: 1px solid #1e293b; }
+  overflow-x: hidden;
+  font-family: var(--font-main);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-soft);
+}

@@ -1,15 +1,15 @@
 <div class="dropdown-wrapper">
   <button class="menu-trigger" (click)="toggle()">
-    ☰ Módulos
+    <i class="fas fa-bars"></i> Módulos
   </button>
 
   @if (open()) {
     <div class="dropdown-panel" (click)="$event.stopPropagation()">
       @for (item of items; track item.route) {
         <a [routerLink]="item.route" 
-           routerLinkActive="active" 
+           routerLinkActive="exact: false " 
            (click)="open.set(false)">
-          <span class="icon">{{ item.icon }}</span>
+          <span class="icon"><i [class]="item.icon"></i></span>
           {{ item.label }}
         </a>
       }

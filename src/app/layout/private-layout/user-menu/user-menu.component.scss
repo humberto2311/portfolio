@@ -1,3 +1,17 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
+$bg-main: #0b0f19;
+$bg-card: #131826;
+$bg-hover: #1b2235;
+$border-color: rgba(0, 242, 254, 0.2);
+
+$cyan-accent: #00f2fe;
+$coral-danger: #ff5c7c;
+
+$text-bright: #ffffff;
+$text-main: #cfd6e4;
+$text-muted: #8891a3;
+
 .user-menu-wrapper {
   position: relative;
 }
@@ -6,9 +20,9 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #00f2fe;
-  background: #131826;
-  color: #00f2fe;
+  border: 2px solid $cyan-accent;
+  background: $bg-card;
+  color: $cyan-accent;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
@@ -19,7 +33,7 @@
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+    box-shadow: 0 0 10px rgba($cyan-accent, 0.4);
   }
 }
 
@@ -28,8 +42,8 @@
   right: 0;
   top: 56px;
   min-width: 240px;
-  background: #131826;
-  border: 1px solid rgba(0, 242, 254, 0.2);
+  background: $bg-card;
+  border: 1px solid $border-color;
   border-radius: 12px;
   padding: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -38,7 +52,7 @@
 
   .dropdown-header {
     padding: 10px;
-    color: #ffffff;
+    color: $text-bright;
     
     strong {
       display: block;
@@ -46,7 +60,7 @@
     }
     
     small {
-      color: #8891a3;
+      color: $text-muted;
       font-size: 0.8rem;
       display: block;
       margin-top: 2px;
@@ -65,23 +79,36 @@
     padding: 10px 12px;
     background: transparent;
     border: none;
-    color: #cfd6e4;
+    color: $text-main;
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
+    font-family: inherit; // Para que use la misma fuente del proyecto
     transition: background 0.15s, color 0.15s;
+    
+    // Alineación perfecta para el icono y el texto
+    display: flex;
+    align-items: center;
+    gap: 12px; 
+
+    i {
+      width: 16px;
+      text-align: center;
+      font-size: 1rem;
+      color: inherit;
+    }
 
     &:hover {
-      background: rgba(0, 242, 254, 0.08);
-      color: #00f2fe;
+      background: rgba($cyan-accent, 0.08);
+      color: $cyan-accent;
     }
 
     &.logout {
-      color: #ff5c7c;
+      color: $coral-danger;
       
       &:hover {
-        background: rgba(255, 92, 124, 0.1);
-        color: #ff5c7c;
+        background: rgba($coral-danger, 0.1);
+        color: $coral-danger;
       }
     }
   }

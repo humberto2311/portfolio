@@ -1,0 +1,11 @@
+<nav class="tabs-nav">
+  @for (tab of tabs; track tab.id) {
+    <button
+      class="tab-btn"
+      [class.active]="tabActiva === tab.id"
+      (click)="seleccionar(tab.id)">
+      <i class="fa-solid" [ngClass]="tab.icon"></i>
+      <span>{{ tab.label }}</span>
+    </button>
+  }
+</nav>

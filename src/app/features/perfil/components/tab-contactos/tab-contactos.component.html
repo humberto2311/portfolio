@@ -1,0 +1,14 @@
+<div class="cont-card">
+  <h3><i class="fa-solid fa-users"></i> Red de Contactos</h3>
+  <div class="grid">
+    @for (c of contactos; track c.nombre) {
+      <div class="contact">
+        <div class="avatar">{{ c.iniciales }}</div>
+        <div>
+          <p class="name">{{ c.nombre }}</p>
+          <p class="rol">{{ c.rol }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

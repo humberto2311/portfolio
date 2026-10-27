@@ -1,0 +1,43 @@
+@import '../../../../shared/styles/variables';
+.feed-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.side-card {
+  @include card-base;
+
+  h3 {
+    font-size: 0.9rem;
+    color: $cyan-main;
+    margin: 0 0 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .text-muted {
+    color: $text-muted;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+.feed-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.empty {
+  text-align: center;
+  color: $text-muted;
+  padding: 2rem;
+  border: 1px dashed $bg-border;
+  border-radius: 12px;
+}

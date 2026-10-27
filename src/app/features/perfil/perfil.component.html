@@ -1,0 +1,35 @@
+<div class="perfil-container">
+  @if (cargando()) {
+    <div class="loader">
+      <span class="spinner"></span>
+      <span>Cargando perfil...</span>
+    </div>
+  } @else {
+    @if (perfil(); as p) {
+      <app-perfil-header [perfil]="p" />
+
+      <app-perfil-tabs
+        [tabActiva]="seccionActiva"
+        (tabChanged)="cambiarSeccion($event)" />
+
+      <div class="tab-content">
+        @switch (seccionActiva) {
+          @case ('publicaciones') {
+            <app-tab-publicaciones />
+          }
+          @case ('informacion') {
+            <app-tab-informacion [perfil]="p" />
+          }
+          @case ('fotos') {
+            <app-tab-fotos [fotos]="p.fotos" />
+          }
+          @case ('amigos') {
+            <app-tab-contactos [contactos]="p.contactos" />
+          }
+        }
+      </div>
+    }
+  }
+
+  <app-toast />
+</div>

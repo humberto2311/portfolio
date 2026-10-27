@@ -29,7 +29,9 @@
 
   <!-- ESTADO: ERROR -->
   <div *ngIf="error" class="estado-error">
-    <div class="error-icon">⚠️</div>
+    <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
     <p>{{ error }}</p>
     <button (click)="cargarProyectos()" class="btn-retry">Reintentar conexión</button>
   </div>

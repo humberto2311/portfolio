@@ -1,0 +1,49 @@
+<div class="info-card">
+  <h3><i class="fa-solid fa-id-card"></i> Información General</h3>
+
+  <div class="grid">
+    <div>
+      <h4>Experiencia</h4>
+      @for (exp of perfil.experiencia; track exp.puesto) {
+        <div class="entry">
+          <p class="title">{{ exp.puesto }} <span>&#64; {{ exp.empresa }}</span></p>
+          <p class="period">{{ exp.periodo }}</p>
+          <p class="detail">{{ exp.detalles }}</p>
+        </div>
+      }
+    </div>
+
+    <div>
+      <h4>Estudios</h4>
+      @for (edu of perfil.estudios; track edu.titulo) {
+        <div class="entry">
+          <p class="title">{{ edu.titulo }}</p>
+          <p class="period">{{ edu.institucion }} · {{ edu.periodo }}</p>
+        </div>
+      }
+    </div>
+
+    <div>
+      <h4>Pila Tecnológica</h4>
+      @for (cat of perfil.pilaTecnologica; track cat.categoria) {
+        <div class="stack">
+          <p class="stack-title">{{ cat.categoria }}</p>
+          <div class="chips">
+            @for (t of cat.tecnologias; track t) {
+              <span class="chip">{{ t }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div>
+      <h4>Contacto</h4>
+      <ul class="contact-list">
+        <li><i class="fa-solid fa-envelope"></i> {{ perfil.contacto.email }}</li>
+        <li><i class="fa-solid fa-location-dot"></i> {{ perfil.contacto.ubicacion }}</li>
+        <li><i class="fa-brands fa-github"></i> {{ perfil.contacto.github }}</li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,152 @@
+<div class="hub-container">
+  <header class="hub-header">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fas fa-network-wired"></i>
+      </div>
+      <div>
+        <h1>Hub de Enlaces</h1>
+        <p>Gestión dinámica de enlaces con activación exclusiva</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-content">
+    <!-- Panel Izquierdo: Preview -->
+    <aside class="active-preview-card">
+      <div class="card-header">
+        <span class="active-badge">
+          <span class="pulse-dot"></span> ENLACE ACTIVO ACTUAL
+        </span>
+      </div>
+
+      <ng-container *ngIf="activeLink; else noActiveLink">
+        <div class="preview-body">
+          <div class="preview-icon">
+            <i [class]="activeLink.iconClass"></i>
+          </div>
+          <h3>{{ activeLink.title }}</h3>
+          <p class="description">{{ activeLink.description || 'Sin descripción disponible' }}</p>
+
+          <a [href]="activeLink.url" target="_blank" rel="noopener noreferrer" class="visit-btn">
+            <span>Visitar Enlace</span>
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+      </ng-container>
+
+      <ng-template #noActiveLink>
+        <div class="empty-active">
+          <p>No hay ningún enlace activo actualmente.</p>
+        </div>
+      </ng-template>
+    </aside>
+
+    <!-- Panel Derecho: Administrador -->
+    <main class="links-manager">
+      <div class="manager-header">
+        <div>
+          <h2>Mis Enlaces</h2>
+          <span class="count-tag">{{ links.length }} en total</span>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+          <i class="fas fa-plus"></i> Agregar enlace
+        </button>
+      </div>
+
+      <div class="links-list">
+        <div 
+          *ngFor="let link of links" 
+          class="link-item" 
+          [class.is-active]="link.active"
+          (click)="setActiveLink(link.id, $event)"
+        >
+          <div class="item-left">
+            <div class="radio-indicator">
+              <input 
+                type="radio" 
+                name="activeLinkRadio" 
+                [checked]="link.active" 
+                (change)="setActiveLink(link.id, $event)"
+              />
+            </div>
+            <div class="item-icon">
+              <i [class]="link.iconClass"></i>
+            </div>
+            <div class="item-info">
+              <h4>{{ link.title }}</h4>
+              <span class="item-url">{{ link.url }}</span>
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <span class="status-chip" [class.active]="link.active">
+              {{ link.active ? 'Activo' : 'Inactivo' }}
+            </span>
+            <!-- Iconos profesionales con clases SCSS de FontAwesome -->
+            <button class="icon-btn edit-btn" (click)="openEditModal(link, $event)" title="Editar">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="icon-btn delete-btn" (click)="deleteLink(link.id, $event)" title="Eliminar">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ isEditing ? 'Editar Enlace' : 'Nuevo Enlace' }}</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" [(ngModel)]="formData.title" placeholder="Ej. Mi Portafolio" />
+        </div>
+
+        <div class="form-group">
+          <label>URL Destino</label>
+          <input type="url" [(ngModel)]="formData.url" placeholder="https://ejemplo.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Descripción (Opcional)</label>
+          <textarea rows="2" [(ngModel)]="formData.description" placeholder="Breve descripción..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Icono Representativo</label>
+          <div class="icon-picker">
+            <button 
+              type="button" 
+              *ngFor="let icon of availableIcons" 
+              class="icon-option" 
+              [class.selected]="formData.iconClass === icon.class"
+              (click)="selectIcon(icon.class)"
+            >
+              <i [class]="icon.class"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="switch-label">
+            <input type="checkbox" [(ngModel)]="formData.active" />
+            <span>Establecer como Enlace Activo (Desactivará el actual)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" (click)="saveLink()">{{ isEditing ? 'Guardar Cambios' : 'Crear Enlace' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<div class="crear-post">
+  <div class="input-row">
+    <div class="avatar">HL</div>
+    <input
+      type="text"
+      [(ngModel)]="texto"
+      placeholder="¿Qué estás desarrollando hoy, Humberto?"
+      class="text-input" />
+  </div>
+
+  @if (imagenPreview()) {
+    <div class="preview">
+      <img [src]="imagenPreview()!" alt="preview" />
+      <button class="btn-remove" (click)="limpiarImagen()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  }
+
+  <div class="actions">
+    <button class="btn-media" (click)="abrirPicker()">
+      <i class="fa-solid fa-image"></i> Foto / Video
+    </button>
+    <input type="file" id="post-image-input" hidden accept="image/*" (change)="onFile($event)">
+    <button class="btn-publish" (click)="publicar()">Publicar</button>
+  </div>
+</div>

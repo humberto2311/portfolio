@@ -30,7 +30,9 @@
           [(ngModel)]="searchQuery" 
           (keyup.enter)="onSearch()" 
         />
-        <button (click)="onSearch()" aria-label="Buscar">🔍</button>
+        <button (click)="onSearch()" aria-label="Buscar">
+          <i class="fas fa-search"></i>
+        </button>
       </div>
 
       <!-- Módulos y Avatar -->

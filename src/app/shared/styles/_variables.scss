@@ -1,0 +1,46 @@
+// === PALETA CYBER DARK ===
+$bg-main: #060b14;
+$bg-navbar: #080e1a;
+$bg-sidebar: #080e1a;
+$bg-card: #0d1527;
+$bg-input: #0b1220;
+$bg-border: #16243d;
+$bg-hover: #131f38;
+
+$cyan-main: #00f2fe;
+$cyan-secondary: #4facfe;
+$cyan-hover: #00b8e6;
+$cyan-dim: rgba(0, 242, 254, 0.12);
+
+$text-light: #e2e8f0;
+$text-muted: #94a3b8;
+
+$border-cyan: rgba(0, 242, 254, 0.25);
+$glow-cyan: rgba(0, 242, 254, 0.15);
+
+// === MIXINS ===
+@mixin neon-glow($intensity: 0.35) {
+  box-shadow: 0 0 14px rgba(0, 242, 254, $intensity);
+}
+
+@mixin card-base {
+  background: $bg-card;
+  border: 1px solid $bg-border;
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+@mixin avatar-base($size: 40px, $font-size: 0.85rem) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  border: 1px solid $cyan-main;
+  color: $cyan-main;
+  background: $bg-main;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: $font-size;
+  flex-shrink: 0;
+}

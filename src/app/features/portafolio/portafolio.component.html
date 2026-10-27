@@ -1,0 +1,70 @@
+<div class="portafolio-layout">
+  
+  <!-- 1. MENÚ LATERAL DE SECCIONES -->
+  <aside class="sidebar-portafolio">
+    <div class="sidebar-header">
+      <h3>Secciones del Portafolio</h3>
+      <p>Ej: Hoja de Vida, Proyectos...</p>
+    </div>
+
+    <ul class="lista-modulos">
+      @for (sec of secciones(); track sec.id) {
+        <li 
+          [class.active]="seccionSeleccionada()?.id === sec.id"
+          (click)="seleccionarSeccion(sec)">
+          <span class="mod-icon">{{ sec.icon }}</span>
+          <span class="mod-title">{{ sec.title }}</span>
+        @if (sec.items && sec.items.length > 0) {
+  <span class="mod-count">{{ sec.items.length }}</span>
+}
+        </li>
+      }
+    </ul>
+
+    <!-- BOTÓN PARA CREAR UNA NUEVA SECCIÓN -->
+    <button class="btn-add-modulo" (click)="abrirModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Nueva Sección
+    </button>
+  </aside>
+
+  <!-- 2. ÁREA DE TRABAJO (ÍTEMS) -->
+  <main class="area-trabajo">
+    @if (seccionSeleccionada()) {
+      <app-editor-items 
+        [seccion]="seccionSeleccionada()!" 
+        (guardarSeccion)="actualizarSeccion($event)" />
+    } @else {
+      <div class="empty-state">
+        <span class="empty-icon">👈</span>
+        <h2>Selecciona una sección</h2>
+        <p>Elige una sección del menú izquierdo o crea una nueva para empezar a añadir ítems.</p>
+      </div>
+    }
+  </main>
+</div>
+
+<!-- MODAL CREAR SECCIÓN -->
+@if (mostrarModal()) {
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Crear nueva Sección</h2>
+      <p>Ej: Hoja de Vida, Mis Proyectos, Certificaciones.</p>
+      
+      <div class="input-group">
+        <label>Ícono (Emoji)</label>
+        <input type="text" [(ngModel)]="nuevoIcono" maxlength="2" class="input-icono" />
+      </div>
+
+      <div class="input-group">
+        <label>Título de la sección</label>
+        <input type="text" [(ngModel)]="nuevoTitulo" placeholder="Ej: Hoja de Vida" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-save" (click)="agregarSeccion()" [disabled]="!nuevoTitulo.trim()">Crear Sección</button>
+      </div>
+    </div>
+  </div>
+}

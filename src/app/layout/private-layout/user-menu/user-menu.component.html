@@ -9,12 +9,26 @@
         <strong>{{ user()?.fullName }}</strong>
         <small>{{ user()?.email }}</small>
       </div>
+      
       <hr />
-      <button (click)="goTo('/ajustes/perfil')">👤 Mi perfil</button>
-      <button (click)="goTo('/ajustes/cuenta')">⚙️ Ajustes de cuenta</button>
-      <button (click)="goTo('/ajustes/seguridad')">🔒 Seguridad</button>
+      
+      <button (click)="goTo('/ajustes/perfil')">
+        <i class="fas fa-user"></i> Mi perfil
+      </button>
+      
+      <button (click)="goTo('/ajustes/cuenta')">
+        <i class="fas fa-cog"></i> Ajustes de cuenta
+      </button>
+      
+      <button (click)="goTo('/ajustes/seguridad')">
+        <i class="fas fa-shield-alt"></i> Seguridad
+      </button>
+      
       <hr />
-      <button class="logout" (click)="logout()">🚪 Cerrar sesión</button>
+      
+      <button class="logout" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+      </button>
     </div>
   }
 </div>

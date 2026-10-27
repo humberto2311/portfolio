@@ -1,6 +1,4 @@
-// ==========================================
-// PALETA (NFC-Soft style)
-// ==========================================
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 $bg-dark: #0b0f19;
 $bg-main: #0f172a;
 $bg-card: rgba(15, 23, 42, 0.75);
@@ -12,7 +10,6 @@ $accent-blue: #4facfe;
 $border-color: rgba(0, 242, 254, 0.2);
 $border-soft: rgba(255, 255, 255, 0.08);
 
-// Acento secundario (manteniendo coherencia con tu HV)
 $accent-warning: #fbbf24;
 $accent-danger: #f87171;
 
@@ -28,7 +25,6 @@ $accent-danger: #f87171;
 }
 
 html { scroll-behavior: smooth; }
-
 * { box-sizing: border-box; }
 
 // ==========================================
@@ -130,28 +126,43 @@ html { scroll-behavior: smooth; }
       transition: all 0.2s ease;
       border-left: 3px solid transparent;
 
+      // AQUÍ SE APLICA EL COLOR CYAN A LOS ICONOS
       .menu-icon {
         font-size: 1rem;
         width: 1.25rem;
         display: inline-flex;
         justify-content: center;
+        color: $accent-cyan; 
+        transition: color 0.2s ease;
       }
 
       &:hover {
         background: rgba(255, 255, 255, 0.03);
         color: $text-main;
+
+        .menu-icon {
+          color: $text-main; // Cambia a blanco en hover general
+        }
       }
 
       &.active {
         background: rgba(0, 242, 254, 0.08);
         color: $accent-cyan;
         border-left-color: $accent-cyan;
+
+        .menu-icon {
+          color: $accent-cyan;
+        }
       }
 
       &.highlight-link {
         color: $accent-cyan;
         background: rgba(0, 242, 254, 0.05);
         border: 1px solid rgba(0, 242, 254, 0.2);
+
+        .menu-icon {
+          color: $accent-cyan;
+        }
 
         &:hover {
           background: rgba(0, 242, 254, 0.1);
@@ -449,6 +460,7 @@ html { scroll-behavior: smooth; }
         width: 1.5rem;
         display: inline-flex;
         justify-content: center;
+        color: $accent-cyan; // Color cyan para los iconos de contacto
       }
 
       .text {
@@ -581,6 +593,7 @@ html { scroll-behavior: smooth; }
       border: 1px solid rgba(0, 242, 254, 0.15);
       padding: 0.5rem;
       border-radius: 0.5rem;
+      color: $accent-cyan; // Color cyan para el icono de la empresa
     }
 
     .empresa-info {
@@ -821,7 +834,9 @@ html { scroll-behavior: smooth; }
     flex-wrap: wrap;
     gap: 1rem;
   }
-  // ==========================================
+}
+
+// ==========================================
 // LOADING SCREEN
 // ==========================================
 .loading-screen {
@@ -847,5 +862,4 @@ html { scroll-behavior: smooth; }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
 }

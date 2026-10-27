@@ -1,0 +1,20 @@
+<div class="feed-fullscreen-bg">
+  <div class="feed-list">
+    
+    @if (cargando()) {
+      <div class="loader">
+        <span class="spinner"></span>
+        <span>Cargando feed...</span>
+      </div>
+    } @else {
+      
+      <app-crear-post />
+
+      @for (post of publicaciones(); track post.id) {
+        <app-post-card [post]="post" />
+      }
+
+    }
+
+  </div>
+</div>

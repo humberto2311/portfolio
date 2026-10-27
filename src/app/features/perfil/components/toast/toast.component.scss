@@ -1,0 +1,26 @@
+@import '../../../../shared/styles/variables';
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: $bg-card;
+  border: 1px solid $cyan-main;
+  color: $text-light;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  z-index: 1000;
+  font-size: 0.8rem;
+  font-family: monospace;
+  animation: slideIn 0.3s ease-out;
+  @include neon-glow(0.3);
+
+  i { color: $cyan-main; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

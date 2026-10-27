@@ -1,0 +1,86 @@
+<div class="editor-header">
+  <div class="editor-title">
+    <span class="editor-icon">{{ seccionLocal.icon }}</span>
+    <h2>Ítems de: {{ seccionLocal.title }}</h2>
+  </div>
+  <button class="btn-guardar" (click)="onGuardar()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+    Guardar
+  </button>
+</div>
+
+<div class="editor-body">
+  
+  <!-- 👇 Iteramos sobre el getter 'itemsSeguros' -->
+  @for (item of itemsSeguros; track item.id; let i = $index) {
+    <div class="item-card">
+      <div class="item-header">
+        <span class="item-number">Ítem #{{ i + 1 }}</span>
+        <button class="btn-delete" (click)="eliminarItem(i)" title="Eliminar ítem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+      </div>
+      
+      <div class="item-inputs" [ngSwitch]="seccionLocal.sectionKey">
+        
+        <ng-container *ngSwitchCase="'hoja_de_vida'">
+          <div class="input-row">
+            <div class="input-group">
+              <label>Título / Puesto / Estudio</label>
+              <input type="text" [(ngModel)]="item.content.titulo" placeholder="Ej: Ing. de Sistemas" />
+            </div>
+            <div class="input-group">
+              <label>Institución / Empresa</label>
+              <input type="text" [(ngModel)]="item.content.institucion" placeholder="Ej: Universidad Nacional" />
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Fecha / Año</label>
+              <input type="text" [(ngModel)]="item.content.fecha" placeholder="Ej: 2020 - 2024" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="item.content.descripcion" placeholder="Logros o detalles..."></textarea>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'proyectos'">
+          <div class="input-group">
+            <label>Nombre del Proyecto</label>
+            <input type="text" [(ngModel)]="item.content.nombre" placeholder="Ej: App NFC" />
+          </div>
+          <div class="input-group">
+            <label>Tecnologías</label>
+            <input type="text" [(ngModel)]="item.content.tecnologias" placeholder="Angular, Spring Boot..." />
+          </div>
+          <div class="input-group">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="item.content.descripcion" placeholder="De qué trata el proyecto..."></textarea>
+          </div>
+        </ng-container>
+
+        <ng-container *ngSwitchDefault>
+          <div class="input-group">
+            <label>Título</label>
+            <input type="text" [(ngModel)]="item.content.titulo" placeholder="Título del registro" />
+          </div>
+          <div class="input-group">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="item.content.descripcion" placeholder="Detalles..."></textarea>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  } @empty {
+    <div class="empty-state">
+      <p>Aún no hay ítems en esta sección. ¡Agrega el primero!</p>
+    </div>
+  }
+
+  <button class="btn-add-item" (click)="agregarItem()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    Agregar Ítem
+  </button>
+</div>

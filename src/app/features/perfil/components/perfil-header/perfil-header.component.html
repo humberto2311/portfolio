@@ -1,0 +1,48 @@
+<div class="header-card">
+  <div class="cover-banner">
+    <button class="btn-edit-cover" (click)="emitirAccion('Modificar portada próximamente')">
+      <i class="fa-solid fa-camera"></i> Editar Portada
+    </button>
+  </div>
+
+  <div class="header-body">
+    <div class="header-row">
+      <div class="avatar-block">
+        <div class="avatar-wrapper">
+          @if (avatarUrl) {
+            <img [src]="avatarUrl" alt="avatar" />
+          } @else {
+            <span class="initials">{{ perfil.iniciales }}</span>
+          }
+        </div>
+        <button class="btn-avatar-edit" (click)="triggerAvatar()">
+          <i class="fa-solid fa-camera"></i>
+        </button>
+        <input type="file" id="avatar-input" hidden accept="image/*" (change)="onAvatarChange($event)">
+      </div>
+
+      <div class="user-info">
+        <div class="name-row">
+          <h1>{{ perfil.nombre }}</h1>
+          <i class="fa-solid fa-circle-check verified"></i>
+        </div>
+        <p class="rol">{{ perfil.rol }}</p>
+        <span class="badge-status">
+          <span class="dot"></span> {{ perfil.estado }}
+        </span>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" (click)="emitirAccion('Descargando Hoja de Vida en PDF...')">
+          <i class="fa-solid fa-file-arrow-down"></i> Hoja de Vida
+        </button>
+        <button class="btn-outline" (click)="emitirAccion('Abriendo ventana de proyectos')">
+          <i class="fa-solid fa-code"></i> Proyectos
+        </button>
+        <button class="btn-icon" (click)="emitirAccion('Modo edición activado')">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

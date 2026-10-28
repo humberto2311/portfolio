@@ -1,4 +1,8 @@
 @import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// ==========================================
+// VARIABLES GLOBALES
+// ==========================================
 $bg-dark: #0b0f19;
 $bg-main: #0f172a;
 $bg-card: rgba(15, 23, 42, 0.75);
@@ -126,7 +130,6 @@ html { scroll-behavior: smooth; }
       transition: all 0.2s ease;
       border-left: 3px solid transparent;
 
-      // AQUÍ SE APLICA EL COLOR CYAN A LOS ICONOS
       .menu-icon {
         font-size: 1rem;
         width: 1.25rem;
@@ -141,7 +144,7 @@ html { scroll-behavior: smooth; }
         color: $text-main;
 
         .menu-icon {
-          color: $text-main; // Cambia a blanco en hover general
+          color: $text-main;
         }
       }
 
@@ -460,7 +463,7 @@ html { scroll-behavior: smooth; }
         width: 1.5rem;
         display: inline-flex;
         justify-content: center;
-        color: $accent-cyan; // Color cyan para los iconos de contacto
+        color: $accent-cyan;
       }
 
       .text {
@@ -593,7 +596,7 @@ html { scroll-behavior: smooth; }
       border: 1px solid rgba(0, 242, 254, 0.15);
       padding: 0.5rem;
       border-radius: 0.5rem;
-      color: $accent-cyan; // Color cyan para el icono de la empresa
+      color: $accent-cyan;
     }
 
     .empresa-info {
@@ -753,6 +756,82 @@ html { scroll-behavior: smooth; }
   }
 }
 
+// ==========================================
+// INTERRUPTOR PÚBLICO/PRIVADO (TOGGLE)
+// ==========================================
+.toggle-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: 0.5rem;
+
+  .toggle-label {
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: $text-muted;
+    transition: color 0.3s;
+  }
+
+  // El switch en sí
+  .toggle-switch {
+    position: relative;
+    width: 46px;
+    height: 24px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid $border-soft;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+
+    // La bolita que rueda
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: #475569; // Gris (inactivo)
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    // Cuando está PÚBLICO (Activado)
+    &.is-public {
+      background-color: rgba(0, 242, 254, 0.2);
+      border-color: rgba(0, 242, 254, 0.5);
+
+      .toggle-thumb {
+        left: 23px; // Se rueda a la derecha
+        background-color: $accent-cyan; // Cyan
+        box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+      }
+    }
+
+    // Efecto hover
+    &:hover:not(:disabled) {
+      border-color: rgba(0, 242, 254, 0.4);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // Si está público, cambiamos el color del texto
+  &:has(.toggle-switch.is-public) .toggle-label {
+    color: $accent-cyan;
+  }
+}
+
+// ==========================================
+// ANIMACIONES
+// ==========================================
 @keyframes scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -761,6 +840,10 @@ html { scroll-behavior: smooth; }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 // ==========================================
@@ -860,6 +943,33 @@ html { scroll-behavior: smooth; }
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+// ==========================================
+// AVATARES CON INICIALES (FALLBACK)
+// ==========================================
+.mini-avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-sidebar;
+  color: $accent-cyan;
+  font-weight: 900;
+  font-size: 0.9rem; 
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: $bg-sidebar;
+  color: $accent-cyan;
+  font-weight: 900;
+  font-size: 3.5rem; 
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.02em;
+  user-select: none;
 }

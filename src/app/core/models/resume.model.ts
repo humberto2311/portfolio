@@ -1,6 +1,6 @@
 export interface ResumeItem {
   id?: number;
-  content: any; // Aquí guardamos el JSONB (ej: { empresa, cargo, fecha })
+  content: any; 
   displayOrder: number;
   source?: string;
 }
@@ -12,20 +12,24 @@ export interface ResumeSection {
   icon: string;
   displayOrder: number;
   isActive: boolean;
-  items?: ResumeItem[]; // Angular lo llenará luego
+  items?: ResumeItem[]; 
 }
 
 export interface ResumeProfile {
   id?: number;
-  fullName: string;
+  userProfileId?: string;
+  fullName?: string;           
+  headline?: string;
+  summary?: string;
   shortBio?: string;
-  headline: string;
-  summary: string;
-  email: string;
-  phone: string;
-  location: string;
-  githubUrl: string;
+  avatarUrl?: string;
+  photoUrl?: string;         
   resumePdfUrl?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
   publicSlug?: string;
-  photoUrl?: string; 
+  isPublic?: boolean;          
 }

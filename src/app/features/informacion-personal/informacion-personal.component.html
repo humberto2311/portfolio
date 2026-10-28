@@ -1,10 +1,10 @@
-<!-- 1. ESTADO DE CARGA (Mientras llegan los datos de PostgreSQL) -->
+<!-- 1. ESTADO DE CARGA -->
 <div class="loading-screen" *ngIf="loading">
   <div class="spinner"></div>
   <h2>Cargando Portafolio desde la Base de Datos...</h2>
 </div>
 
-<!-- 2. CONTENIDO PRINCIPAL (Se muestra cuando loading es false) -->
+<!-- 2. CONTENIDO PRINCIPAL -->
 <div class="dashboard-container" *ngIf="!loading">
 
   <!-- SIDEBAR -->
@@ -60,12 +60,29 @@
       </div>
 
       <div class="user-profile">
+        
+           <!-- 👇 INTERRUPTOR PÚBLICO/PRIVADO -->
+        <div class="toggle-wrapper" *ngIf="esPropietario">
+          <span class="toggle-label" [class.active]="esPublico">
+            {{ esPublico ? 'Público' : 'Privado' }}
+          </span>
+          
+          <div class="toggle-switch" 
+               [class.is-public]="esPublico" 
+               (click)="toggleVisibilidad()">
+            <div class="toggle-thumb"></div>
+          </div>
+        </div>
+
+        <!-- Botón PDF -->
         <a [href]="resumePdfUrl" download class="btn-download" title="Descargar HV">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4h2v4h14v-4h2zM12 3v12l-4-4-1.4 1.4L12 17.8l5.4-5.4L16 11l-4 4V3h-2z"/></svg>
           PDF
         </a>
-       <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre" class="mini-avatar">
-       <span *ngIf="!photoUrl" class="mini-avatar mini-avatar-initials">{{ iniciales }}</span>
+        
+        <!-- Avatar -->
+        <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre" class="mini-avatar">
+        <span *ngIf="!photoUrl" class="mini-avatar mini-avatar-initials">{{ iniciales }}</span>
       </div>
     </header>
 
@@ -96,9 +113,9 @@
 
         <div class="welcome-image">
           <div class="avatar-grande">
-          <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre">
-          <span *ngIf="!photoUrl" class="avatar-initials">{{ iniciales }}</span>
-         </div>
+            <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre">
+            <span *ngIf="!photoUrl" class="avatar-initials">{{ iniciales }}</span>
+          </div>
         </div>
       </div>
 
@@ -110,7 +127,6 @@
         </h3>
 
         <ul class="contact-list">
-          <!-- Aquí solo se renderizarán los que pasaron el filtro -->
           <li *ngFor="let c of contacto">
             <span class="icon"><i [class]="c.icono"></i></span>
             <span class="text">{{ c.texto }}</span>
@@ -135,7 +151,6 @@
       <div class="metricas-grid">
         <div class="card metrica-card glass-panel" *ngFor="let m of metricas">
           <div class="metrica-header">
-            <!-- Se asume que m.icono ahora trae la clase ej: 'fas fa-check' -->
             <span class="metrica-icon" [style.color]="m.color"><i [class]="m.icono"></i></span>
             <span class="metrica-tendencia" [style.color]="m.color">{{ m.tendencia }}</span>
           </div>
@@ -197,7 +212,6 @@
               <i [class]="tech.icono"></i>
               <span>{{ tech.nombre }}</span>
             </div>
-            <!-- Duplicado para loop infinito -->
             <div class="tech-item" *ngFor="let tech of tecnologias">
               <i [class]="tech.icono"></i>
               <span>{{ tech.nombre }}</span>

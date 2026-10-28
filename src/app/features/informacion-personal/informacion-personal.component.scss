@@ -973,3 +973,75 @@ html { scroll-behavior: smooth; }
   letter-spacing: -0.02em;
   user-select: none;
 }
+/* =========================================
+   ESTADO DE ERROR (CV Privado / No existe)
+   ========================================= */
+.error-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #0b1120; /* Color de fondo base de tu app */
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  font-family: 'Inter', sans-serif; /* Ajusta a tu tipografía */
+
+  .error-content {
+    background: rgba(30, 41, 59, 0.6); /* Efecto Glass */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 48px 32px;
+    border-radius: 20px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+    svg {
+      margin-bottom: 24px;
+      filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.4)); /* Glow rojo */
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      color: #94a3b8;
+      margin-bottom: 32px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      background: #0ea5e9; /* Azul de tu tema */
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+
+      &:hover {
+        background: #0284c7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}

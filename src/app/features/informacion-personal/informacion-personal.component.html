@@ -4,8 +4,20 @@
   <h2>Cargando Portafolio desde la Base de Datos...</h2>
 </div>
 
-<!-- 2. CONTENIDO PRINCIPAL -->
-<div class="dashboard-container" *ngIf="!loading">
+<!-- 2. ESTADO DE ERROR (CV Privado o Inexistente) -->
+<div class="error-screen" *ngIf="!loading && errorMessage">
+  <div class="error-content">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="#ef4444">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <h2>Acceso Restringido</h2>
+    <p>{{ errorMessage }}</p>
+    <button (click)="router.navigate(['/'])" class="btn-primary">Volver al Inicio</button>
+  </div>
+</div>
+
+<!-- 3. CONTENIDO PRINCIPAL -->
+<div class="dashboard-container" *ngIf="!loading && !errorMessage">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -60,9 +72,7 @@
       </div>
 
       <div class="user-profile">
-        
-           <!-- 👇 INTERRUPTOR PÚBLICO/PRIVADO -->
-        <div class="toggle-wrapper" *ngIf="esPropietario">
+          <div class="toggle-wrapper" *ngIf="esPropietario">
           <span class="toggle-label" [class.active]="esPublico">
             {{ esPublico ? 'Público' : 'Privado' }}
           </span>

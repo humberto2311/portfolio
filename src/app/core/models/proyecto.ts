@@ -18,5 +18,6 @@ export interface Proyecto {
   lastCommitDate: string;
   stack: string[];
   branches: string[];
-  userProfile?: UserProfile; // <-- Añadido aquí para solucionar el error
+  userProfile?: UserProfile;
+   isPublic?: boolean; 
 }

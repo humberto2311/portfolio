@@ -11,11 +11,9 @@ import { PerfilComponent } from './features/perfil/perfil.component';
 import { FeedComponent } from './features/feed/feed.component';
 import { ProyectosComponent } from './features/proyectos/proyectos.component';
 
-// 👇 IMPORTA EL MISMO COMPONENTE PARA AMBOS CASOS
 import { InformacionPersonalComponent } from './features/informacion-personal/informacion-personal.component';
 
 export const routes: Routes = [
-  // 1. RUTAS PÚBLICAS (Landing, Linktree, CV Público)
   {
     path: '',
     component: LayoutComponent,
@@ -23,6 +21,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: NfcProfileComponent },
       { path: 'proyectos', component: ProyectosComponent },
+      { path: 'proyectos/:username', component: ProyectosComponent }, 
       { path: 'perfil', component: PerfilComponent },
       { path: 'u/:username', component: InformacionPersonalComponent }, 
       { path: 'informacion-personal', component: InformacionPersonalComponent } 

@@ -6,3 +6,5 @@ export interface LinkItem {
   description?: string;
   active: boolean;
 }
+
+export type LinkItemPayload = Omit<LinkItem, 'id' | 'createdAt' | 'updatedAt'>;

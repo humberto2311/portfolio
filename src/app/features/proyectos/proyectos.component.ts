@@ -1,7 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProyectosService } from '../../core/services/proyectos.service';
+import { UserProfileService } from '../../core/services/user-profile.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Proyecto } from '../../core/models/proyecto';
 
 @Component({
@@ -12,31 +15,131 @@ import { Proyecto } from '../../core/models/proyecto';
   styleUrls: ['./proyectos.component.scss']
 })
 export class ProyectosComponent implements OnInit {
-  
+
   private proyectosService = inject(ProyectosService);
+  private userProfileService = inject(UserProfileService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  // 👇 USUARIO QUEMADO (Debe coincidir EXACTAMENTE con el git_username de la BD)
+ public readonly DEFAULT_GIT_USERNAME = 'humberto2311'; 
 
   public proyectos: Proyecto[] = [];
-  public cargando: boolean = true;
+  public cargando = true;
   public error: string | null = null;
-  public busqueda: string = '';
+  public busqueda = '';
 
-  public panelAbierto: boolean = false;
+  public modoPrivado = false;
+  public visitandoUsuario: string | null = null; 
+
+  public panelAbierto = false;
   public proyectoActivo: Proyecto | null = null;
   public pestanaActiva: 'codigo' | 'git' = 'codigo';
+  public ramaSeleccionada = 'main';
 
-  public ramaSeleccionada: string = 'main';
+  public importando = false;
+  public mostrarModalGit = false;
+  public gitUsernameInput = '';
+  public userProfile: any = null;
 
-  // Limpia el nombre de la rama (quita refs/heads/)
-  public limpiarNombreRama(rama: string): string {
-    if (!rama) return 'main';
-    return rama.replace('refs/heads/', '');
+  public modoEdicion = false;
+  public editForm: Partial<Proyecto> = {};
+  public confirmandoEliminarId: number | null = null;
+  public buscandoRemoto = false;
+
+  ngOnInit() {
+    const enRutaPrivada = this.router.url.startsWith('/app');
+    const hayUsuario = !!this.authService.currentUser();
+    this.modoPrivado = enRutaPrivada && hayUsuario;
+    
+    this.route.paramMap.subscribe(params => {
+      const urlParam = params.get('username'); 
+      
+      if (this.modoPrivado) {
+        this.visitandoUsuario = null;
+        this.cargarProyectosLogueado();
+        this.cargarPerfil();
+      } else {
+        if (enRutaPrivada && !hayUsuario) {
+          this.router.navigate(['/proyectos']);
+          return;
+        }
+
+        if (urlParam) {
+          this.visitandoUsuario = urlParam;
+          this.cargarProyectosDeUsuario(urlParam);
+        } else {
+          this.visitandoUsuario = null;
+          this.cargarProyectosDeUsuario(this.DEFAULT_GIT_USERNAME);
+        }
+      }
+    });
   }
 
+  recargarSegunRuta() {
+    if (this.modoPrivado) {
+      this.cargarProyectosLogueado();
+    } else if (this.visitandoUsuario) {
+      this.cargarProyectosDeUsuario(this.visitandoUsuario);
+    } else {
+      this.cargarProyectosDeUsuario(this.DEFAULT_GIT_USERNAME);
+    }
+  }
+
+  cargarProyectosLogueado() {
+    this.cargando = true;
+    this.error = null;
+    
+    this.proyectosService.getProyectos().subscribe({
+      next: (data) => { 
+        this.proyectos = data; 
+        this.cargando = false; 
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.error = 'Tu sesión ha expirado. Vuelve a iniciar sesión.';
+        } else {
+          this.error = 'Error al cargar tus proyectos.';
+        }
+        this.cargando = false;
+        console.error(err);
+      }
+    });
+  }
+
+  cargarProyectosDeUsuario(username: string) {
+    this.cargando = true;
+    this.error = null;
+    
+    this.proyectosService.getProyectosDeUsuario(username).subscribe({
+      next: (data) => { 
+        console.log(`📦 [DEBUG] Proyectos recibidos para ${username}:`, data);
+        // Filtramos estrictamente por los públicos por seguridad
+        this.proyectos = data.filter(p => p.isPublic); 
+        this.cargando = false; 
+      },
+      error: (err) => {
+        this.error = `No se pudieron cargar los proyectos de ${username}.`;
+        this.cargando = false;
+        console.error(err);
+      }
+    });
+  }
+
+  private cargarPerfil() {
+    this.userProfileService.getMe().subscribe({
+      next: (u) => this.userProfile = u,
+      error: (err) => console.error('Error cargando perfil', err)
+    });
+  }
+
+  // ---------- Filtro / getters ----------
   get proyectosFiltrados(): Proyecto[] {
     if (!this.busqueda.trim()) return this.proyectos;
     const term = this.busqueda.toLowerCase().trim();
-    return this.proyectos.filter(p => 
-      p.name.toLowerCase().includes(term) || 
+    return this.proyectos.filter(p =>
+      p.name.toLowerCase().includes(term) ||
       (p.stack && p.stack.some(s => s.toLowerCase().includes(term))) ||
       (p.description && p.description.toLowerCase().includes(term))
     );
@@ -44,68 +147,22 @@ export class ProyectosComponent implements OnInit {
 
   get comandoClonar(): string {
     if (!this.proyectoActivo) return '';
-    // Usa la rama seleccionada (ya limpia)
     const rama = this.limpiarNombreRama(this.ramaSeleccionada);
     return `git clone -b ${rama} ${this.proyectoActivo.cloneUrl}`;
   }
 
   get enlaceGithubRama(): string {
     if (!this.proyectoActivo) return '#';
-    const urlBase = this.proyectoActivo.cloneUrl ? this.proyectoActivo.cloneUrl.replace('.git', '') : '#';
+    const urlBase = this.proyectoActivo.cloneUrl
+      ? this.proyectoActivo.cloneUrl.replace('.git', '')
+      : '#';
     const rama = this.limpiarNombreRama(this.ramaSeleccionada);
     return `${urlBase}/tree/${rama}`;
   }
 
-  ngOnInit() {
-    this.cargarProyectos();
-  }
-
-  cargarProyectos() {
-    this.cargando = true;
-    this.error = null;
-
-    this.proyectosService.getProyectos().subscribe({
-      next: (data) => {
-        this.proyectos = data;
-        this.cargando = false;
-      },
-      error: (err) => {
-        this.error = 'Hubo un error al cargar los proyectos desde la base de datos.';
-        this.cargando = false;
-        console.error(err);
-      }
-    });
-  }
-
-  abrirPanel(proyecto: Proyecto) {
-    this.proyectoActivo = proyecto;
-    this.panelAbierto = true;
-    this.pestanaActiva = 'codigo';
-    
-    // Al abrir, inicializamos con la primera rama disponible
-    this.ramaSeleccionada = proyecto.branches && proyecto.branches.length > 0 
-      ? proyecto.branches[0] 
-      : 'main';
-
-    document.body.style.overflow = 'hidden';
-  }
-
-  cerrarPanel() {
-    this.panelAbierto = false;
-    setTimeout(() => { this.proyectoActivo = null; }, 300);
-    document.body.style.overflow = 'auto';
-  }
-
-  cambiarPestana(pestana: 'codigo' | 'git') {
-    this.pestanaActiva = pestana;
-  }
-
-  copiarComando() {
-    if (this.comandoClonar) {
-      navigator.clipboard.writeText(this.comandoClonar).then(() => {
-        alert('¡Comando copiado al portapapeles!');
-      });
-    }
+  limpiarNombreRama(rama: string): string {
+    if (!rama) return 'main';
+    return rama.replace('refs/heads/', '');
   }
 
   formatearFecha(fecha: string | null): string {
@@ -115,13 +172,40 @@ export class ProyectosComponent implements OnInit {
     });
   }
 
+  // ---------- Panel modal ----------
+  abrirPanel(proyecto: Proyecto) {
+    if (this.modoEdicion) return;
+    this.proyectoActivo = proyecto;
+    this.panelAbierto = true;
+    this.pestanaActiva = 'codigo';
+    this.ramaSeleccionada = proyecto.branches && proyecto.branches.length > 0
+      ? proyecto.branches[0] : 'main';
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarPanel() {
+    this.panelAbierto = false;
+    setTimeout(() => { this.proyectoActivo = null; }, 300);
+    document.body.style.overflow = 'auto';
+  }
+
+  cambiarPestana(pestana: 'codigo' | 'git') { this.pestanaActiva = pestana; }
+
+  copiarComando() {
+    if (this.comandoClonar) {
+      navigator.clipboard.writeText(this.comandoClonar).then(() => {
+        alert('¡Comando copiado al portapapeles!');
+      });
+    }
+  }
+
+  // ---------- Tilt ----------
   onCardTilt(event: MouseEvent, proyecto: Proyecto): void {
     const card = document.getElementById('card-' + proyecto.name);
     if (!card) return;
     const rect = card.getBoundingClientRect();
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;
-    
     card.style.transform = `perspective(1000px) rotateX(${(-y / 35)}deg) rotateY(${(x / 35)}deg) scale3d(1.01, 1.01, 1.01)`;
     card.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`);
     card.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);
@@ -131,5 +215,178 @@ export class ProyectosComponent implements OnInit {
     const card = document.getElementById('card-' + proyecto.name);
     if (!card) return;
     card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+  }
+
+  // =========================================
+  // IMPORTAR GITHUB
+  // =========================================
+  abrirImportarGithub() {
+    if (!this.modoPrivado) return;
+
+    this.userProfileService.getMe().subscribe({
+      next: (u: any) => {
+        this.userProfile = u;
+        if (u.gitUsername && u.gitUsername.trim()) {
+          this.ejecutarImport(u.gitUsername.trim());
+        } else {
+          this.gitUsernameInput = '';
+          this.mostrarModalGit = true;
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.gitUsernameInput = '';
+        this.mostrarModalGit = true;
+      }
+    });
+  }
+
+  confirmarGitUsername() {
+    const username = this.gitUsernameInput.trim();
+    if (!username) return;
+
+    this.userProfileService.updateGitUsername(username).subscribe({
+      next: (u: any) => {
+        this.userProfile = u;
+        this.mostrarModalGit = false;
+        this.ejecutarImport(username);
+      },
+      error: (err) => {
+        console.error('Error guardando gitUsername', err);
+        this.error = 'No se pudo guardar el usuario de GitHub.';
+      }
+    });
+  }
+
+  private ejecutarImport(username: string) {
+    this.importando = true;
+    this.proyectos = [];
+
+    this.proyectosService.importAllFromUser(username).subscribe({
+      next: () => {
+        this.importando = false;
+        this.cargarProyectosLogueado();
+      },
+      error: (err) => {
+        this.importando = false;
+        this.error = 'Error importando repos: ' + (err?.error?.message || err.message);
+        console.error(err);
+      }
+    });
+  }
+
+  cancelarModalGit() {
+    this.mostrarModalGit = false;
+    this.gitUsernameInput = '';
+  }
+
+  // =========================================
+  // TOGGLE VISIBILIDAD POR CARD
+  // =========================================
+  toggleVisibilidadCard(proyecto: Proyecto, event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const nuevoEstado = !proyecto.isPublic;
+    proyecto.isPublic = nuevoEstado;
+
+    this.proyectosService.toggleVisibility(proyecto.id).subscribe({
+      next: (updated) => {
+        const idx = this.proyectos.findIndex(p => p.id === updated.id);
+        if (idx >= 0) this.proyectos[idx] = updated;
+      },
+      error: (err) => {
+        proyecto.isPublic = !nuevoEstado;
+        console.error('No se pudo cambiar la visibilidad', err);
+      }
+    });
+  }
+
+  // ---------- EDITAR CARD ----------
+  iniciarEdicion(p: Proyecto, event: Event) {
+    event.stopPropagation();
+    this.modoEdicion = true;
+    this.editForm = {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      shortBio: p.shortBio,
+      homepage: p.homepage,
+      imageUrl: p.imageUrl
+    };
+  }
+
+  guardarEdicion() {
+    if (!this.editForm.id) return;
+    this.proyectosService.updateProyecto(this.editForm.id, this.editForm).subscribe({
+      next: (updated) => {
+        const idx = this.proyectos.findIndex(x => x.id === updated.id);
+        if (idx >= 0) this.proyectos[idx] = updated;
+        this.modoEdicion = false;
+        this.editForm = {};
+      },
+      error: (err) => console.error('Error actualizando', err)
+    });
+  }
+
+  cancelarEdicion() {
+    this.modoEdicion = false;
+    this.editForm = {};
+  }
+
+  // ---------- ELIMINAR INLINE ----------
+  pedirConfirmarEliminar(id: number, event: Event) {
+    event.stopPropagation();
+    this.confirmandoEliminarId = id;
+  }
+
+  confirmarEliminar(id: number, event: Event) {
+    event.stopPropagation();
+    this.proyectosService.deleteProyecto(id).subscribe({
+      next: () => {
+        this.proyectos = this.proyectos.filter(p => p.id !== id);
+        this.confirmandoEliminarId = null;
+      },
+      error: (err) => console.error('Error eliminando', err)
+    });
+  }
+
+  cancelarEliminar(event: Event) {
+    event.stopPropagation();
+    this.confirmandoEliminarId = null;
+  }
+
+  // =========================================
+  // BUSCADOR GLOBAL (Mis proyectos o GitHub)
+  // =========================================
+   filtrarProyectos() {
+  
+    const term = this.busqueda.trim();
+
+    if (!term) {
+      this.recargarSegunRuta();
+      return;
+    }
+    const locales = this.proyectos.filter(p =>
+      p.name.toLowerCase().includes(term.toLowerCase()) ||
+      (p.stack && p.stack.some(s => s.toLowerCase().includes(term.toLowerCase()))) ||
+      (p.description && p.description.toLowerCase().includes(term.toLowerCase()))
+    );
+   if (locales.length > 0) return; 
+    this.buscandoRemoto = true;
+    const githubTerm = term.replace(/\s+/g, '').toLowerCase();
+
+    this.proyectosService.buscarReposPublicosDeUsuario(githubTerm).subscribe({
+      next: (repos) => {
+        this.proyectos = repos; 
+        this.buscandoRemoto = false;
+      },
+      error: (err) => {
+        console.error('No se encontraron repositorios en GitHub para:', githubTerm);
+        this.proyectos = []; 
+        this.buscandoRemoto = false;
+      }
+    });
+  
   }
 }

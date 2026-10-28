@@ -6,7 +6,6 @@ import { isPlatformBrowser } from '@angular/common';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
-  // Si estamos en el servidor (SSR), no intentamos leer localStorage, solo dejamos pasar la petición
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('token');
     

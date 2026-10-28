@@ -26,7 +26,7 @@ $terminal-header: #131c2f;
   .grid-overlay {
     position: absolute;
     inset: 0;
-    background-image: 
+    background-image:
       linear-gradient(rgba(0, 242, 254, 0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
     background-size: 40px 40px;
@@ -113,9 +113,9 @@ $terminal-header: #131c2f;
       margin-bottom: 0.75rem;
       letter-spacing: -0.02em;
     }
-    
-    p { 
-      color: $text-muted; 
+
+    p {
+      color: $text-muted;
       font-size: 1.05rem;
     }
   }
@@ -126,6 +126,41 @@ $terminal-header: #131c2f;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+// ==========================================
+// BOTÓN IMPORTAR (SOLO PRIVADO)
+// ==========================================
+.acciones-privadas {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+
+  .btn-importar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(79, 172, 254, 0.15));
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    color: $accent-cyan;
+    border-radius: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+
+    &:hover:not(:disabled) {
+      background: rgba(0, 242, 254, 0.25);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
 }
 
 // ==========================================
@@ -183,7 +218,7 @@ $terminal-header: #131c2f;
   padding: 4rem 1rem;
   color: $text-muted;
   font-family: 'JetBrains Mono', monospace;
-  
+
   strong { color: $accent-cyan; }
 
   .btn-retry {
@@ -221,9 +256,9 @@ $terminal-header: #131c2f;
 .grid-proyectos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.5rem; 
+  gap: 1.5rem;
   justify-items: center;
-  perspective: 1000px; 
+  perspective: 1000px;
 }
 
 .tarjeta-proyecto {
@@ -235,9 +270,9 @@ $terminal-header: #131c2f;
   display: flex;
   flex-direction: column;
   position: relative;
-  
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), 
-              border-color 0.3s ease, 
+
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.3s ease,
               box-shadow 0.3s ease;
   transform-style: preserve-3d;
   will-change: transform;
@@ -260,7 +295,7 @@ $terminal-header: #131c2f;
 
   &:hover {
     border-color: rgba(0, 242, 254, 0.4);
-    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.7), 
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.7),
                 0 0 15px rgba(0, 242, 254, 0.1);
 
     &::before {
@@ -335,11 +370,11 @@ $terminal-header: #131c2f;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
 
-    .tarjeta-nombre { 
-      color: $text-light; 
-      font-weight: 600; 
+    .tarjeta-nombre {
+      color: $text-light;
+      font-weight: 600;
     }
-    .tarjeta-tag { 
+    .tarjeta-tag {
       color: $accent-cyan;
       background: rgba(0, 242, 254, 0.08);
       padding: 0.2rem 0.6rem;
@@ -347,6 +382,156 @@ $terminal-header: #131c2f;
       border: 1px solid rgba(0, 242, 254, 0.15);
       font-size: 0.7rem;
     }
+  }
+}
+
+// ==========================================
+// TARJETA INACTIVA (efecto "apagado")
+// ==========================================
+.tarjeta-proyecto.is-inactive {
+  .tarjeta-imagen {
+    filter: contrast(60%) grayscale(100%) brightness(0.55);
+    opacity: 0.8;
+  }
+
+  .tarjeta-nombre {
+    color: $text-muted;
+  }
+
+  .tarjeta-tag {
+    opacity: 0.6;
+  }
+
+  border-color: rgba(255, 95, 86, 0.15);
+
+  &:hover {
+    border-color: rgba(255, 95, 86, 0.3);
+  }
+}
+
+// ==========================================
+// ACCIONES EN TARJETA (ESTADO / EDITAR / ELIMINAR)
+// ==========================================
+.card-actions {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  // 👇 Botón de estado Activo/Inactivo
+  .btn-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 26px;
+    padding: 0 0.6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 95, 86, 0.5);
+    background: rgba(255, 95, 86, 0.15);
+    color: #ff5f56;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.25s ease;
+    white-space: nowrap;
+
+    .estado-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+
+    // Estado ACTIVO (verde)
+    &.is-active {
+      border-color: rgba(39, 201, 63, 0.5);
+      background: rgba(39, 201, 63, 0.15);
+      color: #27c93f;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.97);
+    }
+  }
+
+  // Botones de icono (editar / eliminar)
+  .btn-action {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(11, 15, 25, 0.85);
+    color: $text-light;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.2s;
+
+    &.edit:hover {
+      color: $accent-cyan;
+      border-color: rgba(0, 242, 254, 0.5);
+    }
+    &.delete:hover {
+      color: #ff5f56;
+      border-color: rgba(255, 95, 86, 0.5);
+    }
+  }
+}
+
+.tarjeta-proyecto:hover .card-actions {
+  opacity: 1;
+}
+
+.confirm-delete {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  z-index: 3;
+  color: $text-light;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+
+  .btn-yes, .btn-no {
+    padding: 0.35rem 0.85rem;
+    border-radius: 4px;
+    border: 1px solid;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .btn-yes {
+    background: rgba(255, 95, 86, 0.15);
+    border-color: #ff5f56;
+    color: #ff5f56;
+  }
+  .btn-no {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: $text-light;
   }
 }
 
@@ -365,7 +550,7 @@ $terminal-header: #131c2f;
   opacity: 0;
   visibility: hidden;
   transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease, visibility 0.3s ease;
-  
+
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
 
   &.abierto {
@@ -404,11 +589,11 @@ $terminal-header: #131c2f;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    
+
     .window-controls {
       display: flex;
       gap: 0.4rem;
-      
+
       .dot-red, .dot-yellow, .dot-green {
         width: 12px; height: 12px; border-radius: 50%;
       }
@@ -425,7 +610,7 @@ $terminal-header: #131c2f;
     .folder-icon {
       color: $accent-cyan;
     }
-    
+
     .nombre-repo {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.9rem;
@@ -446,8 +631,8 @@ $terminal-header: #131c2f;
     border-radius: 4px;
     transition: all 0.2s;
 
-    &:hover { 
-      color: #fff; 
+    &:hover {
+      color: #fff;
       background: rgba(255, 95, 86, 0.15);
     }
   }
@@ -504,7 +689,7 @@ $terminal-header: #131c2f;
     font-size: 0.9rem;
     line-height: 1.7;
     color: #cbd5e1;
-    white-space: pre-wrap; 
+    white-space: pre-wrap;
     font-family: 'Inter', sans-serif;
     background: rgba(0, 0, 0, 0.2);
     padding: 1.25rem;
@@ -680,7 +865,7 @@ $terminal-header: #131c2f;
 
       .prompt { color: $accent-cyan; font-weight: bold; }
       .comando { color: $text-light; flex: 1; word-break: break-all; }
-      
+
       .btn-copiar {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -692,9 +877,9 @@ $terminal-header: #131c2f;
         align-items: center;
         transition: all 0.2s;
 
-        &:hover { 
-          color: $accent-cyan; 
-          border-color: rgba(0, 242, 254, 0.3); 
+        &:hover {
+          color: $accent-cyan;
+          border-color: rgba(0, 242, 254, 0.3);
           background: rgba(0, 242, 254, 0.08);
         }
       }
@@ -702,23 +887,23 @@ $terminal-header: #131c2f;
   }
 
   .info-ramas {
-    h4 { 
-      color: $text-light; 
+    h4 {
+      color: $text-light;
       font-size: 0.9rem;
-      margin-bottom: 0.75rem; 
+      margin-bottom: 0.75rem;
     }
 
     ul {
-      list-style: none; 
-      padding: 0; 
+      list-style: none;
+      padding: 0;
       margin: 0 0 1.5rem 0;
-      display: flex; 
-      flex-direction: column; 
+      display: flex;
+      flex-direction: column;
       gap: 0.5rem;
-      
+
       li {
-        display: flex; 
-        align-items: center; 
+        display: flex;
+        align-items: center;
         gap: 0.6rem;
         font-size: 0.85rem;
 
@@ -741,7 +926,7 @@ $terminal-header: #131c2f;
       }
     }
   }
-  
+
   .btn-github {
     display: inline-flex;
     align-items: center;
@@ -760,6 +945,101 @@ $terminal-header: #131c2f;
       background: rgba(0, 242, 254, 0.08);
       border-color: rgba(0, 242, 254, 0.3);
       color: $accent-cyan;
+    }
+  }
+}
+
+// ==========================================
+// MODALES (GIT USERNAME + EDICIÓN)
+// ==========================================
+.modal-git-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 13, 24, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-git {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 1rem;
+  padding: 2rem;
+  background: $terminal-bg;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  h3 {
+    color: $accent-cyan;
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+  }
+
+  p {
+    color: $text-muted;
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+  }
+
+  label {
+    font-size: 0.75rem;
+    color: $text-muted;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.5rem;
+  }
+
+  input, textarea {
+    background: #060a12;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    color: $text-light;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: rgba(0, 242, 254, 0.5);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+    }
+  }
+
+  textarea { resize: vertical; font-family: inherit; }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+
+    button {
+      padding: 0.55rem 1.1rem;
+      border-radius: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: $text-muted;
+      &:hover { color: $text-light; border-color: rgba(255, 255, 255, 0.3); }
+    }
+    .btn-primary {
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      color: $accent-cyan;
+      &:hover:not(:disabled) { background: rgba(0, 242, 254, 0.25); }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
   }
 }

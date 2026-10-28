@@ -7,4 +7,5 @@ export interface AuthUser {
   phone?: string;
   gender?: string;
   birthDate?: string;
+  gitUsername?: string; // 👈 AGREGA ESTA LÍNEA AQUÍ
 }

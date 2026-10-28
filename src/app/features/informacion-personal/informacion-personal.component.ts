@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { switchMap, finalize, timeout, catchError } from 'rxjs/operators';
+import { switchMap, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
@@ -20,9 +20,10 @@ export class InformacionPersonalComponent implements OnInit {
   private resumeSave = inject(ResumeSaveService);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  public router = inject(Router); 
 
   public loading = true;
+  public errorMessage: string | null = null; 
 
   public nombre = '';
   public rol = '';
@@ -40,7 +41,7 @@ export class InformacionPersonalComponent implements OnInit {
   // Estado de publicación
   public profileId: number | null = null;
   public esPublico = false;
-  public esPropietario = false; // Controla si se muestra el botón Público/Privado
+  public esPropietario = false;
   public cambiandoVisibilidad = false;
 
   private readonly DEFAULT_FULL_NAME = 'Humberto Jose Lozano Verbel';
@@ -50,6 +51,9 @@ export class InformacionPersonalComponent implements OnInit {
   }
 
   private resolverPerfil() {
+    this.loading = true;
+    this.errorMessage = null;
+
     const urlParam = this.route.snapshot.paramMap.get('username') || this.route.snapshot.paramMap.get('id');
     const isEditRoute = this.router.url.includes('/app/informacion-personal');
 
@@ -85,32 +89,28 @@ export class InformacionPersonalComponent implements OnInit {
     }
   }
 
-   private ensureAndLoad(userId: string) {
+  private ensureAndLoad(userId: string) {
     this.resumeSave.ensureProfile(userId).subscribe({
       next: (profile) => {
-        // 🔥 AQUÍ CAPTURAMOS EL ID Y LO GUARDAMOS
         if (profile && profile.id) {
           this.profileId = profile.id;
-          console.log('✅ [CV] ID del perfil capturado:', this.profileId);
           this.esPublico = !!profile.isPublic;
           
-          // Ahora cargamos el CV completo con ese ID
           this.resumeService.getFullResume(profile.id).subscribe({
             next: (res) => {
               if (res.profile) {
                 this.handleSuccess(res.profile, res.sections);
               } else {
-                this.loading = false;
+                this.setError();
               }
             },
             error: (err) => {
               console.error('Error cargando secciones:', err);
-              // Si fallan las secciones, al menos mostramos el perfil básico
-              this.handleSuccess(profile, []);
+              this.handleSuccess(profile, []); // Mostramos perfil básico si fallan secciones
             }
           });
         } else {
-          this.loading = false;
+          this.setError();
         }
       },
       error: (err) => {
@@ -121,30 +121,28 @@ export class InformacionPersonalComponent implements OnInit {
             if (profile && profile.id) {
               this.profileId = profile.id;
               this.esPublico = !!profile.isPublic;
-              this.resumeService.getFullResume(profile.id).subscribe(res => {
-                this.handleSuccess(res.profile, res.sections);
+              this.resumeService.getFullResume(profile.id).subscribe({
+                next: (res) => this.handleSuccess(res.profile, res.sections),
+                error: () => this.setError()
               });
             } else {
-              this.loading = false;
+              this.setError();
             }
           },
-          error: () => this.loading = false
+          error: () => this.setError()
         });
       }
     });
   }
 
   toggleVisibilidad() {
-    // 👇 Imprimimos para verificar si el ID llegó
-    console.log('Intentando cambiar visibilidad. ID actual:', this.profileId);
-
     if (!this.profileId) {
       console.error('❌ [CV] ERROR: No hay profileId para cambiar la visibilidad.');
       return;
     }
 
     this.cambiandoVisibilidad = true;
-    this.esPublico = !this.esPublico; // Cambio visual inmediato
+    this.esPublico = !this.esPublico;
 
     const accion$ = this.esPublico
       ? this.resumeSave.publishProfile(this.profileId)
@@ -152,7 +150,6 @@ export class InformacionPersonalComponent implements OnInit {
 
     accion$.subscribe({
       next: (profile) => {
-        console.log('✅ [CV] Respuesta del backend:', profile);
         if (profile && profile.isPublic !== undefined) {
           this.esPublico = profile.isPublic;
         }
@@ -165,12 +162,16 @@ export class InformacionPersonalComponent implements OnInit {
       }
     });
   }
+
   private loadById(id: number) {
     this.resumeService.getFullResume(id).pipe(
       finalize(() => this.loading = false)
     ).subscribe({
       next: ({ profile, sections }) => this.handleSuccess(profile, sections),
-      error: (err) => console.error(`Error cargando CV por ID ${id}:`, err)
+      error: (err) => {
+        console.error(`Error cargando CV por ID ${id}:`, err);
+        this.setError();
+      }
     });
   }
 
@@ -183,10 +184,15 @@ export class InformacionPersonalComponent implements OnInit {
       finalize(() => this.loading = false)
     ).subscribe({
       next: (res) => {
-        if (res.profile) this.handleSuccess(res.profile, res.sections);
+        if (res.profile) {
+          this.handleSuccess(res.profile, res.sections);
+        } else {
+          this.setError();
+        }
       },
       error: (err) => {
         console.warn('[CV] CV no disponible públicamente:', err);
+        this.setError();
       }
     });
   }
@@ -200,19 +206,31 @@ export class InformacionPersonalComponent implements OnInit {
       finalize(() => this.loading = false)
     ).subscribe({
       next: (res) => {
-        if (res.profile) this.handleSuccess(res.profile, res.sections);
+        if (res.profile) {
+          this.handleSuccess(res.profile, res.sections);
+        } else {
+          this.setError();
+        }
       },
       error: (err) => {
         console.error('[CV] No se encontró por nombre:', err);
+        this.setError();
       }
     });
   }
 
   private handleSuccess(profile: ResumeProfile, sections: ResumeSection[]) {
+    this.errorMessage = null; // Limpiamos cualquier error previo
     this.profileId = profile.id ?? null;
     this.esPublico = !!profile.isPublic;
     this.mapProfile(profile);
     this.mapSections(sections);
+    this.loading = false;
+  }
+
+
+  private setError() {
+    this.errorMessage = 'El CV que buscas no existe o ha sido configurado como privado por su dueño.';
     this.loading = false;
   }
 

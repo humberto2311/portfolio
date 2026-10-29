@@ -1,7 +1,7 @@
 <div class="header-card">
   <div class="cover-banner" [style.background-image]="perfil.coverUrl ? 'url(' + perfil.coverUrl + ')' : 'none'">
     @if (esMiPerfil) {
-      <button class="btn-edit-cover" (click)="emitirAccion('Modificar portada próximamente')">
+      <button type="button" class="btn-edit-cover" (click)="emitirAccion('Modificar portada próximamente')">
         <i class="fa-solid fa-camera"></i> Editar Portada
       </button>
     }
@@ -36,13 +36,13 @@
       <div class="actions">
         @if (!esMiPerfil) {
           
-          <!-- 👇 CONTROL DE CARGA PARA EVITAR EL BUCLE DE TEXTO -->
           @if (verificandoEstado) {
-            <button class="btn-follow skeleton" disabled>
+            <button type="button" class="btn-follow skeleton" disabled>
               <i class="fa-solid fa-spinner fa-spin"></i>
             </button>
           } @else {
             <button 
+              type="button" 
               class="btn-follow" 
               [class.following]="isFollowing"
               [disabled]="cargandoAccion"
@@ -57,16 +57,16 @@
             </button>
           }
 
-          <button class="btn-outline" (click)="accionMensaje.emit()">
+          <button type="button" class="btn-outline" (click)="onMensaje()">
             <i class="fa-regular fa-paper-plane"></i> Mensaje
           </button>
         }
 
-        <button class="btn-primary" (click)="accionCv.emit()">
+        <button type="button" class="btn-primary" (click)="accionCv.emit()">
           <i class="fa-solid fa-file-arrow-down"></i> Hoja de Vida
         </button>
         
-        <button class="btn-outline" (click)="accionProyectos.emit()">
+        <button type="button" class="btn-outline" (click)="accionProyectos.emit()">
           <i class="fa-solid fa-code"></i> Proyectos
         </button>
       </div>

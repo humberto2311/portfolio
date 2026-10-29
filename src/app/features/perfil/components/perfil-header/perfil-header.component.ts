@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { PerfilData } from '../../../../core/models/perfil.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConnectionService } from '../../../../core/services/connection.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ModalService } from '../../../../core/services/modal.service'; // 👈 1. Importar ModalService
 
 @Component({
   selector: 'app-perfil-header',
@@ -25,6 +27,8 @@ export class PerfilHeaderComponent implements OnChanges {
 
   private toast = inject(ToastService);
   private connectionService = inject(ConnectionService);
+  private authService = inject(AuthService);
+  private modalSvc = inject(ModalService); // 👈 2. Inyectar ModalService
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['perfil'] && this.perfil) {
@@ -36,6 +40,11 @@ export class PerfilHeaderComponent implements OnChanges {
     this.verificandoEstado = true;
     this.isFollowing = false;
     
+    if (!this.authService.isAuthenticated()) {
+      this.verificandoEstado = false;
+      return;
+    }
+
     if (!this.esMiPerfil && this.perfil?.id) {
       this.connectionService.checkFollowing(this.perfil.id).subscribe({
         next: (follows) => {
@@ -57,6 +66,13 @@ export class PerfilHeaderComponent implements OnChanges {
   }
 
   toggleFollow(): void {
+    // 👇 3. Si no está logueado, abrimos el modal
+    if (!this.authService.isAuthenticated()) {
+      this.toast.show('Debes iniciar sesión para seguir a este usuario');
+      this.modalSvc.openLogin(); // Abre el modal
+      return;
+    }
+
     if (this.cargandoAccion || this.verificandoEstado) return;
     this.cargandoAccion = true;
 
@@ -79,5 +95,15 @@ export class PerfilHeaderComponent implements OnChanges {
         this.cargandoAccion = false;
       }
     });
+  }
+
+  onMensaje(): void {
+    // 👇 4. Si no está logueado, abrimos el modal
+    if (!this.authService.isAuthenticated()) {
+      this.toast.show('Debes iniciar sesión para enviar un mensaje');
+      this.modalSvc.openLogin(); // Abre el modal
+      return;
+    }
+    this.accionMensaje.emit();
   }
 }

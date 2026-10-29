@@ -137,4 +137,7 @@ export class AuthService {
     this.isAuthenticated.set(false);
     this.router.navigate(['/']);
   }
+  isLoggedIn(): boolean {
+    return this.isAuthenticated();
+  }
 }

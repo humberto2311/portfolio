@@ -13,20 +13,20 @@
 <section class="proyectos-contenedor">
 
   <header class="proyectos-header">
-    <div class="header-badge">
-      <span class="pulse-dot"></span>
-      PORTAFOLIO DE CÓDIGO
-    </div>
-    
-    <!-- TÍTULOS DINÁMICOS -->
-    <h1 class="gradient-text" *ngIf="modoPrivado">Mis Proyectos</h1>
-    <h1 class="gradient-text" *ngIf="!modoPrivado && visitandoUsuario">Proyectos de {{ visitandoUsuario }}</h1>
-    <h1 class="gradient-text" *ngIf="!modoPrivado && !visitandoUsuario">Portafolio Público</h1>
-    
-    <p *ngIf="modoPrivado">Gestiona y edita tus repositorios.</p>
-    <p *ngIf="!modoPrivado && visitandoUsuario">Repositorios públicos de {{ visitandoUsuario }}.</p>
-    <p *ngIf="!modoPrivado && !visitandoUsuario">Explora mis repositorios, arquitecturas y despliegues recientes.</p>
-  </header>
+  <div class="header-badge">
+    <span class="pulse-dot"></span>
+    PORTAFOLIO DE CÓDIGO
+  </div>
+  
+  <!-- TÍTULOS DINÁMICOS -->
+  <h1 class="gradient-text" *ngIf="modoPrivado">Mis Proyectos</h1>
+  <h1 class="gradient-text" *ngIf="!modoPrivado && visitandoUsuario">Proyectos de {{ nombreMostrar }}</h1>
+  <h1 class="gradient-text" *ngIf="!modoPrivado && !visitandoUsuario">Portafolio Público</h1>
+  
+  <p *ngIf="modoPrivado">Gestiona y edita tus repositorios.</p>
+  <p *ngIf="!modoPrivado && visitandoUsuario">Repositorios públicos de {{ nombreMostrar }}.</p>
+  <p *ngIf="!modoPrivado && !visitandoUsuario">Explora mis repositorios, arquitecturas y despliegues recientes.</p>
+</header>
 
   <!-- ESTADO: CARGANDO -->
   <div *ngIf="cargando" class="estado-carga">

@@ -61,23 +61,28 @@ export class InformacionPersonalComponent implements OnInit {
     if (urlParam) {
       this.esPropietario = false;
       
-      // 👇 Verificamos si es un UUID (formato de letras y números) o un ID numérico
+      // 👇 VALIDACIÓN DE SEGURIDAD: Detectar si es UUID o ID numérico
       const esUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(urlParam);
+      const esIDNumerico = /^\d+$/.test(urlParam);
+
+      // Si estamos en la zona pública (no es edición) y tratan de buscar por ID interno, lo bloqueamos.
+      if ((esUUID || esIDNumerico) && !isEditRoute) {
+        this.setError('Por motivos de seguridad, no se permite buscar currículums por ID interno. Utiliza el nombre de usuario o el enlace directo.');
+        return;
+      }
 
       if (esUUID) {
-        // Es un UUID de usuario (ej. viene de /cv/{uuid}), buscamos su CV
         this.loadByUserId(urlParam);
-      } else if (/^\d+$/.test(urlParam)) {
-        // Es un ID numérico del CV (ej. /cv/1)
+      } else if (esIDNumerico) {
         this.loadById(Number(urlParam));
       } else {
-        // Es un slug de texto
+        // Es un slug o nombre de usuario (la forma pública y segura)
         this.loadBySlug(urlParam);
       }
       return;
     }
 
-    // 2) Si es modo edición, o no hay URL param
+    // 2) Si es modo edición, o no hay URL param (cargar el mío)
     const currentUser = this.authService.currentUser();
     
     if (currentUser && currentUser.id) {
@@ -94,7 +99,6 @@ export class InformacionPersonalComponent implements OnInit {
     }
   }
 
-  // 👇 NUEVO MÉTODO: Carga el CV usando el UUID del usuario
   private loadByUserId(userId: string) {
     this.resumeService.getProfileByUserId(userId).pipe(
       switchMap(profile => {
@@ -252,8 +256,8 @@ export class InformacionPersonalComponent implements OnInit {
     this.loading = false;
   }
 
-  private setError() {
-    this.errorMessage = 'El CV que buscas no existe o ha sido configurado como privado por su dueño.';
+  private setError(customMessage?: string) {
+    this.errorMessage = customMessage || 'El CV que buscas no existe o ha sido configurado como privado por su dueño.';
     this.loading = false;
   }
 

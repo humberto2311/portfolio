@@ -16,4 +16,9 @@ export class UserProfileService {
   updateGitUsername(gitUsername: string): Observable<UserProfile> {
     return this.http.put<UserProfile>(`${this.API}/me/git-username`, { gitUsername });
   }
+   getPerfilCompletoPorId(id: string): Observable<any> {
+    return this.http.get<any>(`${this.API}/perfil-completo/${id}`);
+  }
+    getPerfilCompletoPorUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.API}/perfil-completo/username/${username}`);}
 }

@@ -22,8 +22,7 @@ export class ProyectosComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // 👇 USUARIO QUEMADO (Debe coincidir EXACTAMENTE con el git_username de la BD)
- public readonly DEFAULT_GIT_USERNAME = 'humberto2311'; 
+  public readonly DEFAULT_GIT_USERNAME = 'humberto2311'; 
 
   public proyectos: Proyecto[] = [];
   public cargando = true;
@@ -32,6 +31,7 @@ export class ProyectosComponent implements OnInit {
 
   public modoPrivado = false;
   public visitandoUsuario: string | null = null; 
+  public nombreMostrar: string | null = null; // 👈 NUEVA VARIABLE PARA EL NOMBRE REAL
 
   public panelAbierto = false;
   public proyectoActivo: Proyecto | null = null;
@@ -58,6 +58,7 @@ export class ProyectosComponent implements OnInit {
       
       if (this.modoPrivado) {
         this.visitandoUsuario = null;
+        this.nombreMostrar = null; // En privado no necesitamos mostrar el nombre del dueño
         this.cargarProyectosLogueado();
         this.cargarPerfil();
       } else {
@@ -67,12 +68,55 @@ export class ProyectosComponent implements OnInit {
         }
 
         if (urlParam) {
+          const esUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(urlParam);
+          const esNumero = /^\d+$/.test(urlParam);
+
+          if (esUUID || esNumero) {
+            this.cargando = true;
+            this.userProfileService.getPerfilCompletoPorId(urlParam).subscribe({
+              next: (perfil) => {
+                if (perfil && perfil.gitUsername) {
+                  this.router.navigate(['/proyectos', perfil.gitUsername], { replaceUrl: true });
+                } else {
+                  this.error = 'Este usuario no tiene un nombre de usuario de GitHub configurado.';
+                  this.cargando = false;
+                }
+              },
+              error: (err) => {
+                this.error = 'El usuario ingresado no existe.';
+                this.cargando = false;
+              }
+            });
+            return;
+          }
+
+          // 👇 Si entra por Username, buscamos el perfil para obtener el nombre real
           this.visitandoUsuario = urlParam;
-          this.cargarProyectosDeUsuario(urlParam);
+          this.obtenerNombreRealYProyectos(urlParam);
         } else {
+          // Si no hay parámetro, mostramos el portafolio por defecto
           this.visitandoUsuario = null;
-          this.cargarProyectosDeUsuario(this.DEFAULT_GIT_USERNAME);
+          this.obtenerNombreRealYProyectos(this.DEFAULT_GIT_USERNAME);
         }
+      }
+    });
+  }
+
+  // 👇 NUEVO MÉTODO: Trae el nombre real y luego los proyectos
+  private obtenerNombreRealYProyectos(gitUsername: string) {
+    this.cargando = true;
+    this.error = null;
+
+    // Primero buscamos el perfil completo para tener el nombre real
+    this.userProfileService.getPerfilCompletoPorUsername(gitUsername).subscribe({
+      next: (perfil) => {
+        this.nombreMostrar = perfil.fullName || gitUsername; // Guardamos el nombre real
+        this.cargarProyectosDeUsuario(gitUsername); // Luego cargamos los repos
+      },
+      error: (err) => {
+        // Si falla la búsqueda del nombre (ej. no tiene perfil creado), igual mostramos el username
+        this.nombreMostrar = gitUsername; 
+        this.cargarProyectosDeUsuario(gitUsername);
       }
     });
   }
@@ -81,9 +125,9 @@ export class ProyectosComponent implements OnInit {
     if (this.modoPrivado) {
       this.cargarProyectosLogueado();
     } else if (this.visitandoUsuario) {
-      this.cargarProyectosDeUsuario(this.visitandoUsuario);
+      this.obtenerNombreRealYProyectos(this.visitandoUsuario);
     } else {
-      this.cargarProyectosDeUsuario(this.DEFAULT_GIT_USERNAME);
+      this.obtenerNombreRealYProyectos(this.DEFAULT_GIT_USERNAME);
     }
   }
 
@@ -110,17 +154,14 @@ export class ProyectosComponent implements OnInit {
 
   cargarProyectosDeUsuario(username: string) {
     this.cargando = true;
-    this.error = null;
     
     this.proyectosService.getProyectosDeUsuario(username).subscribe({
       next: (data) => { 
-        console.log(`📦 [DEBUG] Proyectos recibidos para ${username}:`, data);
-        // Filtramos estrictamente por los públicos por seguridad
         this.proyectos = data.filter(p => p.isPublic); 
         this.cargando = false; 
       },
       error: (err) => {
-        this.error = `No se pudieron cargar los proyectos de ${username}.`;
+        this.error = `No se pudieron cargar los proyectos de ${this.nombreMostrar || username}.`;
         this.cargando = false;
         console.error(err);
       }
@@ -134,7 +175,7 @@ export class ProyectosComponent implements OnInit {
     });
   }
 
-  // ---------- Filtro / getters ----------
+  // ... (El resto de tus métodos se mantienen exactamente igual)
   get proyectosFiltrados(): Proyecto[] {
     if (!this.busqueda.trim()) return this.proyectos;
     const term = this.busqueda.toLowerCase().trim();
@@ -172,7 +213,6 @@ export class ProyectosComponent implements OnInit {
     });
   }
 
-  // ---------- Panel modal ----------
   abrirPanel(proyecto: Proyecto) {
     if (this.modoEdicion) return;
     this.proyectoActivo = proyecto;
@@ -199,7 +239,6 @@ export class ProyectosComponent implements OnInit {
     }
   }
 
-  // ---------- Tilt ----------
   onCardTilt(event: MouseEvent, proyecto: Proyecto): void {
     const card = document.getElementById('card-' + proyecto.name);
     if (!card) return;
@@ -217,9 +256,6 @@ export class ProyectosComponent implements OnInit {
     card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
   }
 
-  // =========================================
-  // IMPORTAR GITHUB
-  // =========================================
   abrirImportarGithub() {
     if (!this.modoPrivado) return;
 
@@ -280,9 +316,6 @@ export class ProyectosComponent implements OnInit {
     this.gitUsernameInput = '';
   }
 
-  // =========================================
-  // TOGGLE VISIBILIDAD POR CARD
-  // =========================================
   toggleVisibilidadCard(proyecto: Proyecto, event: Event) {
     event.stopPropagation();
     event.preventDefault();
@@ -302,7 +335,6 @@ export class ProyectosComponent implements OnInit {
     });
   }
 
-  // ---------- EDITAR CARD ----------
   iniciarEdicion(p: Proyecto, event: Event) {
     event.stopPropagation();
     this.modoEdicion = true;
@@ -334,7 +366,6 @@ export class ProyectosComponent implements OnInit {
     this.editForm = {};
   }
 
-  // ---------- ELIMINAR INLINE ----------
   pedirConfirmarEliminar(id: number, event: Event) {
     event.stopPropagation();
     this.confirmandoEliminarId = id;
@@ -356,11 +387,7 @@ export class ProyectosComponent implements OnInit {
     this.confirmandoEliminarId = null;
   }
 
-  // =========================================
-  // BUSCADOR GLOBAL (Mis proyectos o GitHub)
-  // =========================================
-   filtrarProyectos() {
-  
+  filtrarProyectos() {
     const term = this.busqueda.trim();
 
     if (!term) {
@@ -372,7 +399,8 @@ export class ProyectosComponent implements OnInit {
       (p.stack && p.stack.some(s => s.toLowerCase().includes(term.toLowerCase()))) ||
       (p.description && p.description.toLowerCase().includes(term.toLowerCase()))
     );
-   if (locales.length > 0) return; 
+    if (locales.length > 0) return; 
+    
     this.buscandoRemoto = true;
     const githubTerm = term.replace(/\s+/g, '').toLowerCase();
 
@@ -387,6 +415,5 @@ export class ProyectosComponent implements OnInit {
         this.buscandoRemoto = false;
       }
     });
-  
   }
 }

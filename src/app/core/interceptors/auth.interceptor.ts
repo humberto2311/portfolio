@@ -1,4 +1,3 @@
-// src/app/core/interceptors/auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -9,6 +8,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('token');
     
+    // 👇 Agrega este log para saber si el interceptor se está ejecutando
+    console.log('🛡️ [INTERCEPTOR] Petición a:', req.url, '| Token:', token ? 'SÍ' : 'NO');
+
     if (token) {
       const clonedReq = req.clone({
         setHeaders: {

@@ -17,6 +17,8 @@
     <span>{{ svc.typingName() }}</span> está escribiendo
     <span class="dots"><span></span><span></span><span></span></span>
   </div>
+}@if (sending()) {
+  <div class="typing">enviando…</div>
 }
 
 <form class="input-area" (ngSubmit)="send()">

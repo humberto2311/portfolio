@@ -17,12 +17,19 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [publicGuard], 
+
     children: [
+{ 
+        path: '', 
+        component: NfcProfileComponent, 
+        canActivate: [publicGuard] // 👈 PONLO SOLO AQUÍ (en la página de inicio)
+      },
+
       { path: '', component: NfcProfileComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:username', component: ProyectosComponent }, 
-      { path: 'perfil', component: PerfilComponent },
+      { path: 'perfil', component: PerfilComponent }, 
+      { path: 'perfil/:username', component: PerfilComponent },
       { path: 'u/:username', component: InformacionPersonalComponent }, 
       { path: 'informacion-personal', component: InformacionPersonalComponent } 
     ]
@@ -37,6 +44,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: FeedComponent },
       { path: 'informacion-personal', component: InformacionPersonalComponent }, // 👈 Modo Edición
+      { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'perfil', component: PerfilComponent },
       { path: 'portafolio', component: PortafolioComponent }, 

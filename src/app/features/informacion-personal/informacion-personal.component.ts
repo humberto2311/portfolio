@@ -57,12 +57,21 @@ export class InformacionPersonalComponent implements OnInit {
     const urlParam = this.route.snapshot.paramMap.get('username') || this.route.snapshot.paramMap.get('id');
     const isEditRoute = this.router.url.includes('/app/informacion-personal');
 
-    // 1) Si hay URL param (ej. /u/humberto o /u/123), es público
+    // 1) Si hay URL param
     if (urlParam) {
       this.esPropietario = false;
-      if (/^\d+$/.test(urlParam)) {
+      
+      // 👇 Verificamos si es un UUID (formato de letras y números) o un ID numérico
+      const esUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(urlParam);
+
+      if (esUUID) {
+        // Es un UUID de usuario (ej. viene de /cv/{uuid}), buscamos su CV
+        this.loadByUserId(urlParam);
+      } else if (/^\d+$/.test(urlParam)) {
+        // Es un ID numérico del CV (ej. /cv/1)
         this.loadById(Number(urlParam));
       } else {
+        // Es un slug de texto
         this.loadBySlug(urlParam);
       }
       return;
@@ -72,21 +81,40 @@ export class InformacionPersonalComponent implements OnInit {
     const currentUser = this.authService.currentUser();
     
     if (currentUser && currentUser.id) {
-      // Está logueado, puede editar
       this.esPropietario = true;
       this.ensureAndLoad(currentUser.id);
     } else {
-      // No está logueado
       if (isEditRoute) {
-        // Si intenta editar sin loguearse, lo sacamos
         this.loading = false;
         this.router.navigate(['/']); 
       } else {
-        // Es un visitante anónimo viendo la página pública, mostramos a Humberto
         this.esPropietario = false;
         this.loadByFullName(this.DEFAULT_FULL_NAME);
       }
     }
+  }
+
+  // 👇 NUEVO MÉTODO: Carga el CV usando el UUID del usuario
+  private loadByUserId(userId: string) {
+    this.resumeService.getProfileByUserId(userId).pipe(
+      switchMap(profile => {
+        if (!profile || !profile.id) return of({ profile: null, sections: [] });
+        return this.resumeService.getFullResume(profile.id);
+      }),
+      finalize(() => this.loading = false)
+    ).subscribe({
+      next: (res) => {
+        if (res.profile) {
+          this.handleSuccess(res.profile, res.sections);
+        } else {
+          this.setError();
+        }
+      },
+      error: (err) => {
+        console.warn('[CV] CV no disponible para este usuario:', err);
+        this.setError();
+      }
+    });
   }
 
   private ensureAndLoad(userId: string) {
@@ -106,7 +134,7 @@ export class InformacionPersonalComponent implements OnInit {
             },
             error: (err) => {
               console.error('Error cargando secciones:', err);
-              this.handleSuccess(profile, []); // Mostramos perfil básico si fallan secciones
+              this.handleSuccess(profile, []); 
             }
           });
         } else {
@@ -115,7 +143,6 @@ export class InformacionPersonalComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ [CV] Error en ensureProfile:', err);
-        // Fallback: si falla el ensure, buscamos por userId
         this.resumeService.getProfileByUserId(userId).subscribe({
           next: (profile) => {
             if (profile && profile.id) {
@@ -136,10 +163,7 @@ export class InformacionPersonalComponent implements OnInit {
   }
 
   toggleVisibilidad() {
-    if (!this.profileId) {
-      console.error('❌ [CV] ERROR: No hay profileId para cambiar la visibilidad.');
-      return;
-    }
+    if (!this.profileId) return;
 
     this.cambiandoVisibilidad = true;
     this.esPublico = !this.esPublico;
@@ -157,7 +181,7 @@ export class InformacionPersonalComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ [CV] Error al guardar en BD:', err);
-        this.esPublico = !this.esPublico; // Revertimos
+        this.esPublico = !this.esPublico;
         this.cambiandoVisibilidad = false;
       }
     });
@@ -220,14 +244,13 @@ export class InformacionPersonalComponent implements OnInit {
   }
 
   private handleSuccess(profile: ResumeProfile, sections: ResumeSection[]) {
-    this.errorMessage = null; // Limpiamos cualquier error previo
+    this.errorMessage = null; 
     this.profileId = profile.id ?? null;
     this.esPublico = !!profile.isPublic;
     this.mapProfile(profile);
     this.mapSections(sections);
     this.loading = false;
   }
-
 
   private setError() {
     this.errorMessage = 'El CV que buscas no existe o ha sido configurado como privado por su dueño.';

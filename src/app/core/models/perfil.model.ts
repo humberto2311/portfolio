@@ -49,12 +49,14 @@ export interface Publicacion {
 }
 
 export interface ContactoRed {
+  id: string;
   nombre: string;
   rol: string;
   iniciales: string;
 }
 
 export interface PerfilData {
+  id: string;
   nombre: string;
   rol: string;
   estado: string;
@@ -67,6 +69,8 @@ export interface PerfilData {
   proyectos: Proyecto[];
   fotos: string[];
   contactos: ContactoRed[];
+  coverUrl?: string;
+  avatarUrl?: string;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos';

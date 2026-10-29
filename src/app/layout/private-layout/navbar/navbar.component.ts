@@ -7,13 +7,13 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 
 @Component({
-  selector: 'app-navbar',
+  selector: 'app-private-navbar', // 👈 Selector único
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, UserMenuComponent, DropdownMenuComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class PrivateNavbarComponent { // 👈 Nombre de clase único
   private auth = inject(AuthService);
   private router = inject(Router);
   private elRef = inject(ElementRef);

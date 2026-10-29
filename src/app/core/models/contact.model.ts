@@ -1,22 +1,18 @@
-export type ContactStatus = 'online' | 'offline' | 'away';
+import { ChatMessage } from './chat.model';
+
+export type { ChatMessage };
+
+export type ActiveView = 'contacts' | 'chat';
 
 export interface Contact {
   id: string;
   name: string;
   avatar: string;
-  status: ContactStatus;
+  status: 'online' | 'offline' | 'away';
   statusText: string;
   lastMsg: string;
   time: string;
   unread: number;
-  responses?: string[];
   isAi?: boolean;
+  responses?: string[];
 }
-
-export interface ChatMessage {
-  sender: 'me' | 'them';
-  text: string;
-  time: string;
-}
-
-export type ActiveView = 'contacts' | 'chat';

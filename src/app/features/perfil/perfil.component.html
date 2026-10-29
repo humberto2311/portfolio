@@ -6,7 +6,12 @@
     </div>
   } @else {
     @if (perfil(); as p) {
-      <app-perfil-header [perfil]="p" />
+      <app-perfil-header 
+        [perfil]="p" 
+        [esMiPerfil]="esMiPerfil"
+        (accionCv)="irAHojaDeVida()" 
+        (accionProyectos)="irAProyectos()" 
+      />
 
       <app-perfil-tabs
         [tabActiva]="seccionActiva"
@@ -14,19 +19,18 @@
 
       <div class="tab-content">
         @switch (seccionActiva) {
-          @case ('publicaciones') {
-            <app-tab-publicaciones />
-          }
-          @case ('informacion') {
-            <app-tab-informacion [perfil]="p" />
-          }
-          @case ('fotos') {
-            <app-tab-fotos [fotos]="p.fotos" />
-          }
-          @case ('amigos') {
-            <app-tab-contactos [contactos]="p.contactos" />
-          }
+          @case ('publicaciones') { <app-tab-publicaciones /> }
+          @case ('informacion') { <app-tab-informacion [perfil]="p" /> }
+          @case ('fotos') { <app-tab-fotos [fotos]="p.fotos" /> }
+          @case ('amigos') { <app-tab-contactos [contactos]="p.contactos" /> }
         }
+      </div>
+    } @else {
+      <!-- 👇 ESTO ES LO QUE FALTABA: El mensaje si hay error -->
+      <div class="error-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: white;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
+        <h2>No se pudo cargar el perfil</h2>
+        <p style="color: #94a3b8;">Hubo un problema de conexión con el servidor o el perfil no existe.</p>
       </div>
     }
   }

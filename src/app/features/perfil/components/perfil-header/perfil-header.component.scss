@@ -1,212 +1,230 @@
-@import '../../../../shared/styles/variables';
+$cyan-glow: #00f2fe;
+$bg-dark: #0f172a;
+$bg-card: #1e293b;
+$text-main: #ffffff;
+
 .header-card {
-  background: $bg-card;
-  border: 1px solid $bg-border;
+  background-color: $bg-card;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 20px;
 }
 
 .cover-banner {
-  height: 220px;
-  background: linear-gradient(90deg, #071329, #0e2246, #041c38);
+  height: 160px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background-size: cover;
+  background-position: center;
   position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 1rem;
 
-  &::before {
-    content: '';
+  .btn-edit-cover {
     position: absolute;
-    inset: 0;
-    background-image: radial-gradient(#00f2fe 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.15;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, $cyan-main, transparent);
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    
+    &:hover { background: rgba(255, 255, 255, 0.2); }
   }
 }
 
-.btn-edit-cover {
-  position: relative;
-  z-index: 2;
-  background: rgba($bg-card, 0.85);
-  border: 1px solid $bg-border;
-  color: $text-light;
-  font-size: 0.75rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
+.header-body { 
+  padding: 0 24px 24px 24px; 
 
-  &:hover { border-color: $cyan-main; }
-  i { color: $cyan-main; }
-}
-
-.header-body {
-  padding: 0 1.5rem 1.5rem;
+  @media (max-width: 768px) {
+    padding: 0 16px 16px 16px;
+  }
 }
 
 .header-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-end;
-  gap: 1.5rem;
-  margin-top: -4.5rem;
+  gap: 24px;
+  margin-top: -50px;
+  flex-wrap: wrap;
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin-top: -60px;
+    gap: 16px;
   }
 }
 
-.avatar-block { position: relative; }
-
-.avatar-wrapper {
-  width: 140px;
-  height: 140px;
+.avatar-block .avatar-wrapper {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 4px solid $cyan-main;
-  background: $bg-main;
+  background-color: $bg-dark;
+  border: 4px solid $bg-card;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  @include neon-glow(0.4);
-
-  img { width: 100%; height: 100%; object-fit: cover; }
-
+  box-shadow: 0 0 0 2px $cyan-glow, 0 0 15px rgba(0, 242, 254, 0.3);
+  
   .initials {
-    font-size: 3rem;
-    font-weight: 900;
-    color: $cyan-main;
-    text-shadow: 0 0 8px rgba(0, 242, 254, 0.6);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $cyan-glow;
   }
-}
 
-.btn-avatar-edit {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
-  background: $bg-card;
-  border: 1px solid $cyan-main;
-  color: $cyan-main;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  cursor: pointer;
-  transition: 0.2s;
-
-  &:hover { background: $cyan-main; color: $bg-main; }
+  .profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
 }
 
 .user-info {
   flex: 1;
-  padding-bottom: 0.5rem;
+  margin-top: 40px;
+  min-width: 0; /* 👈 Clave para que el texto largo no desborde el contenedor flex */
+
+  @media (max-width: 768px) {
+    margin-top: 0;
+    width: 100%;
+  }
 
   .name-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 10px;
+    /* Sin flex-wrap para que el chulo siempre se quede al lado */
+    flex-wrap: nowrap; 
 
-    h1 { font-size: 1.8rem; margin: 0; }
-    .verified { color: $cyan-main; }
+    @media (max-width: 768px) {
+      justify-content: center;
+    }
+
+    h1 { 
+      font-size: 1.8rem; 
+      color: $text-main; 
+      margin: 0; 
+      line-height: 1.2;
+      /* 👇 Si el nombre es muy largo, se ajusta o se corta sin empujar el chulo hacia abajo */
+      word-break: break-word; 
+      
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+      }
+    }
+
+    .verified { 
+      color: $cyan-glow; 
+      font-size: 1.2rem;
+      /* 👇 Evita que el chulo se aplaste o se deforme */
+      flex-shrink: 0; 
+      margin-top: 4px; 
+    }
   }
 
-  .rol {
-    color: $cyan-main;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    margin: 0.3rem 0;
+  .rol { 
+    color: $cyan-glow; 
+    font-size: 1rem; 
+    margin: 4px 0 8px 0; 
   }
-}
 
-.badge-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: $cyan-dim;
-  border: 1px solid $cyan-main;
-  color: $cyan-main;
-  font-size: 0.7rem;
-  padding: 0.2rem 0.7rem;
-  border-radius: 20px;
-  font-family: monospace;
-
-  .dot {
-    width: 7px;
-    height: 7px;
-    background: $cyan-main;
-    border-radius: 50%;
-    box-shadow: 0 0 8px $cyan-main;
-    animation: pulse 1.5s infinite;
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 242, 254, 0.1);
+    color: $cyan-glow;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    
+    .dot { 
+      width: 6px; 
+      height: 6px; 
+      background: $cyan-glow; 
+      border-radius: 50%; 
+    }
   }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
 }
 
 .actions {
   display: flex;
+  gap: 12px;
+  margin-top: 40px;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  padding-bottom: 0.5rem;
-}
 
-.btn-primary {
-  background: $cyan-main;
-  color: $bg-main;
-  font-weight: 700;
-  padding: 0.55rem 1rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  @include neon-glow(0.3);
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    margin-top: 16px;
+  }
 
-  &:hover { background: $cyan-hover; }
-}
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    white-space: nowrap;
 
-.btn-outline {
-  background: $bg-main;
-  border: 1px solid $bg-border;
-  color: $text-light;
-  padding: 0.55rem 1rem;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
 
-  i { color: $cyan-main; }
-  &:hover { border-color: $cyan-main; }
-}
+  .btn-follow {
+    background-color: $cyan-glow;
+    color: #000;
 
-.btn-icon {
-  background: $bg-main;
-  border: 1px solid $bg-border;
-  color: $text-muted;
-  padding: 0.55rem 0.8rem;
-  border-radius: 10px;
-  cursor: pointer;
+    &:hover:not(:disabled) { 
+      background-color: darken($cyan-glow, 10%); 
+    }
 
-  &:hover { border-color: $text-muted; color: $text-light; }
+    &.skeleton {
+      width: 110px; 
+    }
+  }
+
+  .btn-follow.following {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $text-main;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    &:hover:not(:disabled) {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-color: #ef4444;
+    }
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: $text-main;
+    
+    &:hover:not(:disabled) { 
+      background: rgba(255, 255, 255, 0.05); 
+    }
+  }
+
+  .btn-primary {
+    background: rgba(0, 242, 254, 0.15);
+    color: $cyan-glow;
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    
+    &:hover:not(:disabled) { 
+      background: rgba(0, 242, 254, 0.25); 
+    }
+  }
 }

@@ -6,26 +6,17 @@
 }
 
 .feed-fullscreen-bg {
-  /* TRUCO: Forzamos que el contenedor ocupe todo el ancho de la ventana */
   width: 100vw;
   position: relative;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  
-  /* 🎨 COLOR CLAVE: Usamos el mismo fondo oscuro de tu navbar */
-  /* Si tu navbar usa rgba(11, 15, 25, 0.85), aquí usamos el sólido */
   background-color: #0b0f19; 
-  
-  /* Esto hace que cubra todo el alto restante de la pantalla */
   min-height: calc(100vh - 65px); 
   
   display: flex;
   justify-content: center;
-  
-  /* Le damos espacio arriba para que no pegue con el navbar, 
-     pero evitando que se vea el fondo del layout */
   padding: 3rem 1rem;
 }
 
@@ -37,7 +28,7 @@
   gap: 1.5rem;
 }
 
-/* Soporte para el loader */
+
 .loader {
   display: flex; flex-direction: column; align-items: center; gap: 1rem;
   color: $text-muted; font-family: monospace; font-size: 0.85rem; padding-top: 4rem;

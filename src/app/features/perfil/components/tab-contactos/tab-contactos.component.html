@@ -1,14 +1,89 @@
-<div class="cont-card">
-  <h3><i class="fa-solid fa-users"></i> Red de Contactos</h3>
-  <div class="grid">
-    @for (c of contactos; track c.nombre) {
-      <div class="contact">
-        <div class="avatar">{{ c.iniciales }}</div>
-        <div>
-          <p class="name">{{ c.nombre }}</p>
-          <p class="rol">{{ c.rol }}</p>
-        </div>
-      </div>
-    }
+<div class="contactos-tab">
+  <div class="contactos-tab__header">
+    <div class="contactos-tab__title-wrap">
+      <h2 class="contactos-tab__title">Contactos</h2>
+      <span class="contactos-tab__count">{{ filteredList.length }}</span>
+    </div>
+
+    <div class="contactos-tab__search">
+      <input
+        type="search"
+        class="contactos-tab__search-input"
+        placeholder="Buscar contacto..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()" />
+      <span class="contactos-tab__search-icon">🔍</span>
+    </div>
   </div>
+
+  <!-- Pestañas -->
+  <div class="contactos-tab__subtabs">
+    <button 
+      class="subtab-btn" 
+      [class.active]="activeSubTab === 'seguidos'"
+      (click)="cambiarTab('seguidos')">
+      Siguiendo
+      <span class="subtab-count" *ngIf="seguidos.length > 0">{{ seguidos.length }}</span>
+    </button>
+    <button 
+      class="subtab-btn" 
+      [class.active]="activeSubTab === 'seguidores'"
+      (click)="cambiarTab('seguidores')">
+      Seguidores
+      <span class="subtab-count" *ngIf="seguidores.length > 0">{{ seguidores.length }}</span>
+    </button>
+  </div>
+
+  <!-- Lista -->
+  <ul class="contactos-tab__list" *ngIf="filteredList.length; else emptyState">
+    <li class="contacto" *ngFor="let c of filteredList" (click)="irAlPerfil(activeSubTab === 'seguidos' ? c.usernameContact : c.usernameUser)">
+      
+      <div class="contacto__avatar">
+        <img *ngIf="c.avatarUrl" [src]="c.avatarUrl" alt="Avatar">
+        <span *ngIf="!c.avatarUrl">
+          {{ (activeSubTab === 'seguidos' ? c.nombreContact : c.nombreUser)?.substring(0, 2) | uppercase }}
+        </span>
+      </div>
+
+      <div class="contacto__info">
+        <span class="contacto__name">
+          {{ activeSubTab === 'seguidos' ? c.nombreContact : c.nombreUser }}
+        </span>
+        <span class="contacto__meta">
+          {{ activeSubTab === 'seguidos' ? 'Lo sigues desde' : 'Te sigue desde' }} 
+          {{ c.connectedAt | date:'MMM yyyy' }}
+        </span>
+      </div>
+
+      <div class="contacto__actions" (click)="$event.stopPropagation()">
+        <button class="btn btn--ghost" (click)="enviarMensaje(c)">Mensaje</button>
+        
+        <button 
+          *ngIf="activeSubTab === 'seguidores'" 
+          class="btn btn--primary" 
+          (click)="seguirDeVuelta(c)">
+          Seguir de vuelta
+        </button>
+        
+        <button 
+          *ngIf="activeSubTab === 'seguidos'" 
+          class="btn btn--danger" 
+          (click)="dejarDeSeguir(c)">
+          Dejar de seguir
+        </button>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #emptyState>
+    <div class="contactos-tab__empty">
+      <span class="contactos-tab__empty-icon">👥</span>
+      <p class="contactos-tab__empty-title">
+        {{ searchTerm ? 'Sin resultados' : (activeSubTab === 'seguidos' ? 'Aún no sigues a nadie' : 'No tienes seguidores') }}
+      </p>
+      <p class="contactos-tab__empty-sub" *ngIf="!searchTerm">
+        {{ activeSubTab === 'seguidos' ? 'Cuando sigas a alguien, aparecerá aquí.' : 'Cuando alguien te siga, aparecerá aquí.' }}
+      </p>
+    </div>
+  </ng-template>
 </div>

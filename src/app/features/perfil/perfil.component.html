@@ -22,11 +22,12 @@
           @case ('publicaciones') { <app-tab-publicaciones /> }
           @case ('informacion') { <app-tab-informacion [perfil]="p" /> }
           @case ('fotos') { <app-tab-fotos [fotos]="p.fotos" /> }
-          @case ('amigos') { <app-tab-contactos [contactos]="p.contactos" /> }
+          
+          <!-- 👇 PASAMOS EL ID DEL USUARIO -->
+          @case ('amigos') { <app-tab-contactos [userId]="p.id" /> }
         }
       </div>
     } @else {
-      <!-- 👇 ESTO ES LO QUE FALTABA: El mensaje si hay error -->
       <div class="error-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: white;">
         <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
         <h2>No se pudo cargar el perfil</h2>

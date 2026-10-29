@@ -15,4 +15,5 @@ export interface Contact {
   unread: number;
   isAi?: boolean;
   responses?: string[];
+   fotoUrl?: string;
 }

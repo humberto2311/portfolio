@@ -24,7 +24,8 @@ import { ToastComponent } from './components/toast/toast.component';
     TabInformacionComponent,
     TabFotosComponent,
     TabContactosComponent,
-    ToastComponent
+    ToastComponent,
+    TabContactosComponent 
   ],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss']
@@ -35,15 +36,13 @@ export class PerfilComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  // Signals del servicio
+
   perfil = this.perfilService.perfil;
   cargando = this.perfilService.cargando;
 
-  // Estado del componente
   seccionActiva: TabId = 'publicaciones';
   esMiPerfil = false;
 
-  // 👇 Control para no mostrar el error genérico cuando es 401 sin login
   errorCarga: string | null = null;
 
   ngOnInit(): void {
@@ -51,10 +50,7 @@ export class PerfilComponent implements OnInit {
       const usernameUrl = params.get('username');
       const estaLogueado = this.authService.isAuthenticated();
 
-      // ─────────────────────────────────────────────────────────────
-      // Caso 1: hay username en la URL (perfil público de otro usuario)
-      //   → siempre intenta cargar, logueado o no
-      // ─────────────────────────────────────────────────────────────
+      
       if (usernameUrl) {
         this.errorCarga = null;
         this.perfilService.cargarPerfil(usernameUrl).subscribe({
@@ -64,11 +60,7 @@ export class PerfilComponent implements OnInit {
         return;
       }
 
-      // ─────────────────────────────────────────────────────────────
-      // Caso 2: no hay username
-      //   - Si está logueado → carga /me/perfil-completo
-      //   - Si NO está logueado → no hay perfil que cargar → redirigir
-      // ─────────────────────────────────────────────────────────────
+     
       if (!estaLogueado) {
         this.router.navigate(['/']); // o a '/login'
         return;
@@ -82,16 +74,13 @@ export class PerfilComponent implements OnInit {
     });
   }
 
-  /**
-   * Maneja los errores de carga del perfil de forma explícita.
-   */
   private manejarError(err: any, usernameUrl: string | null): void {
     console.error('❌ [PERFIL COMPONENT] Error al cargar perfil:', err);
 
     if (err?.status === 401) {
       this.errorCarga = 'No autorizado. Inicia sesión para ver este perfil.';
       if (!usernameUrl) {
-        this.router.navigate(['/']); // solo redirige si era el propio perfil
+        this.router.navigate(['/']); 
       }
       return;
     }

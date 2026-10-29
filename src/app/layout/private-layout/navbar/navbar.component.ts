@@ -1,3 +1,4 @@
+
 import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -7,13 +8,13 @@ import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 
 @Component({
-  selector: 'app-private-navbar', // 👈 Selector único
+  selector: 'app-private-navbar',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, UserMenuComponent, DropdownMenuComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class PrivateNavbarComponent { // 👈 Nombre de clase único
+export class PrivateNavbarComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private elRef = inject(ElementRef);
@@ -34,9 +35,10 @@ export class PrivateNavbarComponent { // 👈 Nombre de clase único
   }
 
   onSearch() {
-    if (this.searchQuery.trim()) {
+    const term = this.searchQuery.trim();
+    if (term) {
       this.isMobileMenuOpen.set(false);
-      this.router.navigate(['/app/buscar'], { queryParams: { q: this.searchQuery } });
+      this.router.navigate(['/perfil', term]);
     }
   }
 }

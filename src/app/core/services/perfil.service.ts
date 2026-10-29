@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap, catchError, throwError } from 'rxjs';
 import { PerfilData, Publicacion } from '../models/perfil.model';
 import { AuthService } from './auth.service';
-// 👇 1. Importamos el environment
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -11,38 +10,33 @@ export class PerfilService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 
-  // 👇 2. Usamos la URL del environment
   private readonly API_URL = `${environment.apiUrl}/api/users`;
 
-  // ==== SIGNALS DE ESTADO ====
   perfil = signal<PerfilData | null>(null);
   publicaciones = signal<Publicacion[]>([]);
   cargando = signal<boolean>(false);
 
-  // ==== CARGA DEL PERFIL ====
+
   cargarPerfil(username?: string | null): Observable<PerfilData | null> {
     this.cargando.set(true);
     this.perfil.set(null);
-
-    // 👇 3. Lógica para buscar por username o por /me
     const url = username 
       ? `${this.API_URL}/perfil-completo/username/${username}` 
       : `${this.API_URL}/me/perfil-completo`;
 
-    console.log('🔍 [PERFIL SERVICE] Llamando a la URL:', url);
+    console.log(' [PERFIL SERVICE] Llamando a la URL:', url);
 
     return this.http.get<any>(url).pipe(
       tap((data: any) => {
-        console.log('✅ [PERFIL SERVICE] Datos recibidos:', data);
+        console.log(' [PERFIL SERVICE] Datos recibidos:', data);
         if (data) {
           this.perfil.set(this.mapearPerfil(data));
         }
         this.cargando.set(false);
       }),
       catchError((err) => {
-        console.error('❌ [PERFIL SERVICE] Error:', err.status, err.message);
+        console.error(' [PERFIL SERVICE] Error:', err.status, err.message);
         this.cargando.set(false);
-        // 👇 Propagamos el error al componente
         return throwError(() => err);
       })
     );

@@ -19,7 +19,6 @@ export class AuthService {
   readonly error = signal<string | null>(null);
 
   constructor() {
-    // 👇 Verificamos que estemos en el navegador antes de usar localStorage
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('token');
       if (token) {
@@ -39,7 +38,6 @@ export class AuthService {
     }
   }
 
-  // ---- OAuth ----
   loginWithProvider(provider: 'github' | 'google' | 'microsoft') {
     window.location.href = `${environment.apiUrl}/oauth2/authorization/${provider}`;
   }

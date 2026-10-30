@@ -63,3 +63,15 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   &.ai-tooltip { color: #d8b4fe; border-color: rgba(147, 51, 234, 0.3); }
 }
+/* ... tus estilos actuales ... */
+
+.fab-pdf {
+  background: linear-gradient(to top right, #ef4444, #f97316); /* Gradiente naranja/rojo */
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.35);
+  &:hover { box-shadow: 0 10px 25px rgba(239, 68, 68, 0.55); }
+}
+
+.pdf-tooltip {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}

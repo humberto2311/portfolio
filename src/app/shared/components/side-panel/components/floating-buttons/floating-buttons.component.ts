@@ -9,4 +9,5 @@ import { SidePanelService } from '../../../../../core/services/side-panel.servic
 })
 export class FloatingButtonsComponent {
   svc = inject(SidePanelService);
+  
 }

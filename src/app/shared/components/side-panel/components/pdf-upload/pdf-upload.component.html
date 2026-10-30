@@ -1,0 +1,61 @@
+<div class="pdf-upload-container">
+  <p class="description">
+    Sube tu hoja de vida en formato PDF. Nuestra IA extraerá la información y llenará tu perfil automáticamente.
+  </p>
+
+  @if (!selectedFile() && !uploadResult()) {
+    <div 
+      class="drop-zone" 
+      [class.dragging]="isDragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+      <p>Arrastra tu PDF aquí o</p>
+      <label class="btn-select">
+        Selecciona un archivo
+        <input type="file" accept=".pdf" (change)="onFileSelected($event)" hidden>
+      </label>
+      <span class="hint">Máximo 15MB</span>
+    </div>
+  }
+
+  @if (selectedFile(); as file) {
+    <div class="file-preview">
+      <i class="fa-solid fa-file-pdf"></i>
+      <div class="file-info">
+        <span class="name">{{ file.name }}</span>
+        <span class="size">{{ (file.size / 1024 / 1024) | number:'1.2-2' }} MB</span>
+      </div>
+      <button class="btn-remove" (click)="selectedFile.set(null)" [disabled]="isUploading()">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <button class="btn-upload" (click)="upload()" [disabled]="isUploading()">
+      @if (isUploading()) {
+        <i class="fa-solid fa-spinner fa-spin"></i> Procesando con IA...
+      } @else {
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Extraer información
+      }
+    </button>
+  }
+
+  @if (uploadResult(); as result) {
+    <div class="result-box success">
+      <i class="fa-solid fa-circle-check"></i>
+      <h4>¡Importación Exitosa!</h4>
+      <p>Se crearon {{ result.sectionsCreated }} secciones y {{ result.itemsCreated }} elementos en tu perfil.</p>
+      <button class="btn-reset" (click)="uploadResult.set(null)">Subir otro PDF</button>
+    </div>
+  }
+
+  @if (errorMessage(); as error) {
+    <div class="result-box error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <p>{{ error }}</p>
+      <button class="btn-reset" (click)="errorMessage.set(null)">Intentar de nuevo</button>
+    </div>
+  }
+</div>

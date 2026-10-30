@@ -1,7 +1,7 @@
 <div class="fab-container">
   <div class="fab-wrap">
     <button class="fab fab-contacts" (click)="svc.openContacts()">
-      <!-- Icono de Contacto en SVG -->
+      <!-- Icono Contacto -->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
         <circle cx="12" cy="7" r="4"></circle>
@@ -12,11 +12,26 @@
 
   <div class="fab-wrap">
     <button class="fab fab-ai" (click)="svc.openChat(svc.aiContact)">
-      <!-- Icono de IA en SVG -->
+      <!-- Icono IA -->
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path>
       </svg>
     </button>
     <span class="tooltip ai-tooltip">Asistente IA</span>
   </div>
+
+  <!-- BOTÓN FLOTANTE PARA PDF -->
+  <div class="fab-wrap">
+    <button class="fab fab-pdf" (click)="svc.openPdf()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    </button>
+    <span class="tooltip pdf-tooltip">Importar CV (PDF)</span>
+  </div>
+ 
 </div>

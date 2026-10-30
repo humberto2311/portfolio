@@ -1,0 +1,125 @@
+.pdf-upload-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.description {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.drop-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  &.dragging {
+    border-color: #818cf8;
+    background: rgba(79, 70, 229, 0.1);
+  }
+
+  i { font-size: 32px; color: #818cf8; }
+  p { margin: 0; font-size: 14px; color: #e2e8f0; }
+
+  .btn-select {
+    background: rgba(79, 70, 229, 0.2);
+    color: #a5b4fc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(79, 70, 229, 0.3);
+    transition: all 0.2s;
+    &:hover { background: rgba(79, 70, 229, 0.3); }
+  }
+
+  .hint { font-size: 11px; color: #64748b; }
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  i.fa-file-pdf { color: #ef4444; font-size: 24px; }
+
+  .file-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    .name { font-size: 13px; color: #fff; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+    .size { font-size: 11px; color: #94a3b8; }
+  }
+
+  .btn-remove {
+    background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;
+    &:hover { color: #ef4444; }
+  }
+}
+
+.btn-upload {
+  background: linear-gradient(to right, #4f46e5, #9333ea);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.result-box {
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  i { font-size: 32px; }
+  h4 { margin: 0; font-size: 16px; color: #fff; }
+  p { margin: 0; font-size: 13px; color: #cbd5e1; }
+
+  &.success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    i { color: #10b981; }
+  }
+
+  &.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    i { color: #ef4444; }
+  }
+
+  .btn-reset {
+    margin-top: 8px;
+    background: none; border: none; color: #94a3b8; text-decoration: underline; cursor: pointer;
+    &:hover { color: #fff; }
+  }
+}

@@ -1,9 +1,9 @@
-
 import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { PerfilService } from '../../../core/services/perfil.service'; 
 import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 
@@ -18,6 +18,7 @@ export class PrivateNavbarComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private elRef = inject(ElementRef);
+  private perfilService = inject(PerfilService); 
 
   readonly user = this.auth.currentUser;
   searchQuery = '';
@@ -36,9 +37,20 @@ export class PrivateNavbarComponent {
 
   onSearch() {
     const term = this.searchQuery.trim();
-    if (term) {
-      this.isMobileMenuOpen.set(false);
-      this.router.navigate(['/perfil', term]);
-    }
+    if (!term) return;
+    this.isMobileMenuOpen.set(false);
+    this.perfilService.searchByFullName(term).subscribe({
+      next: (usuarioEncontrado) => {
+        if (usuarioEncontrado && usuarioEncontrado.gitUsername) {
+          this.router.navigate(['/perfil', usuarioEncontrado.gitUsername]);
+        } else {
+          this.router.navigate(['/perfil', usuarioEncontrado.id]);
+        }
+      },
+      error: () => {
+        console.error('Usuario no encontrado con ese nombre');
+        // Aquí podrías mostrar un ToastService avisando que no se encontró
+      }
+    });
   }
 }

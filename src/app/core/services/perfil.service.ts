@@ -111,4 +111,7 @@ export class PerfilService {
       } : p)
     );
   }
+   searchByFullName(fullName: string): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/search?q=${fullName}`);
+  }
 }

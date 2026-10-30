@@ -1,8 +1,12 @@
-import { ChatMessage } from './chat.model';
+export interface ChatMessage {
+  id?: string;
+  sender: 'me' | 'them';
+  text: string;
+  time: string;
+  createdAt?: string ; 
+}
 
-export type { ChatMessage };
-
-export type ActiveView = 'contacts' | 'chat';
+export type ActiveView = 'contacts' | 'chat' | 'pdf';
 
 export interface Contact {
   id: string;
@@ -15,5 +19,5 @@ export interface Contact {
   unread: number;
   isAi?: boolean;
   responses?: string[];
-   fotoUrl?: string;
+  fotoUrl?: string;
 }

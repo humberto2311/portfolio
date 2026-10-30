@@ -36,6 +36,19 @@
       }
     }
 
+    <!-- 👇 HEADER PARA LA VISTA DE PDF -->
+    @if (svc.activeView() === 'pdf') {
+      <div class="header-inner">
+        <div class="icon-box" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
+          <i class="fa-solid fa-file-pdf"></i>
+        </div>
+        <div>
+          <h3>Importar Hoja de Vida</h3>
+          <p>Lectura con Inteligencia Artificial</p>
+        </div>
+      </div>
+    }
+
     <button class="close-btn" (click)="svc.close()">
       <i class="fa-solid fa-xmark"></i>
     </button>
@@ -48,6 +61,11 @@
     }
     @if (svc.activeView() === 'chat') {
       <app-chat-view />
+    }
+    
+    <!-- 👇 CUERPO PARA LA VISTA DE PDF -->
+    @if (svc.activeView() === 'pdf') {
+      <app-pdf-upload />
     }
   </div>
 </aside>

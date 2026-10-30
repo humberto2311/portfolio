@@ -4,7 +4,7 @@ import { PerfilData } from '../../../../core/models/perfil.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConnectionService } from '../../../../core/services/connection.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { ModalService } from '../../../../core/services/modal.service'; // 👈 1. Importar ModalService
+import { ModalService } from '../../../../core/services/modal.service';
 
 @Component({
   selector: 'app-perfil-header',
@@ -28,7 +28,7 @@ export class PerfilHeaderComponent implements OnChanges {
   private toast = inject(ToastService);
   private connectionService = inject(ConnectionService);
   private authService = inject(AuthService);
-  private modalSvc = inject(ModalService); // 👈 2. Inyectar ModalService
+  private modalSvc = inject(ModalService);
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['perfil'] && this.perfil) {
@@ -40,6 +40,7 @@ export class PerfilHeaderComponent implements OnChanges {
     this.verificandoEstado = true;
     this.isFollowing = false;
     
+    // Si no está logueado, no consultamos al backend para evitar errores 401
     if (!this.authService.isAuthenticated()) {
       this.verificandoEstado = false;
       return;
@@ -66,10 +67,10 @@ export class PerfilHeaderComponent implements OnChanges {
   }
 
   toggleFollow(): void {
-    // 👇 3. Si no está logueado, abrimos el modal
+    // 👇 SI NO ESTÁ LOGUEADO, ABRE EL MODAL
     if (!this.authService.isAuthenticated()) {
       this.toast.show('Debes iniciar sesión para seguir a este usuario');
-      this.modalSvc.openLogin(); // Abre el modal
+      this.modalSvc.openLogin(); 
       return;
     }
 
@@ -98,10 +99,10 @@ export class PerfilHeaderComponent implements OnChanges {
   }
 
   onMensaje(): void {
-    // 👇 4. Si no está logueado, abrimos el modal
+  
     if (!this.authService.isAuthenticated()) {
       this.toast.show('Debes iniciar sesión para enviar un mensaje');
-      this.modalSvc.openLogin(); // Abre el modal
+      this.modalSvc.openLogin();
       return;
     }
     this.accionMensaje.emit();

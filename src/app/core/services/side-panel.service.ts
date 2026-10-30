@@ -99,6 +99,12 @@ export class SidePanelService {
     this.isOpen.set(true);
   }
 
+  openPdf(): void {
+    this.activeView.set('pdf');
+    this.activeContact.set(null);
+    this.isOpen.set(true);
+  }
+
   openChat(contact: Contact): void {
     this.activeView.set('chat');
     this.activeContact.set(contact);

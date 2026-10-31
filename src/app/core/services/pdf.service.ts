@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment'; // Ajusta tu ruta de environment
+import { environment } from '../../../environments/environment';
 
 export interface PdfImportResult {
   success: boolean;
@@ -13,23 +13,25 @@ export interface PdfImportResult {
   itemsCreated?: number;
 }
 
+export interface PdfJobStatus {
+  jobId: string;
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  result?: PdfImportResult;
+  errorMessage?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PdfService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/api/resume/pdf`; 
+  private apiUrl = `${environment.apiUrl}/api/resume/pdf`;
 
-  importPdf(file: File): Observable<PdfImportResult> {
+  importPdf(file: File): Observable<{ jobId: string; message: string }> {
     const formData = new FormData();
     formData.append('file', file);
+    return this.http.post<{ jobId: string; message: string }>(`${this.apiUrl}/import`, formData);
+  }
 
-
-    const token = localStorage.getItem('token'); 
-    
-    let headers = new HttpHeaders();
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return this.http.post<PdfImportResult>(`${this.apiUrl}/import`, formData, { headers });
+  getStatus(jobId: string): Observable<PdfJobStatus> {
+    return this.http.get<PdfJobStatus>(`${this.apiUrl}/status/${jobId}`);
   }
 }

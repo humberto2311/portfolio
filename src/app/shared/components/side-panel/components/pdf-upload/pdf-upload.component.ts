@@ -60,16 +60,46 @@ export class PdfUploadComponent {
     this.errorMessage.set(null);
 
     this.pdfService.importPdf(file).subscribe({
-      next: (res) => {
-        this.uploadResult.set(res);
-        this.isUploading.set(false);
-        this.selectedFile.set(null);
-      },
+      next: ({ jobId }) => this.esperarResultado(jobId, 0),
       error: (err) => {
         this.isUploading.set(false);
-        // Aquí capturamos el mensaje de error del backend (ej. PDF rechazado por seguridad)
-        this.errorMessage.set(err.error?.message || 'Error al procesar el PDF');
+        this.errorMessage.set(this.mensajeDeError(err));
       }
     });
+  }
+
+  
+  private esperarResultado(jobId: string, intentos: number) {
+    if (intentos > 60) {
+      this.isUploading.set(false);
+      this.errorMessage.set('El proceso tardó demasiado. Intenta de nuevo o revisa el PDF.');
+      return;
+    }
+
+    this.pdfService.getStatus(jobId).subscribe({
+      next: (job) => {
+        if (job.status === 'COMPLETED') {
+          this.isUploading.set(false);
+          this.selectedFile.set(null);
+          this.uploadResult.set(job.result ?? null);
+        } else if (job.status === 'FAILED') {
+          this.isUploading.set(false);
+          this.errorMessage.set(job.errorMessage || 'No se pudo procesar el PDF.');
+        } else {
+          setTimeout(() => this.esperarResultado(jobId, intentos + 1), 2000);
+        }
+      },
+      error: () => {
+        this.isUploading.set(false);
+        this.errorMessage.set('No se pudo consultar el estado del procesamiento.');
+      }
+    });
+  }
+
+  private mensajeDeError(err: any): string {
+    return err?.error?.error
+      || err?.error?.message
+      || (err?.status === 401 ? 'Tu sesión expiró. Vuelve a iniciar sesión.' : '')
+      || 'Error al procesar el PDF';
   }
 }

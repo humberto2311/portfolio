@@ -10,11 +10,13 @@
       
       <app-crear-post />
 
-      @for (post of publicaciones(); track post.id) {
+      @for (post of publicacionesVisibles(); track post.uid) {
         <app-post-card [post]="post" />
       }
 
     }
 
   </div>
+
+  <app-toast />
 </div>

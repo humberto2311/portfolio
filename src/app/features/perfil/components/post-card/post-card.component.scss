@@ -7,16 +7,111 @@
   gap: 0.8rem;
 }
 
+/* Descripción de quien compartió (va encima del post original) */
+.compartido {
+  border-left: 2px solid $cyan-main;
+  padding: 0.15rem 0 0.15rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  .compartido-texto {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: $text-light;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .compartido-botones {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .compartido-editor {
+    width: 100%;
+    background: $bg-input;
+    border: 1px solid $cyan-main;
+    border-radius: 8px;
+    color: $text-light;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+  }
+
+  .btn-mini {
+    background: $cyan-main;
+    color: #001018;
+    border: none;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &.sec {
+      background: transparent;
+      color: $text-muted;
+      border: 1px solid $bg-border;
+    }
+  }
+
+  .peligro {
+    color: $text-muted;
+
+    &:hover { color: #ef4444; }
+  }
+
+  .ver-original {
+    align-self: flex-start;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: $cyan-main;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
 .post-head {
   display: flex;
   align-items: center;
   gap: 0.7rem;
 
+  .autor-click {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+
+    &:hover h4 { color: $cyan-main; }
+  }
+
   .avatar { @include avatar-base(40px, 0.85rem); }
 
-  .head-info { flex: 1; }
+  .head-info { flex: 1; min-width: 0; }
 
-  h4 { margin: 0; font-size: 0.9rem; }
+  h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+  }
 
   .meta {
     font-size: 0.7rem;
@@ -98,6 +193,14 @@
   display: flex;
   gap: 0.5rem;
 
+  .avatar-sm { cursor: pointer; }
+
+  .autor-comentario {
+    cursor: pointer;
+    transition: color 0.2s;
+    &:hover { color: $cyan-main; }
+  }
+
   .bubble {
     background: $bg-main;
     border: 1px solid $bg-border;
@@ -137,4 +240,102 @@
     cursor: pointer;
     padding: 0.4rem;
   }
+}
+/* Al final de tu post-card.component.scss */
+
+.more-options-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: $bg-main;
+  border: 1px solid $bg-border;
+  border-radius: 8px;
+  padding: 0.4rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  z-index: 10;
+  animation: fadeIn 0.15s ease-out;
+
+  button {
+    background: transparent;
+    border: none;
+    color: $text-light;
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: 0.2s;
+
+    &:hover {
+      background: $bg-input;
+    }
+
+    &.btn-delete {
+      color: #ef4444; // Rojo para borrar
+      &:hover { background: rgba(239, 68, 68, 0.1); }
+    }
+  }
+}
+
+/* Estilos de la zona de edición */
+.edit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .edit-input {
+    width: 100%;
+    background: $bg-input;
+    border: 1px solid $cyan-main; // Borde cyan para indicar modo edición
+    color: $text-light;
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-size: 0.88rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+  }
+
+  .edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+
+    button {
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: $text-muted;
+      &:hover { color: $text-light; }
+    }
+
+    .btn-save {
+      background: $cyan-main;
+      color: $bg-main;
+      &:hover { background: $cyan-hover; }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

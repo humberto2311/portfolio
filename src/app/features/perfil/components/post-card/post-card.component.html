@@ -1,15 +1,89 @@
 <article class="post-card">
-  <header class="post-head">
-    <div class="avatar">{{ post.iniciales }}</div>
-    <div class="head-info">
-      <h4>{{ post.autor }}</h4>
-      <p class="meta">{{ post.tiempo }} • <i class="fa-solid fa-globe"></i></p>
+  @if (post.descripcionCompartido || esMiCompartido()) {
+    <div class="compartido">
+      @if (editandoCompartido()) {
+        <textarea
+          class="compartido-editor"
+          rows="2"
+          [(ngModel)]="textoCompartido"
+          placeholder="Descripción del compartido..."></textarea>
+        <div class="compartido-botones">
+          <button type="button" class="btn-mini" (click)="guardarCompartido()">Guardar</button>
+          <button type="button" class="btn-mini sec" (click)="cancelarCompartido()">Cancelar</button>
+        </div>
+      } @else {
+        @if (post.descripcionCompartido) {
+          <p class="compartido-texto"><app-menciones-texto [texto]="post.descripcionCompartido" /></p>
+        }
+
+        <div class="compartido-botones">
+          <button type="button" class="ver-original" (click)="verOriginal()">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicación original
+          </button>
+
+          @if (esMiCompartido()) {
+            <button type="button" class="ver-original" (click)="editarCompartido()">
+              <i class="fa-solid fa-pen"></i> Editar
+            </button>
+
+            @if (post.descripcionCompartido) {
+              <button type="button" class="ver-original peligro" (click)="borrarCompartido()">
+                <i class="fa-solid fa-trash"></i> Eliminar
+              </button>
+            }
+          }
+        </div>
+      }
     </div>
-    <button class="more"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+  }
+
+  <header class="post-head">
+    <div class="autor-click" (click)="irAlAutor()">
+      <div class="avatar">
+        @if (post.autorAvatar) {
+          <img [src]="post.autorAvatar" [alt]="'Foto de ' + post.autor" />
+        } @else {
+          {{ post.iniciales }}
+        }
+      </div>
+      <div class="head-info">
+        <h4>{{ post.autor }}</h4>
+        <p class="meta">{{ post.tiempo }} • <i class="fa-solid fa-globe"></i></p>
+      </div>
+    </div>
+    
+    <div class="more-options-container">
+      <button class="more" (click)="toggleMenu($event)">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+
+      @if (mostrarMenu()) {
+        <div class="dropdown-menu">
+          <button (click)="activarEdicion()">
+            <i class="fa-solid fa-pen"></i> Editar
+          </button>
+          <button class="btn-delete" (click)="borrarPost()">
+            <i class="fa-solid fa-trash"></i> Borrar
+          </button>
+        </div>
+      }
+    </div>
   </header>
 
-  <p class="post-text">{{ post.texto }}</p>
 
+  @if (estaEditando()) {
+    <div class="edit-section">
+      <textarea [(ngModel)]="textoEditado" class="edit-input"></textarea>
+      <div class="edit-actions">
+        <button class="btn-cancel" (click)="cancelarEdicion()">Cancelar</button>
+        <button class="btn-save" (click)="guardarEdicion()">Guardar cambios</button>
+      </div>
+    </div>
+  } @else {
+    <p class="post-text"><app-menciones-texto [texto]="post.texto" /></p>
+  }
+
+  <!-- 👇 IMAGEN (solo una vez) -->
   @if (post.imagen) {
     <div class="post-image">
       <img [src]="post.imagen" alt="post" />
@@ -31,17 +105,25 @@
     <button (click)="toggleComentarios()">
       <i class="fa-regular fa-comment"></i> Comentar
     </button>
-    <button><i class="fa-regular fa-paper-plane"></i> Compartir</button>
+   <button (click)="compartirPost()">
+  <i class="fa-regular fa-paper-plane"></i> Compartir
+</button>
   </div>
 
   @if (mostrarComentarios()) {
     <div class="comments">
       @for (c of post.comentarios; track c.id) {
         <div class="comment">
-          <div class="avatar-sm">{{ c.iniciales }}</div>
+          <div class="avatar-sm" (click)="irAlComentario(c)">
+            @if (c.autorAvatar) {
+              <img [src]="c.autorAvatar" [alt]="'Foto de ' + c.autor" />
+            } @else {
+              {{ c.iniciales }}
+            }
+          </div>
           <div class="bubble">
-            <strong>{{ c.autor }}</strong>
-            <p>{{ c.texto }}</p>
+            <strong class="autor-comentario" (click)="irAlComentario(c)">{{ c.autor }}</strong>
+            <p><app-menciones-texto [texto]="c.texto" /></p>
           </div>
         </div>
       }
@@ -57,5 +139,13 @@
         </button>
       </div>
     </div>
+  }
+
+  @if (mostrarCompartir()) {
+    <app-share-modal [post]="post" (cerrado)="mostrarCompartir.set(false)" />
+  }
+
+  @if (mostrarOriginal()) {
+    <app-post-detalle [post]="post" (cerrado)="mostrarOriginal.set(false)" />
   }
 </article>

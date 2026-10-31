@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ConexionDto } from '../models/perfil.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConnectionService {
@@ -11,6 +12,16 @@ export class ConnectionService {
   // ==========================================
   // ACCIONES PRIVADAS (Para el usuario logueado)
   // ==========================================
+
+  // GET: a quién sigue el usuario logueado (para sugerencias @)
+  getMyFollowing(): Observable<ConexionDto[]> {
+    return this.http.get<ConexionDto[]>(`${this.API_URL}/me/following`);
+  }
+
+  // GET: quiénes siguen al usuario logueado (para sugerencias @)
+  getMyFollowers(): Observable<ConexionDto[]> {
+    return this.http.get<ConexionDto[]>(`${this.API_URL}/me/followers`);
+  }
 
   // POST: Seguir a un usuario
   followUser(contactId: string): Observable<any> {

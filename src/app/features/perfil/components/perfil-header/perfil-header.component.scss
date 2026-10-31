@@ -132,6 +132,44 @@ $text-main: #ffffff;
     margin: 4px 0 8px 0; 
   }
 
+  .rol-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .rol { margin: 0 0 2px 0; }
+
+    .rol-input {
+      background: rgba(6, 11, 20, 0.9);
+      border: 1px solid $cyan-glow;
+      border-radius: 8px;
+      color: $text-main;
+      font-size: 0.9rem;
+      font-family: inherit;
+      padding: 0.3rem 0.6rem;
+      min-width: 260px;
+      outline: none;
+    }
+
+    .btn-rol {
+      background: transparent;
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: $cyan-glow;
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      flex-shrink: 0;
+
+      &:hover:not(:disabled) { background: rgba(0, 242, 254, 0.12); }
+      &:disabled { opacity: 0.6; cursor: wait; }
+    }
+  }
+
   .badge-status {
     display: inline-flex;
     align-items: center;
@@ -142,12 +180,29 @@ $text-main: #ffffff;
     border-radius: 20px;
     font-size: 0.75rem;
     border: 1px solid rgba(0, 242, 254, 0.2);
-    
-    .dot { 
-      width: 6px; 
-      height: 6px; 
-      background: $cyan-glow; 
-      border-radius: 50%; 
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: $cyan-glow;
+      border-radius: 50%;
+    }
+
+    &.badge-toggle {
+      cursor: pointer;
+      font-family: inherit;
+      transition: 0.2s;
+
+      &:hover:not(:disabled) { background: rgba(0, 242, 254, 0.2); }
+      &:disabled { opacity: 0.6; cursor: wait; }
+
+      &.sin-disponibilidad {
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.1);
+
+        .dot { background: #f59e0b; }
+      }
     }
   }
 }

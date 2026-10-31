@@ -1,0 +1,240 @@
+@import '../../../../shared/styles/variables';
+
+:host { display: contents; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 25, 0.75);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+  position: relative;
+  width: min(470px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #12161f;
+  border: 1px solid rgba(0, 220, 255, 0.18);
+  border-radius: 16px;
+  padding: 1.6rem 1.5rem 1.4rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  animation: slideUp 0.25s ease;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  background: transparent;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0.25rem;
+  &:hover { color: $cyan-main; }
+}
+
+.titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  color: $text-light;
+  padding-right: 1.5rem;
+}
+
+/* ===== Publicación original ===== */
+.post-original {
+  background: $bg-card;
+  border: 1px solid $bg-border;
+  border-radius: 12px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .datos {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+
+    strong { font-size: 0.82rem; color: $text-light; }
+    small { font-size: 0.7rem; color: $text-muted; }
+  }
+
+  .cuerpo {
+    margin: 0;
+    font-size: 0.83rem;
+    color: $text-light;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .imagen {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+}
+
+.avatar { @include avatar-base(36px, 0.8rem); }
+.avatar-sm { @include avatar-base(30px, 0.72rem); }
+
+/* ===== Campo único de descripción ===== */
+.campo-descripcion {
+  position: relative;
+
+  textarea {
+    width: 100%;
+    min-height: 84px;
+    padding: 0.7rem 0.85rem;
+    background: $bg-input;
+    border: 1px solid $bg-border;
+    border-radius: 10px;
+    color: $text-light;
+    font-size: 0.85rem;
+    font-family: inherit;
+    line-height: 1.45;
+    resize: vertical;
+
+    &::placeholder { color: $text-muted; }
+    &:focus { outline: none; border-color: $cyan-main; }
+  }
+}
+
+.sugerencias {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  background: #0d1527;
+  border: 1px solid $cyan-main;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  max-height: 190px;
+  overflow-y: auto;
+  z-index: 5;
+
+  button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.5rem;
+    cursor: pointer;
+    text-align: left;
+    color: $text-light;
+
+    &.activa,
+    &:hover { background: $bg-hover; }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+    flex: 1;
+
+    strong {
+      font-size: 0.8rem;
+      color: $text-light;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    small { font-size: 0.7rem; color: $cyan-main; }
+  }
+
+  .relacion {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: $cyan-main;
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    background: $cyan-dim;
+    border-radius: 999px;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+
+    &.otro {
+      color: $text-muted;
+      border-color: $bg-border;
+      background: transparent;
+    }
+  }
+}
+
+.destinos {
+  margin: 0;
+  font-size: 0.76rem;
+  color: $text-muted;
+  line-height: 1.4;
+
+  strong { color: $cyan-main; }
+}
+
+.error {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #ff5c7a;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+
+  button {
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+
+  .btn-sec {
+    background: transparent;
+    color: $text-muted;
+    &:hover { color: $text-light; }
+  }
+
+  .btn-pri {
+    background: linear-gradient(135deg, #00dcff, #0090ff);
+    color: #001018;
+    &:hover:not(:disabled) { transform: translateY(-1px); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px) }
+  to { opacity: 1; transform: translateY(0) }
+}

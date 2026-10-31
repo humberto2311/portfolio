@@ -1,14 +1,38 @@
 <div class="feed-layout">
   <aside class="side-col">
     <div class="side-card">
-      <h3><i class="fa-solid fa-user-check"></i> Detalles de Perfil</h3>
-      <p class="text-muted">Apasionado por crear software escalable e interfaces futuristas.</p>
+      <div class="side-head">
+        <h3><i class="fa-solid fa-user-check"></i> Detalles de Perfil</h3>
+
+        @if (esMiPerfil && !editandoResumen()) {
+          <button type="button" class="btn-editar-bio" (click)="editarResumen()" title="Editar descripción">
+            <i class="fas fa-pen"></i>
+          </button>
+        }
+      </div>
+
+      @if (editandoResumen()) {
+        <textarea
+          class="bio-editor"
+          rows="4"
+          [(ngModel)]="textoResumen"
+          placeholder="Escribe un resumen sobre ti..."></textarea>
+
+        <div class="bio-acciones">
+          <button type="button" class="btn-mini" (click)="guardarResumen()">Guardar</button>
+          <button type="button" class="btn-mini sec" (click)="cancelarResumen()">Cancelar</button>
+        </div>
+      } @else {
+        <p class="text-muted">
+          {{ resumenCv() || perfilService.perfil()?.bio || 'Sin resumen todavía.' }}
+        </p>
+      }
     </div>
   </aside>
 
   <main class="feed-col">
-    <app-crear-post />
-    @for (post of publicaciones(); track post.id) {
+    <app-crear-post [destinoAjeno]="!esMiPerfil" />
+    @for (post of publicacionesVisibles(); track post.uid) {
       <app-post-card [post]="post" />
     }
     @if (publicaciones().length === 0) {

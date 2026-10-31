@@ -26,10 +26,46 @@
           <h1>{{ perfil.nombre }}</h1>
           <i class="fa-solid fa-circle-check verified" title="Verificado"></i>
         </div>
-        <p class="rol">{{ perfil.rol }}</p>
-        <span class="badge-status">
-          <span class="dot"></span> {{ perfil.estado }}
-        </span>
+        <div class="rol-row">
+          @if (editandoRol) {
+            <input
+              class="rol-input"
+              [(ngModel)]="textoRol"
+              placeholder="Tu rol (ej. Ingeniero de Sistemas)"
+              (keyup.enter)="guardarRol()"
+              (keyup.escape)="cancelarRol()" />
+            <button type="button" class="btn-rol" (click)="guardarRol()" [disabled]="guardandoRol" title="Guardar">
+              <i class="fas fa-check"></i>
+            </button>
+            <button type="button" class="btn-rol" (click)="cancelarRol()" title="Cancelar">
+              <i class="fas fa-xmark"></i>
+            </button>
+          } @else {
+            <p class="rol">{{ perfil.rol || 'User' }}</p>
+            @if (esMiPerfil) {
+              <button type="button" class="btn-rol" (click)="editarRol()" title="Editar rol">
+                <i class="fas fa-pen"></i>
+              </button>
+            }
+          }
+        </div>
+
+        @if (esMiPerfil) {
+          <button
+            type="button"
+            class="badge-status badge-toggle"
+            [class.sin-disponibilidad]="!disponible"
+            [disabled]="cambiandoEstado"
+            (click)="toggleDisponibilidad()"
+            [title]="disponible ? 'Clic para marcar sin disponibilidad' : 'Clic para marcar disponible'">
+            <span class="dot"></span>
+            {{ cambiandoEstado ? 'Guardando…' : (disponible ? 'DISPONIBLE' : 'SIN DISPONIBILIDAD') }}
+          </button>
+        } @else {
+          <span class="badge-status">
+            <span class="dot"></span> {{ perfil.estado }}
+          </span>
+        }
       </div>
 
       <!-- ACCIONES -->

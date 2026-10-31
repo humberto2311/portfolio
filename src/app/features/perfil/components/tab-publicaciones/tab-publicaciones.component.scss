@@ -12,6 +12,16 @@
 .side-card {
   @include card-base;
 
+  .side-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+
+    h3 { margin: 0; }
+  }
+
   h3 {
     font-size: 0.9rem;
     color: $cyan-main;
@@ -25,6 +35,61 @@
     color: $text-muted;
     font-size: 0.85rem;
     line-height: 1.5;
+  }
+
+  .btn-editar-bio {
+    background: transparent;
+    border: 1px solid $bg-border;
+    color: $cyan-main;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+
+    &:hover { background: rgba(0, 242, 254, 0.1); border-color: $cyan-main; }
+  }
+
+  .bio-editor {
+    width: 100%;
+    background: $bg-input;
+    border: 1px solid $cyan-main;
+    border-radius: 8px;
+    color: $text-light;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.83rem;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .bio-acciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+
+    .btn-mini {
+      background: $cyan-main;
+      color: #001018;
+      border: none;
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+
+      &.sec {
+        background: transparent;
+        color: $text-muted;
+        border: 1px solid $bg-border;
+      }
+    }
   }
 }
 
@@ -40,4 +105,18 @@
   padding: 2rem;
   border: 1px dashed $bg-border;
   border-radius: 12px;
+}
+
+.aviso-compartir {
+  @include card-base;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: $text-muted;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  i { color: $cyan-main; }
+  strong { color: $text-light; }
 }

@@ -7,7 +7,7 @@
       <div class="brand-divider"></div>
       <div class="brand-personal">
         <span class="person-name">{{ user()?.fullName }}</span>
-        <span class="person-role">{{ (user()?.role ?? 'USUARIO').replace('ROLE_', '').replace('ROL_', '') }}</span>
+        <span class="person-role">{{ rolPerfil() || 'User' }}</span>
       </div>
     </a>
 
@@ -18,19 +18,44 @@
     </button>
 
     <div class="navbar-collapse" [class.active]="isMobileMenuOpen()">
-      <div class="search-box">
-        <input 
-          type="text" 
-          placeholder="Buscar por username " 
-          [(ngModel)]="searchQuery" 
-          (keyup.enter)="onSearch()" 
-        />
-        <button (click)="onSearch()" aria-label="Buscar">
-          <i class="fas fa-search"></i>
-        </button>
+      <div class="search-wrap">
+        <div class="search-box">
+          <input
+            type="text"
+            placeholder="Buscar personas por nombre o @usuario"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchInput($event)"
+            (keydown)="onKeydown($event)"
+          />
+          <button (click)="onSearch()" aria-label="Buscar">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+
+        @if (mostrarSugerencias()) {
+          <ul class="sugerencias-nav">
+            @for (s of sugerencias(); track s.username; let i = $index) {
+              <li>
+                <button
+                  type="button"
+                  [class.activa]="i === indice()"
+                  (mouseenter)="indice.set(i)"
+                  (click)="irAPerfil(s)">
+                  <span class="avatar-mini">{{ s.iniciales }}</span>
+                  <span class="datos">
+                    <strong>{{ s.nombre }}</strong>
+                    <small>&#64;{{ s.username }}</small>
+                  </span>
+                  <span class="relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
       </div>
 
       <div class="navbar-actions">
+        <app-notificaciones />
         <app-dropdown-menu />
         <app-user-menu />
       </div>

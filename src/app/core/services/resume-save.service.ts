@@ -73,4 +73,38 @@ export class ResumeSaveService {
   deleteProfile(profileId: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/profiles/${profileId}`);
   }
+
+  // ====== SECCIONES ======
+
+  crearSeccion(profileId: number, payload: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/sections/profile/${profileId}`,
+      payload
+    );
+  }
+
+  actualizarSeccion(sectionId: number, payload: any): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/sections/${sectionId}`, payload);
+  }
+
+  eliminarSeccion(sectionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/sections/${sectionId}`);
+  }
+
+  // ====== ITEMS ======
+
+  crearItem(sectionId: number, payload: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.API_URL}/items/section/${sectionId}`,
+      payload
+    );
+  }
+
+  actualizarItem(itemId: number, payload: any): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/items/${itemId}`, payload);
+  }
+
+  eliminarItem(itemId: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/items/${itemId}`);
+  }
 }

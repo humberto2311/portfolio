@@ -29,6 +29,13 @@
   gap: 1.5rem;
 }
 
+.vacio {
+  margin: 0;
+  font-size: 0.78rem;
+  color: $text-muted;
+  font-style: italic;
+}
+
 .entry {
   border-left: 2px solid $cyan-main;
   padding-left: 0.7rem;
@@ -85,7 +92,6 @@
   list-style: none;
   padding: 0;
   margin: 0;
-
   li {
     display: flex;
     align-items: center;
@@ -95,5 +101,77 @@
     padding: 0.35rem 0;
 
     i { color: $cyan-main; width: 16px; }
+  }
+}
+
+/* Resumen corto de la hoja de vida importada */
+.cv-resumen {
+  border: 1px solid rgba($cyan-main, 0.25);
+  background: rgba($cyan-main, 0.04);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+
+  h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $cyan-main;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .cv-headline {
+    margin: 0 0 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text-light;
+  }
+
+  .cv-summary {
+    margin: 0 0 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: $text-muted;
+  }
+
+  .cv-seccion {
+    margin-top: 0.55rem;
+
+    .cv-seccion-titulo {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: $cyan-main;
+      margin-bottom: 0.25rem;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      font-size: 0.78rem;
+      line-height: 1.45;
+      color: $text-light;
+      padding: 0.15rem 0 0.15rem 0.8rem;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.55rem;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: $cyan-main;
+      }
+    }
   }
 }

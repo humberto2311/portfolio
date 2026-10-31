@@ -55,12 +55,26 @@ export class OAuthCallbackComponent implements OnInit {
 
  ngOnInit(): void {
   this.route.queryParams.subscribe(params => {
-    console.log("Parámetros recibidos en la URL:", params); // <-- Añade esto
     const token = params['token'];
-    const error = params['error']; // <-- Captura si hay error
+    const error = params['error'];
+
+    // El GitHub ya pertenece a otra cuenta del sistema
+    if (error === 'git_en_uso') {
+      sessionStorage.removeItem('nfc_return_to');
+      this.router.navigate(['/app/proyectos'], { queryParams: { gitError: 1 } });
+      return;
+    }
 
     if (token) {
-      this.authService.handleOAuthSuccess(token);
+      const retorno = sessionStorage.getItem('nfc_return_to');
+      sessionStorage.removeItem('nfc_return_to');
+
+      this.authService.handleOAuthSuccess(token); // navega a /app
+
+      if (retorno) {
+        // Vuelve a donde estaba (ej. /app/proyectos?importar=1)
+        setTimeout(() => this.router.navigateByUrl(retorno), 0);
+      }
     } else {
       console.error('No se recibió el token de autenticación. Error recibido:', error);
       this.router.navigate(['/']);

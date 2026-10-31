@@ -1,0 +1,79 @@
+<div class="modal-overlay" (click)="cerrar()" role="dialog" aria-modal="true">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="cerrar()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <h3 class="titulo">Compartir publicación</h3>
+
+    <!-- Publicación original (la que ya existe) -->
+    <article class="post-original">
+      <header>
+        <div class="avatar">{{ post.iniciales }}</div>
+        <div class="datos">
+          <strong>{{ post.autor }}</strong>
+          <small>{{ post.tiempo }}</small>
+        </div>
+      </header>
+
+      @if (post.texto) {
+        <p class="cuerpo">{{ post.texto }}</p>
+      }
+
+      @if (post.imagen) {
+        <img class="imagen" [src]="post.imagen" alt="Publicación" />
+      }
+    </article>
+
+    <!-- Único campo: la descripción -->
+    <div class="campo-descripcion">
+      <textarea
+        #descripcion
+        rows="3"
+        [(ngModel)]="texto"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        placeholder="Añade una descripción… escribe @ para mencionar a alguien"></textarea>
+
+      @if (abiertoSugerencias()) {
+        <ul class="sugerencias">
+          @for (s of sugerencias(); track s.username; let i = $index) {
+            <li>
+              <button
+                type="button"
+                [class.activa]="i === indice()"
+                (mouseenter)="indice.set(i)"
+                (click)="elegir(s)">
+                <span class="avatar-sm">{{ s.iniciales }}</span>
+                <span class="info">
+                  <strong>{{ s.nombre }}</strong>
+                  <small>&#64;{{ s.username }}</small>
+                </span>
+                <span class="relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (menciones().length > 0) {
+      <p class="destinos">
+        Se enviará a <strong>&#64;{{ menciones().join(', @') }}</strong> — deberá aceptarlo.
+      </p>
+    } @else {
+      <p class="destinos">Sin menciones: se comparte en tu propio perfil.</p>
+    }
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <div class="acciones">
+      <button type="button" class="btn-sec" (click)="cerrar()">Cancelar</button>
+      <button type="button" class="btn-pri" [disabled]="enviando()" (click)="enviar()">
+        {{ enviando() ? 'Compartiendo…' : (menciones().length ? 'Enviar solicitud' : 'Compartir en mi perfil') }}
+      </button>
+    </div>
+  </div>
+</div>

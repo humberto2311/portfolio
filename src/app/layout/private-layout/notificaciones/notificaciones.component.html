@@ -1,0 +1,50 @@
+<div class="notif-wrapper">
+  <button class="notif-btn" (click)="toggle()" aria-label="Notificaciones">
+    <i class="fa-solid fa-bell"></i>
+    @if (totalNotificaciones() > 0) {
+      <span class="badge">{{ totalNotificaciones() }}</span>
+    }
+  </button>
+
+  @if (abierto()) {
+    <div class="panel" (click)="$event.stopPropagation()">
+      <header class="panel-head">
+        <h4>Notificaciones</h4>
+        <button class="cerrar" (click)="abierto.set(false)" aria-label="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <div class="panel-body">
+        @if (seguidores().length > 0) {
+          <section class="bloque">
+            <h5>Te siguen</h5>
+            @for (s of seguidores(); track s.conexion.userId) {
+              <div class="seguidor" (click)="irAPerfil(s.conexion)">
+                <span class="avatar-sm">{{ iniciales(s.conexion) }}</span>
+                <span class="datos">
+                  <strong>{{ nombre(s.conexion) }}</strong>
+                  @if (s.conexion.usernameUser) {
+                    <small>&#64;{{ s.conexion.usernameUser }}</small>
+                  }
+                </span>
+                @if (!s.siguiendo) {
+                  <button type="button" class="btn-seguir" (click)="seguirDeVuelta(s.conexion, $event)">
+                    Seguir
+                  </button>
+                } @else {
+                  <span class="siguiendo">Siguiendo</span>
+                }
+              </div>
+            }
+          </section>
+        }
+
+        <section class="bloque">
+          <h5>Solicitudes para compartir</h5>
+          <app-solicitudes-compartidas />
+        </section>
+      </div>
+    </div>
+  }
+</div>

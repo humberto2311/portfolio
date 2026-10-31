@@ -19,7 +19,7 @@
 
       <div class="tab-content">
         @switch (seccionActiva) {
-          @case ('publicaciones') { <app-tab-publicaciones /> }
+          @case ('publicaciones') { <app-tab-publicaciones [esMiPerfil]="esMiPerfil" /> }
           @case ('informacion') { <app-tab-informacion [perfil]="p" /> }
           @case ('fotos') { <app-tab-fotos [fotos]="p.fotos" /> }
           

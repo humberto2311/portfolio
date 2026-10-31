@@ -1,11 +1,38 @@
 <div class="crear-post">
   <div class="input-row">
     <div class="avatar">{{ inicialesUsuario }}</div>
-    <input
-      type="text"
-      [(ngModel)]="texto"
-      placeholder="¿Qué estás desarrollando hoy, Humberto?"
-      class="text-input" />
+
+    <div class="input-wrap">
+      <input
+        #entrada
+        type="text"
+        [(ngModel)]="texto"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        placeholder="¿Qué estás desarrollando hoy? Escribe @ para mencionar a alguien"
+        class="text-input" />
+
+      @if (abiertoSugerencias()) {
+        <ul class="sugerencias">
+          @for (s of sugerencias(); track s.username; let i = $index) {
+            <li>
+              <button
+                type="button"
+                [class.activa]="i === indice()"
+                (mouseenter)="indice.set(i)"
+                (mousedown)="$event.preventDefault(); elegir(s)">
+                <span class="avatar-sm">{{ s.iniciales }}</span>
+                <span class="datos">
+                  <strong>{{ s.nombre }}</strong>
+                  <small>&#64;{{ s.username }}</small>
+                </span>
+                <span class="relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
   </div>
 
   @if (imagenPreview()) {
@@ -22,6 +49,15 @@
       <i class="fa-solid fa-image"></i> Foto / Video
     </button>
     <input type="file" id="post-image-input" hidden accept="image/*" (change)="onFile($event)">
-    <button class="btn-publish" (click)="publicar()">Publicar</button>
+    <button class="btn-publish" [disabled]="publicando()" (click)="publicar()">
+      {{ publicando() ? 'Enviando…' : (destinoAjeno ? 'Enviar solicitud' : 'Publicar') }}
+    </button>
   </div>
+
+  @if (destinoAjeno) {
+    <p class="aviso-destino">
+      <i class="fa-solid fa-clock"></i>
+      Quedará pendiente hasta que el dueño del perfil la acepte.
+    </p>
+  }
 </div>

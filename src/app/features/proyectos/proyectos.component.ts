@@ -39,9 +39,9 @@ export class ProyectosComponent implements OnInit {
   public ramaSeleccionada = 'main';
 
   public importando = false;
-  public mostrarModalGit = false;
-  public gitUsernameInput = '';
   public userProfile: any = null;
+  /** Mensaje cuando el GitHub del usuario ya pertenece a otra cuenta. */
+  public avisoGit: string | null = null;
 
   public modoEdicion = false;
   public editForm: Partial<Proyecto> = {};
@@ -52,7 +52,9 @@ export class ProyectosComponent implements OnInit {
     const enRutaPrivada = this.router.url.startsWith('/app');
     const hayUsuario = !!this.authService.currentUser();
     this.modoPrivado = enRutaPrivada && hayUsuario;
-    
+
+    this.revisarParametrosGit();
+
     this.route.paramMap.subscribe(params => {
       const urlParam = params.get('username'); 
       
@@ -137,7 +139,7 @@ export class ProyectosComponent implements OnInit {
     
     this.proyectosService.getProyectos().subscribe({
       next: (data) => { 
-        this.proyectos = data; 
+        this.proyectos = this.ordenarPorFecha(data); 
         this.cargando = false; 
       },
       error: (err) => {
@@ -157,7 +159,7 @@ export class ProyectosComponent implements OnInit {
     
     this.proyectosService.getProyectosDeUsuario(username).subscribe({
       next: (data) => { 
-        this.proyectos = data.filter(p => p.isPublic); 
+        this.proyectos = this.ordenarPorFecha(data.filter(p => p.isPublic)); 
         this.cargando = false; 
       },
       error: (err) => {
@@ -173,6 +175,66 @@ export class ProyectosComponent implements OnInit {
       next: (u) => this.userProfile = u,
       error: (err) => console.error('Error cargando perfil', err)
     });
+  }
+
+  // ==========================================
+  // ORDEN, IMAGEN Y DATOS VISIBLES DE LA CARD
+  // ==========================================
+
+  public readonly IMAGEN_DEFECTO =
+    'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop';
+
+  /** Más recientes primero (fecha de último commit). */
+  private ordenarPorFecha(lista: Proyecto[]): Proyecto[] {
+    return [...(lista ?? [])].sort((a, b) => {
+      const fa = a.lastCommitDate ? new Date(a.lastCommitDate).getTime() : 0;
+      const fb = b.lastCommitDate ? new Date(b.lastCommitDate).getTime() : 0;
+      return fb - fa;
+    });
+  }
+
+  /**
+   * Imagen de la card: la del despliegue (imageUrl del backend, sacada del
+   * og:image de la homepage). Si no hay, se pide captura de la homepage.
+   */
+  imagenProyecto(p: Proyecto): string {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.homepage) {
+      return `https://image.thum.io/get/width/900/crop/600/${p.homepage}`;
+    }
+    return this.IMAGEN_DEFECTO;
+  }
+
+  onImagenError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    if (img && img.src !== this.IMAGEN_DEFECTO) {
+      img.src = this.IMAGEN_DEFECTO;
+    }
+  }
+
+  stackVisible(p: Proyecto): string[] {
+    return (p.stack ?? []).slice(0, 3);
+  }
+
+  resumenProyecto(p: Proyecto): string {
+    const texto = p.shortBio || p.description || 'Sin descripción.';
+    return texto.length > 120 ? texto.slice(0, 120).trim() + '…' : texto;
+  }
+
+  /** Texto corto con el dominio de la homepage, para mostrarlo en la card. */
+  dominioHomepage(p: Proyecto): string {
+    if (!p.homepage) return '';
+    try {
+      const url = new URL(p.homepage);
+      return url.host.replace(/^www\./, '');
+    } catch {
+      return p.homepage;
+    }
+  }
+
+  abrirHomepage(p: Proyecto, event: Event) {
+    event.stopPropagation();
+    if (p.homepage) window.open(p.homepage, '_blank', 'noopener');
   }
 
   // ... (El resto de tus métodos se mantienen exactamente igual)
@@ -256,64 +318,84 @@ export class ProyectosComponent implements OnInit {
     card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
   }
 
+  /** Lee ?importar=1 / ?gitError=1 que devuelve el callback de GitHub. */
+  private revisarParametrosGit() {
+    this.route.queryParamMap.subscribe((qp) => {
+      if (qp.get('gitError')) {
+        this.avisoGit =
+          'Ese usuario de GitHub ya está registrado en el sistema con otra cuenta.';
+      }
+
+      if (qp.get('importar') === '1' && this.modoPrivado) {
+        this.importarConGitGuardado();
+      }
+    });
+  }
+
   abrirImportarGithub() {
     if (!this.modoPrivado) return;
+    this.avisoGit = null;
 
     this.userProfileService.getMe().subscribe({
       next: (u: any) => {
         this.userProfile = u;
         if (u.gitUsername && u.gitUsername.trim()) {
+          // Ya tiene gitUsername en userprofile: se importa normal.
           this.ejecutarImport(u.gitUsername.trim());
         } else {
-          this.gitUsernameInput = '';
-          this.mostrarModalGit = true;
+          this.irALoginGit();
         }
       },
-      error: (err) => {
-        console.error(err);
-        this.gitUsernameInput = '';
-        this.mostrarModalGit = true;
-      }
+      error: () => this.irALoginGit(),
     });
   }
 
-  confirmarGitUsername() {
-    const username = this.gitUsernameInput.trim();
-    if (!username) return;
+  /** No tiene git guardado: se autentica con GitHub y se vuelve a importar. */
+  private irALoginGit() {
+    sessionStorage.setItem('nfc_return_to', '/app/proyectos?importar=1');
+    this.authService.loginWithProvider('github');
+  }
 
-    this.userProfileService.updateGitUsername(username).subscribe({
+  private importarConGitGuardado() {
+    this.userProfileService.getMe().subscribe({
       next: (u: any) => {
         this.userProfile = u;
-        this.mostrarModalGit = false;
-        this.ejecutarImport(username);
+        const git = u?.gitUsername?.trim();
+        if (git) {
+          this.ejecutarImport(git);
+        } else {
+          this.error =
+            'No se pudo obtener tu usuario de GitHub. Intenta de nuevo con "Importar desde GitHub".';
+        }
       },
       error: (err) => {
-        console.error('Error guardando gitUsername', err);
-        this.error = 'No se pudo guardar el usuario de GitHub.';
-      }
+        this.error = 'No se pudo leer tu perfil: ' + (err?.error?.message || err.message);
+      },
     });
   }
 
   private ejecutarImport(username: string) {
     this.importando = true;
-    this.proyectos = [];
+    this.avisoGit = null;
 
     this.proyectosService.importAllFromUser(username).subscribe({
-      next: () => {
+      next: (cards) => {
         this.importando = false;
         this.cargarProyectosLogueado();
+        // Limpia ?importar=1 de la URL
+        this.router.navigate(['/app/proyectos'], { replaceUrl: true });
       },
       error: (err) => {
         this.importando = false;
-        this.error = 'Error importando repos: ' + (err?.error?.message || err.message);
+        const mensaje = err?.error?.message || err?.error?.error || err.message;
+        if (String(mensaje).toLowerCase().includes('ya está registrado')) {
+          this.avisoGit = mensaje;
+        } else {
+          this.error = 'Error importando repos: ' + mensaje;
+        }
         console.error(err);
-      }
+      },
     });
-  }
-
-  cancelarModalGit() {
-    this.mostrarModalGit = false;
-    this.gitUsernameInput = '';
   }
 
   toggleVisibilidadCard(proyecto: Proyecto, event: Event) {

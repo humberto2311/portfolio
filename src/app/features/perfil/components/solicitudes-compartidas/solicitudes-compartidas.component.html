@@ -1,0 +1,47 @@
+@if (solicitudes().length === 0) {
+  <p class="vacio">
+    <i class="fa-solid fa-inbox"></i>
+    No tienes solicitudes pendientes.
+  </p>
+}
+
+@for (s of solicitudes(); track s.id) {
+  <article class="solicitud">
+    <div class="quien" (click)="irAlPerfil(s, $event)">
+      <div class="avatar-sm">{{ s.deIniciales }}</div>
+      <div class="texto">
+        <p class="linea">
+          <strong class="nombre">{{ s.deNombre }}</strong> quiere publicar esto en tu perfil
+          <span class="hace">· {{ s.tiempo }}</span>
+        </p>
+        @if (s.mensaje) {
+          <p class="mensaje">“{{ s.mensaje }}”</p>
+        }
+      </div>
+    </div>
+
+    <div class="post-preview">
+      @if (s.imagenPost) {
+        <img [src]="s.imagenPost" alt="Publicación compartida" />
+      }
+      <p>{{ s.textoPost }}</p>
+    </div>
+
+    <div class="acciones">
+      <button
+        type="button"
+        class="btn-rechazar"
+        [disabled]="s.resolviendo"
+        (click)="resolver(s, false)">
+        Rechazar
+      </button>
+      <button
+        type="button"
+        class="btn-aceptar"
+        [disabled]="s.resolviendo"
+        (click)="resolver(s, true)">
+        {{ s.resolviendo ? '...' : 'Aceptar' }}
+      </button>
+    </div>
+  </article>
+}

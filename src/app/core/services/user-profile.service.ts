@@ -16,9 +16,22 @@ export class UserProfileService {
   updateGitUsername(gitUsername: string): Observable<UserProfile> {
     return this.http.put<UserProfile>(`${this.API}/me/git-username`, { gitUsername });
   }
-   getPerfilCompletoPorId(id: string): Observable<any> {
+
+  getPerfilCompletoPorId(id: string): Observable<any> {
     return this.http.get<any>(`${this.API}/perfil-completo/${id}`);
   }
-    getPerfilCompletoPorUsername(username: string): Observable<any> {
-    return this.http.get<any>(`${this.API}/perfil-completo/username/${username}`);}
+
+  getPerfilCompletoPorUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.API}/perfil-completo/username/${username}`);
+  }
+
+  /** Perfil social propio (rol, estado, portada, bio...). */
+  getMiPerfilSocial(): Observable<any> {
+    return this.http.get<any>(`${this.API}/social/me`);
+  }
+
+  /** Guarda el perfil social propio (rol, estado, portada, bio...). */
+  guardarMiPerfilSocial(dto: any): Observable<any> {
+    return this.http.post<any>(`${this.API}/social/me`, dto);
+  }
 }

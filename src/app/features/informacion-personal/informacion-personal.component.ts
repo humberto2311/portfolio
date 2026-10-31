@@ -1,17 +1,19 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { switchMap, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { switchMap, finalize, catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { ResumeProfile, ResumeSection } from '../../core/models/resume.model';
 
 @Component({
   selector: 'app-informacion-personal',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './informacion-personal.component.html',
   styleUrls: ['./informacion-personal.component.scss']
 })
@@ -20,7 +22,8 @@ export class InformacionPersonalComponent implements OnInit {
   private resumeSave = inject(ResumeSaveService);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
-  public router = inject(Router); 
+  private toast = inject(ToastService);
+  public router = inject(Router);
 
   public loading = true;
   public errorMessage: string | null = null; 
@@ -45,6 +48,27 @@ export class InformacionPersonalComponent implements OnInit {
   public cambiandoVisibilidad = false;
 
   private readonly DEFAULT_FULL_NAME = 'Humberto Jose Lozano Verbel';
+
+  // ====== EDICIÓN DE LA HOJA DE VIDA ======
+  public editando = false;
+  public guardando = false;
+
+  public form = {
+    fullName: '',
+    headline: '',
+    summary: '',
+    shortBio: '',
+    email: '',
+    phone: '',
+    location: '',
+    githubUrl: '',
+    experiencia: [] as any[],
+    formacion: [] as any[],
+    tecnologias: [] as any[],
+  };
+
+  private perfilCv: ResumeProfile | null = null;
+  private seccionesRaw: ResumeSection[] = [];
 
   ngOnInit() {
     this.resolverPerfil();
@@ -251,6 +275,8 @@ export class InformacionPersonalComponent implements OnInit {
     this.errorMessage = null; 
     this.profileId = profile.id ?? null;
     this.esPublico = !!profile.isPublic;
+    this.perfilCv = profile;
+    this.seccionesRaw = sections ?? [];
     this.mapProfile(profile);
     this.mapSections(sections);
     this.loading = false;
@@ -290,7 +316,10 @@ export class InformacionPersonalComponent implements OnInit {
     sections.forEach(sec => {
       if (sec.sectionKey === 'experience') {
         this.experiencia = sec.items?.map(item => ({
-          empresa: item.content.empresa, cargo: item.content.cargo, fecha: item.content.fecha
+          empresa: item.content.empresa,
+          cargo: item.content.cargo,
+          fecha: item.content.fecha,
+          descripcion: item.content.descripcion || item.content.detalles || item.content.description || ''
         })) || [];
       } else if (sec.sectionKey === 'education') {
         this.formacion = sec.items?.map(item => ({

@@ -43,6 +43,15 @@
     <button (click)="recargarSegunRuta()" class="btn-retry">Reintentar conexión</button>
   </div>
 
+  <!-- AVISO: GITHUB YA REGISTRADO -->
+  <div *ngIf="avisoGit" class="aviso-git">
+    <i class="fas fa-triangle-exclamation"></i>
+    <span>{{ avisoGit }}</span>
+    <button type="button" class="aviso-cerrar" (click)="avisoGit = null" aria-label="Cerrar">
+      <i class="fas fa-xmark"></i>
+    </button>
+  </div>
+
   <!-- CONTENIDO -->
   <ng-container *ngIf="!cargando && !error">
 
@@ -91,10 +100,11 @@
 
         <div class="tarjeta-imagen-contenedor">
           <img
-            [src]="p.imageUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=600&auto=format&fit=crop'"
+            [src]="imagenProyecto(p)"
             [alt]="p.name"
             class="tarjeta-imagen"
-            loading="lazy">
+            loading="lazy"
+            (error)="onImagenError($event)">
           <div class="imagen-overlay">
             <span class="ver-detalle">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -103,11 +113,40 @@
               Ver Detalles
             </span>
           </div>
+          <span class="badge-demo" *ngIf="p.homepage">
+            <i class="fas fa-rocket"></i> Desplegado
+          </span>
         </div>
 
-        <div class="tarjeta-footer">
-          <span class="tarjeta-nombre">{{ p.name }}</span>
-          <span class="tarjeta-tag">#{{ p.stack && p.stack.length > 0 ? p.stack[0] : 'GIT' }}</span>
+        <div class="tarjeta-cuerpo">
+          <div class="tarjeta-titulo-row">
+            <span class="tarjeta-nombre">{{ p.name }}</span>
+            <span class="tarjeta-tag">#{{ p.stack && p.stack.length > 0 ? p.stack[0] : 'GIT' }}</span>
+          </div>
+
+          <p class="tarjeta-desc">{{ resumenProyecto(p) }}</p>
+
+          <div class="tarjeta-meta">
+            <span class="meta-fecha">
+              <i class="far fa-clock"></i> {{ formatearFecha(p.lastCommitDate) }}
+            </span>
+
+            <a
+              class="meta-home"
+              *ngIf="p.homepage"
+              [href]="p.homepage"
+              target="_blank"
+              rel="noopener noreferrer"
+              [title]="p.homepage"
+              (click)="$event.stopPropagation()">
+              <i class="fas fa-arrow-up-right-from-square"></i>
+              {{ dominioHomepage(p) }}
+            </a>
+          </div>
+
+          <div class="tarjeta-stack" *ngIf="stackVisible(p).length > 0">
+            <span class="tech-chip" *ngFor="let tech of stackVisible(p)">{{ tech }}</span>
+          </div>
         </div>
 
         <!-- ACCIONES PRIVADAS (ESTADO / EDITAR / ELIMINAR) -->
@@ -292,25 +331,6 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- ========================================== -->
-<!-- MODAL: PEDIR GIT USERNAME                   -->
-<!-- ========================================== -->
-<div class="modal-git-overlay" *ngIf="mostrarModalGit" (click)="cancelarModalGit()">
-  <div class="modal-git glass-panel" (click)="$event.stopPropagation()">
-    <h3>Vincula tu usuario de GitHub</h3>
-    <p>Necesitamos tu nombre de usuario de GitHub para importar tus repositorios.</p>
-    <input
-      type="text"
-      [(ngModel)]="gitUsernameInput"
-      placeholder="ej: torvalds"
-      name="gitUsernameInput" />
-    <div class="modal-actions">
-      <button class="btn-secondary" (click)="cancelarModalGit()">Cancelar</button>
-      <button class="btn-primary" (click)="confirmarGitUsername()" [disabled]="!gitUsernameInput.trim()">Importar</button>
-    </div>
   </div>
 </div>
 

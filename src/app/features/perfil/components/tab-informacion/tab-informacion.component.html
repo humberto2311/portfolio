@@ -4,36 +4,57 @@
   <div class="grid">
     <div>
       <h4>Experiencia</h4>
-      @for (exp of perfil.experiencia; track exp.puesto) {
+      @for (exp of experiencia; track $index) {
         <div class="entry">
-          <p class="title">{{ exp.puesto }} <span>&#64; {{ exp.empresa }}</span></p>
-          <p class="period">{{ exp.periodo }}</p>
-          <p class="detail">{{ exp.detalles }}</p>
+          <p class="title">
+            {{ exp.titulo }}
+            @if (exp.lugar) { <span>&#64; {{ exp.lugar }}</span> }
+          </p>
+          @if (exp.periodo) { <p class="period">{{ exp.periodo }}</p> }
+          @if (exp.detalle) { <p class="detail">{{ exp.detalle }}</p> }
         </div>
+      }
+      @if (experiencia.length === 0) {
+        <p class="vacio">Sin experiencia registrada.</p>
       }
     </div>
 
     <div>
       <h4>Estudios</h4>
-      @for (edu of perfil.estudios; track edu.titulo) {
+      @for (edu of estudios; track $index) {
         <div class="entry">
           <p class="title">{{ edu.titulo }}</p>
-          <p class="period">{{ edu.institucion }} · {{ edu.periodo }}</p>
+          <p class="period">
+            {{ edu.lugar }}@if (edu.periodo) { · {{ edu.periodo }} }
+          </p>
         </div>
+      }
+      @if (estudios.length === 0) {
+        <p class="vacio">Sin estudios registrados.</p>
       }
     </div>
 
     <div>
       <h4>Pila Tecnológica</h4>
-      @for (cat of perfil.pilaTecnologica; track cat.categoria) {
-        <div class="stack">
-          <p class="stack-title">{{ cat.categoria }}</p>
-          <div class="chips">
-            @for (t of cat.tecnologias; track t) {
-              <span class="chip">{{ t }}</span>
-            }
-          </div>
+      @if (tecnologias.length > 0) {
+        <div class="chips">
+          @for (t of tecnologias; track t) {
+            <span class="chip">{{ t }}</span>
+          }
         </div>
+      }
+
+      @if (idiomas.length > 0) {
+        <p class="stack-title">Idiomas</p>
+        <div class="chips">
+          @for (i of idiomas; track i) {
+            <span class="chip">{{ i }}</span>
+          }
+        </div>
+      }
+
+      @if (tecnologias.length === 0 && idiomas.length === 0) {
+        <p class="vacio">Sin tecnologías registradas.</p>
       }
     </div>
 

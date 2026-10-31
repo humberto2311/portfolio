@@ -1,0 +1,38 @@
+<div class="modal-overlay" (click)="cerrado.emit()" role="dialog" aria-modal="true">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="cerrado.emit()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <h3 class="titulo">Publicación original</h3>
+
+    <article class="post">
+      <header class="autor-click" (click)="irAlAutor()">
+        <div class="avatar">
+          @if (post.autorAvatar) {
+            <img [src]="post.autorAvatar" [alt]="'Foto de ' + post.autor" />
+          } @else {
+            {{ post.iniciales }}
+          }
+        </div>
+        <div class="datos">
+          <strong>{{ post.autor }}</strong>
+          <small>{{ post.tiempo }} • <i class="fa-solid fa-globe"></i></small>
+        </div>
+      </header>
+
+      @if (post.texto) {
+        <p class="texto"><app-menciones-texto [texto]="post.texto" /></p>
+      }
+
+      @if (post.imagen) {
+        <img class="imagen" [src]="post.imagen" alt="Publicación" />
+      }
+
+      <div class="metricas">
+        <span><i class="fa-solid fa-thumbs-up"></i> {{ post.likes }}</span>
+        <span>{{ post.compartidos }} compartidos</span>
+      </div>
+    </article>
+  </div>
+</div>

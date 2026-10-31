@@ -127,6 +127,103 @@ $border-soft: rgba(255, 255, 255, 0.08);
       }
     }
 
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin-left: auto;
+
+      .search-box {
+        max-width: none;
+        margin-left: 0;
+      }
+    }
+
+    .sugerencias-nav {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0.35rem;
+      background: rgba(8, 13, 24, 0.98);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      border-radius: 10px;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.8);
+      z-index: 1002;
+      max-height: 320px;
+      overflow-y: auto;
+
+      button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        padding: 0.45rem 0.5rem;
+        cursor: pointer;
+        text-align: left;
+        color: $text-primary;
+
+        &.activa,
+        &:hover { background: rgba(0, 242, 254, 0.1); }
+      }
+
+      .avatar-mini {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1px solid rgba(0, 242, 254, 0.45);
+        background: rgba(0, 242, 254, 0.08);
+        color: $accent-cyan;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .datos {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+        min-width: 0;
+        flex: 1;
+
+        strong {
+          font-size: 0.8rem;
+          color: $text-primary;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        small { font-size: 0.7rem; color: $accent-cyan; }
+      }
+
+      .relacion {
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: $accent-cyan;
+        border: 1px solid rgba(0, 242, 254, 0.4);
+        background: rgba(0, 242, 254, 0.12);
+        border-radius: 999px;
+        padding: 0.1rem 0.4rem;
+        white-space: nowrap;
+
+        &.otro {
+          color: $text-secondary;
+          border-color: $border-soft;
+          background: transparent;
+        }
+      }
+    }
+
     .navbar-actions {
       display: flex;
       align-items: center;
@@ -218,7 +315,7 @@ $border-soft: rgba(255, 255, 255, 0.08);
         animation: slideDown 0.25s ease-out;
       }
 
-      .search-box {
+      .search-wrap {
         max-width: 100%;
         margin-left: 0;
       }

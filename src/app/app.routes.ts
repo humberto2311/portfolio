@@ -47,6 +47,7 @@ export const routes: Routes = [
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'perfil', component: PerfilComponent },
+      { path: 'perfil/:username', component: PerfilComponent },
       { path: 'portafolio', component: PortafolioComponent }, 
       { path: 'hub', component: LinkHubComponent }
     ]

@@ -182,6 +182,9 @@
             <div class="empresa-info">
               <h4>{{ exp.empresa }}</h4>
               <p class="empresa-cargo">{{ exp.cargo }}</p>
+              @if (exp.descripcion) {
+                <p class="empresa-descripcion">{{ exp.descripcion }}</p>
+              }
             </div>
             <div class="empresa-fecha">
               <span>{{ exp.fecha }}</span>

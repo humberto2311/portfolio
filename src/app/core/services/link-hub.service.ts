@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { LinkItem, LinkItemPayload } from '../models/LinkItem';
 
 @Injectable({ providedIn: 'root' })
 export class LinkHubService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/links'; // ajusta a tu endpoint real
+  private readonly baseUrl = `${environment.apiUrl}/api/links`;
 
   getAll(): Observable<LinkItem[]> {
     return this.http.get<LinkItem[]>(this.baseUrl);

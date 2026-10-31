@@ -275,6 +275,12 @@ export class InformacionPersonalComponent implements OnInit {
     this.errorMessage = null; 
     this.profileId = profile.id ?? null;
     this.esPublico = !!profile.isPublic;
+
+    // Si el CV es del usuario logueado, se considera dueño (aunque venga por la URL pública)
+    const usuarioActual = this.authService.currentUser();
+    if (usuarioActual?.id && profile.userProfileId === usuarioActual.id) {
+      this.esPropietario = true;
+    }
     this.perfilCv = profile;
     this.seccionesRaw = sections ?? [];
     this.mapProfile(profile);

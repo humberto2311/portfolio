@@ -89,7 +89,8 @@ export class TabInformacionComponent implements OnChanges {
         // Secciones "custom": si son idiomas, van en la caja de pila.
         const valores = items
           .map((i: any) => this.texto(i.content, ['idioma', 'language', 'nombre', 'name']))
-          .filter((t: string) => !!t);
+          // Un idioma es una palabra o dos, nunca un párrafo del PDF
+          .filter((t: string) => !!t && t.length <= 40);
 
         const esIdioma =
           (seccion.title ?? '').toLowerCase().includes('idioma') ||
@@ -134,9 +135,7 @@ export class TabInformacionComponent implements OnChanges {
       }
     }
 
-    // Respaldo: cuando la IA falló y se guardó el texto del PDF.
-    if (typeof content['texto'] === 'string') return content['texto'].trim();
-
+    // Nunca se usa el texto crudo del PDF: solo los campos reales del ítem.
     return '';
   }
 

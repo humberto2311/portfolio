@@ -70,7 +70,8 @@ export class PdfUploadComponent {
 
   
   private esperarResultado(jobId: string, intentos: number) {
-    if (intentos > 60) {
+    // La IA puede tardar varios minutos: se espera hasta 10 min (300 x 2 s)
+    if (intentos > 300) {
       this.isUploading.set(false);
       this.errorMessage.set('El proceso tardó demasiado. Intenta de nuevo o revisa el PDF.');
       return;

@@ -85,17 +85,18 @@ export class InformacionPersonalComponent implements OnInit {
     if (urlParam) {
       this.esPropietario = false;
       
-      // 👇 VALIDACIÓN DE SEGURIDAD: Detectar si es UUID o ID numérico
+      // 👇 Detectar si es UUID o ID numérico
       const esUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(urlParam);
       const esIDNumerico = /^\d+$/.test(urlParam);
 
-      // Si estamos en la zona pública (no es edición) y tratan de buscar por ID interno, lo bloqueamos.
-      if ((esUUID || esIDNumerico) && !isEditRoute) {
-        this.setError('Por motivos de seguridad, no se permite buscar currículums por ID interno. Utiliza el nombre de usuario o el enlace directo.');
+      // El ID numérico interno sigue bloqueado (no expone el perfil completo).
+      if (esIDNumerico && !isEditRoute) {
+        this.setError('Por motivos de seguridad, no se permite buscar currículums por ID interno. Usa el enlace con el nombre de usuario.');
         return;
       }
 
       if (esUUID) {
+        // El backend decide: CV público para cualquiera, privado solo su dueño.
         this.loadByUserId(urlParam);
       } else if (esIDNumerico) {
         this.loadById(Number(urlParam));

@@ -36,7 +36,7 @@
       }
     }
 
-    <!-- 👇 HEADER PARA LA VISTA DE PDF -->
+
     @if (svc.activeView() === 'pdf') {
       <div class="header-inner">
         <div class="icon-box" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">
@@ -63,7 +63,6 @@
       <app-chat-view />
     }
     
-    <!-- 👇 CUERPO PARA LA VISTA DE PDF -->
     @if (svc.activeView() === 'pdf') {
       <app-pdf-upload />
     }

@@ -7,22 +7,22 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
-          PROYECTO NFC-SOFT V1.0 • FASE INICIAL
+          NFC-SOFT • RED SOCIAL DE IDENTIDAD PROFESIONAL
         </div>
         <h1 class="hero-title">
-          Potenciando el networking inteligente con <span class="gradient-text">NFC-Soft</span>
+          NFC-Soft: la red social donde cada persona publica su <span class="gradient-text">identidad profesional</span>
         </h1>
         <p class="hero-subtitle">
-          Tu identidad digital al alcance de un tap. Crea tu memo personal, comparte tus códigos de Git y conecta profesionales en segundos.
+          No es solo mi tarjeta: es un espacio abierto para la comunidad. Cada persona crea su perfil, publica lo que hace y guarda sus contactos. Hoy se comparte con un enlace; el toque con tarjeta NFC todavía no está activo y está planeado para una próxima etapa.
         </p>
         <div class="hero-actions">
           <a href="#builder" class="btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            Crear Mi Memo Personal
+            Crear mi perfil
           </a>
           <a href="#git" class="btn-secondary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-            Conoce el Proyecto
+            Ver qué hace la app
           </a>
         </div>
       </div>
@@ -43,30 +43,30 @@
               <div class="chip-icon">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2v2H7v2h2v2H7v2h2v2H7v2h2v2h2v2h2v-2h2v2h2v-2h2v2h2V8h-2V6h-2V4h-2V2h-2zm0 6h2v2H9zm4 0h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg>
               </div>
-              <span class="card-label">NFC-SOFT PASS</span>
+              <span class="card-label">NFC-SOFT</span>
             </div>
             <svg class="wifi-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21c-1.5 0-2.7-1.2-2.7-2.7S10.5 15.6 12 15.6s2.7 1.2 2.7 2.7S13.5 21 12 21zM6.3 12.9l1.9 1.9c1-1 2.3-1.5 3.8-1.5s2.8.5 3.8 1.5l1.9-1.9C16.5 11.7 14.4 11 12 11s-4.5.7-5.7 1.9zM2.5 9.1l1.9 1.9C6.6 8.8 9.2 7.6 12 7.6s5.4 1.2 7.6 3.4l1.9-1.9C18.7 6.3 15.5 5 12 5S5.3 6.3 2.5 9.1z"/></svg>
           </div>
 
           <div class="card-body">
             <h3 class="card-name">HUMBERTO "BETO"</h3>
-            <p class="card-role">BACKEND & MOBILE DEVELOPER</p>
+            <p class="card-role">DESARROLLADOR BACKEND</p>
           </div>
 
           <div class="card-footer">
             <div>
-              <p class="card-footer-label">ID PROYECTO</p>
-              <p class="card-footer-value">NFC-V1-BETO-01</p>
+              <p class="card-footer-label">MI MARCA</p>
+              <p class="card-footer-value">NFC-SOFT</p>
             </div>
             <div class="card-status" [class.active]="isScanning || scanSuccess">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-              {{ isScanning ? 'ESCANEAR...' : scanSuccess ? 'CONECTADO' : 'Tap to Scan' }}
+              {{ isScanning ? 'SIMULANDO...' : scanSuccess ? 'COMPARTIDO' : 'Vista previa' }}
             </div>
           </div>
         </div>
         <p class="card-hint">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6a1 1 0 0 0-2 0v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
-          Pasa el cursor para inclinación 3D • Haz clic para simular NFC
+          Diseño de la tarjeta (demostración) • Haz clic para ver la animación
         </p>
       </div>
     </div>
@@ -76,15 +76,15 @@
   <section id="git" class="git-section">
     <div class="section-header">
       <div>
-        <span class="section-eyebrow">Plataforma de Networking Inteligente</span>
-        <h2 class="section-title">NFC-Soft: Identidad Digital y Conexiones que Perduran</h2>
+        <span class="section-eyebrow">Qué es NFC-Soft</span>
+        <h2 class="section-title">Mi marca y una red social para toda la comunidad</h2>
         <p class="section-subtitle">
-          Una solución que transforma la presentación personal y el networking en entornos de alta presión, eliminando la pérdida de información y optimizando cada interacción.
+          NFC-Soft es el nombre con el que firmo mi trabajo, y también el de la aplicación: una red social donde cualquier persona o empresa puede publicar su identidad profesional.
         </p>
       </div>
       <a href="#builder" class="github-link">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        Probar el creador de memo
+        Probar la versión 1
       </a>
     </div>
 
@@ -94,21 +94,23 @@
         <div class="bio-header">
           <div class="bio-avatar">NS</div>
           <div>
-            <h3>NFC-Soft V1.0</h3>
-            <p>Plataforma de Networking con NFC</p>
+            <h3>NFC-Soft · Versión 1</h3>
+            <p>Red social de identidad profesional</p>
           </div>
         </div>
         <p class="bio-text">
-          NFC-Soft es un aplicativo y red social de presentación personal que utiliza tecnología NFC para compartir identidad digital en segundos. Su propósito es evitar la pérdida de información en contextos de estrés, poco tiempo o alta densidad de contactos —como eventos, ferias y reuniones ejecutivas— donde las tarjetas físicas y los métodos tradicionales fallan.
+          NFC-Soft no es solo mi perfil: es una red social donde cada persona crea el suyo, publica lo que está haciendo y se conecta con los demás. Un desarrollador, un diseñador o una empresa pueden mostrar su trabajo en el mismo lugar.
           <br><br>
-          A través de un memo digital editable, el usuario comparte su perfil profesional, enlaces a repositorios Git, datos de contacto y vCard con un solo tap. La plataforma centraliza y preserva cada conexión, garantizando que ninguna oportunidad de networking se pierda por falta de tiempo o desorganización.
+          La diferencia con otras redes es que aquí la identidad va primero: tu perfil, tus proyectos, tu hoja de vida y tus enlaces están juntos y se comparten en segundos con un enlace propio. Y tú decides qué se ve: tu perfil puede ser público o privado.
         </p>
         <div class="bio-tags">
-          <div><span class="dot"></span> Networking sin fricción</div>
-          <div><span class="dot"></span> Identidad digital portable</div>
-          <div><span class="dot"></span> Integración con GitHub</div>
-          <div><span class="dot"></span> Exportación vCard inmediata</div>
-          <div><span class="dot"></span> Diseñado para entornos de alta presión</div>
+          <div><span class="dot"></span> Perfil público o privado</div>
+          <div><span class="dot"></span> Publicaciones y comentarios</div>
+          <div><span class="dot"></span> Compartir con otros perfiles</div>
+          <div><span class="dot"></span> Proyectos importados de GitHub</div>
+          <div><span class="dot"></span> Hoja de vida armada con IA</div>
+          <div><span class="dot"></span> Contactos y buscador de personas</div>
+          <div><span class="dot"></span> NFC: planeado, aún no activo</div>
         </div>
       </div>
 
@@ -118,36 +120,50 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
-          ¿Cómo funciona NFC-Soft V1?
+          Qué se puede hacer hoy
         </h3>
         <p class="how-intro">
-          En su volumen uno, la aplicación funciona como los botones de <strong>“Proyectos & Códigos”</strong> y <strong>“Información Personal”</strong> de esta misma landing: es una <strong>presentación personal</strong> que reúne tu identidad profesional, tus enlaces y tus datos de contacto en un solo lugar.
+          Esto ya está funcionando en la versión 1, tanto para mí como para cualquier persona que se registre:
         </p>
         <div class="how-steps">
           <div class="how-step">
             <span class="step-num">01</span>
             <div>
-              <h4>Información Personal</h4>
-              <p>Tu memo digital centraliza nombre, rol, bio, teléfono, email y enlaces. Es tu tarjeta de presentación viva.</p>
+              <h4>Creas tu perfil</h4>
+              <p>Foto, portada, tu rol y si estás disponible para trabajar o no. Puedes entrar con correo o con GitHub, Google o Microsoft.</p>
             </div>
           </div>
           <div class="how-step">
             <span class="step-num">02</span>
             <div>
-              <h4>Proyectos & Códigos</h4>
-              <p>Compartes tus proyectos y perfiles de desarrollador con un solo tap, sin dictar URLs ni perder tiempo.</p>
+              <h4>Publicas lo que haces</h4>
+              <p>Escribes una publicación (con foto o video) y los demás pueden darle me gusta y comentarla.</p>
             </div>
           </div>
           <div class="how-step">
             <span class="step-num">03</span>
             <div>
-              <h4>Networking real</h4>
-              <p>El sistema consiste en presentaciones y networking: cada tap preserva la conexión y evita la pérdida de información.</p>
+              <h4>Compartes con la comunidad</h4>
+              <p>Puedes compartir una publicación en tu perfil o en el de otra persona. La otra persona acepta o rechaza, y le llega una notificación.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <span class="step-num">04</span>
+            <div>
+              <h4>Sumas tu hoja de vida y tus proyectos</h4>
+              <p>Subes tu hoja de vida en PDF y queda ordenada sola. Tus proyectos de GitHub entran con su imagen, lenguaje y último cambio.</p>
+            </div>
+          </div>
+          <div class="how-step">
+            <span class="step-num">05</span>
+            <div>
+              <h4>Guardas tus contactos</h4>
+              <p>Buscas personas por nombre o por &#64;usuario y las agregas a tu red, así no pierdes a quién conociste.</p>
             </div>
           </div>
         </div>
         <p class="how-note">
-          En resumen: <strong>NFC-Soft V1 es tu presentación personal + tu red de contactos</strong>, funcionando de forma análoga a los botones de “Repositorios” y “Perfil” que ves en esta página.
+          En resumen: la <strong>versión 1 es una red social completa para la identidad profesional</strong>. Cada persona tiene su espacio, su público y sus contactos; la versión 2 lleva lo mismo al mundo de las empresas.
         </p>
       </div>
     </div>
@@ -156,37 +172,44 @@
   <!-- 3. ROADMAP -->
   <section class="roadmap-section">
     <div class="section-header centered">
-      <span class="section-eyebrow">Evolución del Producto</span>
-      <h2 class="section-title">Marca NFC-Soft & Roadmap</h2>
-      <p class="section-subtitle">Estrategia modular para transformar la presentación personal y el networking empresarial.</p>
+      <span class="section-eyebrow">Hacia dónde va</span>
+      <h2 class="section-title">NFC-Soft: versión 1 y versión 2</h2>
+      <p class="section-subtitle">Lo que ya está funcionando para la comunidad y lo que viene para las empresas.</p>
     </div>
 
     <div class="roadmap-grid">
       <div class="roadmap-card active glass-panel">
-        <div class="phase-tag active-tag">Versión 1.0 (Activa)</div>
+        <div class="phase-tag active-tag">Versión 1 · Ya funciona</div>
         <div class="phase-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
         </div>
-        <h3>Fase 1: Memos & Landings Personales</h3>
-        <p>Enfocado en desarrolladores y profesionales independientes. Permite crear perfiles digitales compactos, enlaces directos a proyectos Git y descarga instantánea de contacto vCard.</p>
+        <h3>La red social, para personas</h3>
+        <p>Cualquiera puede registrarse y publicar su identidad profesional. Tú decides si tu perfil y tu hoja de vida son públicos o privados.</p>
         <ul>
-          <li><span class="check">✓</span> Landing de presentación editable</li>
-          <li><span class="check">✓</span> Integración con repositorio GitHub</li>
-          <li><span class="check">✓</span> Exportación dinámica de contacto .vcf</li>
+          <li><span class="check">✓</span> Perfil, portada y estado de disponibilidad</li>
+          <li><span class="check">✓</span> Publicaciones, me gusta y comentarios</li>
+          <li><span class="check">✓</span> Compartir publicaciones con otros perfiles</li>
+          <li><span class="check">✓</span> Proyectos desde GitHub y hoja de vida desde PDF</li>
+          <li><span class="check">✓</span> Contactos, buscador de personas y notificaciones</li>
+          <li><span class="check">✓</span> Enlace propio para compartir tu perfil</li>
         </ul>
+        <p class="how-note">
+          El toque con tarjeta NFC <strong>todavía no está en la versión 1</strong>: está planeado para una próxima etapa.
+        </p>
       </div>
 
       <div class="roadmap-card glass-panel">
-        <div class="phase-tag">Próximamente</div>
+        <div class="phase-tag">Versión 2 · En camino</div>
         <div class="phase-icon muted">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
         </div>
-        <h3>Fase 2: Soluciones Empresariales</h3>
-        <p>Plataforma SaaS centralizada para empresas. Administración masiva de tarjetas físicas NFC corporativas, analíticas de interacciones y gestión de permisos por departamento.</p>
+        <h3>La misma red, para empresas</h3>
+        <p>Equipos completos con una sola cuenta: la empresa administra los perfiles de sus empleados, usa tarjetas con su logo y ve cuántas veces se comparte cada perfil.</p>
         <ul>
-          <li><span class="dash">○</span> Dashboard multi-usuario corporativo</li>
-          <li><span class="dash">○</span> Métricas de scans e interacciones</li>
-          <li><span class="dash">○</span> Tarjetas PVC y metálicas personalizadas</li>
+          <li><span class="dash">○</span> Varias personas bajo una cuenta de empresa</li>
+          <li><span class="dash">○</span> Tarjetas físicas con el logo de la empresa</li>
+          <li><span class="dash">○</span> Toque NFC para compartir el perfil</li>
+          <li><span class="dash">○</span> Panel con cuántas veces se abrió cada perfil</li>
         </ul>
       </div>
     </div>

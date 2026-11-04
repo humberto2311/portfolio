@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// ⚠️ IMPORTANTE: Ajusta las rutas de estos imports según tu estructura de carpetas
+// 1. IMPORTAMOS EL SERVICIO (Esta es la ruta correcta)
+import { ModalService } from '../../../core/services/modal.service'; 
 import { ProyectosService } from '../../../core/services/proyectos.service'; 
 import { Proyecto } from '../../../core/models/proyecto';
 
@@ -25,20 +26,19 @@ export interface DeveloperProfile {
   styleUrl: './nfc-profile.component.scss'
 })
 export class NfcProfileComponent implements OnInit {
-  // Inyección del servicio
   private proyectosService = inject(ProyectosService);
+  
+  // 2. INYECTAMOS EL SERVICIO (Igual que en el Navbar)
+  private modalSvc = inject(ModalService);
 
-  // Variables para la tarjeta NFC
   cardTransform = 'rotateX(0deg) rotateY(0deg)';
   isScanning = false;
   scanSuccess = false;
 
-  // Variables para el estado de los repositorios de la API
   loadingRepos = true;
   reposError = false;
   gitRepos: Proyecto[] = [];
 
-  // Datos del perfil para el formulario y el Hero
   profile: DeveloperProfile = {
     name: 'Humberto Lozano Verbel',
     nickname: 'Beto',
@@ -50,19 +50,27 @@ export class NfcProfileComponent implements OnInit {
     linkedin: 'linkedin.com/in/beto-dev'
   };
 
-  // Al iniciar el componente, cargamos los repos
   ngOnInit(): void {
     this.loadRecentRepos();
   }
 
-  // Método que soluciona el error de la imagen
+  abrirLogin(tab: 'login' | 'register' = 'register') {
+    this.modalSvc.openLogin(tab);
+  }
+
+  // AGREGA ESTE MÉTODO PARA EL BOTÓN "VER QUÉ HACE LA APP"
+  scrollToGit(): void {
+    const el = document.getElementById('git');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
   loadRecentRepos(): void {
     this.loadingRepos = true;
     this.reposError = false;
 
     this.proyectosService.getProyectos().subscribe({
       next: (repos) => {
-        // Tomamos los primeros 4 proyectos
         this.gitRepos = repos.slice(0, 4);
         this.loadingRepos = false;
       },
@@ -74,7 +82,6 @@ export class NfcProfileComponent implements OnInit {
     });
   }
 
-  // Lógica de la tarjeta 3D
   onCardTilt(event: MouseEvent): void {
     const card = event.currentTarget as HTMLElement;
     const rect = card.getBoundingClientRect();
@@ -87,7 +94,6 @@ export class NfcProfileComponent implements OnInit {
     this.cardTransform = 'rotateX(0deg) rotateY(0deg)';
   }
 
-  // Lógica del escáner NFC simulado
   triggerTapScan(): void {
     if (this.isScanning) return;
     this.isScanning = true;
@@ -113,7 +119,6 @@ export class NfcProfileComponent implements OnInit {
     }, 1200);
   }
 
-  // Lógica para descargar el contacto .vcf
   exportVCard(): void {
     const p = this.profile;
     const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${p.name}\nTITLE:${p.role}\nTEL:${p.phone}\nEMAIL:${p.email}\nNOTE:NFC-Soft V1 Contact\nEND:VCARD`;

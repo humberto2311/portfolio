@@ -12,8 +12,11 @@ import { FeedComponent } from './features/feed/feed.component';
 import { ProyectosComponent } from './features/proyectos/proyectos.component';
 
 import { InformacionPersonalComponent } from './features/informacion-personal/informacion-personal.component';
+import { TarjetaPublicaComponent } from './features/tarjeta-publica/tarjeta-publica.component';
 
 export const routes: Routes = [
+  // Tarjeta de contacto pública (destino del QR / NFC)
+  { path: 'tarjeta/:userId', component: TarjetaPublicaComponent },
   {
     path: '',
     component: LayoutComponent,

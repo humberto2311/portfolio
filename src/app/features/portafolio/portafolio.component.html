@@ -1,70 +1,296 @@
-<div class="portafolio-layout">
-  
-  <!-- 1. MENÚ LATERAL DE SECCIONES -->
-  <aside class="sidebar-portafolio">
-    <div class="sidebar-header">
-      <h3>Secciones del Portafolio</h3>
-      <p>Ej: Hoja de Vida, Proyectos...</p>
+<div class="vcard-page">
+
+  <!-- CABECERA -->
+  <header class="page-head">
+    <div class="head-text">
+      <span class="eyebrow">Mi identidad</span>
+      <h1>Mi tarjeta de contacto</h1>
+      <p>
+        Una tarjeta que puedes compartir con un enlace. Elige la plantilla y agrega solo los campos
+        que necesites: lo que ves a la derecha es exactamente lo que recibirá la otra persona.
+      </p>
     </div>
 
-    <ul class="lista-modulos">
-      @for (sec of secciones(); track sec.id) {
-        <li 
-          [class.active]="seccionSeleccionada()?.id === sec.id"
-          (click)="seleccionarSeccion(sec)">
-          <span class="mod-icon">{{ sec.icon }}</span>
-          <span class="mod-title">{{ sec.title }}</span>
-        @if (sec.items && sec.items.length > 0) {
-  <span class="mod-count">{{ sec.items.length }}</span>
-}
-        </li>
+    <div class="head-actions">
+      <button type="button" class="btn ghost" (click)="abrirCompartir()">
+        <i class="fa-solid fa-qrcode"></i> Compartir
+      </button>
+      <button type="button" class="btn primary" (click)="guardar()" [disabled]="guardando()">
+        <i class="fa-solid" [class.fa-spinner]="guardando()" [class.fa-spin]="guardando()"
+           [class.fa-floppy-disk]="!guardando()"></i>
+        {{ guardando() ? 'Guardando...' : 'Guardar tarjeta' }}
+      </button>
+    </div>
+  </header>
+
+  @if (mensaje()) {
+    <div class="aviso">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>{{ mensaje() }}</span>
+      <button type="button" class="aviso-close" (click)="mensaje.set(null)">×</button>
+    </div>
+  }
+
+  <div class="layout">
+
+    <!-- ================= FORMULARIO ================= -->
+    <section class="col-form">
+
+      <!-- 1. Plantillas -->
+      <div class="panel">
+        <h2><span class="num">1</span> Elige la plantilla</h2>
+        <p class="hint">Define qué campos se muestran. Puedes cambiarla cuando quieras.</p>
+
+        <div class="templates">
+          @for (p of plantillas; track p.id) {
+            <button type="button"
+                    class="template"
+                    [class.active]="tarjeta().plantilla === p.id"
+                    (click)="elegirPlantilla(p.id)">
+              <span class="template-icon"><i [class]="p.icono"></i></span>
+              <strong>{{ p.nombre }}</strong>
+              <small>{{ p.descripcion }}</small>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- 2. Datos base -->
+      <div class="panel">
+        <h2><span class="num">2</span> Tus datos</h2>
+
+        <div class="fields">
+          <label class="field">
+            <span>Nombre completo</span>
+            <input type="text" placeholder="Tu nombre"
+                   [ngModel]="tarjeta().nombre" (ngModelChange)="set('nombre', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Puesto o rol</span>
+            <input type="text" placeholder="Desarrollador Backend"
+                   [ngModel]="tarjeta().puesto" (ngModelChange)="set('puesto', $event)" />
+          </label>
+
+          @if (mostrarEmpresa()) {
+            <label class="field">
+              <span>Empresa</span>
+              <input type="text" placeholder="Nombre de tu empresa"
+                     [ngModel]="tarjeta().empresa" (ngModelChange)="set('empresa', $event)" />
+            </label>
+          }
+
+          <label class="field">
+            <span>Teléfono</span>
+            <input type="tel" placeholder="+57 300 000 0000"
+                   [ngModel]="tarjeta().telefono" (ngModelChange)="set('telefono', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Correo</span>
+            <input type="email" placeholder="tu@correo.com"
+                   [ngModel]="tarjeta().email" (ngModelChange)="set('email', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Sitio web</span>
+            <input type="text" placeholder="tupagina.com"
+                   [ngModel]="tarjeta().web" (ngModelChange)="set('web', $event)" />
+          </label>
+
+          <label class="field">
+            <span>LinkedIn</span>
+            <input type="text" placeholder="linkedin.com/in/tuperfil"
+                   [ngModel]="tarjeta().linkedin" (ngModelChange)="set('linkedin', $event)" />
+          </label>
+        </div>
+      </div>
+
+      <!-- 3. Campos extra ya agregados -->
+      @if (tarjeta().campos.length > 0) {
+        <div class="panel">
+          <h2><span class="num">3</span> Campos que agregaste</h2>
+
+          <div class="campos-lista">
+            @for (campo of tarjeta().campos; track campo.clave) {
+              <div class="campo-item">
+                <label class="field">
+                  <span>{{ campo.etiqueta }}</span>
+                  <input type="text" placeholder="Escribe el valor"
+                         [ngModel]="campo.valor" (ngModelChange)="setCampo(campo.clave, $event)" />
+                </label>
+                <button type="button" class="quitar" (click)="quitarCampo(campo.clave)" title="Quitar campo">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
       }
-    </ul>
 
-    <!-- BOTÓN PARA CREAR UNA NUEVA SECCIÓN -->
-    <button class="btn-add-modulo" (click)="abrirModal()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-      Nueva Sección
-    </button>
-  </aside>
+      <!-- 4. Añadir más campos -->
+      <div class="panel add-panel">
+        <button type="button" class="btn dashed" (click)="toggleMenu()">
+          <i class="fa-solid" [class.fa-plus]="!menuCampos()" [class.fa-minus]="menuCampos()"></i>
+          {{ menuCampos() ? 'Cerrar opciones' : 'Añadir más campos' }}
+        </button>
 
-  <!-- 2. ÁREA DE TRABAJO (ÍTEMS) -->
-  <main class="area-trabajo">
-    @if (seccionSeleccionada()) {
-      <app-editor-items 
-        [seccion]="seccionSeleccionada()!" 
-        (guardarSeccion)="actualizarSeccion($event)" />
-    } @else {
-      <div class="empty-state">
-        <span class="empty-icon">👈</span>
-        <h2>Selecciona una sección</h2>
-        <p>Elige una sección del menú izquierdo o crea una nueva para empezar a añadir ítems.</p>
-      </div>
-    }
-  </main>
-</div>
-
-<!-- MODAL CREAR SECCIÓN -->
-@if (mostrarModal()) {
-  <div class="modal-backdrop" (click)="cerrarModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h2>Crear nueva Sección</h2>
-      <p>Ej: Hoja de Vida, Mis Proyectos, Certificaciones.</p>
-      
-      <div class="input-group">
-        <label>Ícono (Emoji)</label>
-        <input type="text" [(ngModel)]="nuevoIcono" maxlength="2" class="input-icono" />
+        @if (menuCampos()) {
+          <div class="menu-grupos">
+            @for (grupo of grupos; track grupo.id) {
+              <div class="grupo">
+                <h3><i [class]="grupo.icono"></i> {{ grupo.nombre }}</h3>
+                <div class="grupo-campos">
+                  @for (def of grupo.campos; track def.clave) {
+                    <button type="button"
+                            class="chip-campo"
+                            [class.agregado]="tieneCampo(def.clave)"
+                            [disabled]="tieneCampo(def.clave)"
+                            (click)="agregarCampo(def)">
+                      <i class="fa-solid" [class.fa-plus]="!tieneCampo(def.clave)" [class.fa-check]="tieneCampo(def.clave)"></i>
+                      {{ def.etiqueta }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
 
-      <div class="input-group">
-        <label>Título de la sección</label>
-        <input type="text" [(ngModel)]="nuevoTitulo" placeholder="Ej: Hoja de Vida" />
+      <!-- 5. Notas -->
+      <div class="panel">
+        <h2><span class="num">4</span> Sobre mí / Notas</h2>
+        <p class="hint">
+          Texto libre que verá quien abra tu tarjeta: horario de atención, indicaciones para llegar,
+          una bio corta o datos de emergencia.
+        </p>
+        <textarea rows="4" placeholder="Ej: Atiendo de lunes a viernes de 8 a 18. Estoy frente al parque principal."
+                  [ngModel]="tarjeta().notas" (ngModelChange)="set('notas', $event)"></textarea>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
-        <button class="btn-save" (click)="agregarSeccion()" [disabled]="!nuevoTitulo.trim()">Crear Sección</button>
+    </section>
+
+    <!-- ================= VISTA PREVIA ================= -->
+    <aside class="col-preview">
+      <div class="preview-wrap">
+        <div class="preview-label">
+          <i class="fa-solid fa-mobile-screen"></i> Así se ve tu tarjeta
+        </div>
+
+        <div class="preview-card" [attr.data-plantilla]="tarjeta().plantilla">
+          <div class="preview-top">
+            <div class="preview-avatar">{{ iniciales() }}</div>
+            <div class="preview-id">
+              <h3>{{ tarjeta().nombre || 'Tu nombre' }}</h3>
+              <p class="preview-role">
+                {{ tarjeta().puesto || 'Tu puesto' }}
+                @if (mostrarEmpresa() && tarjeta().empresa) {
+                  <span> · {{ tarjeta().empresa }}</span>
+                }
+              </p>
+            </div>
+          </div>
+
+          <div class="preview-rows">
+            @if (tarjeta().telefono) {
+              <div class="row"><i class="fa-solid fa-phone"></i><span>{{ tarjeta().telefono }}</span></div>
+            }
+            @if (tarjeta().email) {
+              <div class="row"><i class="fa-solid fa-envelope"></i><span>{{ tarjeta().email }}</span></div>
+            }
+            @if (tarjeta().plantilla !== 'PERSONAL') {
+              @if (tarjeta().web) {
+                <div class="row"><i class="fa-solid fa-globe"></i><span>{{ tarjeta().web }}</span></div>
+              }
+              @if (tarjeta().linkedin) {
+                <div class="row"><i class="fa-brands fa-linkedin"></i><span>{{ tarjeta().linkedin }}</span></div>
+              }
+            }
+
+            @for (campo of camposPreview(); track campo.clave) {
+              <div class="row">
+                <i class="fa-solid fa-circle-dot"></i>
+                <span><strong>{{ campo.etiqueta }}:</strong> {{ campo.valor }}</span>
+              </div>
+            }
+          </div>
+
+          @if (mostrarNotas() && tarjeta().notas) {
+            <div class="preview-notas">
+              <span class="notas-label">Notas</span>
+              <p>{{ tarjeta().notas }}</p>
+            </div>
+          }
+
+          <div class="preview-footer">
+            <span class="brand">NFC-SOFT</span>
+            <span class="tipo">{{ plantillaActual().nombre }}</span>
+          </div>
+        </div>
+
+        <p class="preview-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          Los campos que agregues aparecen aquí al instante. Al guardar se incluyen en el archivo .vcf.
+        </p>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ================= MODAL COMPARTIR ================= -->
+  @if (compartirAbierto()) {
+    <div class="modal-backdrop" (click)="cerrarCompartir()">
+      <div class="modal" (click)="$event.stopPropagation()">
+
+        <header class="modal-head">
+          <h2><i class="fa-solid fa-qrcode"></i> Compartir mi tarjeta</h2>
+          <button type="button" class="modal-close" (click)="cerrarCompartir()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </header>
+
+        @if (enlacePublico()) {
+          <div class="modal-body">
+            <div class="qr-box">
+              <img [src]="qrUrl()" alt="Código QR de mi tarjeta" />
+            </div>
+
+            <p class="modal-text">
+              Al escanear este QR —o tocar la tarjeta NFC— se abre tu tarjeta y el contacto se
+              guarda en el teléfono de la otra persona, sin que tenga que escribir nada.
+            </p>
+
+            <div class="enlace-box">
+              <input type="text" [value]="enlacePublico()" readonly />
+              <button type="button" class="btn ghost" (click)="copiarEnlace()">
+                <i class="fa-regular fa-copy"></i> Copiar
+              </button>
+            </div>
+
+            <div class="modal-acciones">
+              <button type="button" class="btn primary" (click)="descargarVcf()">
+                <i class="fa-solid fa-address-card"></i> Guardar contacto (.vcf)
+              </button>
+              <a class="btn ghost" [href]="enlacePublico()" target="_blank" rel="noopener">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver tarjeta
+              </a>
+            </div>
+          </div>
+        } @else {
+          <div class="modal-body">
+            <p class="modal-vacio">
+              <i class="fa-solid fa-circle-info"></i>
+              Guarda tu tarjeta una vez para generar el enlace y el QR.
+            </p>
+            <button type="button" class="btn primary" (click)="guardar()" [disabled]="guardando()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar tarjeta
+            </button>
+          </div>
+        }
+
       </div>
     </div>
-  </div>
-}
+  }
+
+</div>

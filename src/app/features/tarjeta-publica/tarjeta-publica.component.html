@@ -1,0 +1,134 @@
+<div class="tarjeta-page">
+
+  @if (cargando()) {
+    <div class="estado">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <p>Cargando tarjeta...</p>
+    </div>
+  }
+
+  @if (!cargando() && noEncontrada()) {
+    <div class="estado">
+      <i class="fa-solid fa-id-card"></i>
+      <h2>Esta tarjeta no está disponible</h2>
+      <p>Puede que se haya eliminado o que el enlace esté incompleto.</p>
+    </div>
+  }
+
+  @if (!cargando() && !noEncontrada() && tarjeta(); as t) {
+    <div class="tarjeta-wrap">
+
+      <article class="tarjeta" [attr.data-plantilla]="t.plantilla">
+        <div class="brillo"></div>
+
+        <header class="tarjeta-head">
+          <div class="avatar">{{ iniciales() }}</div>
+          <div class="identidad">
+            <h1>{{ t.nombre || 'Sin nombre' }}</h1>
+            <p class="rol">
+              {{ t.puesto }}
+              @if (t.empresa) { <span>· {{ t.empresa }}</span> }
+            </p>
+            <button type="button" class="copiar-mini" (click)="copiar(t.nombre, 'Nombre copiado')">
+              <i class="fa-regular fa-copy"></i> Copiar nombre
+            </button>
+          </div>
+        </header>
+
+        <div class="acciones-rapidas">
+          @if (t.telefono) {
+            <a class="accion" [href]="enlaceTel(t.telefono)"><i class="fa-solid fa-phone"></i> Llamar</a>
+          }
+          @if (t.email) {
+            <a class="accion" [href]="enlaceCorreo(t.email)"><i class="fa-solid fa-envelope"></i> Correo</a>
+          }
+          @if (t.web) {
+            <a class="accion" [href]="enlaceWeb(t.web)" target="_blank" rel="noopener"><i class="fa-solid fa-globe"></i> Web</a>
+          }
+          <button type="button" class="accion" (click)="compartir()"><i class="fa-solid fa-share-nodes"></i> Compartir</button>
+        </div>
+
+        <div class="filas">
+          @if (t.telefono) {
+            <button type="button" class="fila" (click)="copiar(t.telefono, 'Teléfono copiado')">
+              <i class="fa-solid fa-phone"></i>
+              <span>{{ t.telefono }}</span>
+              <i class="fa-regular fa-copy copia"></i>
+            </button>
+          }
+
+          @if (t.email) {
+            <button type="button" class="fila" (click)="copiar(t.email, 'Correo copiado')">
+              <i class="fa-solid fa-envelope"></i>
+              <span>{{ t.email }}</span>
+              <i class="fa-regular fa-copy copia"></i>
+            </button>
+          }
+
+          @if (t.web) {
+            <a class="fila" [href]="enlaceWeb(t.web)" target="_blank" rel="noopener">
+              <i class="fa-solid fa-globe"></i>
+              <span>{{ t.web }}</span>
+              <i class="fa-solid fa-arrow-up-right-from-square copia"></i>
+            </a>
+          }
+
+          @if (t.linkedin) {
+            <a class="fila" [href]="enlaceWeb(t.linkedin)" target="_blank" rel="noopener">
+              <i class="fa-brands fa-linkedin"></i>
+              <span>{{ t.linkedin }}</span>
+              <i class="fa-solid fa-arrow-up-right-from-square copia"></i>
+            </a>
+          }
+
+          @for (campo of campos(); track campo.clave) {
+            <button type="button" class="fila" (click)="copiar(campo.valor, campo.etiqueta + ' copiado')">
+              <i [class]="icono(campo.clave)"></i>
+              <span><strong>{{ campo.etiqueta }}:</strong> {{ campo.valor }}</span>
+              <i class="fa-regular fa-copy copia"></i>
+            </button>
+          }
+        </div>
+
+        @if (t.notas) {
+          <div class="notas">
+            <span class="notas-label"><i class="fa-solid fa-note-sticky"></i> Notas</span>
+            <p>{{ t.notas }}</p>
+          </div>
+        }
+
+        @if (modoNfc()) {
+          <div class="nfc-aviso">
+            <i class="fa-solid fa-wifi"></i>
+            <div>
+              <strong>Toque detectado</strong>
+              <span>Estamos guardando el contacto en tu teléfono…</span>
+            </div>
+          </div>
+        }
+
+        <button type="button" class="guardar" [class.destacado]="modoNfc()" (click)="guardarContacto()">
+          <i class="fa-solid fa-address-card"></i>
+          Guardar en mis contactos
+        </button>
+
+        <footer class="pie">
+          <span class="marca">NFC-SOFT</span>
+          <span class="tipo">{{ t.plantilla | titlecase }}</span>
+        </footer>
+      </article>
+
+      @if (aviso()) {
+        <div class="aviso">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>{{ aviso() }}</span>
+        </div>
+      }
+
+      <p class="pista">
+        <i class="fa-solid fa-circle-info"></i>
+        Al guardar se añade el contacto completo a tu teléfono: teléfono, correo, enlaces y notas.
+      </p>
+    </div>
+  }
+</div>

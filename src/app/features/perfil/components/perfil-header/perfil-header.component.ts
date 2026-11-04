@@ -2,11 +2,13 @@ import { Component, Input, Output, EventEmitter, inject, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PerfilData } from '../../../../core/models/perfil.model';
+import { Contact } from '../../../../core/models/contact.model'; // <-- IMPORTANTE
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConnectionService } from '../../../../core/services/connection.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserProfileService } from '../../../../core/services/user-profile.service';
 import { ModalService } from '../../../../core/services/modal.service';
+import { SidePanelService } from '../../../../core/services/side-panel.service';
 
 @Component({
   selector: 'app-perfil-header',
@@ -33,8 +35,8 @@ export class PerfilHeaderComponent implements OnChanges {
   private authService = inject(AuthService);
   private userProfileService = inject(UserProfileService);
   private modalSvc = inject(ModalService);
+  private sidePanelSvc = inject(SidePanelService);
 
-  /** true si el perfil está marcado como disponible. */
   get disponible(): boolean {
     const estado = (this.perfil?.estado ?? '').toUpperCase();
     return !estado.includes('SIN');
@@ -158,7 +160,7 @@ export class PerfilHeaderComponent implements OnChanges {
   }
 
   toggleFollow(): void {
-    // 👇 SI NO ESTÁ LOGUEADO, ABRE EL MODAL
+    // Si no está logueado, abre el modal
     if (!this.authService.isAuthenticated()) {
       this.toast.show('Debes iniciar sesión para seguir a este usuario');
       this.modalSvc.openLogin(); 
@@ -189,13 +191,32 @@ export class PerfilHeaderComponent implements OnChanges {
     });
   }
 
+  // ====== ACCIÓN DE MENSAJE ======
   onMensaje(): void {
-  
     if (!this.authService.isAuthenticated()) {
       this.toast.show('Debes iniciar sesión para enviar un mensaje');
       this.modalSvc.openLogin();
       return;
     }
+
+    // Forzamos la estructura usando "as Contact" para que TS no proteste por el tipo de 'status'
+    const contact = {
+      id: this.perfil.id,
+      name: this.perfil.nombre,
+      avatar: this.perfil.avatarUrl ?? '',
+      status: 'online',
+      statusText: this.perfil.estado ?? '',
+      lastMsg: '',
+      time: '',
+      unread: 0
+    } as Contact;
+
+    const existe = this.sidePanelSvc.contacts().some(c => c.id === contact.id);
+    if (!existe) {
+      this.sidePanelSvc.contacts.update(list => [...list, contact]);
+    }
+
+    this.sidePanelSvc.openChat(contact);
     this.accionMensaje.emit();
   }
 }

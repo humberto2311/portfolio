@@ -46,6 +46,9 @@ export class PortafolioComponent implements OnInit {
   menuCampos = signal(false);
   mensaje = signal<string | null>(null);
 
+  /** Todas las tarjetas del usuario. */
+  tarjetas = signal<VCardPayload[]>([]);
+  /** Tarjeta que se está editando. */
   tarjeta = signal<VCardPayload>(this.vcardService.vacia());
 
   plantillas: Plantilla[] = [
@@ -66,6 +69,12 @@ export class PortafolioComponent implements OnInit {
       nombre: 'Digital',
       descripcion: 'Tu web, portafolio, redes y mensajería directa.',
       icono: 'fa-solid fa-globe',
+    },
+    {
+      id: 'EMERGENCIA',
+      nombre: 'Emergencias',
+      descripcion: 'Contactos de emergencia, tipo de sangre, alergias y seguro.',
+      icono: 'fa-solid fa-heart-pulse',
     },
     {
       id: 'TOTAL',
@@ -124,45 +133,81 @@ export class PortafolioComponent implements OnInit {
         { clave: 'sitioEmpresa', etiqueta: 'Sitio de la empresa', placeholder: 'miempresa.com', categoria: 'empresa' },
       ],
     },
+    {
+      id: 'emergencia',
+      nombre: 'Emergencias',
+      icono: 'fa-solid fa-heart-pulse',
+      campos: [
+        { clave: 'contactoEmergencia1', etiqueta: 'Contacto de emergencia 1', placeholder: 'Nombre · +57 300 000 0000', categoria: 'emergencia' },
+        { clave: 'contactoEmergencia2', etiqueta: 'Contacto de emergencia 2', placeholder: 'Nombre · +57 300 000 0000', categoria: 'emergencia' },
+        { clave: 'tipoSangre', etiqueta: 'Tipo de sangre', placeholder: 'O+', categoria: 'emergencia' },
+        { clave: 'alergias', etiqueta: 'Alergias', placeholder: 'Penicilina, mariscos…', categoria: 'emergencia' },
+        { clave: 'condiciones', etiqueta: 'Condiciones médicas', placeholder: 'Diabetes, asma…', categoria: 'emergencia' },
+        { clave: 'medicamentos', etiqueta: 'Medicamentos actuales', placeholder: 'Losartán 50 mg', categoria: 'emergencia' },
+        { clave: 'seguroMedico', etiqueta: 'Seguro médico / EPS', placeholder: 'Nombre y número de póliza', categoria: 'emergencia' },
+        { clave: 'donanteOrganos', etiqueta: 'Donante de órganos', placeholder: 'Sí / No', categoria: 'emergencia' },
+        { clave: 'indicaciones', etiqueta: 'Indicaciones especiales', placeholder: 'Llamar a… en caso de…', categoria: 'emergencia' },
+      ],
+    },
   ];
 
   ngOnInit(): void {
     this.cargar();
   }
 
+  // ====== CARGA ======
+
   cargar(): void {
     this.cargando.set(true);
 
-    this.vcardService.miTarjeta().subscribe({
-      next: (t) => {
-        if (t) {
-          this.tarjeta.set({
-            ...this.vcardService.vacia(),
-            ...t,
-            campos: t.campos ?? [],
-          });
-        }
+    this.vcardService.listar().subscribe({
+      next: (lista) => {
+        this.tarjetas.set(lista ?? []);
+
+        const def =
+          lista?.find((t) => t.porDefecto) ??
+          lista?.[0] ??
+          this.vcardService.vacia();
+
+        this.seleccionar(def);
         this.cargando.set(false);
       },
       error: () => {
         this.cargando.set(false);
-        this.mensaje.set('No se pudo cargar tu tarjeta. Revisa tu sesión.');
+        this.mensaje.set('No se pudieron cargar tus tarjetas. Revisa tu sesión.');
       },
     });
   }
 
-  // ====== plantillas ======
+  // ====== SELECTOR DE TARJETA ======
 
-  elegirPlantilla(id: PlantillaVcard): void {
-    this.tarjeta.update((t) => ({ ...t, plantilla: id }));
+  seleccionar(t: VCardPayload): void {
+    this.tarjeta.set({
+      ...this.vcardService.vacia(),
+      ...t,
+      campos: t.campos ?? [],
+    });
   }
 
-  /** Cambia un campo base (nombre, email, notas...). */
+  crearNueva(plantilla: PlantillaVcard = 'PERSONAL'): void {
+    this.tarjeta.set(this.vcardService.vacia(plantilla, plantilla.toLowerCase()));
+  }
+
+  // ====== PLANTILLAS ======
+
+  elegirPlantilla(id: PlantillaVcard): void {
+    this.tarjeta.update((t) => ({
+      ...t,
+      plantilla: id,
+      // Si aún no tiene id, sugiere slug automático
+      slug: t.id ? t.slug : id.toLowerCase(),
+    }));
+  }
+
   set<K extends keyof VCardPayload>(campo: K, valor: VCardPayload[K]): void {
     this.tarjeta.update((t) => ({ ...t, [campo]: valor }));
   }
 
-  /** Cambia el valor de un campo modular. */
   setCampo(clave: string, valor: string): void {
     this.tarjeta.update((t) => ({
       ...t,
@@ -174,7 +219,7 @@ export class PortafolioComponent implements OnInit {
     return this.plantillas.find((p) => p.id === this.tarjeta().plantilla) ?? this.plantillas[0];
   }
 
-  // ====== campos modulares ======
+  // ====== CAMPOS MODULARES ======
 
   toggleMenu(): void {
     this.menuCampos.update((v) => !v);
@@ -204,12 +249,11 @@ export class PortafolioComponent implements OnInit {
     }));
   }
 
-  /** Campos agregados agrupados por categoría (para el formulario). */
   camposAgregados(categoria: CategoriaCampo): CampoExtraVcard[] {
     return this.tarjeta().campos.filter((c) => c.categoria === categoria);
   }
 
-  // ====== vista previa ======
+  // ====== PREVIEW ======
 
   readonly categoriasPreview = computed<CategoriaCampo[]>(() => {
     switch (this.tarjeta().plantilla) {
@@ -219,15 +263,18 @@ export class PortafolioComponent implements OnInit {
         return ['contacto', 'empresa'];
       case 'DIGITAL':
         return ['contacto', 'redes', 'enlaces'];
+      case 'EMERGENCIA':
+        return ['emergencia'];
       default:
-        return ['contacto', 'redes', 'enlaces', 'empresa'];
+        return ['contacto', 'redes', 'enlaces', 'empresa', 'emergencia'];
     }
   });
 
   readonly camposPreview = computed<CampoExtraVcard[]>(() => {
     const visibles = this.categoriasPreview();
-    return this.tarjeta()
-      .campos.filter((c) => visibles.includes(c.categoria) && c.valor.trim() !== '');
+    return this.tarjeta().campos.filter(
+      (c) => visibles.includes(c.categoria) && c.valor.trim() !== ''
+    );
   });
 
   readonly iniciales = computed(() => {
@@ -240,12 +287,14 @@ export class PortafolioComponent implements OnInit {
   });
 
   readonly mostrarEmpresa = computed(
-    () => this.tarjeta().plantilla !== 'PERSONAL'
+    () => this.tarjeta().plantilla !== 'PERSONAL' && this.tarjeta().plantilla !== 'EMERGENCIA'
   );
 
-  readonly mostrarNotas = computed(() => this.tarjeta().plantilla !== 'PERSONAL');
+  readonly mostrarNotas = computed(
+    () => this.tarjeta().plantilla !== 'PERSONAL' && this.tarjeta().plantilla !== 'EMERGENCIA'
+  );
 
-  // ====== acciones ======
+  // ====== ACCIONES ======
 
   guardar(): void {
     if (this.guardando()) return;
@@ -255,9 +304,20 @@ export class PortafolioComponent implements OnInit {
 
     this.vcardService.guardar(this.tarjeta()).subscribe({
       next: (t) => {
-        this.tarjeta.set({ ...t, campos: t.campos ?? [] });
+        const normalizada: VCardPayload = { ...t, campos: t.campos ?? [] };
+        this.tarjeta.set(normalizada);
+
+        // Refresca listado local
+        this.tarjetas.update((lista) => {
+          const i = lista.findIndex((x) => x.id === normalizada.id);
+          if (i === -1) return [...lista, normalizada];
+          const copia = [...lista];
+          copia[i] = normalizada;
+          return copia;
+        });
+
         this.guardando.set(false);
-        this.mensaje.set('Tarjeta guardada. Ya puedes descargarla o compartirla.');
+        this.mensaje.set('Tarjeta guardada. Ya aparece en el hub y tiene su propio QR.');
       },
       error: () => {
         this.guardando.set(false);
@@ -266,26 +326,57 @@ export class PortafolioComponent implements OnInit {
     });
   }
 
+  eliminarTarjeta(t: VCardPayload, event: Event): void {
+    event.stopPropagation();
+
+    if (!t.id) {
+      this.crearNueva('PERSONAL');
+      return;
+    }
+
+    const confirmar = confirm(`¿Estás seguro de que quieres eliminar la tarjeta "${t.nombre || t.slug}"?\nEsta acción no se puede deshacer y el enlace/QR dejará de funcionar.`);
+    if (!confirmar) return;
+
+    this.vcardService.eliminar(t.id).subscribe({
+      next: () => {
+        this.tarjetas.update((lista) => lista.filter((x) => x.id !== t.id));
+        
+        if (this.tarjeta().id === t.id) {
+          const restantes = this.tarjetas();
+          if (restantes.length > 0) {
+            this.seleccionar(restantes[0]);
+          } else {
+            this.crearNueva('PERSONAL');
+          }
+        }
+        
+        this.mensaje.set('Tarjeta eliminada correctamente.');
+      },
+      error: () => {
+        this.mensaje.set('No se pudo eliminar la tarjeta. Intenta de nuevo.');
+      }
+    });
+  }
   descargarVcf(): void {
-    this.vcardService.descargarVcf().subscribe({
+    const slug = this.tarjeta().slug;
+    this.vcardService.descargarVcf(slug).subscribe({
       next: (blob) => this.guardarBlob(blob),
-      error: () => this.mensaje.set('Primero guarda tu tarjeta para poder descargarla.'),
+      error: () =>
+        this.mensaje.set('Primero guarda tu tarjeta para poder descargarla.'),
     });
   }
 
-  // ====== compartir (QR + enlace) ======
+  // ====== COMPARTIR ======
 
   compartirAbierto = signal(false);
 
-  /** URL pública de la tarjeta (destino del QR y del NFC). */
   readonly enlacePublico = computed(() => {
     const id = this.tarjeta().userProfileId;
-    if (!id || typeof window === 'undefined') return '';
-    // auto=1: al abrirla desde el QR/NFC se intenta guardar el contacto solo
-    return `${window.location.origin}/tarjeta/${id}?auto=1`;
+    const slug = this.tarjeta().slug;
+    if (!id || !slug || typeof window === 'undefined') return '';
+    return `${window.location.origin}/tarjeta/${id}/${slug}?auto=1`;
   });
 
-  /** Imagen del QR a partir del enlace público. */
   readonly qrUrl = computed(() => {
     const enlace = this.enlacePublico();
     return enlace
@@ -315,7 +406,9 @@ export class PortafolioComponent implements OnInit {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(this.tarjeta().nombre || 'mi-tarjeta').replace(/\s+/g, '-').toLowerCase()}.vcf`;
+    a.download = `${(this.tarjeta().nombre || 'mi-tarjeta')
+      .replace(/\s+/g, '-')
+      .toLowerCase()}.vcf`;
     a.click();
     URL.revokeObjectURL(url);
   }

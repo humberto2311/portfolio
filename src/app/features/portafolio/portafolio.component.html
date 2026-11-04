@@ -4,14 +4,17 @@
   <header class="page-head">
     <div class="head-text">
       <span class="eyebrow">Mi identidad</span>
-      <h1>Mi tarjeta de contacto</h1>
+      <h1>Mis tarjetas de contacto</h1>
       <p>
-        Una tarjeta que puedes compartir con un enlace. Elige la plantilla y agrega solo los campos
-        que necesites: lo que ves a la derecha es exactamente lo que recibirá la otra persona.
+        Crea varias tarjetas (personal, profesional, emergencia…). Cada una tiene su
+        propio enlace y QR. En el Hub eliges cuál se muestra destacada.
       </p>
     </div>
 
     <div class="head-actions">
+      <button type="button" class="btn ghost" (click)="crearNueva('PERSONAL')">
+        <i class="fa-solid fa-plus"></i> Nueva tarjeta
+      </button>
       <button type="button" class="btn ghost" (click)="abrirCompartir()">
         <i class="fa-solid fa-qrcode"></i> Compartir
       </button>
@@ -31,15 +34,39 @@
     </div>
   }
 
+  <!-- SELECTOR DE TARJETAS -->
+  @if (tarjetas().length > 0) {
+    <div class="tarjetas-tabs">
+      @for (t of tarjetas(); track t.id) {
+        <div 
+          class="tarjeta-tab-wrapper"
+          [class.active]="tarjeta().id === t.id"
+          (click)="seleccionar(t)"
+        >
+          <button type="button" class="tarjeta-tab-content">
+            <i class="fa-solid fa-address-card"></i>
+            <span>{{ t.nombre || '(sin nombre)' }}</span>
+            <small>{{ t.plantilla | titlecase }} · /{{ t.slug }}</small>
+          </button>
+          
+          <!-- Botón de eliminar -->
+          <button type="button" class="btn-eliminar" (click)="eliminarTarjeta(t, $event)" title="Eliminar tarjeta">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   <div class="layout">
 
-    <!-- ================= FORMULARIO ================= -->
+    <!-- FORMULARIO -->
     <section class="col-form">
 
-      <!-- 1. Plantillas -->
+      <!-- Plantillas -->
       <div class="panel">
         <h2><span class="num">1</span> Elige la plantilla</h2>
-        <p class="hint">Define qué campos se muestran. Puedes cambiarla cuando quieras.</p>
+        <p class="hint">Cada plantilla sugiere un slug; puedes cambiarlo al guardar.</p>
 
         <div class="templates">
           @for (p of plantillas; track p.id) {
@@ -55,9 +82,22 @@
         </div>
       </div>
 
-      <!-- 2. Datos base -->
+      <!-- Slug -->
       <div class="panel">
-        <h2><span class="num">2</span> Tus datos</h2>
+        <h2><span class="num">2</span> Identificador de la tarjeta (slug)</h2>
+        <p class="hint">
+          Se usa en la URL pública: <code>/tarjeta/&lt;tu-id&gt;/{{ tarjeta().slug }}</code>.
+        </p>
+        <label class="field">
+          <span>Slug</span>
+          <input type="text" placeholder="personal, profesional, emergencia…"
+                 [ngModel]="tarjeta().slug" (ngModelChange)="set('slug', $event)" />
+        </label>
+      </div>
+
+      <!-- Datos base -->
+      <div class="panel">
+        <h2><span class="num">3</span> Tus datos</h2>
 
         <div class="fields">
           <label class="field">
@@ -106,10 +146,10 @@
         </div>
       </div>
 
-      <!-- 3. Campos extra ya agregados -->
+      <!-- Campos agregados -->
       @if (tarjeta().campos.length > 0) {
         <div class="panel">
-          <h2><span class="num">3</span> Campos que agregaste</h2>
+          <h2><span class="num">4</span> Campos que agregaste</h2>
 
           <div class="campos-lista">
             @for (campo of tarjeta().campos; track campo.clave) {
@@ -128,7 +168,7 @@
         </div>
       }
 
-      <!-- 4. Añadir más campos -->
+      <!-- Añadir campos -->
       <div class="panel add-panel">
         <button type="button" class="btn dashed" (click)="toggleMenu()">
           <i class="fa-solid" [class.fa-plus]="!menuCampos()" [class.fa-minus]="menuCampos()"></i>
@@ -158,20 +198,20 @@
         }
       </div>
 
-      <!-- 5. Notas -->
+      <!-- Notas -->
       <div class="panel">
-        <h2><span class="num">4</span> Sobre mí / Notas</h2>
+        <h2><span class="num">5</span> Sobre mí / Notas</h2>
         <p class="hint">
-          Texto libre que verá quien abra tu tarjeta: horario de atención, indicaciones para llegar,
-          una bio corta o datos de emergencia.
+          Texto libre que verá quien abra tu tarjeta: horario de atención, indicaciones,
+          bio corta o datos de emergencia.
         </p>
-        <textarea rows="4" placeholder="Ej: Atiendo de lunes a viernes de 8 a 18. Estoy frente al parque principal."
+        <textarea rows="4" placeholder="Ej: Atiendo de lunes a viernes de 8 a 18."
                   [ngModel]="tarjeta().notas" (ngModelChange)="set('notas', $event)"></textarea>
       </div>
 
     </section>
 
-    <!-- ================= VISTA PREVIA ================= -->
+    <!-- PREVIEW -->
     <aside class="col-preview">
       <div class="preview-wrap">
         <div class="preview-label">
@@ -199,7 +239,7 @@
             @if (tarjeta().email) {
               <div class="row"><i class="fa-solid fa-envelope"></i><span>{{ tarjeta().email }}</span></div>
             }
-            @if (tarjeta().plantilla !== 'PERSONAL') {
+            @if (tarjeta().plantilla !== 'PERSONAL' && tarjeta().plantilla !== 'EMERGENCIA') {
               @if (tarjeta().web) {
                 <div class="row"><i class="fa-solid fa-globe"></i><span>{{ tarjeta().web }}</span></div>
               }
@@ -231,14 +271,14 @@
 
         <p class="preview-hint">
           <i class="fa-solid fa-circle-info"></i>
-          Los campos que agregues aparecen aquí al instante. Al guardar se incluyen en el archivo .vcf.
+          Al guardar, esta tarjeta aparece en el Hub y es accesible por su propio QR.
         </p>
       </div>
     </aside>
 
   </div>
 
-  <!-- ================= MODAL COMPARTIR ================= -->
+  <!-- MODAL COMPARTIR -->
   @if (compartirAbierto()) {
     <div class="modal-backdrop" (click)="cerrarCompartir()">
       <div class="modal" (click)="$event.stopPropagation()">
@@ -257,8 +297,8 @@
             </div>
 
             <p class="modal-text">
-              Al escanear este QR —o tocar la tarjeta NFC— se abre tu tarjeta y el contacto se
-              guarda en el teléfono de la otra persona, sin que tenga que escribir nada.
+              Al escanear este QR —o tocar la tarjeta NFC— se abre esta tarjeta concreta y
+              el contacto se guarda en el teléfono de la otra persona.
             </p>
 
             <div class="enlace-box">

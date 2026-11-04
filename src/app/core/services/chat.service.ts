@@ -1,45 +1,75 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Conversacion } from '../models/chat.model';
+import { 
+  Conversacion, 
+  ChatMessageApi, 
+  ChatMessageSendApi, 
+  ChatMessageUpdateApi 
+} from '../models/chat.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/api/chats`;
+  
+  private baseChats = `${environment.apiUrl}/api/chats`;
+  private baseMessages = `${environment.apiUrl}/api/chat`;
 
+  
   listar(): Observable<Conversacion[]> {
-    return this.http.get<Conversacion[]>(this.base);
+    return this.http.get<Conversacion[]>(this.baseChats);
   }
 
   abrir(id: string): Observable<Conversacion> {
-    return this.http.get<Conversacion>(`${this.base}/${id}`);
+    return this.http.get<Conversacion>(`${this.baseChats}/${id}`);
   }
 
-  /** Inicia o continúa una conversación con alguien. */
   enviar(destinatarioId: string, contenido: string): Observable<Conversacion> {
-    return this.http.post<Conversacion>(this.base, { destinatarioId, contenido });
+    return this.http.post<Conversacion>(this.baseChats, { destinatarioId, contenido });
   }
 
-  /** Responde dentro de una conversación existente. */
   responder(id: string, contenido: string): Observable<Conversacion> {
-    return this.http.post<Conversacion>(`${this.base}/${id}/mensajes`, { contenido });
+    return this.http.post<Conversacion>(`${this.baseChats}/${id}/mensajes`, { contenido });
   }
 
   aceptar(id: string): Observable<Conversacion> {
-    return this.http.post<Conversacion>(`${this.base}/${id}/aceptar`, {});
+    return this.http.post<Conversacion>(`${this.baseChats}/${id}/aceptar`, {});
   }
 
   rechazar(id: string): Observable<Conversacion> {
-    return this.http.post<Conversacion>(`${this.base}/${id}/rechazar`, {});
+    return this.http.post<Conversacion>(`${this.baseChats}/${id}/rechazar`, {});
   }
 
   reportar(id: string, motivo: string): Observable<Conversacion> {
-    return this.http.post<Conversacion>(`${this.base}/${id}/reportar`, { motivo });
+    return this.http.post<Conversacion>(`${this.baseChats}/${id}/reportar`, { motivo });
   }
 
-  eliminar(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+  eliminarConversacion(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseChats}/${id}`);
+  }
+
+ 
+  sendMessage(payload: ChatMessageSendApi): Observable<ChatMessageApi> {
+    return this.http.post<ChatMessageApi>(this.baseMessages, payload);
+  }
+
+  updateMessage(id: string, payload: ChatMessageUpdateApi): Observable<ChatMessageApi> {
+    return this.http.put<ChatMessageApi>(`${this.baseMessages}/${id}`, payload);
+  }
+
+  deleteMessage(id: string): Observable<ChatMessageApi> {
+    return this.http.delete<ChatMessageApi>(`${this.baseMessages}/${id}`);
+  }
+
+  getBySession(sessionId: string): Observable<ChatMessageApi[]> {
+    return this.http.get<ChatMessageApi[]>(`${this.baseMessages}/session/${sessionId}`);
+  }
+
+  getConversation(senderId: string, receiverId: string): Observable<ChatMessageApi[]> {
+    const params = new HttpParams()
+      .set('senderId', senderId)
+      .set('receiverId', receiverId);
+    return this.http.get<ChatMessageApi[]>(`${this.baseMessages}/conversation`, { params });
   }
 }

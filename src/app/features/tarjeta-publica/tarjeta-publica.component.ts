@@ -5,10 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { VcardService } from '../../core/services/vcard.service';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 
-/**
- * Página que se abre al escanear el QR o tocar el NFC.
- * Muestra la tarjeta y permite guardar el contacto en el teléfono.
- */
 @Component({
   selector: 'app-tarjeta-publica',
   standalone: true,
@@ -21,6 +17,7 @@ export class TarjetaPublicaComponent implements OnInit {
   private vcardService = inject(VcardService);
 
   private userId = '';
+  private slug = '';
 
   cargando = signal(true);
   noEncontrada = signal(false);
@@ -32,6 +29,7 @@ export class TarjetaPublicaComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('userId') ?? '';
+    this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
     this.modoNfc.set(this.route.snapshot.queryParamMap.get('auto') === '1');
 
     if (!this.userId) {
@@ -40,13 +38,16 @@ export class TarjetaPublicaComponent implements OnInit {
       return;
     }
 
-    this.vcardService.tarjetaDe(this.userId).subscribe({
+    const peticion$ = this.slug
+      ? this.vcardService.tarjetaPorSlug(this.userId, this.slug)
+      : this.vcardService.tarjetaPorDefecto(this.userId);
+
+    peticion$.subscribe({
       next: (t) => {
         if (!t) this.noEncontrada.set(true);
         this.tarjeta.set(t);
         this.cargando.set(false);
 
-        // Llegó escaneando el QR o tocando el NFC: se intenta guardar solo.
         if (t && this.modoNfc()) {
           setTimeout(() => this.guardarContacto(), 700);
         }
@@ -71,24 +72,27 @@ export class TarjetaPublicaComponent implements OnInit {
     (this.tarjeta()?.campos ?? []).filter((c) => c.valor?.trim())
   );
 
-  // ====== acciones ======
+  // ====== ACCIONES ======
 
   guardarContacto(): void {
-    if (!this.userId) return;
+    const t = this.tarjeta();
+    if (!this.userId || !t?.slug) return;
 
-    this.vcardService.vcfPublico(this.userId).subscribe({
+    this.vcardService.vcfPublico(this.userId, t.slug).subscribe({
       next: async (blob) => {
         const archivo = new File([blob], this.nombreArchivo(), { type: 'text/vcard' });
 
-        // En el móvil se abre la hoja de compartir con "Anadir a contactos".
         const nav = navigator as any;
         if (nav.canShare && nav.canShare({ files: [archivo] })) {
           try {
-            await nav.share({ files: [archivo], title: this.tarjeta()?.nombre ?? 'Contacto' });
+            await nav.share({
+              files: [archivo],
+              title: this.tarjeta()?.nombre ?? 'Contacto',
+            });
             this.aviso.set('Listo. Si tu teléfono lo pregunta, elige "Añadir a contactos".');
             return;
           } catch {
-            // cancelo o fallo: se intenta la descarga normal
+            /* canceló o falló: se intenta la descarga normal */
           }
         }
 
@@ -109,8 +113,10 @@ export class TarjetaPublicaComponent implements OnInit {
     const url = window.location.href;
 
     if (navigator.share) {
-      navigator.share({ title: this.tarjeta()?.nombre ?? 'Tarjeta de contacto', url })
-        .catch(() => { /* el usuario canceló */ });
+      navigator.share({
+        title: this.tarjeta()?.nombre ?? 'Tarjeta de contacto',
+        url,
+      }).catch(() => { /* el usuario canceló */ });
       return;
     }
 
@@ -160,13 +166,25 @@ export class TarjetaPublicaComponent implements OnInit {
       horario: 'fa-solid fa-clock',
       logoUrl: 'fa-solid fa-image',
       sitioEmpresa: 'fa-solid fa-building',
+      // emergencia
+      contactoEmergencia1: 'fa-solid fa-phone-volume',
+      contactoEmergencia2: 'fa-solid fa-phone-volume',
+      tipoSangre: 'fa-solid fa-droplet',
+      alergias: 'fa-solid fa-triangle-exclamation',
+      condiciones: 'fa-solid fa-notes-medical',
+      medicamentos: 'fa-solid fa-pills',
+      seguroMedico: 'fa-solid fa-shield-heart',
+      donanteOrganos: 'fa-solid fa-heart',
+      indicaciones: 'fa-solid fa-circle-info',
     };
 
     return mapa[clave] ?? 'fa-solid fa-circle-dot';
   }
 
   private nombreArchivo(): string {
-    const base = (this.tarjeta()?.nombre ?? 'contacto').replace(/\s+/g, '-').toLowerCase();
+    const base = (this.tarjeta()?.nombre ?? 'contacto')
+      .replace(/\s+/g, '-')
+      .toLowerCase();
     return `${base}.vcf`;
   }
 }

@@ -4,10 +4,48 @@
       <div class="bubble"
         [class.me]="msg.sender === 'me'"
         [class.ai]="msg.sender === 'them' && svc.activeContact()?.isAi"
-        [class.them]="msg.sender === 'them' && !svc.activeContact()?.isAi">
-        {{ msg.text }}
+        [class.them]="msg.sender === 'them' && !svc.activeContact()?.isAi"
+        [class.deleted]="msg.deleted">
+
+        @if (editingId() === msg.id) {
+          <textarea
+            class="edit-input"
+            [ngModel]="message()"
+            (ngModelChange)="message.set($event)"
+            (keydown)="onKeyDown($event)"
+            name="editMessage"></textarea>
+          <div class="edit-actions">
+            <button type="button" class="save" (click)="confirmEdit()">
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button type="button" class="cancel" (click)="cancelEdit()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        } @else {
+          <span class="text">{{ msg.text }}</span>
+        }
       </div>
-      <span class="msg-time">{{ msg.time }}</span>
+
+      <div class="msg-meta">
+        <span class="msg-time">{{ msg.time }}</span>
+        @if (msg.edited && !msg.deleted) {
+          <span class="msg-edited">editado</span>
+        }
+      </div>
+
+      @if (msg.sender === 'me' && msg.id && !msg.deleted && editingId() !== msg.id) {
+        <div class="msg-actions">
+          @if (msg.canEdit) {
+            <button type="button" class="action" (click)="startEdit(msg)" title="Editar">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+          }
+          <button type="button" class="action danger" (click)="remove(msg)" title="Eliminar">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      }
     </div>
   }
 </div>
@@ -17,13 +55,19 @@
     <span>{{ svc.typingName() }}</span> está escribiendo
     <span class="dots"><span></span><span></span><span></span></span>
   </div>
-}@if (sending()) {
+}
+@if (sending()) {
   <div class="typing">enviando…</div>
+}
+@if (editingId()) {
+  <div class="typing">editando mensaje…</div>
 }
 
 <form class="input-area" (ngSubmit)="send()">
   <input type="text" placeholder="Escribe un mensaje..." autocomplete="off"
     [ngModel]="message()" (ngModelChange)="message.set($event)"
     (keydown)="onKeyDown($event)" name="message" />
-  <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+  <button type="submit">
+    <i class="fa-solid" [class.fa-paper-plane]="!editingId()" [class.fa-check]="editingId()"></i>
+  </button>
 </form>

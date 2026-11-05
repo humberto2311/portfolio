@@ -10,12 +10,14 @@ import { publicGuard } from './core/guards/public.guard';
 import { PerfilComponent } from './features/perfil/perfil.component';
 import { FeedComponent } from './features/feed/feed.component';
 import { ProyectosComponent } from './features/proyectos/proyectos.component';
+import { TalentoComponent } from './features/talento/talento.component';
 
 import { InformacionPersonalComponent } from './features/informacion-personal/informacion-personal.component';
 import { TarjetaPublicaComponent } from './features/tarjeta-publica/tarjeta-publica.component';
 
 export const routes: Routes = [
   // Tarjeta de contacto pública (destino del QR / NFC)
+  { path: 'tarjeta/:userId/:slug', component: TarjetaPublicaComponent },
   { path: 'tarjeta/:userId', component: TarjetaPublicaComponent },
   {
     path: '',
@@ -53,7 +55,8 @@ export const routes: Routes = [
       { path: 'perfil', component: PerfilComponent },
       { path: 'perfil/:username', component: PerfilComponent },
       { path: 'portafolio', component: PortafolioComponent }, 
-      { path: 'hub', component: LinkHubComponent }
+      { path: 'hub', component: LinkHubComponent },
+      { path: 'talento', component: TalentoComponent }
     ]
   },
 

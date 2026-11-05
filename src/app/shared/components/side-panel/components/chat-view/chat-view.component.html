@@ -19,7 +19,7 @@
     </p>
   }
 
-  @for (msg of messages; track msg.id ?? $index) {
+  @for (msg of messages; track trackMsg(msg, $index)) {
     <div class="msg-row" [class.mine]="msg.sender === 'me'">
       <div class="bubble"
         [class.me]="msg.sender === 'me'"

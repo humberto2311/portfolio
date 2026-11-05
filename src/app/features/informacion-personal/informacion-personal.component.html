@@ -84,6 +84,16 @@
           </div>
         </div>
 
+        <!-- Botón de edición manual (solo el dueño logueado) -->
+        @if (esPropietario) {
+          <button class="btn-edit" type="button" (click)="editando ? cancelarEdicion() : iniciarEdicion()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+            {{ editando ? 'Salir de edición' : 'Editar' }}
+          </button>
+        }
+
         <!-- Botón PDF -->
         <a [href]="resumePdfUrl" download class="btn-download" title="Descargar HV">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4h2v4h14v-4h2zM12 3v12l-4-4-1.4 1.4L12 17.8l5.4-5.4L16 11l-4 4V3h-2z"/></svg>
@@ -97,6 +107,72 @@
     </header>
 
     <div class="grid-layout">
+
+      <!-- ====== EDITOR DE DATOS DEL CV (solo modo edición) ====== -->
+      @if (editando) {
+        <section class="card cv-form glass-panel">
+          <header class="cv-form-head">
+            <div>
+              <span class="eyebrow">Edición manual</span>
+              <h3 class="card-title">Datos del currículum</h3>
+            </div>
+            <div class="cv-form-actions">
+              <button class="btn-ghost" type="button" (click)="cancelarEdicion()">Cancelar</button>
+              <button class="btn-primary" type="button" (click)="guardarPerfil()" [disabled]="guardando">
+                {{ guardando ? 'Guardando…' : 'Guardar datos' }}
+              </button>
+            </div>
+          </header>
+
+          <div class="field-grid">
+            <div class="field field-readonly">
+              <span>Nombre completo</span>
+              <input type="text" [ngModel]="nombre" readonly />
+              <small>Se toma de tu cuenta; edítalo en Perfil.</small>
+            </div>
+            <label class="field">
+              <span>Titular / rol</span>
+              <input type="text" [(ngModel)]="form.headline" placeholder="Ej. Full-stack Developer" />
+            </label>
+            <label class="field">
+              <span>Ubicación</span>
+              <input type="text" [(ngModel)]="form.location" placeholder="Ciudad, país" />
+            </label>
+            <label class="field">
+              <span>Correo</span>
+              <input type="email" [(ngModel)]="form.email" placeholder="correo@dominio.com" />
+            </label>
+            <label class="field">
+              <span>Teléfono</span>
+              <input type="text" [(ngModel)]="form.phone" placeholder="+57 300 000 0000" />
+            </label>
+            <label class="field">
+              <span>GitHub</span>
+              <input type="text" [(ngModel)]="form.githubUrl" placeholder="https://github.com/…" />
+            </label>
+            <label class="field">
+              <span>LinkedIn</span>
+              <input type="text" [(ngModel)]="form.linkedinUrl" placeholder="https://linkedin.com/in/…" />
+            </label>
+            <label class="field field-wide">
+              <span>Resumen profesional</span>
+              <textarea rows="4" [(ngModel)]="form.summary" placeholder="Párrafo que encabeza el perfil"></textarea>
+            </label>
+            <label class="field field-wide">
+              <span>Bio corta (tarjeta de bienvenida)</span>
+              <textarea rows="2" [(ngModel)]="form.shortBio" placeholder="Una o dos líneas"></textarea>
+            </label>
+            <label class="field">
+              <span>Foto (URL)</span>
+              <input type="text" [(ngModel)]="form.avatarUrl" placeholder="https://…" />
+            </label>
+            <label class="field">
+              <span>PDF de la hoja de vida (URL)</span>
+              <input type="text" [(ngModel)]="form.resumePdfUrl" placeholder="assets/docs/…" />
+            </label>
+          </div>
+        </section>
+      }
 
       <!-- TARJETA DE BIENVENIDA -->
       <div class="card welcome-card glass-panel">
@@ -232,6 +308,145 @@
           </div>
         </div>
       </div>
+
+      <!-- ====== SECCIONES PERSONALIZADAS (cuadro grande + items dentro) ====== -->
+      @for (sec of seccionesPersonalizadas; track $index) {
+        <div class="card seccion-libre glass-panel">
+          <h3 class="card-title seccion-libre-titulo">
+            @if (esIconoFontAwesome(sec.icono)) {
+              <i [class]="sec.icono"></i>
+            } @else if (sec.icono) {
+              <span class="seccion-libre-emoji">{{ sec.icono }}</span>
+            }
+            {{ sec.titulo }}
+          </h3>
+
+          <div class="seccion-libre-items">
+            @for (item of sec.items; track $index) {
+              <article class="libre-item">
+                <div class="libre-item-head">
+                  <h4 class="libre-item-titulo">{{ item.cabecera }}</h4>
+                  @if (item.meta) {
+                    <span class="libre-item-meta">{{ item.meta }}</span>
+                  }
+                </div>
+                @if (item.detalle) {
+                  <p class="libre-item-detalle">{{ item.detalle }}</p>
+                }
+              </article>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ====== GESTOR DE SECCIONES E ÍTEMS (solo modo edición) ====== -->
+      @if (editando) {
+        <section class="card seccion-gestor glass-panel">
+          <header class="cv-form-head">
+            <div>
+              <span class="eyebrow">Estructura</span>
+              <h3 class="card-title">Secciones e ítems del CV</h3>
+              <p class="gestor-hint">Cada sección es un cuadro con su título; los ítems van adentro.</p>
+            </div>
+            <button class="btn-primary" type="button" (click)="agregarSeccion()">
+              <i class="fas fa-plus"></i> Añadir sección
+            </button>
+          </header>
+
+          @for (seccion of seccionesEditables; track seccion.sectionKey) {
+            <div class="gestor-bloque" [class.es-nueva]="seccion.nueva">
+              <div class="gestor-cabecera">
+                <label class="field field-title">
+                  <span>Título de la sección</span>
+                  <input type="text" [(ngModel)]="seccion.title" placeholder="Ej. Certificaciones" />
+                </label>
+                <label class="field field-icon">
+                  <span>Icono</span>
+                  <div class="icono-campo">
+                    <input type="text" [(ngModel)]="seccion.icon" placeholder="fas fa-award" />
+                    @if (esIconoFontAwesome(seccion.icon)) {
+                      <i class="icono-previa" [class]="seccion.icon"></i>
+                    } @else if (seccion.icon) {
+                      <span class="icono-emoji">{{ seccion.icon }}</span>
+                    }
+                  </div>
+                </label>
+                <div class="gestor-botones">
+                  <span class="clave-badge">{{ seccion.sectionKey }}</span>
+                  <span class="contador-badge">{{ seccion.items.length }} ítem{{ seccion.items.length === 1 ? '' : 's' }}</span>
+                  <button class="btn-save" type="button" (click)="guardarSeccion(seccion)">Guardar</button>
+                  <button class="btn-danger" type="button" (click)="eliminarSeccion(seccion)">Eliminar</button>
+                </div>
+              </div>
+
+              <div class="gestor-items">
+                @for (item of seccion.items; track $index) {
+                  <div class="item-row" [class.abierto]="item.abierto">
+                    <div class="item-row-head">
+                      <div class="item-identidad">
+                        @if (iconoDelItem(item)) {
+                          <i class="item-icono" [class]="iconoDelItem(item)"></i>
+                        }
+                        <span class="item-resumen">{{ resumenDe(item) }}</span>
+                        <span class="item-fuente">{{ fuenteDe(item) }}</span>
+                      </div>
+                      <div class="item-botones">
+                        <button class="btn-link" type="button" (click)="alternarItem(item)">
+                          {{ item.abierto ? 'Cerrar' : 'Editar' }}
+                        </button>
+                        <button class="btn-save" type="button" (click)="guardarItem(seccion, item)">Guardar</button>
+                        <button class="btn-danger" type="button" (click)="eliminarItem(seccion, item)">Eliminar</button>
+                      </div>
+                    </div>
+
+                    @if (item.abierto) {
+                      <div class="item-campos">
+                        @for (par of paresOrdenados(item); track par) {
+                          <div class="par-row">
+                            <input class="par-clave" type="text" [ngModel]="par.clave"
+                                   (ngModelChange)="par.clave = $event" placeholder="clave" />
+
+                            <div class="par-cuerpo">
+                              <span class="par-etiqueta">{{ etiquetaDe(par.clave) }}</span>
+
+                              @if (esCampoIcono(par)) {
+                                <div class="par-icono">
+                                  <input type="text" [ngModel]="par.valor"
+                                         (ngModelChange)="par.valor = $event" placeholder="fab fa-java" />
+                                  @if (esValorIcono(par)) {
+                                    <i class="par-icono-previa" [class]="par.valor.trim()"></i>
+                                  }
+                                </div>
+                              } @else {
+                                <textarea class="par-valor" rows="2" [ngModel]="par.valor"
+                                          (ngModelChange)="par.valor = $event" placeholder="valor"></textarea>
+                              }
+                            </div>
+
+                            <button class="btn-x" type="button" title="Quitar campo"
+                                    (click)="quitarPar(item, par)">×</button>
+                          </div>
+                        }
+                        <button class="btn-ghost btn-add-campo" type="button" (click)="agregarPar(item)">
+                          <i class="fas fa-plus"></i> Añadir campo
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (seccion.items.length === 0) {
+                  <p class="items-vacias">Sin ítems todavía. Crea el primero con el botón de abajo.</p>
+                }
+
+                <button class="btn-ghost btn-add-item" type="button" (click)="agregarItem(seccion)">
+                  <i class="fas fa-plus"></i> Añadir ítem
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+      }
 
     </div>
   </main>

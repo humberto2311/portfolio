@@ -60,6 +60,11 @@ export class ChatViewComponent {
     return id ? this.svc.chatHistories()[id] ?? [] : [];
   }
 
+  /** El track con `??` en el template rompe el compilador de Angular 17.3 (ReferenceError: tmp_x). */
+  trackMsg(msg: ChatMessage, index: number): string | number {
+    return msg.id ?? `tmp-${index}-${msg.time}`;
+  }
+
   /** El backend admite mensajes en ACEPTADA, o en PENDIENTE siendo quien los solicitó. */
   get puedeEscribir(): boolean {
     const contact = this.svc.activeContact();
@@ -189,7 +194,8 @@ export class ChatViewComponent {
 
   private cargarHistorial(contact: Contact): void {
     if (!contact.conversationId) {
-      this.svc.setHistorial(contact.id, []);
+      // Sin conversación todavía: lo ya cargado se conserva, la lista la traerá en un momento.
+      if (!this.messages.length) this.svc.setHistorial(contact.id, []);
       return;
     }
 

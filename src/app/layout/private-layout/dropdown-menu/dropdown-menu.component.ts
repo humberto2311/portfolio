@@ -27,6 +27,7 @@ export class DropdownMenuComponent {
     { label: 'Hub de Enlaces', icon: 'fas fa-network-wired', route: '/app/hub' },
     { label: 'Perfil', icon: 'fas fa-id-badge', route: '/app/perfil' }, 
     { label: 'Proyectos', icon: 'fas fa-project-diagram', route: '/app/proyectos' },
+    { label: 'Talento', icon: 'fas fa-magnifying-glass-location', route: '/app/talento' },
     { label: 'panel', icon: 'fas fa-chart-pie', route: '/app' },
     
     // { label: 'Reportes', icon: 'fas fa-chart-line', route: '/app/reportes' },

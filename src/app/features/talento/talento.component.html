@@ -1,0 +1,83 @@
+<section class="talento">
+  <header class="encabezado">
+    <h2>Talento</h2>
+    <p>Busca perfiles por skill o por rol.</p>
+  </header>
+
+  <div class="filtros">
+    <label class="campo">
+      <span>Skill o tecnología</span>
+      <input
+        type="text"
+        name="skill"
+        placeholder="Angular, Java, PostgreSQL…"
+        [ngModel]="skill()"
+        (ngModelChange)="onSkill($event)" />
+    </label>
+
+    <label class="campo">
+      <span>Rol o puesto</span>
+      <input
+        type="text"
+        name="rol"
+        placeholder="Backend, DevOps, Junior…"
+        [ngModel]="rol()"
+        (ngModelChange)="onRol($event)" />
+    </label>
+
+    <button type="button" class="limpiar" (click)="limpiar()">Limpiar</button>
+  </div>
+
+  @if (aviso()) {
+    <p class="aviso">{{ aviso() }}</p>
+  }
+
+  @if (buscando()) {
+    <p class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Buscando…</p>
+  }
+
+  @if (!buscando() && !tieneCriterios) {
+    <p class="estado">Escribe una skill o un rol para ver perfiles.</p>
+  }
+
+  @if (sinResultados) {
+    <p class="vacio">Sin coincidencias.</p>
+  }
+
+  <ul class="resultados">
+    @for (p of resultados(); track p.id) {
+      <li class="perfil">
+        <a
+          class="perfil-link"
+          [routerLink]="p.gitUsername ? '/app/perfil/' + p.gitUsername : '/app/perfil'">
+
+          @if (p.avatarUrl) {
+            <img class="avatar" [src]="p.avatarUrl" [alt]="p.fullName" />
+          } @else {
+            <span class="avatar avatar-text">
+              {{ (p.gitUsername || p.fullName).slice(0, 2).toUpperCase() }}
+            </span>
+          }
+
+          <span class="datos">
+            <strong class="nombre">{{ p.fullName }}</strong>
+            @if (p.rol) {
+              <span class="rol">{{ p.rol }}</span>
+            }
+            @if (p.gitUsername) {
+              <span class="usuario">&#64;{{ p.gitUsername }}</span>
+            }
+          </span>
+        </a>
+
+        @if (p.tecnologias.length) {
+          <div class="stack">
+            @for (tecnologia of p.tecnologias; track tecnologia) {
+              <span class="chip">{{ tecnologia }}</span>
+            }
+          </div>
+        }
+      </li>
+    }
+  </ul>
+</section>

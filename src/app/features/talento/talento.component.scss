@@ -1,0 +1,165 @@
+:host {
+  display: block;
+  padding: 1.5rem 0 3rem;
+}
+
+.talento {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.encabezado {
+  margin-bottom: 1.25rem;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1 1 240px;
+
+    span {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      padding: 0.6rem 0.75rem;
+
+      &:focus {
+        border-color: var(--border-cyan);
+        outline: none;
+      }
+    }
+  }
+
+  .limpiar {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.6rem 0.9rem;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+  }
+}
+
+.estado,
+.vacio,
+.aviso {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 0.75rem 0;
+}
+
+.aviso {
+  color: #fca5a5;
+}
+
+.resultados {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.perfil {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+
+  &:hover {
+    border-color: var(--border-cyan);
+  }
+}
+
+.perfil-link {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 42px;
+  object-fit: cover;
+  width: 42px;
+}
+
+.avatar-text {
+  align-items: center;
+  background: rgba(79, 172, 254, 0.15);
+  color: var(--accent-blue);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+
+  .nombre {
+    font-weight: 600;
+  }
+
+  .rol {
+    color: var(--accent-cyan);
+    font-size: 0.85rem;
+  }
+
+  .usuario {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+}
+
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+
+  .chip {
+    background: rgba(0, 242, 254, 0.08);
+    border: 1px solid var(--border-cyan);
+    border-radius: 999px;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+}

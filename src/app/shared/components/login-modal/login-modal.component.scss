@@ -175,5 +175,96 @@
 
 .forgot { text-align: center; font-size: .82rem; color: #8891a3; &:hover { color: #00dcff; } }
 
+/* ---- Medidor de fuerza y confirmación (solo registro) ---- */
+.meter {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-top: -.35rem;
+}
+
+.meter-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+
+  .bar {
+    height: 4px;
+    flex: 1;
+    border-radius: 3px;
+    background: rgba(255,255,255,.12);
+    transition: background .2s;
+
+    &.on { background: #00dcff; }
+    &.on.deficit { background: #ff5c7a; }
+  }
+}
+
+.meter-label { font-size: .74rem; color: #8891a3; white-space: nowrap; }
+
+.politicas {
+  margin: 0;
+  font-size: .76rem;
+  color: #8891a3;
+  text-align: center;
+
+  a { color: #00dcff; text-decoration: underline; }
+}
+
+/* ---- Paso de verificación por código ---- */
+.verify-box {
+  display: grid;
+  gap: .85rem;
+
+  h3 { margin: 0; font-size: 1.15rem; color: #e6ebf5; }
+}
+
+.verify-text { margin: 0; font-size: .85rem; color: #a3adc2; line-height: 1.45; strong { color: #e6ebf5; } }
+
+.hint {
+  margin: 0;
+  font-size: .76rem;
+  color: #ffc861;
+  background: rgba(255, 200, 97, .1);
+  border: 1px solid rgba(255, 200, 97, .25);
+  border-radius: 8px;
+  padding: .45rem .6rem;
+}
+
+.codigo {
+  width: 100%;
+  padding: .75rem;
+  text-align: center;
+  letter-spacing: .55rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e6ebf5;
+  background: #0d1117;
+  border: 1px solid rgba(0,220,255,.3);
+  border-radius: 10px;
+  outline: none;
+
+  &:focus { border-color: #00dcff; }
+  &::placeholder { letter-spacing: .35rem; color: #3d4658; }
+}
+
+.verify-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.link-plain {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .8rem;
+  color: #8891a3;
+
+  &:hover { color: #00dcff; }
+}
+
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }

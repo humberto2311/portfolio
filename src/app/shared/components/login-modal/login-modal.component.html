@@ -15,19 +15,56 @@
       </svg>
     </button>
 
-    <!-- Tabs -->
-    <div class="modal-tabs">
-      <button
-        [class.active]="modalSvc.loginTab() === 'login'"
-        (click)="switchTab('login')">
-        Iniciar sesión
+    <!-- PASO DE VERIFICACIÓN: la cuenta existe pero falta escribir el código del correo -->
+    <div class="verify-box" *ngIf="auth.pendiente() as correo; else formulario">
+      <h3>Confirma tu correo</h3>
+
+      <p class="verify-text" *ngIf="auth.correoEnviado()">
+        Te enviamos un código de 6 dígitos a <strong>{{ correo }}</strong>.
+      </p>
+      <p class="verify-text" *ngIf="!auth.correoEnviado()">
+        Todavía no hay correo configurado, así que el código quedó en la consola del backend.
+      </p>
+      <p class="hint" *ngIf="auth.pistaDesarrollo()">{{ auth.pistaDesarrollo() }}</p>
+
+      <input
+        class="codigo"
+        type="text"
+        name="codigo"
+        [ngModel]="codigo"
+        (ngModelChange)="escribirCodigo($event)"
+        inputmode="numeric"
+        maxlength="6"
+        autocomplete="one-time-code"
+        placeholder="000000">
+
+      <p class="error" *ngIf="auth.error()">{{ auth.error() }}</p>
+
+      <button type="button" class="submit-btn" (click)="verificar()"
+              [disabled]="codigo.length !== 6 || auth.isLoading()">
+        {{ auth.isLoading() ? 'Verificando…' : 'Verificar cuenta' }}
       </button>
-      <button
-        [class.active]="modalSvc.loginTab() === 'register'"
-        (click)="switchTab('register')">
-        Crear cuenta
-      </button>
+
+      <div class="verify-foot">
+        <button type="button" class="link-plain" (click)="reenviar()">Reenviar código</button>
+        <button type="button" class="link-plain" (click)="volverAlFormulario()">Volver</button>
+      </div>
     </div>
+
+    <ng-template #formulario>
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <button
+          [class.active]="modalSvc.loginTab() === 'login'"
+          (click)="switchTab('login')">
+          Iniciar sesión
+        </button>
+        <button
+          [class.active]="esRegistro()"
+          (click)="switchTab('register')">
+          Crear cuenta
+        </button>
+      </div>
 
     <!-- OAuth -->
     <div class="oauth-buttons">
@@ -65,7 +102,7 @@
     <form [formGroup]="form" (ngSubmit)="submit()" class="email-form">
 
       <!-- CAMPOS EXCLUSIVOS DE REGISTRO -->
-      <ng-container *ngIf="modalSvc.loginTab() === 'register'">
+      <ng-container *ngIf="esRegistro()">
         
         <label>
           <span>Nombre completo</span>
@@ -111,12 +148,43 @@
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="password"
             placeholder="Mínimo 8 caracteres"
-            [autocomplete]="modalSvc.loginTab() === 'login' ? 'current-password' : 'new-password'">
+            [autocomplete]="modalSvc.loginTab() === 'login' ? 'current-password' : 'new-password'"
+            (change)="revalidarConfirmacion()">
           <button type="button" (click)="showPassword.set(!showPassword())" tabindex="-1">
             {{ showPassword() ? '🙈' : '👁️' }}
           </button>
         </div>
       </label>
+
+      <!-- Solo en registro: medidor de fuerza y la contraseña escrita por segunda vez -->
+      <ng-container *ngIf="esRegistro()">
+        <div class="meter" *ngIf="form.get('password')?.value">
+          <div class="meter-bars">
+            <span class="bar" *ngFor="let nivel of [1, 2, 3, 4]"
+                  [class.on]="fuerza() >= nivel" [class.deficit]="fuerza() > 0 && fuerza() < 3"></span>
+          </div>
+          <span class="meter-label">Seguridad: {{ etiquetaFuerza() }}</span>
+        </div>
+
+        <label>
+          <span>Confirmar contraseña</span>
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            placeholder="Escríbela otra vez"
+            autocomplete="new-password">
+        </label>
+
+        <p class="error"
+           *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.errors?.['clavesDistintas']">
+          Las contraseñas no coinciden.
+        </p>
+
+        <p class="politicas">
+          Al crear la cuenta aceptas las
+          <a href="/politicas" target="_blank" rel="noopener">Políticas de seguridad</a>.
+        </p>
+      </ng-container>
 
       <p class="error" *ngIf="auth.error()">{{ auth.error() }}</p>
 
@@ -128,5 +196,6 @@
         ¿Olvidaste tu contraseña?
       </a>
     </form>
+    </ng-template>
   </div>
 </div>

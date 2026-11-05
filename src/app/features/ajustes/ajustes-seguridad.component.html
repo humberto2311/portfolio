@@ -1,0 +1,159 @@
+<div class="seguridad-page">
+
+  <header class="page-head">
+    <h1>Seguridad</h1>
+    <p>Estado de tu cuenta, cómo entras y qué enlaces están abiertos.</p>
+  </header>
+
+  <p class="aviso" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="cargando" *ngIf="isLoading">Revisando tu cuenta…</div>
+
+  <ng-container *ngIf="!isLoading && estado">
+
+    <!-- VERIFICACIÓN DEL CORREO -->
+    <section class="card">
+      <h2><i class="fas fa-envelope-circle-check"></i> Correo verificado</h2>
+
+      <div class="row">
+        <div>
+          <strong>{{ estado.email }}</strong>
+          <p class="helper" *ngIf="estado.verificado">
+            La cuenta ya está verificada: no hace falta usar códigos otra vez.
+          </p>
+          <p class="helper" *ngIf="!estado.verificado">
+            Esta cuenta todavía no confirma su correo. Sin verificación no podrás volver a entrar
+            con contraseña después de cerrar la sesión.
+          </p>
+        </div>
+
+        <span class="chip" [class.ok]="estado.verificado">
+          {{ estado.verificado ? 'Verificado' : 'Pendiente' }}
+        </span>
+      </div>
+
+      <ng-container *ngIf="!estado.verificado">
+        <div class="codigo-fila">
+          <input
+            class="codigo"
+            type="text"
+            name="codigo"
+            [ngModel]="codigo"
+            (ngModelChange)="escribirCodigo($event)"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            placeholder="000000">
+
+          <button type="button" class="btn-primary" (click)="verificarCorreo()"
+                  [disabled]="codigo.length !== 6 || verificando">
+            {{ verificando ? 'Verificando…' : 'Verificar' }}
+          </button>
+
+          <button type="button" class="btn-ghost" (click)="reenviarCorreo()" [disabled]="reenviando">
+            {{ reenviando ? 'Enviando…' : 'Reenviar código' }}
+          </button>
+        </div>
+
+        <p class="error" *ngIf="auth.error()">{{ auth.error() }}</p>
+        <p class="helper" *ngIf="reenviado && !auth.error()">
+          Revisa la bandeja de entrada y el spam: el código tarda un par de minutos.
+        </p>
+      </ng-container>
+    </section>
+
+    <!-- CÓMO ENTRAS -->
+    <section class="card">
+      <h2><i class="fas fa-right-to-bracket"></i> Forma de acceso</h2>
+
+      <ul class="list">
+        <li>
+          <span>Proveedor</span>
+          <strong>{{ proveedorTexto }}</strong>
+        </li>
+        <li>
+          <span>Contraseña propia</span>
+          <strong>{{ estado.tieneContrasena ? 'Sí' : 'No' }}</strong>
+        </li>
+        <li>
+          <span>Último acceso</span>
+          <strong>{{ ultimoAccesoTexto }}</strong>
+        </li>
+      </ul>
+
+      <p class="helper" *ngIf="!estado.tieneContrasena">
+        Entraste con un proveedor externo. Puedes crear una contraseña desde Ajustes para usar
+        también el acceso por correo.
+      </p>
+
+      <div class="actions">
+        <a class="btn-primary" routerLink="/app/ajustes/cuenta">Cambiar contraseña</a>
+      </div>
+    </section>
+
+    <!-- SESIONES -->
+    <section class="card">
+      <h2><i class="fas fa-mobile-screen-button"></i> Sesiones activas</h2>
+
+      <p class="helper">
+        Al cerrar todas, cualquier dispositivo que haya entrado antes de ahora pierde el acceso y
+        tendrá que identificarse otra vez. Esta sesión sigue abierta.
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn-danger" [class.pedir]="confirmandoCierre"
+                (click)="cerrarSesiones()" [disabled]="cerrandoSesiones">
+          {{ cerrandoSesiones ? 'Cerrando…' : (confirmandoCierre ? '¿Seguro? pulsa otra vez' : 'Cerrar sesión en otros dispositivos') }}
+        </button>
+      </div>
+    </section>
+
+    <!-- QUÉ ESTÁ A LA VISTA -->
+    <section class="card">
+      <h2><i class="fas fa-link"></i> Enlaces abiertos sobre ti</h2>
+
+      <ul class="list" *ngIf="hayEnlacesPublicos">
+        <li *ngIf="cvVisible && cv?.publicSlug">
+          <span>Hoja de vida</span>
+          <a [routerLink]="['/u', cv?.publicSlug]" target="_blank" rel="noopener">
+            /u/{{ cv?.publicSlug }}
+          </a>
+        </li>
+        <li *ngIf="tarjeta?.slug && userId">
+          <span>Tarjeta NFC</span>
+          <a [routerLink]="['/tarjeta', userId, tarjeta?.slug]" target="_blank" rel="noopener">
+            /tarjeta/…/{{ tarjeta?.slug }}
+          </a>
+        </li>
+      </ul>
+
+      <p class="helper" *ngIf="!hayEnlacesPublicos">
+        Ahora mismo no hay nada público: tu hoja de vida está privada y no tienes tarjeta NFC creada.
+      </p>
+
+      <p class="helper">
+        La hoja de vida se hace pública o privada desde
+        <a routerLink="/app/ajustes/cuenta">Ajustes de cuenta</a>, y los enlaces desde
+        <a routerLink="/app/hub">mi Hub</a>.
+      </p>
+    </section>
+
+  </ng-container>
+
+  <!-- POLÍTICAS -->
+  <section class="card">
+    <h2><i class="fas fa-shield-halved"></i> Políticas de seguridad</h2>
+
+    <p class="helper">
+      Cómo tratamos tus datos personales, qué cambia cuando usas la app en el celular y qué hacer si
+      pierdes la etiqueta NFC.
+    </p>
+
+    <div class="actions">
+      <a class="btn-ghost" routerLink="/politicas" target="_blank" rel="noopener">
+        Leer las políticas completas
+      </a>
+    </div>
+  </section>
+
+</div>

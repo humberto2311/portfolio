@@ -1,0 +1,637 @@
+<article class="politicas">
+
+  <header class="portada">
+    <h1>Políticas de seguridad</h1>
+    <p>
+      Aplicación <strong>sistem</strong> (NFC-Soft) — web y uso desde celular, con etiquetas NFC.
+      Este documento dice qué datos guardamos, cómo protegemos tu acceso y qué haces tú si algo se sale
+      de control.
+    </p>
+    <p class="vigencia">Última actualización: {{ vigencia }}</p>
+  </header>
+
+  <nav class="indice" aria-label="Contenido">
+    <a href="#datos">1. Datos personales</a>
+    <a href="#cuentas">2. Cuentas y contraseñas</a>
+    <a href="#movil">3. Uso en celular</a>
+    <a href="#nfc">4. Etiquetas NFC</a>
+    <a href="#metricas">5. Métricas, proximidad y mercadeo</a>
+    <a href="#derechos">6. Tus derechos</a>
+    <a href="#legal">7. Marco legal</a>
+    <a href="#contacto">8. Contacto</a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="datos">
+    <h2><i class="fas fa-database"></i> 1. Datos personales que tratamos</h2>
+
+    <ul>
+      <li><strong>Los que escribes al registrarte:</strong> nombre, correo electrónico, teléfono,
+        género y fecha de nacimiento. Sirven para identificar tu perfil y completar la hoja de vida.</li>
+      <li><strong>Los que aporta tu proveedor de acceso:</strong> si entras con GitHub, Google o
+        Microsoft, recibimos nombre, correo y, en GitHub, tu usuario público. No pedimos ni guardamos
+        tu token del proveedor.</li>
+      <li><strong>Lo que publicas tú:</strong> proyectos, enlaces del hub, foto de perfil y el
+        contenido de tu hoja de vida.</li>
+      <li><strong>Registros técnicos:</strong> correo, fecha del último acceso y la marca del momento
+        en que cerraste todas las sesiones. No rastreamos tu comportamiento con cookies de terceros.</li>
+      <li><strong>Eventos de tu etiqueta NFC:</strong> cuando alguien escanea tu tarjeta se registra el
+        callback de ese evento: fecha, hora, tipo de dispositivo y, si quien escanea acepta compartir su
+        ubicación y tú activaste el seguimiento, una zona aproximada. Con eso se arman tus métricas de
+        networking y, solo si autorizas casillas aparte, el mercadeo por proximidad y las promociones de
+        entidades cercanas al lugar donde se hizo el contacto (sección 5, finalidades A, B y C).</li>
+    </ul>
+
+    <h3>Quién es el responsable y con qué base legal</h3>
+    <p>
+      El responsable del tratamiento es <strong>NFC-Soft</strong>, proyecto de Humberto José Lozano
+      Verbel, domiciliado en Bogotá, Colombia. La base que autoriza el tratamiento es tu
+      <strong>consentimiento previo, expreso e informado</strong> (artículo 9, Ley 1581 de 2012), que
+      otorgas al crear la cuenta y que puedes revocar en cualquier momento. Las finalidades son las de
+      este documento y ninguna otra: hacer funcionar tu cuenta, mostrar lo que tú publicas, medir el uso
+      de tus etiquetas y contactarte por asuntos de seguridad o de la propia cuenta. El mercadeo por
+      proximidad y las promociones de entidades cercanas al lugar del contacto <strong>no entran en esa
+      lista</strong>: son finalidades aparte que requieren su propia autorización expresa y separada
+      (sección 5.4).
+    </p>
+
+    <p>
+      La base de datos está en un proveedor administrado (PostgreSQL) y la comunicación viaja por
+      HTTPS. <strong>No vendemos, alquilamos ni cedemos tus datos a terceros</strong> para que los
+      exploten comercialmente; solo es público lo que tú haces visible con un enlace, y solo se entrega
+      información a los proveedores que tratan datos por cuenta nuestra (correo transaccional,
+      alojamiento y, si llega a operar la sección 5, analítica de campañas) bajo contrato de encargo del
+      tratamiento y con la misma protección. Los aliados comerciales de promociones por proximidad no son
+      destinatarios de datos personales: reciben una petición ya filtrada por zona, como se detalla en la
+      sección 5.6.
+    </p>
+
+    <h3>Conservación y borrado</h3>
+    <p>
+      Guardamos tus datos mientras la cuenta exista. Al suprimirla se eliminan tus perfiles, proyectos,
+      enlaces y mensajes, y los registros de escaneo quedan seudonimizados: conservamos conteos, no tu
+      nombre ni tu correo. La información necesaria para cumplir obligaciones legales o contractuales y
+      para atender reclamaciones se conserva por el término de ley de cinco (5) años después de la
+      supresión (artículo 5.1, Ley 1581 de 2012), con fines de estadística y prueba.
+    </p>
+  </section>
+
+  <!-- 2 -->
+  <section id="cuentas">
+    <h2><i class="fas fa-key"></i> 2. Cuentas y contraseñas</h2>
+
+    <h3>Cómo las guardamos</h3>
+    <ul>
+      <li>La contraseña se guarda cifrada con BCrypt. Nadie —ni el administrador— puede leerla.</li>
+      <li>Mínimo 8 caracteres. Al crear la cuenta debes escribirla dos veces: si no coinciden, el
+        registro no avanza.</li>
+      <li>Quien entra con GitHub, Google o Microsoft no tiene contraseña; si después quieres acceso
+        por correo, la creas desde Ajustes.</li>
+    </ul>
+
+    <h3>Verificación por código</h3>
+    <ul>
+      <li>Al registrarte recibes un código de 6 dígitos por correo. La cuenta queda bloqueada hasta
+        que lo escribas: sin verificar no se puede volver a entrar.</li>
+      <li>El código vence en 10 minutos, falla después de 5 intentos y solo hay uno vigente por
+        correo. Se guarda cifrado, nunca en texto.</li>
+      <li>Si no te llega, usa «Reenviar código» desde el propio paso de verificación o desde
+        Seguridad.</li>
+    </ul>
+
+    <h3>Sesiones</h3>
+    <ul>
+      <li>El acceso usa un token JWT firmado. Se guarda en tu navegador y se envía solo con las
+        peticiones de esta app.</li>
+      <li><strong>Cerrar sesión en otros dispositivos</strong> (Seguridad) invalida todos los tokens
+        emitidos antes de ese momento. Si prestas tu celular o compartiste el navegador, ese es el
+        botón que debes pulsar.</li>
+      <li>Cambia la contraseña si crees que alguien más la conoce, y no reutilices la de tu correo.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="movil">
+    <h2><i class="fas fa-mobile-screen-button"></i> 3. Uso desde el celular</h2>
+
+    <p>
+      sistem es una web responsive: se usa desde el navegador del teléfono, sin tienda de aplicaciones.
+      Por eso el almacenamiento local del navegador es tu sesión: ten presente lo siguiente.
+    </p>
+
+    <ul>
+      <li>No dejes la sesión abierta en teléfonos compartidos ni en navegadores de otras personas.</li>
+      <li>En tablets o celulares prestados, cierra sesión y luego pulsa «Cerrar sesión en otros
+        dispositivos» cuando vuelvas a tu equipo.</li>
+      <li>Activa bloqueo de pantalla en el teléfono: quien desbloquea el dispositivo puede abrir la
+        app si quedó la sesión.</li>
+      <li>El sistema no pide acceso a tu cámara ni a tus contactos. La ubicación solo la puede llegar a
+        pedir la pantalla pública que se abre al escanear una etiqueta, y únicamente si el seguimiento
+        está activado. Esa zona aproximada alimenta primero el dashboard y, solo si autorizas casillas
+        aparte, el mercadeo por proximidad y las promociones de entidades cercanas: mira la sección 5.</li>
+      <li>Los enlaces que generas (hoja de vida pública, tarjeta NFC) se abren igual en celular;
+        revisa su visibilidad desde Ajustes.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section id="nfc">
+    <h2><i class="fas fa-wifi"></i> 4. Etiquetas NFC</h2>
+
+    <h3>Qué guarda la etiqueta</h3>
+    <p>
+      La tarjeta NFC se programa con un enlace (URI) hacia tu perfil público. <strong>En la etiqueta
+      no hay datos personales</strong>: ni correo, ni teléfono, ni contraseña. Al acercar el celular
+      se abre la pantalla pública que tú decidiste compartir.
+    </p>
+
+    <h3>Riesgo real</h3>
+    <ul>
+      <li>La etiqueta no es una llave: cualquiera que la lea obtiene el enlace, no tu sesión.</li>
+      <li>Si el enlace apunta a una hoja de vida marcada como pública, quien tenga la etiqueta puede
+        verla y descargar el PDF.</li>
+      <li>Una etiqueta perdida no da acceso a tu cuenta, pero sí revela lo que tengas público.</li>
+    </ul>
+
+    <h3>Si pierdes la etiqueta</h3>
+    <ol>
+      <li>Entra a <strong>Ajustes → Seguridad</strong> desde otro dispositivo.</li>
+      <li>Pon tu hoja de vida en <strong>privada</strong> y revisa los enlaces del hub.</li>
+      <li>Cierra sesión en otros dispositivos si además crees que alguien tuvo tu navegador abierto.</li>
+      <li>Cambia tu contraseña o vuelve a publicar con un enlace nuevo cuando recuperes el control.</li>
+      <li>Vuelve a escribir la etiqueta cuando quieras reactivar el acceso físico.</li>
+    </ol>
+  </section>
+
+  <!-- 5 -->
+  <section id="metricas">
+    <h2><i class="fas fa-chart-line"></i> 5. Métricas de tu etiqueta, proximidad, usos de mercadeo y promociones de entidades cercanas</h2>
+
+    <p>
+      Esta sección es la más larga del documento a propósito, porque es donde se cruzan tres cosas que
+      conviene tener separadas por escrito: (i) el registro técnico que produce cada escaneo de tu
+      etiqueta NFC, (ii) el panel de métricas —en adelante <strong>el dashboard</strong>— donde ese
+      registro se te muestra, y (iii) los <strong>usos distintos de la métrica</strong> que la cercanía o
+      ubicación obtenida por NFC puede tener una vez el dashboard existió: <strong>mercadeo
+      (marketing)</strong> y <strong>promociones de entidades aliadas cercanas al lugar donde se hizo el
+      contacto</strong>. Cada finalidad del apartado (iii) es independiente, se autoriza por separado y
+      se puede apagar por separado. Lo que no está escrito aquí no es finalidad del tratamiento.
+    </p>
+
+    <h3>5.1 · Definiciones que usan estas cláusulas</h3>
+    <ul>
+      <li><strong>Petición de retorno (callback):</strong> la llamada que el navegador del celular hace
+        sobre tu enlace público en el instante en que alguien acerca la etiqueta. Es el hecho técnico que
+        genera el registro.</li>
+      <li><strong>Evento de escaneo:</strong> la unidad de dato que queda registrada como
+        consecuencia de un callback, con su marca temporal y las características del dispositivo.</li>
+      <li><strong>Zona aproximada / proximidad:</strong> una demarcación de área —ciudad, municipio,
+        área metropolitana, recinto o recinto de gran aforo— derivada del evento. <strong>Nunca</strong>
+        una coordenada exacta, una dirección postal, un punto de interés particular ni un recorrido.</li>
+      <li><strong>Dashboard:</strong> el panel de métricas de tu tarjeta donde ves conteos, fechas, tipo
+        de dispositivo y zonas de tus escaneos, con opción de exportar o borrar.</li>
+      <li><strong>Mercadeo por proximidad:</strong> el uso estadístico y agregado de la proximidad de tus
+        escaneos para diseñar, medir y mostrar ofertas, contenido comercial o campañas dentro de la
+        aplicación.</li>
+      <li><strong>Entidad aliada:</strong> un tercero con contrato vigente con NFC-Soft que opera un
+        establecimiento físico o un recinto —<strong>tiendas y locales de comida, cafeterías y
+        restaurantes, comercio de barrio y centros comerciales, hoteles y alojamiento, agencias de viaje y
+        transporte terrestre, terminales terrestres, puertos aéreos y aeropuertos, salas VIP y recintos
+        feriales o de eventos</strong>— y que puede ofrecer una promoción en la zona donde ocurrió el
+        contacto.</li>
+      <li><strong>Promoción por proximidad:</strong> el mensaje comercial de una entidad aliada que se
+        muestra en la aplicación atendiendo a la zona aproximada del escaneo, no a la identidad de quien
+        escanea.</li>
+      <li><strong>Titular y tercero escaneante:</strong> tú, dueño de la etiqueta, y la persona que la
+        acerca a su celular. Ambos tienen derechos propios sobre sus datos y se describen por separado
+        más abajo.</li>
+    </ul>
+
+    <h3>5.2 · Qué se registra en cada escaneo y qué no</h3>
+    <p>
+      Por cada evento de escaneo guardamos: fecha y hora con zona horaria; el identificador interno de la
+      etiqueta; el identificador interno de la cuenta dueña de la etiqueta; tipo de dispositivo, sistema
+      operativo y navegador obtenidos de la cabecera de la petición; la ruta del enlace que se abrió; el
+      resultado de la navegación (si el enlace resolvió o falló); y, únicamente si se cumplen las dos
+      condiciones del número 5.3, una zona aproximada.
+    </p>
+    <p>
+      <strong>No guardamos:</strong> la dirección IP completa ni su volcado a terceros —cuando se
+      conserva algo es un prefijo anónimo usado para contar país o ciudad—; el nombre, el correo, el
+      teléfono ni la sesión del tercero escaneante; el contenido del portapapeles, la agenda, los
+      contactos, el historial de navegación ni ningún dato de la aplicación del escaneante; la
+      coordenada geográfica exacta; y ningún dato sensible (artículo 6, Ley 1581 de 2012), incluida la
+      ubicación cuando por contexto pudiera revelar salud, religión, ideología o vida sexual: el sistema
+      no se construye para inferir esos datos y está prohibido usar la proximidad para clasificar a nadie
+      en esas categorías.
+    </p>
+
+    <h3>5.3 · Doble condición para registrar la proximidad</h3>
+    <p>
+      La zona aproximada solo se registra cuando concurren dos consentimientos simultáneos y revocables:
+    </p>
+    <ol>
+      <li>que <strong>tú</strong>, como titular de la etiqueta, tengas el <em>seguimiento por
+        proximidad</em> activado en tu cuenta; y</li>
+      <li>que <strong>quien escanea</strong> otorgue el permiso de ubicación que el navegador le pide en
+        ese momento. Si lo niega, si lo revoca, o si el navegador no lo soporta, el evento se registra
+        <strong>sin</strong> zona aproximada y el conteo del dashboard sigue siendo válido.</li>
+    </ol>
+    <p>
+      Si falta uno de los dos, no hay proximidad y por lo tanto no puede existir uso de proximidad para
+      métricas, para mercadeo ni para promociones. La falta de ambos permisos es el estado por defecto.
+    </p>
+
+    <h3>5.4 · Las finalidades van por separado: métricas, mercadeo, promociones</h3>
+    <p>
+      Este es el punto central de la sección. El dato de proximidad puede tratararse por tres finalidades
+      distintas, cada una con su propia base de consentimiento, de acuerdo con los artículos 6, 8, 9 y 10
+      de la Ley 1581 de 2012 y con el deber de información previa del Decreto 1074 de 2015:
+    </p>
+    <ul>
+      <li><strong>Finalidad A — Métricas (dashboard).</strong> Mostrarte cuántos escaneos recibiste,
+        cuándo, desde qué tipo de dispositivo y en qué zonas, para que sepas si una feria, un evento, una
+        ciudad o un cliente te producen más contactos. Esta finalidad es la única que se activa con el
+        simple hecho de encender el seguimiento.</li>
+      <li><strong>Finalidad B — Mercadeo (marketing).</strong> Usar la cercanía obtenida por NFC
+        <em>después del dashboard</em>, es decir una vez que el panel te registró y mostró el evento, con
+        fines de publicidad y de mercadeo: segmentar campañas, ordenar la oferta promocional que se
+        muestra dentro de la app, medir qué tipo de contenido comercial funciona en qué zona, y priorizar
+        qué promociones de aliados se ofrecen. Requiere un consentimiento <strong>expreso, separado y
+        específico</strong>, distinto del de la finalidad A.</li>
+      <li><strong>Finalidad C — Promociones de entidades aliadas cercanas.</strong> Que una entidad aliada
+        que opera en la zona aproximada donde se hizo el contacto pueda dirigirte una promoción. También
+        requiere consentimiento <strong>expreso, separado y específico</strong>, y puede activarse o
+        apagarse sin tocar la finalidad B.</li>
+    </ul>
+    <p>
+      Ninguna casilla de registro, ni la aceptación general de estas políticas, vale como autorización de
+      B o de C. Esas dos finalidades se ofrecen en un punto de control propio dentro de Ajustes, con su
+      propia fecha, hora y dirección de correo de origen como prueba de consentimiento (artículo 10,
+      literal a, Ley 1581 de 2012), y se retiran con el mismo número de clics con el que se activaron.
+    </p>
+
+    <h3>5.5 · Mercadeo con la proximidad: qué significa en concreto</h3>
+    <p>
+      Si autorizas la finalidad B, la zona aproximada de tus escaneos —que primero se te mostró en el
+      dashboard— podrá usarse para lo siguiente, y solo para lo siguiente:
+    </p>
+    <ul>
+      <li>Ordenar y priorizar, <strong>dentro de la aplicación</strong>, qué promociones y qué contenido
+        comercial se te muestran, según las zonas donde has tenido contactos profesionales.</li>
+      <li>Medir el desempeño de las campañas en agregado: cuántas veces se mostró una promoción, cuántos
+        la abrieron, en qué zonas y en qué franjas horarias. Esas métricas se calculan sobre datos
+        seudonimizados y se reportan como conteos, no como personas.</li>
+      <li>Construir una <strong>segmentación de zonas</strong> —por ejemplo «eventos de tecnología en
+        Bogotá», «aeropuerto El Dorado», «zona gastronómica de Chapinero»— para decidir qué inventario
+        promocional tiene sentido mostrarte. La segmentación se hace sobre proximidad y tipo de evento, no
+        sobre tu nombre, tu correo, tu hoja de vida ni el contenido de tus enlaces.</li>
+      <li>Definir la frecuencia máxima de mensaje comercial que recibe un mismo dispositivo.</li>
+    </ul>
+    <p>
+      <strong>Límites expresos del mercadeo.</strong> Con la finalidad B: no se te envía publicidad por
+      correo electrónico, mensajería de texto, WhatsApp, llamada ni ningún canal externo por el solo hecho
+      de haberla activado —para eso hay una casilla adicional y separada—; no se comparte tu identidad con
+      agencias de publicidad ni con anunciantes; no se compra ni se enriquece tu perfil con bases de
+      datos de terceros; no se usa la proximidad para elaborar perfiles de riesgo, de solvencia, de salud
+      ni de comportamiento que produzcan efectos jurídicos o significativos sobre ti sin revisión humana
+      (artículo 8, numeral 2, literal g, y la prohibición de decisiones automatizadas sin posibilidad de
+      rectificación); y no se usa la ubicación para reconstruir trayectos, rutinas, domicilios ni horarios
+      de sueño de nadie. Si en algún momento una campaña de mercadeo implicara un tratamiento que no esté
+      aquí descrito, se te pedirá consentimiento nuevo antes de activarla.
+    </p>
+
+    <h3>5.6 · Promociones de entidades cercanas al lugar donde se hizo el contacto</h3>
+    <p>
+      Si autorizas la finalidad C, la promoción se arma a partir de un criterio geográfico y lógico,
+      simple y verificable: <strong>el lugar donde se haya hecho el contacto</strong>. Es decir, la zona
+      aproximada del evento de escaneo —el café donde entregaste la tarjeta, la sala del evento, la
+      terminal aérea, el local— es la que determina qué entidad aliada puede dirigirte una oferta y en qué
+      momento se te muestra dentro de la app, usualmente en la pantalla que sigue al dashboard o
+      inmediatamente después del escaneo. Las categorías de aliados previstas son:
+    </p>
+    <ul>
+      <li><strong>Tiendas y locales de comida:</strong> cafeterías, restaurantes, food courts, panaderías,
+        tiendas de conveniencia y comercio de barrio.</li>
+      <li><strong>Lugares de viaje y alojamiento:</strong> hoteles, hostales, apartahoteles, agencias de
+        viaje y tour operadores, transporte terrestre, terminales de buses, arrendamiento de vehículos.</li>
+      <li><strong>Terminales aéreos:</strong> aeropuertos, salas VIP, operadores de manejo de equipaje y
+        servicios de aeropuerto, siempre dentro del recinto donde ocurrió el escaneo.</li>
+      <li><strong>Recintos de encuentro profesional:</strong> centros de convenciones, ferias, eventos,
+        coworkings y cámaras de comercio.</li>
+    </ul>
+    <p>
+      <strong>Qué recibe la entidad aliada y qué no.</strong> El aliado recibe una <em>petición de
+      promoción ya filtrada por zona aproximada y por categoría</em>, acompañada de un identificador
+      interno de sesión efímero y de un contador. El aliado <strong>no recibe tu nombre, tu correo, tu
+      teléfono, tu usuario, tu hoja de vida, tus enlaces, tu historial de escaneos, tu ubicación exacta,
+      tu dirección IP ni ninguna otra información que permita identificarte o contactarte por cuenta
+      propia</strong>. La relación comercial de la promoción es entre tú y el aliado; NFC-Soft no recibe
+      compensación por entregar tus datos —no existen— y, si cobra al aliado, lo cobra por mostrar el
+      espacio publicitario, no por la audiencia identificada.
+    </p>
+    <p>
+      <strong>Rol de cada uno.</strong> Frente a la finalidad C, NFC-Soft actúa como responsable del
+      tratamiento de los datos que usa para elegir la promoción, y cada aliado actúa como responsable del
+      tratamiento que realice sobre los datos que tú le entregues voluntariamente al aceptar la oferta
+      (por ejemplo, si tú le das tu correo para redimir un descuento). Cuando un aliado trate datos por
+      cuenta de NFC-Soft, media un contrato de <strong>encargado del tratamiento</strong> en los términos
+      del artículo 21 de la Ley 1581 de 2012, con el mismo nivel de seguridad, la prohibición de usar los
+      datos para fines propios y la obligación de suprimirlos al terminar el servicio. La lista de aliados
+      vigentes es consultable por correo, y puedes exigir que se retire un aliado del inventario de tu
+      zona.
+    </p>
+
+    <h3>5.7 · Prohibición de venta y cesión de datos</h3>
+    <p>
+      Ni la proximidad, ni el histórico de escaneos, ni la segmentación de zonas, ni el listado de
+      titulares con seguimiento activo se venden, se alquilan, se negocian, se permutan ni se ceden a
+      título oneroso o gratuito. La prohibición del <strong>artículo 16 de la Ley 1581 de 2012</strong> es
+      absoluta y no admite el atajo de «datos anonimizados a granel». Lo que se entrega a aliados o a
+      informes de campaña es exclusivamente agregado estadístico que no permite individualizar a ninguna
+      persona; si un corte territorial o de categoría dejara a un grupo demasiado pequeño para no ser
+      reidentificable, ese corte no se publica —se aplica supresión por umbral mínimo antes de
+      reportar—.
+    </p>
+
+    <h3>5.8 · Seudonimización, umbral mínimo y retención</h3>
+    <ul>
+      <li><strong>Seudonimización.</strong> Para contar promociones mostradas, aperturas y frecuencia se
+        usa un identificador interno derivado y reversible solo dentro del sistema. La estadística de
+        campaña no te identifica y el identificador no viaja con el mensaje comercial.</li>
+      <li><strong>Umbral mínimo de agregación.</strong> Los cortes por zona, por recinto o por categoría
+        se publican solo cuando el grupo supera un tamaño suficiente; por debajo de él se reporta
+        «sin datos».</li>
+      <li><strong>Retención del evento con proximidad.</strong> El detalle de un evento de escaneo con
+        zona aproximada se conserva como máximo doce (12) meses desde su registro; después se conserva
+        únicamente el conteo mensual agregado por zona. Las grabaciones de mercadeo —qué campaña se te
+        mostró y cuándo— se conservan hasta seis (6) meses.</li>
+      <li><strong>Revocatoria y supresión.</strong> Al apagar la finalidad B o C dejan de tratarse datos
+        para ella desde ese instante; al apagar el seguimiento por proximidad dejan de registrarse zonas
+        y el dashboard oculta los cortes geográficos históricos. Puedes pedir la supresión selectiva de
+        los eventos con ubicación conservando los conteos de escaneo sin ubicación. Al suprimir la cuenta,
+        los eventos quedan seudonimizados conforme a la cláusula de conservación de la sección 1 (5 años
+        solo para lo necesario a obligaciones legales y prueba; el resto se elimina).</li>
+    </ul>
+
+    <h3>5.9 · Menores, datos sensibles y poblaciones protegidas</h3>
+    <p>
+      Las finalidades B y C quedan excluidas de dos maneras absolutas: (i) no se ofrecen a cuentas de
+      menores de edad —el sistema no trata datos de menores, salvo autorización del padre, madre o
+      representante legal conforme al artículo 7 de la Ley 1581 de 2012 y, en caso de detectarse, la
+      cuenta se suprimirá y con ella cualquier dato de proximidad—; y (ii) no se construyen campañas ni
+      segmentaciones a partir de datos sensibles, ni en recintos cuya frecuencia pudiera revelarlos
+      (centros de salud, lugares de culto, sedes de organizaciones políticas o sindicales). Una promoción
+      de aeropuerto o de terminal de transporte nunca se dirige por nacionalidad, origen étnico, religión
+      ni composición del grupo que viaja contigo; el criterio es exclusivamente la zona y el momento del
+      escaneo.
+    </p>
+
+    <h3>5.10 · Controles, canal de exclusión y publicidad</h3>
+    <ul>
+      <li><strong>Controles en Ajustes.</strong> Tres interruptores independientes: <em>seguimiento por
+        proximidad</em> (finalidad A), <em>uso de proximidad para mercadeo</em> (finalidad B) y
+        <em>promociones de entidades cercanas</em> (finalidad C), más la visibilidad de cada enlace que el
+        escaneo abre y la desactivación inmediata de una etiqueta perdida.</li>
+      <li><strong>Exclusión publicitaria (opt-out).</strong> Todo mensaje comercial dentro de la app
+        incluye la vía para dejar de recibir promociones de un aliado o de todas las campañas, sin costo
+        distinto al de la conexión. La exclusión opera hacia el futuro; los efectos de la revocación se
+        hacen efectivos dentro de los términos del artículo 9 de la Ley 1581 de 2012 y no afectan la
+        legalidad del tratamiento anterior.</li>
+      <li><strong>Publicidad y consumidor.</strong> La promoción se identifica como material publicitario,
+        reproduce las condiciones que el aliado declara (precio, vigencia, restricciones, canal de
+        redención) y se somete a los artículos 28 a 31 de la Ley 1480 de 2011 y a la Ley 1328 de 2009; NFC-Soft
+        no verifica la existencia, calidad ni legalidad de la oferta del aliado y su responsabilidad se
+        limita a la exactitud con que reproduce la información recibida y a la selección por zona.</li>
+      <li><strong>Regulación de recintos cerrados.</strong> En aeropuertos, terminales, recintos
+        concesionados y eventos con normas propias de captación de datos, la promoción solo se ofrece si
+        el aliado tiene autorización para operar allí; el incumplimiento de ese tercero no se cubre con
+        estas políticas y se reporta a su concesionante.</li>
+      <li><strong>Tu dispositivo también decide.</strong> El permiso de ubicación del navegador y el
+        control de publicidad del sistema operativo del escaneante están por encima de cualquier
+        preferencia nuestra: si el navegador no tiene permiso, no hay zona que tratar.</li>
+    </ul>
+
+    <h3>5.11 · Transferencia internacional en métricas y campañas</h3>
+    <p>
+      Los eventos de escaneo, las zonas aproximadas y los registros de campaña se almacenan en la base de
+      datos del proveedor de nube administrado por NFC-Soft, que puede estar fuera de Colombia, y pueden
+      procesarse con herramientas de analítica y de mensajería alojadas en el exterior. Ese envío ocurre
+      por cuenta nuestra y bajo las condiciones de la sección 7; no constituye transferencia a aliados
+      comerciales, porque a estos no se les transfieren datos personales identificables sino únicamente
+      la petición filtrada descrita en 5.6.
+    </p>
+
+    <p class="nota">
+      <i class="fas fa-circle-info"></i> Estado actual del producto: el registro de eventos por escaneo, el
+      panel de métricas, el mercadeo por proximidad y las promociones de entidades cercanas están
+      descritos aquí como la política que los rige desde el primer día en que existan —no como funciones
+      disponibles hoy. Ninguna de las tres finalidades de esta sección está activada mientras el backend
+      no tenga entidad de evento de escaneo ni captura de ubicación. Si una función aún no aparece en tu
+      cuenta, tampoco está tratando datos de esa clase, y no has otorgado consentimiento alguno sobre
+      ella. Cuando alguna de esas funciones llegue a implementarse, su casilla de consentimiento se te
+      pedirá de forma expresa y separada antes de recoger el primer dato.
+    </p>
+  </section>
+
+  <!-- 6 -->
+  <section id="derechos">
+    <h2><i class="fas fa-user-shield"></i> 6. Tus derechos</h2>
+
+    <ul>
+      <li><strong>Conocer y revocar el consentimiento (art. 8.2.5, Ley 1581 de 2012):</strong> apaga el
+        seguimiento de la etiqueta, deja la hoja de vida en privada o solicita la supresión. Revocar no
+        borra lo que ya pasó, pero sí detiene el tratamiento para el futuro, salvo la conservación
+        legal de la sección 1.</li>
+      <li><strong>Acceder (derecho de acceso):</strong> todo lo tuyo está en Ajustes de cuenta, en el
+        editor de tu hoja de vida y en el panel de métricas de tu tarjeta.</li>
+      <li><strong>Rectificar y actualizar:</strong> editas nombre, teléfono, género y fecha de
+        nacimiento desde Ajustes. El correo no se cambia desde la app porque identifica la cuenta; para
+        modificarlo escribe un correo y lo tramitamos como corrección.</li>
+      <li><strong>Exigir prueba de consentimiento:</strong> podemos mostrar cuándo, desde qué correo y
+        con qué finalidad registraste tu autorización.</li>
+      <li><strong>Limitar la difusión:</strong> deja la hoja de vida en privada, quita enlaces del hub y
+        desactiva la etiqueta.</li>
+      <li><strong>Suprimir:</strong> solicítalo por correo y se elimina tu cuenta con sus datos, con la
+        excepción de conservación indicada en la sección 1.</li>
+      <li><strong>Portabilidad:</strong> descarga tu hoja de vida en PDF desde la propia app y exporta o
+        solicita tus métricas de escaneo en un formato legible por máquina.</li>
+      <li><strong>No ser objeto de decisiones automatizadas</strong> que te afecten sin posibilidad de
+        revisión humana: en sistem no existen perfiles de riesgo ni puntuaciones automáticas.</li>
+      <li><strong>Revocar por finalidad, no en bloque:</strong> puedes apagar el mercadeo por proximidad
+        (finalidad B) y dejar encendidas tus métricas (finalidad A), o quitar las promociones de entidades
+        cercanas (finalidad C) sin perder el dashboard. Cada interruptor es un consentimiento distinto y
+        cada uno se retira solo (secciones 5.4 y 5.10).</li>
+      <li><strong>Exclusión publicitaria:</strong> deja de recibir promociones de un aliado o de todas las
+        campañas desde el propio mensaje, sin costo y sin tener que borrar la cuenta. La exclusión opera
+        hacia el futuro y no exige que justifiques la decisión.</li>
+      <li><strong>Supresión selectiva de ubicación:</strong> pide borrar los eventos con zona aproximada y
+        conserva los conteos de escaneo sin ubicación (sección 5.8).</li>
+    </ul>
+
+    <h3>Cómo ejercerlos</h3>
+    <ol>
+      <li>Escribe a <a [href]="'mailto:' + contacto">{{ contacto }}</a> desde el correo de tu cuenta,
+        con la palabra <strong>«habeas data»</strong> en el asunto e identifica el derecho que ejerces.</li>
+      <li>Puedes pedir un representante y autorizarlo por escrito; adjunta copia de tu identificación.</li>
+      <li>Plazos de <strong>consulta</strong>: <strong>10 días hábiles</strong> contados desde el día
+        siguiente al recibo para darte acceso a la información; <strong>5 días hábiles</strong> tenemos
+        nosotros para pedirte aclaración si la solicitud no es clara; y <strong>3 días hábiles</strong>
+        para expedir la prueba de consentimiento si la pides (art. 14, Ley 1581 de 2012, y Decreto 1372 de
+        2013, compilado en el libro 5 del Decreto 1074 de 2015).</li>
+      <li>Plazos de <strong>reclamo</strong>: <strong>15 días hábiles</strong> para atenderlo;
+        <strong>2 días hábiles</strong> para dar traslado a quien sea competente si no lo somos, y
+        <strong>2 días hábiles</strong> para completar la respuesta si resultó incompleta
+        (art. 15, Ley 1581 de 2012).</li>
+      <li>Si no recibes respuesta en esos términos o la respuesta no te satisface, puedes acudir ante la
+        <strong>Superintendencia de Industria y Comercio</strong>, autoridad de control y única entidad
+        facultada para imponer sanciones (art. 18, Ley 1581 de 2012). No te cobramos por ejercer ninguno
+        de estos derechos.</li>
+    </ol>
+  </section>
+
+  <!-- 7 -->
+  <section id="legal">
+    <h2><i class="fas fa-scale-balanced"></i> 7. Marco legal y límites de responsabilidad</h2>
+
+    <h3>Normas que aplicamos</h3>
+    <ul>
+      <li><strong>Ley 1581 de 2012</strong> y sus decretos reglamentarios — régimen general de
+        protección de datos personales en Colombia; es la columna vertebral de este documento.</li>
+      <li><strong>Decreto 1074 de 2015</strong>, títulos 1 a 4 del libro 5: procedimiento de la
+        solicitud, política de tratamiento y deber de informarte la finalidad antes de recolectar.</li>
+      <li><strong>Decreto 1372 de 2013</strong>, artículo 9: medidas mínimas de seguridad — cifrado en
+        tránsito (HTTPS) y en reposo, control de acceso por rol, registro de la fecha de último acceso,
+        respaldo y plan para incidentes.</li>
+      <li><strong>Ley 1328 de 2009</strong> y <strong>Ley 1480 de 2011</strong> (Estatuto del
+        Consumidor) para publicidad, ofertas y promociones: los artículos 28 a 31 regulan la publicidad
+        y el control de oficiosos, y ningún mensaje comercial de un aliado puede presentarse como si
+        fuera información neutral de la app. No hacemos prácticas abusivas de publicidad ni «letra
+        pequeña» sobre las condiciones de una promoción.</li>
+      <li><strong>Artículo 21, Ley 1581 de 2012</strong> (encargo del tratamiento) para cada proveedor o
+        aliado que trate datos por cuenta nuestra: contrato, instrucciones escritas, misma seguridad y
+        prohibición de usar los datos para fines propios.</li>
+      <li><strong>Lineamientos de la Superintendencia de Industria y Comercio</strong> sobre tratamiento
+        de datos en medios electrónicos y sobre geolocalización: la SIC ha sostenido que la ubicación
+        precisa puede revelar datos sensibles, y por eso el diseño de sistem no captura coordenadas —solo
+        zona aproximada— ni conserva trayectos (secciones 5.2 y 5.8).</li>
+      <li><strong>Ley 1581 de 2012, artículos 6 y 7</strong> para datos sensibles y menores: las
+        finalidades B y C de la sección 5 están excluidas de ambos colectivos.</li>
+      <li><strong>Decreto 2364 de 2012</strong>, principio de <em>privacy by design</em>: la privacidad
+        se decide en el diseño de la app, no como parche posterior.</li>
+      <li><strong>Ley 527 de 1999</strong> y <strong>Ley 2394 de 2024</strong> para la firma digital y
+        la confidencialidad de las comunicaciones electrónicas.</li>
+      <li>Si algún día operamos para usuarios de la Unión Europea, se añadiría el <strong>RGPD</strong>
+        con su base de legitimación y su delegado de protección; hoy el tratamiento se rige por la norma
+        colombiana.</li>
+    </ul>
+
+    <h3>Transferencia y envío de datos</h3>
+    <p>
+      Tus datos se alojan en proveedores de nube administrados cuyos servidores pueden estar fuera de
+      Colombia (por ejemplo, bases de datos gestionadas en Estados Unidos). Al aceptar estas políticas
+      autorizas ese <strong>envío o transferencia</strong>. El destino cumple nivel de protección
+      adecuada según la lectura de la Ley 1581 y del Decreto 1074, y el proveedor trata los datos solo
+      por cuenta de NFC-Soft, bajo contrato y sin usarlos para fines propios.
+    </p>
+
+    <h3>Qué NO hacemos</h3>
+    <ul>
+      <li>No vendemos, alquilamos, negociamos ni cedemos bases de datos personales (art. 16, Ley 1581;
+        la práctica de venta de datos está expresamente prohibida).</li>
+      <li>No recolectamos datos sensibles —salud, orientación sexual, religión, biometría, opiniones
+        políticas ni pertenencia sindical— ni pedimos los de menores de edad.</li>
+      <li>No usamos cookies de terceros ni rastreo entre sitios.</li>
+      <li>No almacenamos el código de verificación en texto ni la contraseña de ninguna forma legible.</li>
+      <li>No hacemos mercadeo con la proximidad de tus escaneos sin la casilla expresa de la finalidad B,
+        ni dejamos que una entidad aliada te contacte por su cuenta con datos de sistem: la promoción vive
+        dentro de la app y el aliado no recibe tu identidad (secciones 5.4, 5.5 y 5.6).</li>
+      <li>No vendemos listados de zonas, de recintos ni de titulares con seguimiento activo, ni
+        reconstruimos rutas, domicilios u horarios de ninguna persona a partir de los escaneos.</li>
+    </ul>
+
+    <h3>Edad mínima</h3>
+    <p>
+      sistem está dirigido a mayores de 18 años. Si descubrimos una cuenta de un menor sin la
+      autorización del padre, madre o representante legal (art. 7, Ley 1581), la suprimimos tan pronto
+      la detectemos.
+    </p>
+
+    <h3>Límites de responsabilidad</h3>
+    <p>
+      Son situaciones que escapan al control razonable del responsable y que aceptas al usar la app, sin
+      que ello nos exima de las obligaciones de seguridad que sí nos corresponden:
+    </p>
+    <ul>
+      <li><strong>Hechos de terceros y caso fortuito:</strong> cortes del proveedor de nube o del correo,
+        ataques a infraestructura que no operamos, fallas de Internet o del lector NFC del celular.</li>
+      <li><strong>Credenciales bajo tu control:</strong> contraseña reutilizada de otro servicio, correo
+        comprometido, sesión dejada abierta en un dispositivo ajeno o entrega voluntaria del token. La
+        responsabilidad de guardar tus credenciales y de cerrar sesiones remotas es tuya (sección 2).</li>
+      <li><strong>Lo que tú haces público:</strong> si publicas la hoja de vida o un enlace, quien lo
+        visite puede leerlo y guardarlo. La app te da el control, pero no puede retirar lo que otros ya
+        copiaron.</li>
+      <li><strong>Contenido de terceros en tus enlaces:</strong> no respondemos por las políticas ni por
+        el contenido de GitHub, Google, Microsoft o de los sitios a los que apuntas.</li>
+      <li><strong>Dano indirecto:</strong> en la medida permitida por la ley colombiana, no respondemos
+        por lucro cesante o daño emergente derivados de indisponibilidades temporales; el servicio se
+        presta «como está», sin garantía de disponibilidad continua.</li>
+    </ul>
+
+    <h3>Cambios de estas políticas y de la ley</h3>
+    <p>
+      Podemos actualizar este documento por cambios del producto o de la normativa. Los cambios
+      materiales se avisan con la fecha de esta página y, cuando afectan una finalidad nueva de tus
+      datos, te pedimos consentimiento expreso antes de aplicarlos. <strong>Si no aceptas el cambio,
+      puedes revocar y solicitar la supresión antes de que entre en vigor.</strong> La versión anterior
+      queda guardada para que puedas exigirla como prueba de las condiciones con las que autorizaste.
+    </p>
+
+    <h3>Legislación aplicable y controversias</h3>
+    <p>
+      Estas políticas se interpretan conforme a la legislación colombiana. Cualquier controversia se
+      somete primero al canal de la sección 8 y, de no resolverse, a la Superintendencia de Industria y
+      Comercio y a la jurisdicción de Bogotá, D. C. La eventual nulidad de una cláusula no afecta las
+      demás.
+    </p>
+  </section>
+
+  <!-- 8 -->
+  <section id="contacto">
+    <h2><i class="fas fa-envelope"></i> 8. Contacto, incidentes y cambios</h2>
+
+    <h3>Área de protección de datos personales</h3>
+    <p>
+      Cualquier solicitud sobre tus datos, un incidente de seguridad o una duda de estas políticas:
+      <a [href]="'mailto:' + contacto">{{ contacto }}</a>. Somos el área designada para atender
+      consultas, quejas y reclamos (art. 13 y 15, Decreto 1074 de 2015), con los plazos legales de
+      respuesta de la sección 6.
+    </p>
+
+    <p>
+      <i class="fas fa-triangle-exclamation"></i> Si crees que hubo un uso indebido o una fuga: avísanos
+      de inmediato por ese correo, pulsa <strong>Cerrar sesión en otros dispositivos</strong> y cambia tu
+      contraseña. Te informaremos, dentro de las posibilidades del proyecto, qué datos estuvieron
+      expuestos y qué medidas se tomaron.
+    </p>
+
+    <p>
+      Diferencia entre reclamo y queja: el <strong>reclamo</strong> se presenta ante nosotros, el
+      responsable, cuando consideras que el tratamiento no cumple la ley; la <strong>queja</strong> se
+      presenta ante la Superintendencia de Industria y Comercio cuando el reclamo no fue atendido en los
+      términos de la sección 6 o su respuesta no te satisfizo. El reclamo es, por regla general, el paso
+      previo necesario (art. 15, Ley 1581 de 2012, y Decreto 1372 de 2013).
+    </p>
+
+    <p>
+      Si estas políticas cambian, se actualiza la fecha de esta página y, cuando el cambio es
+      importante, te avisamos por correo.
+    </p>
+
+    <div class="cta-fila">
+      <a class="boton" routerLink="/app/ajustes/seguridad">Ir a Seguridad</a>
+      <a class="boton secundario" routerLink="/app/ajustes/cuenta">Ajustes de cuenta</a>
+    </div>
+  </section>
+
+</article>

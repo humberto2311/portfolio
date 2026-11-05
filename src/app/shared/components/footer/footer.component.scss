@@ -342,6 +342,18 @@ $border-glow: rgba(0, 242, 254, 0.2);
       }
     }
 
+    .legal-link {
+      color: $text-secondary;
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: color 0.2s ease, border-color 0.2s ease;
+
+      &:hover {
+        color: $accent-cyan;
+        border-bottom-color: $accent-cyan;
+      }
+    }
+
     .tech-stack {
       display: flex;
       align-items: center;

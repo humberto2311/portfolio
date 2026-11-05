@@ -1,0 +1,130 @@
+<div class="ajustes-page">
+
+  <header class="page-head">
+    <h1>Ajustes de cuenta</h1>
+    <p>Lo que cualquier red social te deja cambiar: tus datos, tu contraseña y qué tan visible eres.</p>
+  </header>
+
+  <p class="aviso" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="cargando" *ngIf="isLoading">Cargando tus datos…</div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- DATOS PERSONALES -->
+    <section class="card">
+      <h2><i class="fas fa-user"></i> Datos personales</h2>
+
+      <div class="field">
+        <label for="nombre">Nombre visible</label>
+        <input id="nombre" type="text" [(ngModel)]="nombre" placeholder="Cómo quieres que aparezcas">
+      </div>
+
+      <div class="field">
+        <label for="email">Correo electrónico</label>
+        <input id="email" type="email" [value]="email" disabled>
+        <small>El correo no se cambia desde aquí: es tu identidad de acceso.</small>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="tel" [(ngModel)]="telefono" placeholder="+57 300 000 0000" maxlength="20">
+        </div>
+
+        <div class="field">
+          <label for="genero">Género</label>
+          <select id="genero" [(ngModel)]="genero">
+            <option value="">Sin especificar</option>
+            <option *ngFor="let g of generos" [value]="g.valor">{{ g.texto }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="nacimiento">Fecha de nacimiento</label>
+        <input id="nacimiento" type="date" [(ngModel)]="nacimiento" [max]="maxDate">
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="guardarDatos()" [disabled]="guardandoDatos">
+          {{ guardandoDatos ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+        <a class="btn-ghost" routerLink="/app/perfil">Editar foto, bio y portada</a>
+      </div>
+    </section>
+
+    <!-- CONTRASEÑA -->
+    <section class="card">
+      <h2><i class="fas fa-key"></i> {{ tieneContrasena ? 'Cambiar contraseña' : 'Establecer contraseña' }}</h2>
+
+      <p class="helper" *ngIf="!tieneContrasena">
+        Entraste con un proveedor externo, así que tu cuenta todavía no tiene contraseña.
+        Al crear una podrás entrar también escribiendo tu correo.
+      </p>
+
+      <form (ngSubmit)="guardarClave()" class="clave-form">
+        <div class="field" *ngIf="tieneContrasena">
+          <label for="claveActual">Contraseña actual</label>
+          <input id="claveActual" type="password" [(ngModel)]="claveActual" name="claveActual"
+                 autocomplete="current-password" required>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="claveNueva">Contraseña nueva</label>
+            <input id="claveNueva" type="password" [(ngModel)]="claveNueva" name="claveNueva"
+                   autocomplete="new-password" minlength="8" required>
+          </div>
+
+          <div class="field">
+            <label for="claveConfirmar">Confirmar contraseña</label>
+            <input id="claveConfirmar" type="password" [(ngModel)]="claveConfirmar" name="claveConfirmar"
+                   autocomplete="new-password" minlength="8" required>
+          </div>
+        </div>
+
+        <p class="error" *ngIf="errorClave">{{ errorClave }}</p>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="guardandoClave">
+            {{ guardandoClave ? 'Guardando…' : (tieneContrasena ? 'Actualizar contraseña' : 'Crear contraseña') }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- VISIBILIDAD -->
+    <section class="card">
+      <h2><i class="fas fa-eye"></i> Visibilidad de tu hoja de vida</h2>
+
+      <div class="visibilidad" *ngIf="cv; else sinCv">
+        <div>
+          <strong>{{ cvVisible ? 'Pública' : 'Privada' }}</strong>
+          <p class="helper" *ngIf="cvVisible">
+            Cualquiera con el enlace puede verla y descargar el PDF
+            <span *ngIf="cv.publicSlug">/u/{{ cv.publicSlug }}</span>.
+          </p>
+          <p class="helper" *ngIf="!cvVisible">Solo tú la ves. Los enlaces que apuntan a tu CV aparecen en gris.</p>
+        </div>
+
+        <button type="button" class="btn-ghost" (click)="alternarVisibilidadCv()" [disabled]="alternandoCv">
+          {{ alternandoCv ? 'Cambiando…' : (cvVisible ? 'Hacerla privada' : 'Hacerla pública') }}
+        </button>
+      </div>
+
+      <ng-template #sinCv>
+        <p class="helper">Todavía no tienes hoja de vida creada.</p>
+        <div class="actions">
+          <a class="btn-ghost" routerLink="/app/informacion-personal">Crear mi hoja de vida</a>
+        </div>
+      </ng-template>
+
+      <div class="actions">
+        <a class="btn-ghost" routerLink="/app/hub">Administrar mis enlaces</a>
+        <a class="btn-ghost" routerLink="/app/ajustes/seguridad">Seguridad de la cuenta</a>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

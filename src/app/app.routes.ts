@@ -14,6 +14,9 @@ import { TalentoComponent } from './features/talento/talento.component';
 
 import { InformacionPersonalComponent } from './features/informacion-personal/informacion-personal.component';
 import { TarjetaPublicaComponent } from './features/tarjeta-publica/tarjeta-publica.component';
+import { PoliticasComponent } from './features/politicas/politicas.component';
+import { AjustesCuentaComponent } from './features/ajustes/ajustes-cuenta.component';
+import { AjustesSeguridadComponent } from './features/ajustes/ajustes-seguridad.component';
 
 export const routes: Routes = [
   // Tarjeta de contacto pública (destino del QR / NFC)
@@ -36,7 +39,8 @@ export const routes: Routes = [
       { path: 'perfil', component: PerfilComponent }, 
       { path: 'perfil/:username', component: PerfilComponent },
       { path: 'u/:username', component: InformacionPersonalComponent }, 
-      { path: 'informacion-personal', component: InformacionPersonalComponent } 
+      { path: 'informacion-personal', component: InformacionPersonalComponent },
+      { path: 'politicas', component: PoliticasComponent }
     ]
   },
   
@@ -56,7 +60,9 @@ export const routes: Routes = [
       { path: 'perfil/:username', component: PerfilComponent },
       { path: 'portafolio', component: PortafolioComponent }, 
       { path: 'hub', component: LinkHubComponent },
-      { path: 'talento', component: TalentoComponent }
+      { path: 'talento', component: TalentoComponent },
+      { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
+      { path: 'ajustes/seguridad', component: AjustesSeguridadComponent }
     ]
   },
 

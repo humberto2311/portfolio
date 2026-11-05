@@ -669,9 +669,9 @@ export class InformacionPersonalComponent implements OnInit {
     return this.CLAVES_ICONO.indexOf(clave) >= 0 || this.esValorIcono(par);
   }
 
-  /** true cuando el valor es una clase de FontAwesome, p. ej. "fab fa-java". */
+  /** true cuando el valor es una clase de FontAwesome, p. ej. "fab fa-java" o "fa-brands fa-x-twitter". */
   esValorIcono(par: ParContenido): boolean {
-    return /^fa[brlsd]?\s+fa-[a-z0-9-]+$/.test(par.valor.trim());
+    return /^fa(?:-[a-z]+)?\s+fa-[a-z0-9-]+$/.test(par.valor.trim());
   }
 
   /** El ícono que representa al ítem, si lo tiene. */

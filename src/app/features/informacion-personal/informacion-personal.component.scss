@@ -260,11 +260,17 @@ html { scroll-behavior: smooth; }
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
       transition: all 0.2s;
+      cursor: pointer;
 
       &:hover {
         background: rgba(0, 242, 254, 0.08);
         border-color: rgba(0, 242, 254, 0.4);
         color: $accent-cyan;
+      }
+
+      &:disabled {
+        opacity: 0.55;
+        cursor: progress;
       }
     }
 

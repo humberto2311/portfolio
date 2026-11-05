@@ -55,18 +55,20 @@
       </div>
 
       <div class="links-list">
-        <div 
-          *ngFor="let link of links" 
-          class="link-item" 
+        <div
+          *ngFor="let link of links"
+          class="link-item"
           [class.is-active]="link.active"
+          [class.es-cv]="esDelCv(link)"
+          [class.is-privado]="esDelCv(link) && link.isPublic === false"
           (click)="setActiveLink(link.id, $event)"
         >
           <div class="item-left">
             <div class="radio-indicator">
-              <input 
-                type="radio" 
-                name="activeLinkRadio" 
-                [checked]="link.active" 
+              <input
+                type="radio"
+                name="activeLinkRadio"
+                [checked]="link.active"
                 (change)="setActiveLink(link.id, $event)"
               />
             </div>
@@ -80,19 +82,39 @@
           </div>
 
           <div class="item-actions">
+            @if (esDelCv(link)) {
+              <button
+                type="button"
+                class="visibility-chip"
+                [class.publicado]="estaPublicado(link)"
+                [disabled]="alternandoCvId === link.id"
+                (click)="cambiarPublicidad(link, $event)"
+                [title]="estaPublicado(link) ? 'Público: cualquiera puede ver y descargar tu HV' : 'Privado: solo tú'"
+              >
+                <i class="fas" [class.fa-globe]="estaPublicado(link)" [class.fa-lock]="!estaPublicado(link)"></i>
+                {{ alternandoCvId === link.id ? '…' : (estaPublicado(link) ? 'Público' : 'Privado') }}
+              </button>
+            }
+
             <span class="status-chip" [class.active]="link.active">
               {{ link.active ? 'Activo' : 'Inactivo' }}
             </span>
             <!-- Iconos profesionales con clases SCSS de FontAwesome -->
-            <button class="icon-btn edit-btn" (click)="openEditModal(link, $event)" title="Editar">
-              <i class="fas fa-pen"></i>
-            </button>
-            <button class="icon-btn delete-btn" (click)="deleteLink(link.id, $event)" title="Eliminar">
-              <i class="fas fa-trash-alt"></i>
-            </button>
+            @if (!esDelCv(link)) {
+              <button class="icon-btn edit-btn" (click)="openEditModal(link, $event)" title="Editar">
+                <i class="fas fa-pen"></i>
+              </button>
+            }
+            @if (!esDelCv(link)) {
+              <button class="icon-btn delete-btn" (click)="deleteLink(link.id, $event)" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            }
           </div>
         </div>
       </div>
+
+      <p class="hub-aviso" *ngIf="errorMessage">{{ errorMessage }}</p>
     </main>
   </div>
 

@@ -218,6 +218,27 @@ $text-muted: #8891a3;
       background: rgba($cyan-accent, 0.04);
     }
 
+    // CV privado: la tarjeta se ve apagada hasta que se publique
+    &.is-privado {
+      .item-icon {
+        background: rgba(255, 255, 255, 0.03);
+        color: $text-muted;
+        filter: grayscale(100%);
+      }
+
+      .item-info h4 {
+        color: $text-muted;
+      }
+
+      .item-url {
+        opacity: 0.55;
+      }
+
+      .status-chip {
+        opacity: 0.6;
+      }
+    }
+
     .item-left {
       display: flex;
       align-items: center;
@@ -274,6 +295,35 @@ $text-muted: #8891a3;
         }
       }
 
+      .visibility-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        border: 1px solid rgba($coral-danger, 0.35);
+        background: rgba($coral-danger, 0.1);
+        color: $coral-danger;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &.publicado {
+          border-color: rgba($emerald-active, 0.35);
+          background: rgba($emerald-active, 0.12);
+          color: $emerald-active;
+        }
+
+        &:hover:not(:disabled) {
+          border-color: currentColor;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: wait;
+        }
+      }
+
       .icon-btn {
         background: transparent;
         border: none;
@@ -298,6 +348,12 @@ $text-muted: #8891a3;
       }
     }
   }
+}
+
+.hub-aviso {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: $coral-danger;
 }
 
 .btn-primary {

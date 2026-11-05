@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 
 import { LinkItem, LinkItemPayload } from '../../core/models/LinkItem';
 import { LinkHubService } from '../../core/services/link-hub.service';
+import { ResumeSaveService } from '../../core/services/resume-save.service';
 
 @Component({
   selector: 'app-link-hub',
@@ -16,6 +17,7 @@ import { LinkHubService } from '../../core/services/link-hub.service';
 })
 export class LinkHubComponent implements OnInit {
   private readonly linkService = inject(LinkHubService);
+  private readonly resumeSave = inject(ResumeSaveService);
 
   availableIcons = [
     { id: 'globe',  name: 'Web',      class: 'fas fa-globe' },
@@ -29,6 +31,7 @@ export class LinkHubComponent implements OnInit {
 
   isLoading = false;
   isSaving = false;
+  alternandoCvId: string | null = null;
   errorMessage: string | null = null;
 
   isModalOpen = false;
@@ -186,6 +189,42 @@ export class LinkHubComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.errorMessage = 'No se pudo eliminar el enlace.';
+      }
+    });
+  }
+
+  // ---------- Enlace de la hoja de vida ----------
+  esDelCv(link: LinkItem): boolean {
+    return link.kind === 'cv';
+  }
+
+  /** El estado público se lee del perfil en cada GET, nunca se guarda en el enlace. */
+  estaPublicado(link: LinkItem): boolean {
+    return this.esDelCv(link) && link.isPublic === true;
+  }
+
+  cambiarPublicidad(link: LinkItem, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!link.profileId || link.id === this.alternandoCvId) return;
+
+    const publicar = !this.estaPublicado(link);
+    this.alternandoCvId = link.id;
+    this.errorMessage = null;
+
+    const accion$ = publicar
+      ? this.resumeSave.publishProfile(link.profileId)
+      : this.resumeSave.unpublishProfile(link.profileId);
+
+    accion$.subscribe({
+      next: (profile) => {
+        link.isPublic = !!profile.isPublic;
+        this.alternandoCvId = null;
+      },
+      error: () => {
+        this.alternandoCvId = null;
+        this.errorMessage = publicar
+          ? 'No se pudo publicar la hoja de vida.'
+          : 'No se pudo privatizar la hoja de vida.';
       }
     });
   }

@@ -73,6 +73,7 @@ export class InformacionPersonalComponent implements OnInit {
   public esPublico = false;
   public esPropietario = false;
   public cambiandoVisibilidad = false;
+  public generandoPdf = false;
 
   private readonly DEFAULT_FULL_NAME = 'Humberto Jose Lozano Verbel';
 
@@ -271,6 +272,35 @@ export class InformacionPersonalComponent implements OnInit {
         });
       }
     });
+  }
+
+  /** La hoja de vida la arma el backend con PDFBox; aquí solo se baja el blob. */
+  descargarPdf(event?: Event) {
+    if (event) event.preventDefault();
+    if (!this.profileId || this.generandoPdf) return;
+
+    this.generandoPdf = true;
+    this.resumeService.descargarPdf(this.profileId).pipe(
+      finalize(() => this.generandoPdf = false)
+    ).subscribe({
+      next: (blob) => this.guardarArchivo(blob),
+      error: () => this.toast.show('No se pudo generar la hoja de vida'),
+    });
+  }
+
+  private guardarArchivo(blob: Blob) {
+    const slug = (this.perfilCv?.publicSlug || this.nombre)
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `hoja-de-vida-${slug || 'cv'}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.toast.show('Hoja de vida generada');
   }
 
   toggleVisibilidad() {

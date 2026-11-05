@@ -27,6 +27,13 @@ export class ResumeService {
     return this.http.get<ResumeProfile>(`${this.API_URL}/profiles/slug/${slug}`);
   }
 
+  /** El backend arma la hoja de vida en Java (PDFBox) y la devuelve como PDF. */
+  descargarPdf(profileId: number): Observable<Blob> {
+    return this.http.get(`${this.API_URL}/profiles/${profileId}/pdf`, {
+      responseType: 'blob',
+    });
+  }
+
   getSections(profileId: number): Observable<ResumeSection[]> {
     return this.http.get<ResumeSection[]>(`${this.API_URL}/sections/profile/${profileId}`);
   }

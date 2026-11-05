@@ -50,8 +50,8 @@
       <a routerLink="/proyectos">
         <i class="fas fa-folder menu-icon"></i> Proyectos
       </a>
-      <a [href]="resumePdfUrl" target="_blank" rel="noopener noreferrer" class="highlight-link">
-        <i class="fas fa-file-pdf menu-icon"></i> Hoja de Vida
+      <a href="#" (click)="descargarPdf($event)" class="highlight-link">
+        <i class="fas fa-file-pdf menu-icon"></i> {{ generandoPdf ? 'Generando…' : 'Hoja de Vida' }}
       </a>
     </nav>
 
@@ -94,11 +94,13 @@
           </button>
         }
 
-        <!-- Botón PDF -->
-        <a [href]="resumePdfUrl" download class="btn-download" title="Descargar HV">
+        <!-- Hoja de vida: la arma el backend (Java + PDFBox), formato ATS -->
+        <button type="button" class="btn-download" (click)="descargarPdf($event)"
+                [disabled]="generandoPdf || !profileId"
+                [title]="esPropietario ? 'Generar PDF de la hoja de vida' : 'Descargar hoja de vida'">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4h2v4h14v-4h2zM12 3v12l-4-4-1.4 1.4L12 17.8l5.4-5.4L16 11l-4 4V3h-2z"/></svg>
-          PDF
-        </a>
+          {{ generandoPdf ? 'Generando…' : (esPropietario ? 'Generar PDF' : 'Descargar HV') }}
+        </button>
         
         <!-- Avatar -->
         <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre" class="mini-avatar">

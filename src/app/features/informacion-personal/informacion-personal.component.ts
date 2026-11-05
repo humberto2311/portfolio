@@ -97,7 +97,7 @@ export class InformacionPersonalComponent implements OnInit {
   public seccionesEditables: SeccionEditable[] = [];
 
   /** Las que ya tienen su propio bloque visual no se repiten abajo. */
-  private readonly CLAVES_CONOCIDAS = ['experience', 'education', 'skill', 'metric', 'contact'];
+  private readonly CLAVES_CONOCIDAS = ['experience', 'education', 'skill', 'metric'];
 
   private readonly CLAVES_CABECERA = [
     'titulo', 'title', 'nombre', 'name', 'empresa', 'company', 'cargo', 'role',
@@ -130,6 +130,24 @@ export class InformacionPersonalComponent implements OnInit {
 
   /** Claves que guardan una clase de ícono en lugar de texto visible. */
   private readonly CLAVES_ICONO = ['icono', 'icon', 'logo', 'avatar'];
+
+  /** Campos con los que nace un ítem nuevo, según el tipo de sección. */
+  private readonly PLANTILLAS: Record<string, string[][]> = {
+    experience: [['empresa', ''], ['cargo', ''], ['fecha', ''], ['descripcion', '']],
+    education: [['institucion', ''], ['titulo', ''], ['year', '']],
+    skill: [['nombre', ''], ['icono', '']],
+    metric: [['titulo', ''], ['valor', ''], ['tendencia', ''], ['icono', ''], ['color', '']],
+  };
+
+  private readonly PLANTILLA_LIBRE = [['titulo', ''], ['detalle', ''], ['fecha', '']];
+
+  /** Las cuatro secciones que el CV ya tiene diseñadas, para crearlas sin importar un PDF. */
+  public readonly SECCIONES_BASE = [
+    { sectionKey: 'experience', title: 'Experiencia', icon: '💼' },
+    { sectionKey: 'education', title: 'Formación Académica', icon: '🎓' },
+    { sectionKey: 'skill', title: 'Stack Tecnológico', icon: '🛠️' },
+    { sectionKey: 'metric', title: 'Métricas', icon: '📊' },
+  ];
 
   private perfilCv: ResumeProfile | null = null;
   private seccionesRaw: ResumeSection[] = [];
@@ -459,7 +477,7 @@ export class InformacionPersonalComponent implements OnInit {
 
   /** El backend guarda emoji ("💼") o clases de FontAwesome; la vista debe distinguirlos. */
   esIconoFontAwesome(icono: string): boolean {
-    return /^fa(-|\s)/.test(icono ?? '');
+    return /^fa[a-z-]*\s+fa-[a-z0-9-]+$/.test((icono ?? '').trim());
   }
 
   // ====== MODO EDICIÓN ======
@@ -671,12 +689,12 @@ export class InformacionPersonalComponent implements OnInit {
 
   /** true cuando el valor es una clase de FontAwesome, p. ej. "fab fa-java" o "fa-brands fa-x-twitter". */
   esValorIcono(par: ParContenido): boolean {
-    return /^fa(?:-[a-z]+)?\s+fa-[a-z0-9-]+$/.test(par.valor.trim());
+    return this.esIconoFontAwesome(par.valor);
   }
 
-  /** El ícono que representa al ítem, si lo tiene. */
+  /** El ícono que representa al ítem: basta con que algún valor sea una clase de FontAwesome. */
   iconoDelItem(item: ItemEditable): string {
-    const par = item.pares.find(p => this.esCampoIcono(p) && this.esValorIcono(p));
+    const par = item.pares.find(p => this.esValorIcono(p));
     return par ? par.valor.trim() : '';
   }
 
@@ -689,17 +707,34 @@ export class InformacionPersonalComponent implements OnInit {
   }
 
   agregarItem(seccion: SeccionEditable) {
+    const plantilla = this.PLANTILLAS[seccion.sectionKey] ?? this.PLANTILLA_LIBRE;
+
     seccion.items.push({
       original: {},
-      pares: [
-        { clave: 'titulo', valor: '' },
-        { clave: 'detalle', valor: '' },
-        { clave: 'fecha', valor: '' },
-      ],
+      pares: plantilla.map(([clave, valor]) => ({ clave, valor })),
       source: 'manual',
       nuevo: true,
       abierto: true,
     });
+  }
+
+  /** Crea una de las secciones diseñadas del CV sin necesidad de importar un PDF. */
+  agregarSeccionBase(base: { sectionKey: string; title: string; icon: string }) {
+    if (this.tieneSeccion(base.sectionKey)) return;
+
+    this.seccionesEditables.push({
+      sectionKey: base.sectionKey,
+      title: base.title,
+      icon: base.icon,
+      displayOrder: this.seccionesEditables.length,
+      isActive: true,
+      items: [],
+      nueva: true,
+    });
+  }
+
+  tieneSeccion(sectionKey: string): boolean {
+    return this.seccionesEditables.some(sec => sec.sectionKey === sectionKey);
   }
 
   guardarItem(seccion: SeccionEditable, item: ItemEditable) {

@@ -234,80 +234,102 @@
       </div>
 
       <!-- TARJETAS DE MÉTRICAS -->
-      <div class="metricas-grid">
-        <div class="card metrica-card glass-panel" *ngFor="let m of metricas">
-          <div class="metrica-header">
-            <span class="metrica-icon" [style.color]="m.color"><i [class]="m.icono"></i></span>
-            <span class="metrica-tendencia" [style.color]="m.color">{{ m.tendencia }}</span>
+      @if (metricas.length) {
+        <div class="metricas-grid">
+          <div class="card metrica-card glass-panel" *ngFor="let m of metricas">
+            <div class="metrica-header">
+              <span class="metrica-icon" [style.color]="m.color">
+                @if (esIconoFontAwesome(m.icono)) {
+                  <i [class]="m.icono"></i>
+                } @else {
+                  {{ m.icono }}
+                }
+              </span>
+              <span class="metrica-tendencia" [style.color]="m.color">{{ m.tendencia }}</span>
+            </div>
+            <h3 class="metrica-valor">{{ m.valor }}</h3>
+            <p class="metrica-titulo">{{ m.titulo }}</p>
           </div>
-          <h3 class="metrica-valor">{{ m.valor }}</h3>
-          <p class="metrica-titulo">{{ m.titulo }}</p>
         </div>
-      </div>
+      }
 
       <!-- EXPERIENCIA LABORAL -->
-      <div class="card experiencia-card glass-panel" id="experiencia">
-        <h3 class="card-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
-          Experiencia Laboral
-        </h3>
+      @if (experiencia.length) {
+        <div class="card experiencia-card glass-panel" id="experiencia">
+          <h3 class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+            Experiencia Laboral
+          </h3>
 
-        <div class="empresas-grid">
-          <div class="empresa-item" *ngFor="let exp of experiencia">
-            <div class="empresa-icono"><i class="fas fa-building"></i></div>
-            <div class="empresa-info">
-              <h4>{{ exp.empresa }}</h4>
-              <p class="empresa-cargo">{{ exp.cargo }}</p>
-              @if (exp.descripcion) {
-                <p class="empresa-descripcion">{{ exp.descripcion }}</p>
-              }
-            </div>
-            <div class="empresa-fecha">
-              <span>{{ exp.fecha }}</span>
+          <div class="empresas-grid">
+            <div class="empresa-item" *ngFor="let exp of experiencia">
+              <div class="empresa-icono"><i class="fas fa-building"></i></div>
+              <div class="empresa-info">
+                <h4>{{ exp.empresa }}</h4>
+                <p class="empresa-cargo">{{ exp.cargo }}</p>
+                @if (exp.descripcion) {
+                  <p class="empresa-descripcion">{{ exp.descripcion }}</p>
+                }
+              </div>
+              <div class="empresa-fecha">
+                <span>{{ exp.fecha }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
 
       <!-- FORMACIÓN ACADÉMICA -->
-      <div class="card formacion-card glass-panel" id="estudios">
-        <h3 class="card-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
-          Formación Académica
-        </h3>
+      @if (formacion.length) {
+        <div class="card formacion-card glass-panel" id="estudios">
+          <h3 class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/></svg>
+            Formación Académica
+          </h3>
 
-        <div class="timeline">
-          <div class="timeline-item" *ngFor="let f of formacion">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <span class="year">{{ f.year }}</span>
-              <h4>{{ f.titulo }}</h4>
-              <p>{{ f.institucion }}</p>
+          <div class="timeline">
+            <div class="timeline-item" *ngFor="let f of formacion">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="year">{{ f.year }}</span>
+                <h4>{{ f.titulo }}</h4>
+                <p>{{ f.institucion }}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
 
       <!-- CARRUSEL DE TECNOLOGÍAS -->
-      <div class="card carrusel-card glass-panel" id="stack">
-        <h3 class="card-title">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
-          Stack Tecnológico
-        </h3>
+      @if (tecnologias.length) {
+        <div class="card carrusel-card glass-panel" id="stack">
+          <h3 class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+            Stack Tecnológico
+          </h3>
 
-        <div class="carrusel-wrapper">
-          <div class="carrusel-track">
-            <div class="tech-item" *ngFor="let tech of tecnologias">
-              <i [class]="tech.icono"></i>
-              <span>{{ tech.nombre }}</span>
-            </div>
-            <div class="tech-item" *ngFor="let tech of tecnologias">
-              <i [class]="tech.icono"></i>
-              <span>{{ tech.nombre }}</span>
+          <div class="carrusel-wrapper">
+            <div class="carrusel-track">
+              <div class="tech-item" *ngFor="let tech of tecnologias">
+                @if (esIconoFontAwesome(tech.icono)) {
+                  <i [class]="tech.icono"></i>
+                } @else {
+                  <span class="tech-emoji">{{ tech.icono }}</span>
+                }
+                <span>{{ tech.nombre }}</span>
+              </div>
+              <div class="tech-item" *ngFor="let tech of tecnologias">
+                @if (esIconoFontAwesome(tech.icono)) {
+                  <i [class]="tech.icono"></i>
+                } @else {
+                  <span class="tech-emoji">{{ tech.icono }}</span>
+                }
+                <span>{{ tech.nombre }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
 
       <!-- ====== SECCIONES PERSONALIZADAS (cuadro grande + items dentro) ====== -->
       @for (sec of seccionesPersonalizadas; track $index) {
@@ -349,9 +371,31 @@
               <p class="gestor-hint">Cada sección es un cuadro con su título; los ítems van adentro.</p>
             </div>
             <button class="btn-primary" type="button" (click)="agregarSeccion()">
-              <i class="fas fa-plus"></i> Añadir sección
+              <i class="fas fa-plus"></i> Añadir sección libre
             </button>
           </header>
+
+          <div class="base-chips">
+            <span class="base-chips-label">Añadir al CV:</span>
+            @for (base of SECCIONES_BASE; track base.sectionKey) {
+              <button class="base-chip" type="button"
+                      [class.ya-esta]="tieneSeccion(base.sectionKey)"
+                      [disabled]="tieneSeccion(base.sectionKey)"
+                      (click)="agregarSeccionBase(base)">
+                <span class="base-chip-icono">{{ base.icon }}</span> {{ base.title }}
+                @if (tieneSeccion(base.sectionKey)) {
+                  <i class="fas fa-check base-chip-ok"></i>
+                }
+              </button>
+            }
+          </div>
+
+          @if (!seccionesEditables.length) {
+            <p class="gestor-vacio">
+              Todavía no hay secciones. Elige una de arriba para crearla en blanco, o pulsa
+              <strong>Añadir sección libre</strong> para inventar la tuya. No hace falta importar un PDF.
+            </p>
+          }
 
           @for (seccion of seccionesEditables; track seccion.sectionKey) {
             <div class="gestor-bloque" [class.es-nueva]="seccion.nueva">

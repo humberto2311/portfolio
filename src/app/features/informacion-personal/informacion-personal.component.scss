@@ -1328,7 +1328,7 @@ html { scroll-behavior: smooth; }
 
 .gestor-cabecera {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 0.9rem;
   align-items: end;
   padding-bottom: 1rem;
@@ -1336,9 +1336,73 @@ html { scroll-behavior: smooth; }
 }
 
 .gestor-botones {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.base-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.base-chips-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+.base-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba($accent-cyan, 0.28);
+  background: rgba($accent-cyan, 0.06);
+  color: $text-main;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: rgba($accent-cyan, 0.6);
+    background: rgba($accent-cyan, 0.14);
+    transform: translateY(-1px);
+  }
+
+  &.ya-esta {
+    opacity: 0.5;
+    border-style: dashed;
+    cursor: default;
+  }
+}
+
+.base-chip-icono { font-size: 0.95rem; line-height: 1; }
+
+.base-chip-ok { color: $accent-cyan; font-size: 0.72rem; }
+
+.gestor-vacio {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  border: 1px dashed rgba($accent-cyan, 0.35);
+  background: rgba($accent-cyan, 0.05);
+  color: $text-muted;
+  font-size: 0.84rem;
+  line-height: 1.5;
+
+  strong { color: $text-main; font-weight: 600; }
 }
 
 .clave-badge {
@@ -1497,18 +1561,20 @@ html { scroll-behavior: smooth; }
   align-items: center;
   gap: 0.6rem;
 
-  input { flex: 1; }
+  input { flex: 1; min-width: 0; }
 }
 
 .icono-emoji {
   width: 2.1rem;
   height: 2.1rem;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
   border: 1px solid $border-soft;
   font-size: 1.15rem;
+  overflow: hidden;
 }
 
 .item-identidad {

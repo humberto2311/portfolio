@@ -71,6 +71,12 @@
 .avatar-wrap {
   position: relative;
   img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2); }
+  .avatar-initials {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(99, 102, 241, 0.25); color: #c7d2fe;
+    font-size: 14px; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.2);
+  }
   .status-dot {
     position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
     border-radius: 50%; background: #64748b; border: 2px solid #0f172a;

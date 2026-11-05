@@ -172,7 +172,8 @@ export class PrivateNavbarComponent implements OnInit, OnDestroy {
 
     this.isMobileMenuOpen.set(false);
     this.perfilService.searchByFullName(termino).subscribe({
-      next: (usuarioEncontrado) => {
+      next: (resultados) => {
+        const usuarioEncontrado = resultados?.[0];
         if (!usuarioEncontrado) return;
         if (usuarioEncontrado.gitUsername) {
           this.router.navigate(['/perfil', usuarioEncontrado.gitUsername]);

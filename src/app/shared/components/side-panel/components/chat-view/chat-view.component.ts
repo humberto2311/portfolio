@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +13,8 @@ import { take } from 'rxjs';
 
 import { SidePanelService } from '../../../../../core/services/side-panel.service';
 import { ChatService } from '../../../../../core/services/chat.service';
-import { ChatMessage, ChatMessageApi } from '../../../../../core/models/chat.model';
+import { ChatMessage } from '../../../../../core/models/chat.model';
+import { Contact } from '../../../../../core/models/contact.model';
 
 @Component({
   selector: 'app-chat-view',
@@ -27,9 +29,14 @@ export class ChatViewComponent {
 
   message = signal('');
   sending = signal(false);
+  cargando = signal(false);
   editingId = signal<string | null>(null);
+  error = signal<string | null>(null);
 
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
+
+  /** Clave de la última carga: evita pedir dos veces la misma conversación. */
+  private ultimaCarga = '';
 
   constructor() {
     effect(() => {
@@ -40,8 +47,11 @@ export class ChatViewComponent {
 
     effect(() => {
       const contact = this.svc.activeContact();
-      if (!contact) return;
-      this.loadHistory(contact.id);
+      const clave = contact ? `${contact.id}|${contact.conversationId ?? 'nueva'}` : '';
+      if (!clave || clave === this.ultimaCarga) return;
+
+      this.ultimaCarga = clave;
+      untracked(() => this.cargarHistorial(contact!));
     });
   }
 
@@ -50,8 +60,23 @@ export class ChatViewComponent {
     return id ? this.svc.chatHistories()[id] ?? [] : [];
   }
 
-  get activeContactId(): string | null {
-    return this.svc.activeContact()?.id ?? null;
+  /** El backend admite mensajes en ACEPTADA, o en PENDIENTE siendo quien los solicitó. */
+  get puedeEscribir(): boolean {
+    const contact = this.svc.activeContact();
+    if (!contact) return false;
+    if (!contact.estado || contact.estado === 'ACEPTADA') return true;
+    return contact.estado === 'PENDIENTE' && contact.soySolicitante === true;
+  }
+
+  /** Me llegó una solicitud todavía sin responder. */
+  get esSolicitudPendiente(): boolean {
+    const contact = this.svc.activeContact();
+    return contact?.estado === 'PENDIENTE' && contact?.esSolicitud === true;
+  }
+
+  get conversacionCerrada(): boolean {
+    const estado = this.svc.activeContact()?.estado;
+    return estado === 'RECHAZADA' || estado === 'REPORTADA';
   }
 
   send(): void {
@@ -62,25 +87,33 @@ export class ChatViewComponent {
 
     const text = this.message().trim();
     const contact = this.svc.activeContact();
-    if (!text || !contact) return;
+    if (!text || !contact || !this.puedeEscribir) return;
 
     // UI optimista
     this.svc.sendMessage(text);
     this.message.set('');
-
+    this.error.set(null);
     this.sending.set(true);
-    this.chatService.sendMessage({
-      sessionId: this.sessionIdFor(contact.id),
-      senderId: this.currentUserId(),
-      receiverId: contact.id,
-      content: text,
-    }).pipe(take(1)).subscribe({
-      next: (saved) => this.replaceLastMessage(contact.id, text, saved),
-      error: (err) => {
-        console.error('Error enviando mensaje', err);
+
+    // Sin conversación previa, la primera petición la crea.
+    const peticion = contact.conversationId
+      ? this.chatService.responder(contact.conversationId, text)
+      : this.chatService.enviar(contact.id, text);
+
+    peticion.pipe(take(1)).subscribe({
+      next: (conversacion) => {
         this.sending.set(false);
+        this.svc.aplicarConversacion(conversacion);
+        this.ultimaCarga = `${contact.id}|${conversacion.id}`;
       },
-      complete: () => this.sending.set(false),
+      error: (err) => {
+        this.sending.set(false);
+        this.svc.setHistorial(
+          contact.id,
+          this.messages.filter(m => !(m.sender === 'me' && m.text === text && !m.id))
+        );
+        this.error.set(this.mensajeError(err, 'No se pudo enviar el mensaje'));
+      },
     });
   }
 
@@ -108,120 +141,95 @@ export class ChatViewComponent {
   confirmEdit(): void {
     const id = this.editingId();
     const text = this.message().trim();
-    const contactId = this.activeContactId;
-    if (!id || !text || !contactId) return;
+    const contact = this.svc.activeContact();
+    if (!id || !text || !contact) return;
 
-    this.chatService.updateMessage(id, { content: text })
+    this.error.set(null);
+    this.chatService.editarMensaje(id, { content: text })
       .pipe(take(1))
       .subscribe({
         next: (updated) => {
-          this.svc.chatHistories.update(h => {
-            const list: ChatMessage[] = [...(h[contactId] || [])];
-            const idx = list.findIndex(m => m.id === updated.id);
-            if (idx >= 0) {
-              list[idx] = {
-                ...list[idx],
-                text: updated.content,
-                editedAt: updated.editedAt ?? undefined,
-                edited: updated.editado ?? true,
-                canEdit: updated.puedeEditar ?? false,
-              };
-            }
-            return { ...h, [contactId]: list };
-          });
+          this.svc.actualizarMensaje(contact.id, this.svc.mensajeAUi(updated, contact.id));
           this.cancelEdit();
         },
-        error: (err) => console.error('Error editando mensaje', err),
+        error: (err) =>
+          this.error.set(this.mensajeError(err, 'No se pudo editar el mensaje')),
       });
   }
 
   remove(msg: ChatMessage): void {
-    const contactId = this.activeContactId;
-    if (!msg.id || !contactId) return;
+    const contact = this.svc.activeContact();
+    if (!msg.id || !contact) return;
 
-    this.chatService.deleteMessage(msg.id)
+    this.error.set(null);
+    this.chatService.borrarMensaje(msg.id)
       .pipe(take(1))
       .subscribe({
-        next: (deleted) => {
-          this.svc.chatHistories.update(h => {
-            const list: ChatMessage[] = [...(h[contactId] || [])];
-            const idx = list.findIndex(m => m.id === deleted.id);
-            if (idx >= 0) {
-              list[idx] = {
-                ...list[idx],
-                text: 'Mensaje eliminado',
-                deleted: true,
-                canEdit: false,
-              };
-            }
-            return { ...h, [contactId]: list };
-          });
-        },
-        error: (err) => console.error('Error eliminando mensaje', err),
+        next: (deleted) =>
+          this.svc.actualizarMensaje(contact.id, this.svc.mensajeAUi(deleted, contact.id)),
+        error: (err) =>
+          this.error.set(this.mensajeError(err, 'No se pudo eliminar el mensaje')),
       });
   }
 
-  private loadHistory(contactId: string): void {
-    this.chatService.getConversation(this.currentUserId(), contactId)
+  aceptarSolicitud(): void {
+    this.resolverSolicitud('aceptar');
+  }
+
+  rechazarSolicitud(): void {
+    this.resolverSolicitud('rechazar');
+  }
+
+  reintentar(): void {
+    const contact = this.svc.activeContact();
+    if (!contact) return;
+    this.ultimaCarga = '';
+    this.cargarHistorial(contact);
+  }
+
+  private cargarHistorial(contact: Contact): void {
+    if (!contact.conversationId) {
+      this.svc.setHistorial(contact.id, []);
+      return;
+    }
+
+    this.cargando.set(true);
+    this.error.set(null);
+
+    this.chatService.abrir(contact.conversationId)
       .pipe(take(1))
       .subscribe({
-        next: (list) => {
-          const me = this.currentUserId();
-          const mapped: ChatMessage[] = list.map(m => this.toUiMessage(m, me));
-          this.svc.chatHistories.update(h => ({
-            ...h,
-            [contactId]: mapped,
-          }));
+        next: (conversacion) => {
+          this.cargando.set(false);
+          this.svc.aplicarConversacion(conversacion);
         },
-        error: (err) => console.error('Error cargando historial', err),
+        error: (err) => {
+          this.cargando.set(false);
+          this.error.set(this.mensajeError(err, 'No se pudo cargar la conversación'));
+        },
       });
   }
 
-  private toUiMessage(m: ChatMessageApi, me: string): ChatMessage {
-    return {
-      sender: m.senderId === me ? 'me' : 'them',
-      text: m.eliminado ? 'Mensaje eliminado' : m.content,
-      time: new Date(m.createdAt).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      id: m.id,
-      createdAt: m.createdAt,
-      editedAt: m.editedAt ?? undefined,
-      edited: m.editado ?? false,
-      deleted: m.eliminado ?? false,
-      canEdit: m.puedeEditar ?? false,
-    };
-  }
+  private resolverSolicitud(accion: 'aceptar' | 'rechazar'): void {
+    const contact = this.svc.activeContact();
+    const conversacionId = contact?.conversationId;
+    if (!contact || !conversacionId) return;
 
-  private replaceLastMessage(contactId: string, originalText: string, saved: ChatMessageApi): void {
-    this.svc.chatHistories.update(h => {
-      const list: ChatMessage[] = [...(h[contactId] || [])];
-      for (let i = list.length - 1; i >= 0; i--) {
-        if (list[i].sender === 'me' && list[i].text === originalText) {
-          list[i] = {
-            ...list[i],
-            id: saved.id,
-            createdAt: saved.createdAt,
-            editedAt: saved.editedAt ?? undefined,
-            edited: saved.editado ?? false,
-            deleted: saved.eliminado ?? false,
-            canEdit: saved.puedeEditar ?? false,
-          };
-          break;
-        }
-      }
-      return { ...h, [contactId]: list };
+    this.error.set(null);
+    const peticion = accion === 'aceptar'
+      ? this.chatService.aceptar(conversacionId)
+      : this.chatService.rechazar(conversacionId);
+
+    peticion.pipe(take(1)).subscribe({
+      next: (conversacion) => this.svc.aplicarConversacion(conversacion),
+      error: (err) =>
+        this.error.set(this.mensajeError(err, 'No se pudo responder la solicitud')),
     });
   }
 
-  private sessionIdFor(contactId: string): string {
-    const me = this.currentUserId();
-    return me < contactId ? `${me}_${contactId}` : `${contactId}_${me}`;
-  }
-
-  private currentUserId(): string {
-    return localStorage.getItem('userId') ?? '00000000-0000-0000-0000-000000000000';
+  private mensajeError(err: any, porDefecto: string): string {
+    const detalle = err?.error?.message ?? err?.error?.error;
+    return typeof detalle === 'string' && detalle ? detalle : porDefecto;
   }
 
   private scrollToBottom(): void {

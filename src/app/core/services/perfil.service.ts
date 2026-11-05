@@ -327,8 +327,10 @@ export class PerfilService {
   }
   
 
-  searchByFullName(fullName: string): Observable<any> {
-    return this.http.get<any>(`${this.API_URL}/search?q=${fullName}`);
+  searchByFullName(fullName: string): Observable<UserProfileDto[]> {
+    return this.http.get<UserProfileDto[]>(`${this.API_URL}/search`, {
+      params: { q: fullName },
+    });
   }
 
   // ====== COMPARTIR PUBLICACIONES ======

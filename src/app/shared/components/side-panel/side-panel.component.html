@@ -22,7 +22,11 @@
             <i class="fa-solid fa-arrow-left"></i>
           </button>
           <div class="avatar-wrap">
-            <img [src]="contact.avatar" [alt]="contact.name" />
+            @if (contact.avatar) {
+              <img [src]="contact.avatar" [alt]="contact.name" />
+            } @else {
+              <span class="avatar-initials">{{ contact.name.charAt(0) }}</span>
+            }
             <span class="status-dot" [class.online]="contact.status === 'online'" [class.ai]="contact.isAi"></span>
           </div>
           <div>

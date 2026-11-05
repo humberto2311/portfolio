@@ -1,28 +1,64 @@
 <div class="search-wrap">
   <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="text" placeholder="Buscar contacto..."
+  <input type="text" placeholder="Buscar contacto o persona..."
     [ngModel]="search()" (ngModelChange)="onSearch($event)" />
+  @if (buscando()) {
+    <span class="search-loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+  }
 </div>
 
+@if (svc.avisoContactos()) {
+  <p class="panel-notice">{{ svc.avisoContactos() }}</p>
+}
+
 <div class="list">
-  @for (contact of filtered; track contact.id) {
-    <div class="contact-item" (click)="select(contact)">
-      <div class="avatar-wrap">
-        <img [src]="contact.avatar" [alt]="contact.name" />
-        <span class="status-dot" [class.online]="contact.status === 'online'"></span>
-      </div>
-      <div class="info">
-        <div class="top-row">
-          <h4>{{ contact.name }}</h4>
-          <span class="time">{{ contact.time }}</span>
+  @if (conversaciones.length > 0) {
+    <h5 class="section-title">Chats</h5>
+    @for (contact of conversaciones; track contact.id) {
+      <div class="contact-item" (click)="select(contact)">
+        <div class="avatar-wrap">
+          @if (contact.avatar) {
+            <img [src]="contact.avatar" [alt]="contact.name" />
+          } @else {
+            <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
+          }
+          <span class="status-dot" [class.online]="contact.status === 'online'"></span>
         </div>
-        <p class="preview">{{ contact.lastMsg }}</p>
+        <div class="info">
+          <div class="top-row">
+            <h4>{{ contact.name }}</h4>
+            <span class="time">{{ contact.time }}</span>
+          </div>
+          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
+        </div>
+        @if (contact.esSolicitud) {
+          <span class="badge">1</span>
+        } @else if (contact.unread > 0) {
+          <span class="badge">{{ contact.unread }}</span>
+        }
       </div>
-      @if (contact.unread > 0) {
-        <span class="badge">{{ contact.unread }}</span>
-      }
-    </div>
-  } @empty {
+    }
+  }
+
+  @if (sugerencias.length > 0) {
+    <h5 class="section-title">Personas</h5>
+    @for (persona of sugerencias; track persona.id) {
+      <div class="contact-item" (click)="seleccionarPersona(persona)">
+        <div class="avatar-wrap">
+          <span class="avatar-initials">{{ iniciales(persona.fullName) }}</span>
+        </div>
+        <div class="info">
+          <div class="top-row">
+            <h4>{{ persona.fullName }}</h4>
+          </div>
+          <p class="preview">{{ persona.gitUsername ? '@' + persona.gitUsername : 'Iniciar chat' }}</p>
+        </div>
+        <span class="new-chat"><i class="fa-regular fa-paper-plane"></i></span>
+      </div>
+    }
+  }
+
+  @if (conversaciones.length === 0 && sugerencias.length === 0 && !buscando() && !svc.cargandoContactos()) {
     <p class="empty">Sin resultados</p>
   }
 </div>

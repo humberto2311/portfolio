@@ -199,8 +199,7 @@ export class PerfilHeaderComponent implements OnChanges {
       return;
     }
 
-    // Forzamos la estructura usando "as Contact" para que TS no proteste por el tipo de 'status'
-    const contact = {
+    const contact: Contact = {
       id: this.perfil.id,
       name: this.perfil.nombre,
       avatar: this.perfil.avatarUrl ?? '',
@@ -209,12 +208,7 @@ export class PerfilHeaderComponent implements OnChanges {
       lastMsg: '',
       time: '',
       unread: 0
-    } as Contact;
-
-    const existe = this.sidePanelSvc.contacts().some(c => c.id === contact.id);
-    if (!existe) {
-      this.sidePanelSvc.contacts.update(list => [...list, contact]);
-    }
+    };
 
     this.sidePanelSvc.openChat(contact);
     this.accionMensaje.emit();

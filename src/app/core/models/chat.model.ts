@@ -24,15 +24,15 @@ export interface ChatMessageApi {
   puedeEditar?: boolean;
 }
 
-export interface ChatMessageSendApi {
-  sessionId: string;
-  senderId: string;
-  receiverId: string | null;
+export interface ChatMessageUpdateApi {
   content: string;
 }
 
-export interface ChatMessageUpdateApi {
-  content: string;
+/** Respuesta de /api/users/search */
+export interface UsuarioBuscado {
+  id: string;
+  fullName: string;
+  gitUsername?: string | null;
 }
 
 

@@ -1,5 +1,25 @@
 <div class="messages" #messagesContainer>
-  @for (msg of messages; track $index) {
+  @if (cargando()) {
+    <p class="chat-status"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando…</p>
+  }
+
+  @if (esSolicitudPendiente) {
+    <div class="solicitud">
+      <p>{{ svc.activeContact()?.name }} quiere iniciar un chat contigo.</p>
+      <div class="solicitud-actions">
+        <button type="button" class="accept" (click)="aceptarSolicitud()">Aceptar</button>
+        <button type="button" class="deny" (click)="rechazarSolicitud()">Rechazar</button>
+      </div>
+    </div>
+  }
+
+  @if (conversacionCerrada) {
+    <p class="chat-status closed">
+      Esta conversación está {{ svc.activeContact()?.estado === 'RECHAZADA' ? 'rechazada' : 'reportada' }}.
+    </p>
+  }
+
+  @for (msg of messages; track msg.id ?? $index) {
     <div class="msg-row" [class.mine]="msg.sender === 'me'">
       <div class="bubble"
         [class.me]="msg.sender === 'me'"
@@ -48,6 +68,12 @@
       }
     </div>
   }
+
+  @if (!cargando() && messages.length === 0) {
+    <p class="chat-status">
+      {{ svc.activeContact()?.conversationId ? 'Sin mensajes todavía.' : 'Empieza la conversación con el primer mensaje.' }}
+    </p>
+  }
 </div>
 
 @if (svc.typing()) {
@@ -63,11 +89,22 @@
   <div class="typing">editando mensaje…</div>
 }
 
+@if (error()) {
+  <div class="chat-error">
+    <span>{{ error() }}</span>
+    @if (!cargando()) {
+      <button type="button" (click)="reintentar()">Reintentar</button>
+    }
+  </div>
+}
+
 <form class="input-area" (ngSubmit)="send()">
-  <input type="text" placeholder="Escribe un mensaje..." autocomplete="off"
+  <input type="text" autocomplete="off"
+    [placeholder]="puedeEscribir ? 'Escribe un mensaje...' : 'No puedes escribir en esta conversación'"
+    [disabled]="!puedeEscribir || sending()"
     [ngModel]="message()" (ngModelChange)="message.set($event)"
     (keydown)="onKeyDown($event)" name="message" />
-  <button type="submit">
+  <button type="submit" [disabled]="!puedeEscribir || sending()">
     <i class="fa-solid" [class.fa-paper-plane]="!editingId()" [class.fa-check]="editingId()"></i>
   </button>
 </form>

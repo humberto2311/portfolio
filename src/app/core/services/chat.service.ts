@@ -2,19 +2,19 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { 
-  Conversacion, 
-  ChatMessageApi, 
-  ChatMessageSendApi, 
-  ChatMessageUpdateApi 
+import {
+  Conversacion,
+  ChatMessageApi,
+  ChatMessageUpdateApi,
+  UsuarioBuscado,
 } from '../models/chat.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
   
-  private baseChats = `${environment.apiUrl}/api/chats`;
-  private baseMessages = `${environment.apiUrl}/api/chat`;
+  private readonly baseChats = `${environment.apiUrl}/api/chats`;
+  private readonly baseUsers = `${environment.apiUrl}/api/users`;
 
   
   listar(): Observable<Conversacion[]> {
@@ -50,26 +50,19 @@ export class ChatService {
   }
 
  
-  sendMessage(payload: ChatMessageSendApi): Observable<ChatMessageApi> {
-    return this.http.post<ChatMessageApi>(this.baseMessages, payload);
+  /** Editar mensaje propio (ventana de 1 hora en el backend). */
+  editarMensaje(mensajeId: string, payload: ChatMessageUpdateApi): Observable<ChatMessageApi> {
+    return this.http.patch<ChatMessageApi>(`${this.baseChats}/mensajes/${mensajeId}`, payload);
   }
 
-  updateMessage(id: string, payload: ChatMessageUpdateApi): Observable<ChatMessageApi> {
-    return this.http.put<ChatMessageApi>(`${this.baseMessages}/${id}`, payload);
+  /** Borrado lógico de un mensaje propio. */
+  borrarMensaje(mensajeId: string): Observable<ChatMessageApi> {
+    return this.http.delete<ChatMessageApi>(`${this.baseChats}/mensajes/${mensajeId}`);
   }
 
-  deleteMessage(id: string): Observable<ChatMessageApi> {
-    return this.http.delete<ChatMessageApi>(`${this.baseMessages}/${id}`);
-  }
-
-  getBySession(sessionId: string): Observable<ChatMessageApi[]> {
-    return this.http.get<ChatMessageApi[]>(`${this.baseMessages}/session/${sessionId}`);
-  }
-
-  getConversation(senderId: string, receiverId: string): Observable<ChatMessageApi[]> {
-    const params = new HttpParams()
-      .set('senderId', senderId)
-      .set('receiverId', receiverId);
-    return this.http.get<ChatMessageApi[]>(`${this.baseMessages}/conversation`, { params });
+  /** Personas cuyo nombre contiene el término; sirve para abrir un chat nuevo. */
+  buscarUsuarios(termino: string): Observable<UsuarioBuscado[]> {
+    const params = new HttpParams().set('q', termino.trim());
+    return this.http.get<UsuarioBuscado[]>(`${this.baseUsers}/search`, { params });
   }
 }

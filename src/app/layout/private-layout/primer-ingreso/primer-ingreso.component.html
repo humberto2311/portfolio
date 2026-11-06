@@ -1,0 +1,52 @@
+@if (tour.abierto()) {
+  <div class="tour">
+    @if (marco(); as m) {
+      <span
+        class="tour__lupa"
+        [style.top.px]="m.top"
+        [style.left.px]="m.left"
+        [style.width.px]="m.ancho"
+        [style.height.px]="m.alto"></span>
+    } @else {
+      <span class="tour__velo"></span>
+    }
+
+    <button type="button" class="tour__saltar" (click)="saltar()">Saltar la guía</button>
+
+    <section class="tour__caja" role="dialog" aria-modal="false" [attr.data-lugar]="posicion()">
+      <h2>{{ paso()?.titulo }}</h2>
+      <p class="tour__bajada">{{ paso()?.bajada }}</p>
+
+      @if (hitos().length) {
+        <ul class="tour__lista" [class.tour__lista--mapa]="hitos().length > 5">
+          @for (hito of hitos(); track hito.etiqueta) {
+            <li>
+              <span class="tour__icono"><i [class]="hito.icono" aria-hidden="true"></i></span>
+              <span>
+                <strong>{{ hito.etiqueta }}</strong>
+                <small>{{ hito.detalle }}</small>
+              </span>
+            </li>
+          }
+        </ul>
+      }
+
+      <div class="tour__pie">
+        <span class="tour__puntos" aria-hidden="true">
+          @for (p of pasos(); track $index) {
+            <i [class.activo]="tour.paso() === $index"></i>
+          }
+        </span>
+
+        <div class="tour__botones">
+          @if (tour.paso() > 0) {
+            <button type="button" (click)="atras()">Atrás</button>
+          }
+          <button type="button" class="tour__ir" (click)="siguiente()">
+            {{ esUltimo() ? 'Listo, a usarla' : 'Siguiente' }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+}

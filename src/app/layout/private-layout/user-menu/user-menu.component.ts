@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { ResumeService } from '../../../core/services/resume.service';
+import { TourService } from '../../../core/services/tour.service';
 
 @Component({
   selector: 'app-user-menu',
@@ -18,6 +19,7 @@ export class UserMenuComponent implements OnInit {
   private elRef = inject(ElementRef);
   private perfiles = inject(UserProfileService);
   private resumes = inject(ResumeService);
+  private tour = inject(TourService);
 
   readonly user = this.auth.currentUser;
   readonly menuOpen = signal(false);
@@ -68,6 +70,11 @@ export class UserMenuComponent implements OnInit {
   goTo(path: string) {
     this.menuOpen.set(false);
     this.router.navigate([path]);
+  }
+
+  abrirGuia() {
+    this.menuOpen.set(false);
+    this.tour.abrir();
   }
 
   logout() {

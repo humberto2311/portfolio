@@ -7,13 +7,14 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 import { TabBarComponent } from './tab-bar/tab-bar.component';
 import { SidePanelComponent } from '../../shared/components/side-panel/side-panel.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { PrimerIngresoComponent } from './primer-ingreso/primer-ingreso.component';
 import { RailStateService } from '../../core/services/rail-state.service';
 import { TemaService } from '../../core/services/tema.service';
 
 @Component({
   selector: 'app-private-layout',
   standalone: true,
-  imports: [RouterOutlet, PrivateNavbarComponent, SideNavComponent, TabBarComponent, SidePanelComponent, FooterComponent],
+  imports: [RouterOutlet, PrivateNavbarComponent, SideNavComponent, TabBarComponent, SidePanelComponent, FooterComponent, PrimerIngresoComponent],
   templateUrl: './private-layout.component.html',
   styleUrls: ['./private-layout.component.scss'],
 })

@@ -1,0 +1,247 @@
+@import '../../../shared/styles/variables';
+
+:host {
+  display: contents;
+}
+
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+}
+
+.tour__velo {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.78);
+}
+
+.tour__lupa {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(3, 7, 18, 0.78), 0 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+  transition: top 0.24s ease, left 0.24s ease, width 0.24s ease, height 0.24s ease;
+}
+
+.tour__saltar {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  border: 1px solid $bg-border;
+  border-radius: 999px;
+  background: $bg-card;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 0.8rem;
+  padding: 7px 14px;
+  cursor: pointer;
+
+  &:hover {
+    color: $text-light;
+    background: $bg-elevated;
+  }
+}
+
+.tour__caja {
+  position: fixed;
+  width: min(430px, calc(100vw - 32px));
+  max-height: min(78vh, 620px);
+  overflow-y: auto;
+  background: $bg-card;
+  border: 1px solid $bg-border;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  animation: tourEntrada 0.2s ease;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $bg-border;
+    border-radius: 4px;
+  }
+
+  h2 {
+    margin: 0 0 0.4rem;
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: $text-light;
+  }
+
+  &[data-lugar='derecha'] {
+    top: 50%;
+    right: 28px;
+    transform: translateY(-50%);
+  }
+
+  &[data-lugar='izquierda'] {
+    top: 50%;
+    left: 28px;
+    transform: translateY(-50%);
+  }
+
+  &[data-lugar='abajo'] {
+    top: calc(50% + 40px);
+    left: 50%;
+    transform: translate(-50%, -30%);
+  }
+
+  &[data-lugar='arriba'] {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -70%);
+  }
+
+  &[data-lugar='centro'] {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &[data-lugar='fondo'] {
+    bottom: calc(56px + var(--safe-bottom) + 12px);
+    left: 50%;
+    top: auto;
+    transform: translateX(-50%);
+  }
+}
+
+.tour__bajada {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: $text-muted;
+}
+
+.tour__lista {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 650;
+    color: $text-light;
+  }
+
+  small {
+    display: block;
+    font-size: 0.79rem;
+    line-height: 1.45;
+    color: $text-faint;
+  }
+}
+
+.tour__lista--mapa {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tour__icono {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: $accent;
+  font-size: 0.72rem;
+}
+
+.tour__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid $bg-border;
+}
+
+.tour__puntos {
+  display: inline-flex;
+  gap: 5px;
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $bg-border;
+
+    &.activo {
+      background: $accent;
+      width: 16px;
+      border-radius: 3px;
+    }
+  }
+}
+
+.tour__botones {
+  display: inline-flex;
+  gap: 0.5rem;
+
+  button {
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 8px 15px;
+    cursor: pointer;
+    border: 1px solid $bg-border;
+    background: transparent;
+    color: $text-muted;
+
+    &:hover {
+      color: $text-light;
+      background: $bg-hover;
+    }
+  }
+
+  .tour__ir {
+    border-color: $accent;
+    background: $accent;
+    color: $on-accent;
+
+    &:hover {
+      background: $accent-strong;
+      border-color: $accent-strong;
+      color: $on-accent;
+    }
+  }
+}
+
+@media (max-width: 719.98px) {
+  .tour__lista--mapa {
+    grid-template-columns: 1fr;
+  }
+
+  .tour__saltar {
+    top: 12px;
+    right: 12px;
+    font-size: 0.75rem;
+    padding: 6px 11px;
+  }
+}
+
+@media (min-width: 720px) and (max-width: 1023.98px) {
+  .tour__caja[data-lugar='fondo'] {
+    width: min(520px, calc(100vw - 32px));
+  }
+}
+
+@keyframes tourEntrada {
+  from {
+    opacity: 0;
+  }
+}

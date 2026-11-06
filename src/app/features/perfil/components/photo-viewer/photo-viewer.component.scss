@@ -1,0 +1,368 @@
+@import '../../../../shared/styles/variables';
+
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(4, 8, 15, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__panel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: $bg-card;
+    overflow: hidden;
+  }
+
+  &__imagen {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Transparente para que el gris del fondo se vea alrededor de la foto.
+    background: transparent;
+    min-width: 0;
+    padding: clamp(0.5rem, 2.5vw, 2rem);
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  &__lateral {
+    width: clamp(300px, 34%, 380px);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid $bg-border;
+    min-width: 0;
+  }
+}
+
+.lateral {
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid $bg-border;
+
+    h3 {
+      margin: 0;
+      color: $cyan-main;
+      font-size: 0.95rem;
+    }
+
+    .cerrar {
+      background: transparent;
+      border: none;
+      color: $text-muted;
+      font-size: 1rem;
+      cursor: pointer;
+
+      &:hover { color: $text-light; }
+    }
+  }
+
+  &__descripcion {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid $bg-border;
+
+    textarea {
+      width: 100%;
+      background: $bg-input;
+      border: 1px solid $bg-border;
+      border-radius: 8px;
+      color: $text-light;
+      font-size: 0.82rem;
+      font-family: inherit;
+      padding: 0.5rem;
+      resize: vertical;
+
+      &:focus { outline: none; border-color: $border-cyan; }
+    }
+  }
+
+  &__estadisticas {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid $bg-border;
+  }
+
+  &__comentarios {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  &__entrada {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid $bg-border;
+
+    input {
+      flex: 1 1 auto;
+      min-width: 0;
+      background: $bg-input;
+      border: 1px solid $bg-border;
+      border-radius: 999px;
+      color: $text-light;
+      font-size: 0.82rem;
+      padding: 0.45rem 0.8rem;
+
+      &:focus { outline: none; border-color: $border-cyan; }
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      color: $cyan-main;
+      cursor: pointer;
+      font-size: 0.9rem;
+
+      &:disabled { opacity: 0.5; cursor: default; }
+    }
+  }
+}
+
+.descripcion {
+  &__texto {
+    margin: 0;
+    color: $text-light;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    &.vacia { color: $text-muted; font-style: italic; }
+  }
+
+  &__editar {
+    margin-top: 0.5rem;
+    background: transparent;
+    border: none;
+    color: $cyan-main;
+    font-size: 0.78rem;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover { text-decoration: underline; }
+  }
+
+  &__acciones {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+}
+
+.avatar {
+  @include avatar-base(34px, 0.72rem);
+}
+
+.like,
+.mini-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid $bg-border;
+  border-radius: 8px;
+  color: $text-muted;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+
+  &:hover { color: $cyan-main; border-color: $border-cyan; }
+  &.liked { color: $cyan-main; border-color: $border-cyan; background: $cyan-dim; }
+}
+
+.mini-like {
+  margin-top: 0.3rem;
+  border: none;
+  padding: 0.1rem 0;
+  font-size: 0.74rem;
+}
+
+.total {
+  color: $text-muted;
+  font-size: 0.78rem;
+}
+
+.acciones {
+  margin-left: auto;
+  display: flex;
+  gap: 0.4rem;
+
+  button {
+    background: transparent;
+    border: 1px solid $bg-border;
+    border-radius: 8px;
+    color: $text-light;
+    font-size: 0.76rem;
+    padding: 0.3rem 0.55rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    &:hover { border-color: $border-cyan; color: $cyan-main; }
+    &.peligro:hover { color: #f87171; border-color: rgba(248, 113, 113, 0.4); }
+  }
+}
+
+.comentario {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.burbuja {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    strong {
+      color: $text-light;
+      font-size: 0.8rem;
+    }
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    color: $text-light;
+    font-size: 0.82rem;
+    word-break: break-word;
+  }
+
+  input {
+    width: 100%;
+    margin-top: 0.25rem;
+    background: $bg-input;
+    border: 1px solid $bg-border;
+    border-radius: 8px;
+    color: $text-light;
+    font-size: 0.82rem;
+    padding: 0.4rem 0.55rem;
+
+    &:focus { outline: none; border-color: $border-cyan; }
+  }
+
+  &__acciones {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+  }
+}
+
+.mas {
+  position: relative;
+  margin-left: auto;
+
+  .boton {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: 0.8rem;
+
+    &:hover { color: $cyan-main; }
+  }
+
+  .menu {
+    position: absolute;
+    right: 0;
+    top: 22px;
+    min-width: 140px;
+    background: $bg-card;
+    border: 1px solid $bg-border;
+    border-radius: 10px;
+    padding: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    z-index: 30;
+
+    button {
+      background: transparent;
+      border: none;
+      color: $text-light;
+      font-size: 0.76rem;
+      text-align: left;
+      padding: 0.35rem 0.5rem;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+
+      &:hover { background: $bg-hover; color: $cyan-main; }
+      &.peligro:hover { color: #f87171; }
+    }
+  }
+}
+
+.primario {
+  background: linear-gradient(135deg, $cyan-main 0%, $cyan-secondary 100%);
+  border: none;
+  border-radius: 8px;
+  color: #061018;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.burbuja__acciones button:not(.primario),
+.descripcion__acciones button:not(.primario) {
+  background: transparent;
+  border: 1px solid $bg-border;
+  border-radius: 8px;
+  color: $text-muted;
+  font-size: 0.76rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+
+  &:hover { color: $text-light; border-color: $border-cyan; }
+}
+
+.estado {
+  color: $text-muted;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .visor__panel {
+    flex-direction: column;
+  }
+
+  .visor__imagen {
+    flex: 0 0 45%;
+    padding: 0.5rem;
+  }
+
+  .visor__lateral {
+    width: 100%;
+    flex: 1 1 auto;
+    border-left: none;
+    border-top: 1px solid $bg-border;
+  }
+}

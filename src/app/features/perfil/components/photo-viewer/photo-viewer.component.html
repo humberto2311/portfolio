@@ -1,0 +1,139 @@
+<div class="visor" (click)="cerrar()">
+  <div class="visor__panel" (click)="$event.stopPropagation()">
+    <div class="visor__imagen">
+      <img [src]="foto.url" alt="Foto ampliada" />
+    </div>
+
+    <aside class="visor__lateral">
+      <header class="lateral__cabecera">
+        <h3>Foto</h3>
+        <button type="button" class="cerrar" (click)="cerrar()" title="Cerrar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+
+      <div class="lateral__descripcion">
+        @if (editandoDescripcion()) {
+          <textarea
+            rows="3"
+            placeholder="¿Qué quieres contar sobre esta foto?"
+            [(ngModel)]="textoDescripcion"
+            (keyup.escape)="cancelarDescripcion()"></textarea>
+          <div class="descripcion__acciones">
+            <button type="button" class="primario" [disabled]="guardandoDescripcion()" (click)="guardarDescripcion()">Guardar</button>
+            <button type="button" (click)="cancelarDescripcion()">Cancelar</button>
+          </div>
+        } @else {
+          <p class="descripcion__texto" [class.vacia]="!descripcion()">
+            {{ descripcion() || 'Sin descripción' }}
+          </p>
+          @if (esMiPerfil) {
+            <button type="button" class="descripcion__editar" (click)="comenzarDescripcion()">
+              <i class="fa-solid fa-pen"></i>
+              {{ descripcion() ? 'Editar descripción' : 'Añadir descripción' }}
+            </button>
+          }
+        }
+      </div>
+
+      <div class="lateral__estadisticas">
+        <button type="button" class="like" [class.liked]="likedByMe()" (click)="like()">
+          <i class="fa-thumbs-up" [class.fa-solid]="likedByMe()" [class.fa-regular]="!likedByMe()"></i>
+          {{ likes() }}
+        </button>
+        <span class="total">{{ totalComentarios() }} comentarios</span>
+
+        @if (esMiPerfil) {
+          <div class="acciones">
+            <button type="button" (click)="compartir()">
+              <i class="fa-solid fa-share-nodes"></i> Compartir
+            </button>
+            <button type="button" class="peligro" (click)="eliminar()">
+              <i class="fa-solid fa-trash"></i> Eliminar
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="lateral__comentarios">
+        @if (cargando()) {
+          <p class="estado">Cargando comentarios…</p>
+        } @else if (comentarios().length === 0) {
+          <p class="estado">Sé el primero en comentar.</p>
+        }
+
+        @for (c of comentarios(); track c.id) {
+          <div class="comentario">
+            <div class="avatar">
+              @if (c.autorAvatar) {
+                <img [src]="c.autorAvatar" [alt]="'Foto de ' + c.autor" />
+              } @else {
+                {{ c.iniciales }}
+              }
+            </div>
+
+            <div class="burbuja">
+              <div class="burbuja__cabecera">
+                <strong>{{ c.autor }}</strong>
+                @if (esMiComentario(c)) {
+                  <div class="mas">
+                    <button type="button" class="boton" (click)="toggleMenuComentario(c, $event)" title="Opciones">
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+
+                    @if (comentarioMenu() === c.id) {
+                      <div class="menu">
+                        <button type="button" (click)="comenzarEdicion(c)">
+                          <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                        <button type="button" class="peligro" (click)="eliminarComentario(c)">
+                          <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (comentarioEditando() === c.id) {
+                <input
+                  type="text"
+                  [(ngModel)]="textoComentarioEditado"
+                  (keyup.enter)="guardarEdicion(c)"
+                  (keyup.escape)="cancelarEdicion()" />
+                <div class="burbuja__acciones">
+                  <button type="button" class="primario" (click)="guardarEdicion(c)">Guardar</button>
+                  <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+                </div>
+              } @else {
+                <p><app-menciones-texto [texto]="c.texto" /></p>
+                <button type="button" class="mini-like" [class.liked]="c.likedByMe" (click)="likeComentario(c)">
+                  <i class="fa-thumbs-up" [class.fa-solid]="c.likedByMe" [class.fa-regular]="!c.likedByMe"></i>
+                  {{ c.likes }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <footer class="lateral__entrada">
+        <div class="avatar">
+          @if (avatar()) {
+            <img [src]="avatar()" alt="Mi foto" />
+          } @else {
+            {{ iniciales() }}
+          }
+        </div>
+        <input
+          type="text"
+          [(ngModel)]="nuevoComentario"
+          placeholder="Escribe un comentario..."
+          (keyup.enter)="enviarComentario()" />
+        <button type="button" [disabled]="enviando()" (click)="enviarComentario()">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </footer>
+    </aside>
+  </div>
+</div>

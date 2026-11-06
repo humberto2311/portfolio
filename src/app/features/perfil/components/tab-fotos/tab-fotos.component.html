@@ -1,8 +1,76 @@
-<div class="fotos-card">
-  <h3><i class="fa-solid fa-images"></i> Galería</h3>
-  <div class="grid">
-    @for (f of fotos; track f) {
-      <img [src]="f" alt="foto" loading="lazy">
+<div class="fotos-tab">
+  <div class="fotos-tab__header">
+    <div class="fotos-tab__title-wrap">
+      <h2 class="fotos-tab__title"><i class="fa-solid fa-images"></i> Galería</h2>
+      <span class="fotos-tab__count">{{ fotos().length + postsConMedia().length }}</span>
+    </div>
+
+    @if (esMiPerfil) {
+      <button type="button" class="btn-subir" [disabled]="subiendo()" (click)="elegirArchivo()">
+        <i class="fa-solid" [class.fa-plus]="!subiendo()" [class.fa-spinner]="subiendo()" [class.fa-spin]="subiendo()"></i>
+        {{ subiendo() ? 'Publicando…' : 'Subir foto' }}
+      </button>
     }
   </div>
+
+  @if (cargando()) {
+    <p class="fotos-tab__estado">Cargando fotos…</p>
+  }
+
+  @if (fotos().length > 0) {
+    <h3 class="seccion">Fotos del perfil</h3>
+    <div class="grid">
+      @for (f of fotos(); track f.id) {
+        <figure class="foto" (click)="ampliar(f)">
+          <img [src]="f.url" alt="Foto del perfil" loading="lazy" />
+
+          <figcaption class="foto__pie">
+            <span><i class="fa-solid fa-thumbs-up"></i> {{ f.likesCount ?? 0 }}</span>
+            <span><i class="fa-regular fa-comment"></i> {{ f.commentsCount ?? 0 }}</span>
+          </figcaption>
+
+          @if (esMiPerfil) {
+            <div class="more-options-container" (click)="$event.stopPropagation()">
+              <button type="button" class="more" (click)="toggleMenu(f, $event)" title="Opciones">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+
+              @if (menuAbierto() === f.id) {
+                <div class="dropdown-menu">
+                  <button type="button" (click)="descargar(f)">
+                    <i class="fa-solid fa-share-nodes"></i> Compartir
+                  </button>
+                  <button type="button" class="btn-delete" (click)="eliminar(f)">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </figure>
+      }
+    </div>
+  }
+
+  @if (postsConMedia().length > 0) {
+    <h3 class="seccion">Publicaciones con imagen</h3>
+    <div class="posts">
+      @for (p of postsConMedia(); track p.id) {
+        <app-post-card [post]="p" />
+      }
+    </div>
+  } @else if (!cargando()) {
+    <p class="fotos-tab__estado">
+      Aquí aparecen las fotos y videos que publiques y las que pongas en tu perfil.
+    </p>
+  }
 </div>
+
+@if (ampliada(); as foto) {
+  <app-photo-viewer
+    [foto]="foto"
+    [esMiPerfil]="esMiPerfil"
+    (cerrado)="cerrar()"
+    (eliminada)="alEliminar($event)"
+    (descripcionCambiada)="alCambiarDescripcion($event)" />
+}

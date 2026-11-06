@@ -1,9 +1,20 @@
 <div class="header-card">
-  <div class="cover-banner" [style.background-image]="perfil.coverUrl ? 'url(' + perfil.coverUrl + ')' : 'none'">
+  <div class="cover-banner" [class.abrible]="!!perfil.coverUrl" [style.background-image]="perfil.coverUrl ? 'url(' + perfil.coverUrl + ')' : null"
+       (click)="abrirVisor('portada')">
     @if (esMiPerfil) {
-      <button type="button" class="btn-edit-cover" (click)="emitirAccion('Modificar portada próximamente')">
-        <i class="fa-solid fa-camera"></i> Editar Portada
-      </button>
+      <div class="cover-actions">
+        <button type="button" class="btn-edit-cover" [disabled]="subiendoImagen" (click)="$event.stopPropagation(); elegirImagen('portada')">
+          <i class="fa-solid" [class.fa-camera]="!subiendoImagen" [class.fa-spinner]="subiendoImagen" [class.fa-spin]="subiendoImagen"></i>
+          {{ subiendoImagen ? 'Guardando portada…' : 'Cambiar Portada' }}
+        </button>
+
+        @if (perfil.coverUrl) {
+          <button type="button" class="btn-edit-cover quitar" [disabled]="subiendoImagen" (click)="$event.stopPropagation(); quitarPortada()">
+            <i class="fa-solid fa-trash-can"></i>
+            Quitar
+          </button>
+        }
+      </div>
     }
   </div>
 
@@ -13,9 +24,16 @@
       <div class="avatar-block">
         <div class="avatar-wrapper" [class.has-image]="perfil.avatarUrl">
           @if (perfil.avatarUrl) {
-            <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img" />
+            <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img"
+                 title="Ver en grande" (click)="abrirVisor('avatar')" />
           } @else {
             <span class="initials">{{ perfil.iniciales }}</span>
+          }
+          @if (esMiPerfil) {
+            <button type="button" class="btn-edit-avatar" [disabled]="subiendoImagen" (click)="elegirImagen('avatar')"
+                    title="Cambiar foto de perfil">
+              <i class="fa-solid fa-camera"></i>
+            </button>
           }
         </div>
       </div>
@@ -109,4 +127,13 @@
       </div>
     </div>
   </div>
+
+  @if (fotoAbierta(); as foto) {
+    <app-photo-viewer
+      [foto]="foto"
+      [esMiPerfil]="esMiPerfil"
+      (cerrado)="fotoAbierta.set(null)"
+      (descripcionCambiada)="fotoAbierta.set($event)"
+      (eliminada)="alEliminarFoto()" />
+  }
 </div>

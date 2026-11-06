@@ -12,16 +12,24 @@ $text-main: #ffffff;
 }
 
 .cover-banner {
-  height: 160px;
+  height: 240px;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   position: relative;
 
-  .btn-edit-cover {
+  &.abrible { cursor: zoom-in; }
+
+  .cover-actions {
     position: absolute;
     top: 15px;
     right: 15px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-edit-cover {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
@@ -29,8 +37,14 @@ $text-main: #ffffff;
     border-radius: 8px;
     cursor: pointer;
     backdrop-filter: blur(4px);
-    
+
     &:hover { background: rgba(255, 255, 255, 0.2); }
+    &.quitar { padding: 8px 12px; }
+    &:disabled { opacity: 0.6; cursor: default; }
+  }
+
+  @media (max-width: 768px) {
+    height: 170px;
   }
 }
 
@@ -59,6 +73,7 @@ $text-main: #ffffff;
 }
 
 .avatar-block .avatar-wrapper {
+  position: relative;
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -80,6 +95,27 @@ $text-main: #ffffff;
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    cursor: zoom-in;
+  }
+
+  .btn-edit-avatar {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid $bg-card;
+    background: rgba(0, 0, 0, 0.55);
+    color: $cyan-glow;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+
+    &:hover:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
+    &:disabled { opacity: 0.6; cursor: default; }
   }
 }
 

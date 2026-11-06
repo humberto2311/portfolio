@@ -36,6 +36,8 @@ export interface Comentario {
   autorUsername?: string;
   autorAvatar?: string;
   texto: string;
+  likes: number;
+  likedByMe: boolean;
 }
 
 export interface Publicacion {
@@ -101,10 +103,14 @@ export interface AuthorDto {
 
 export interface CommentDto {
   id: string;
-  postId: string;
+  postId?: string;
+  /** Va lleno cuando el comentario está en una foto del perfil en lugar de en un post. */
+  photoId?: number;
   author: AuthorDto;
   content: string;
   createdAt: string;
+  likes: number;
+  likedByMe: boolean;
 }
 
 export interface PostTagDto {
@@ -148,6 +154,7 @@ export interface UserProfileDto {
   fullName: string;
   gitUsername?: string;
   email?: string;
+  avatarUrl?: string | null;
 }
 
 /** Respuesta de /api/users/connections/me/following */

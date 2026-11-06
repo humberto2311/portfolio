@@ -1,13 +1,14 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap, catchError, throwError, switchMap, map, forkJoin } from 'rxjs';
-import { PerfilData, Publicacion, PostDto, UserProfileDto } from '../models/perfil.model';
+import { PerfilData, Publicacion, PostDto, UserProfileDto, Comentario, CommentDto } from '../models/perfil.model';
 import { AuthService } from './auth.service';
 import { PostService } from './post.service';
 import { LikeService } from './like.service';
 import { CommentService } from './comment.service';
 import { ShareService } from './share.service';
 import { ResumeService } from './resume.service';
+import { ToastService } from './toast.service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +20,7 @@ export class PerfilService {
   private commentService = inject(CommentService);
   private shareService = inject(ShareService);
   private resumeService = inject(ResumeService);
+  private toast = inject(ToastService);
 
   private readonly API_URL = `${environment.apiUrl}/api/users`;
 
@@ -233,6 +235,8 @@ export class PerfilService {
                       autorUsername: c.author?.gitUsername || undefined,
                       autorAvatar: this.avatarDelAutor(c.author?.id),
                       texto: c.content,
+                      likes: c.likes ?? 0,
+                      likedByMe: c.likedByMe ?? false,
                     },
                   ],
                 }
@@ -242,6 +246,83 @@ export class PerfilService {
       },
       error: (err) => console.error('Error agregando comentario', err),
     });
+  }
+
+  /** El feed no trae los comentarios: se piden al abrir el hilo de cada post. */
+  cargarComentarios(postId: string): void {
+    this.commentService.list(postId).subscribe({
+      next: (page) => this.actualizarComentarios(postId, () => page.content.map((c) => this.mapComentario(c))),
+      error: (err) => this.avisar('No se pudieron cargar los comentarios', err),
+    });
+  }
+
+  editarComentario(postId: string, commentId: string, texto: string): void {
+    const limpio = texto.trim();
+    if (!limpio) return;
+
+    this.commentService.update(postId, commentId, limpio).subscribe({
+      next: (c) => this.actualizarComentarios(postId, (lista) =>
+        lista.map((item) => (item.id === commentId ? { ...item, texto: c.content } : item))
+      ),
+      error: (err) => this.avisar('No se pudo editar el comentario', err),
+    });
+  }
+
+  borrarComentario(postId: string, commentId: string): void {
+    this.commentService.delete(postId, commentId).subscribe({
+      next: () => this.actualizarComentarios(postId, (lista) =>
+        lista.filter((item) => item.id !== commentId)
+      ),
+      error: (err) => this.avisar('No se pudo eliminar el comentario', err),
+    });
+  }
+
+  likeComentario(postId: string, commentId: string): void {
+    this.commentService.like(postId, commentId).subscribe({
+      next: ({ liked, likesCount }) => this.actualizarComentarios(postId, (lista) =>
+        lista.map((item) =>
+          item.id === commentId ? { ...item, likes: likesCount, likedByMe: liked } : item
+        )
+      ),
+      error: (err) => this.avisar('No se pudo registrar el me gusta', err),
+    });
+  }
+
+  esComentarioPropio(autorId?: string): boolean {
+    const actual = this.authService.currentUser()?.id;
+    return !!actual && !!autorId && String(actual) === String(autorId);
+  }
+
+  private avisar(porDefecto: string, err: any): void {
+    console.error(porDefecto, err);
+    this.toast.show(err?.error?.message || err?.error?.error || porDefecto);
+  }
+
+  private actualizarComentarios(
+    postId: string,
+    cambiar: (actuales: Comentario[]) => Comentario[]
+  ): void {
+    this.publicaciones.update((list) =>
+      list.map((p) =>
+        String(p.id) === String(postId) ? { ...p, comentarios: cambiar(p.comentarios) } : p
+      )
+    );
+  }
+
+  /** También lo usa el visor de fotos: un comentario de foto se ve igual que uno de post. */
+  mapComentario(c: CommentDto): Comentario {
+    const autor = c.author?.fullName?.trim() || 'Usuario';
+    return {
+      id: c.id,
+      autor,
+      iniciales: c.author?.initials?.trim() || this.generarIniciales(autor),
+      autorId: c.author?.id,
+      autorUsername: c.author?.gitUsername || undefined,
+      autorAvatar: this.avatarDelAutor(c.author?.id),
+      texto: c.content,
+      likes: c.likes ?? 0,
+      likedByMe: c.likedByMe ?? false,
+    };
   }
 
   // ====== MAPPERS ======

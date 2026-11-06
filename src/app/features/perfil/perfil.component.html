@@ -21,10 +21,10 @@
         @switch (seccionActiva) {
           @case ('publicaciones') { <app-tab-publicaciones [esMiPerfil]="esMiPerfil" /> }
           @case ('informacion') { <app-tab-informacion [perfil]="p" /> }
-          @case ('fotos') { <app-tab-fotos [fotos]="p.fotos" /> }
+          @case ('fotos') { <app-tab-fotos [userId]="p.id" [esMiPerfil]="esMiPerfil" /> }
           
           <!-- 👇 PASAMOS EL ID DEL USUARIO -->
-          @case ('amigos') { <app-tab-contactos [userId]="p.id" /> }
+          @case ('amigos') { <app-tab-contactos [userId]="p.id" [esMiPerfil]="esMiPerfil" /> }
         }
       </div>
     } @else {

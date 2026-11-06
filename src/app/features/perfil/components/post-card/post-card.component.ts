@@ -1,10 +1,11 @@
-import { Component, Input, inject, signal, HostListener, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, inject, signal, HostListener, ElementRef, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Publicacion, Comentario } from '../../../../core/models/perfil.model';
 import { PerfilService } from '../../../../core/services/perfil.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserProfileService } from '../../../../core/services/user-profile.service';
 import { ShareModalComponent } from '../share-modal/share-modal.component';
 import { PostDetalleComponent } from '../post-detalle/post-detalle.component';
 import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.component';
@@ -22,13 +23,17 @@ import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.comp
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.scss']
 })
-export class PostCardComponent implements OnChanges {
+export class PostCardComponent implements OnInit, OnChanges {
   @Input({ required: true }) post!: Publicacion;
   
   private perfilService = inject(PerfilService);
   private authService = inject(AuthService); 
   private elRef = inject(ElementRef);
   private router = inject(Router);
+  private perfiles = inject(UserProfileService);
+
+  /** Foto de quien escribe el comentario; sin ella quedan las iniciales. */
+  readonly miAvatar = this.perfiles.avatar;
 
   // --- ESTADOS DE LA UI ---
   mostrarMenu = signal(false);
@@ -42,6 +47,13 @@ export class PostCardComponent implements OnChanges {
   // --- VARIABLES DE FORMULARIO ---
   textoEditado = '';
   nuevoComentario = '';
+  textoComentarioEditado = '';
+  comentarioEditando = signal<string | null>(null);
+  comentarioMenu = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.perfiles.cargarMiAvatar();
+  }
 
   // Nos aseguramos de que el texto original se cargue si el post cambia desde el padre
   ngOnChanges(changes: SimpleChanges): void {
@@ -70,7 +82,46 @@ export class PostCardComponent implements OnChanges {
   }
 
   toggleComentarios(): void {
-    this.mostrarComentarios.update(v => !v);
+    const abrir = !this.mostrarComentarios();
+    this.mostrarComentarios.set(abrir);
+    if (abrir) this.perfilService.cargarComentarios(this.post.id as any);
+  }
+
+  esMiComentario(comentario: Comentario): boolean {
+    return this.perfilService.esComentarioPropio(comentario.autorId);
+  }
+
+  likeComentario(comentario: Comentario): void {
+    this.perfilService.likeComentario(this.post.id as any, comentario.id);
+  }
+
+  toggleMenuComentario(comentario: Comentario, event: Event): void {
+    event.stopPropagation();
+    this.comentarioMenu.set(this.comentarioMenu() === comentario.id ? null : comentario.id);
+  }
+
+  comenzarEdicionComentario(comentario: Comentario): void {
+    this.comentarioMenu.set(null);
+    this.comentarioEditando.set(comentario.id);
+    this.textoComentarioEditado = comentario.texto;
+  }
+
+  cancelarEdicionComentario(): void {
+    this.comentarioEditando.set(null);
+    this.textoComentarioEditado = '';
+  }
+
+  guardarEdicionComentario(comentario: Comentario): void {
+    const texto = this.textoComentarioEditado.trim();
+    if (!texto) return;
+
+    this.perfilService.editarComentario(this.post.id as any, comentario.id, texto);
+    this.cancelarEdicionComentario();
+  }
+
+  eliminarComentario(comentario: Comentario): void {
+    this.comentarioMenu.set(null);
+    this.perfilService.borrarComentario(this.post.id as any, comentario.id);
   }
 
   enviarComentario(): void {
@@ -95,6 +146,7 @@ export class PostCardComponent implements OnChanges {
     // Si el clic fue fuera del componente, cerramos el menú
     if (!this.elRef.nativeElement.contains(event.target)) {
       this.mostrarMenu.set(false);
+      this.comentarioMenu.set(null);
     }
   }
 

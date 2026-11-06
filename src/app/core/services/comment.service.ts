@@ -36,4 +36,11 @@ export class CommentService {
       `${this.API}/${postId}/comments/${commentId}`
     );
   }
+
+  like(postId: string, commentId: string): Observable<{ liked: boolean; likesCount: number }> {
+    return this.http.post<{ liked: boolean; likesCount: number }>(
+      `${this.API}/${postId}/comments/${commentId}/like`,
+      {}
+    );
+  }
 }

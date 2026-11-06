@@ -208,8 +208,51 @@
     border-radius: 10px;
     flex: 1;
 
+    .bubble-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .more { padding: 0.1rem 0.3rem; }
+
     strong { font-size: 0.78rem; color: $text-light; display: block; }
     p { font-size: 0.78rem; color: $text-muted; margin: 0.15rem 0 0; }
+
+    .editar-comentario {
+      width: 100%;
+      margin-top: 0.35rem;
+      background: $bg-input;
+      border: 1px solid $bg-border;
+      color: $text-light;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      outline: none;
+
+      &:focus { border-color: $cyan-main; }
+    }
+  }
+
+  .comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.35rem;
+
+    button {
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: 0.7rem;
+      color: $text-muted;
+
+      &:hover { color: $cyan-main; }
+      &.liked { color: $cyan-main; }
+      &.primary { font-weight: 600; color: $cyan-main; }
+    }
   }
 }
 

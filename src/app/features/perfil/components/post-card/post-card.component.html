@@ -122,13 +122,60 @@
             }
           </div>
           <div class="bubble">
-            <strong class="autor-comentario" (click)="irAlComentario(c)">{{ c.autor }}</strong>
-            <p><app-menciones-texto [texto]="c.texto" /></p>
+            <div class="bubble-top">
+              <strong class="autor-comentario" (click)="irAlComentario(c)">{{ c.autor }}</strong>
+
+              @if (esMiComentario(c)) {
+                <div class="more-options-container">
+                  <button type="button" class="more" (click)="toggleMenuComentario(c, $event)" title="Opciones">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
+
+                  @if (comentarioMenu() === c.id) {
+                    <div class="dropdown-menu">
+                      <button (click)="comenzarEdicionComentario(c)">
+                        <i class="fa-solid fa-pen"></i> Editar
+                      </button>
+                      <button class="btn-delete" (click)="eliminarComentario(c)">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (comentarioEditando() === c.id) {
+              <input
+                class="editar-comentario"
+                type="text"
+                [(ngModel)]="textoComentarioEditado"
+                (keyup.enter)="guardarEdicionComentario(c)"
+                (keyup.escape)="cancelarEdicionComentario()" />
+              <div class="comment-actions">
+                <button class="primary" (click)="guardarEdicionComentario(c)">Guardar</button>
+                <button (click)="cancelarEdicionComentario()">Cancelar</button>
+              </div>
+            } @else {
+              <p><app-menciones-texto [texto]="c.texto" /></p>
+              <div class="comment-actions">
+                <button [class.liked]="c.likedByMe" (click)="likeComentario(c)">
+                  <i class="fa-thumbs-up" [class.fa-solid]="c.likedByMe" [class.fa-regular]="!c.likedByMe"></i>
+                  {{ c.likes }}
+                </button>
+              </div>
+            }
           </div>
         </div>
       }
       <div class="comment-input">
-        <div class="avatar-sm">{{ inicialesUsuario }}</div>
+        <div class="avatar-sm">
+          @if (miAvatar()) {
+            <img [src]="miAvatar()" [alt]="'Mi foto'" />
+          } @else {
+            {{ inicialesUsuario }}
+          }
+        </div>
         <input
           type="text"
           [(ngModel)]="nuevoComentario"

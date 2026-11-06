@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
 import { VcardService } from '../../core/services/vcard.service';
+import { ArchivoService } from '../../core/services/archivo.service';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 
 @Component({
@@ -15,6 +16,7 @@ import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 export class TarjetaPublicaComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private vcardService = inject(VcardService);
+  private archivos = inject(ArchivoService);
 
   private userId = '';
   private slug = '';
@@ -80,43 +82,36 @@ export class TarjetaPublicaComponent implements OnInit {
 
     this.vcardService.vcfPublico(this.userId, t.slug).subscribe({
       next: async (blob) => {
-        const archivo = new File([blob], this.nombreArchivo(), { type: 'text/vcard' });
-
-        const nav = navigator as any;
-        if (nav.canShare && nav.canShare({ files: [archivo] })) {
-          try {
-            await nav.share({
-              files: [archivo],
-              title: this.tarjeta()?.nombre ?? 'Contacto',
-            });
-            this.aviso.set('Listo. Si tu teléfono lo pregunta, elige "Añadir a contactos".');
-            return;
-          } catch {
-            /* canceló o falló: se intenta la descarga normal */
-          }
+        const nombre = this.nombreArchivo();
+        try {
+          const resultado = await this.archivos.guardar(
+            blob,
+            nombre,
+            this.tarjeta()?.nombre ?? 'Contacto'
+          );
+          this.aviso.set(
+            resultado === 'cancelado'
+              ? 'Se cerró sin guardar. Vuelve a tocar "Guardar contacto" cuando quieras.'
+              : 'Listo. Elige "Añadir a contactos" y quedará guardado en tu agenda.'
+          );
+        } catch {
+          this.aviso.set('No se pudo guardar el contacto. Intenta de nuevo.');
         }
-
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = archivo.name;
-        a.click();
-        URL.revokeObjectURL(url);
-
-        this.aviso.set('Contacto descargado. Ábrelo para guardarlo en tu agenda.');
       },
       error: () => this.aviso.set('No se pudo descargar el contacto. Intenta de nuevo.'),
     });
   }
 
-  compartir(): void {
+  async compartir(): Promise<void> {
     const url = window.location.href;
+    const resultado = await this.archivos.compartirEnlace(
+      url,
+      this.tarjeta()?.nombre ?? 'Tarjeta de contacto'
+    );
 
-    if (navigator.share) {
-      navigator.share({
-        title: this.tarjeta()?.nombre ?? 'Tarjeta de contacto',
-        url,
-      }).catch(() => { /* el usuario canceló */ });
+    if (resultado === 'compartido') return;
+    if (resultado === 'cancelado') {
+      this.aviso.set('Se cerró sin compartir el enlace.');
       return;
     }
 

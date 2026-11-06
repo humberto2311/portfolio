@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 // 1. IMPORTAMOS EL SERVICIO (Esta es la ruta correcta)
 import { ModalService } from '../../../core/services/modal.service'; 
 import { ProyectosService } from '../../../core/services/proyectos.service'; 
+import { ToastService } from '../../../core/services/toast.service';
+import { ArchivoService } from '../../../core/services/archivo.service';
 import { Proyecto } from '../../../core/models/proyecto';
 
 export interface DeveloperProfile {
@@ -30,6 +32,8 @@ export class NfcProfileComponent implements OnInit {
   
   // 2. INYECTAMOS EL SERVICIO (Igual que en el Navbar)
   private modalSvc = inject(ModalService);
+  private archivos = inject(ArchivoService);
+  private toast = inject(ToastService);
 
   cardTransform = 'rotateX(0deg) rotateY(0deg)';
   isScanning = false;
@@ -119,15 +123,14 @@ export class NfcProfileComponent implements OnInit {
     }, 1200);
   }
 
-  exportVCard(): void {
+  async exportVCard(): Promise<void> {
     const p = this.profile;
     const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${p.name}\nTITLE:${p.role}\nTEL:${p.phone}\nEMAIL:${p.email}\nNOTE:NFC-Soft V1 Contact\nEND:VCARD`;
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${p.nickname}_nfc_contact.vcf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      await this.archivos.guardar(blob, `${p.nickname}_nfc_contact.vcf`, p.name);
+    } catch {
+      this.toast.show('No se pudo guardar el contacto en este dispositivo.');
+    }
   }
 }

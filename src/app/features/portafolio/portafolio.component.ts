@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { VcardService } from '../../core/services/vcard.service';
+import { ArchivoService } from '../../core/services/archivo.service';
 import {
   CampoExtraVcard,
   CategoriaCampo,
@@ -40,6 +41,7 @@ interface GrupoCampos {
 })
 export class PortafolioComponent implements OnInit {
   private vcardService = inject(VcardService);
+  private archivos = inject(ArchivoService);
 
   cargando = signal(true);
   guardando = signal(false);
@@ -402,14 +404,24 @@ export class PortafolioComponent implements OnInit {
     );
   }
 
-  private guardarBlob(blob: Blob): void {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${(this.tarjeta().nombre || 'mi-tarjeta')
+  private async guardarBlob(blob: Blob): Promise<void> {
+    const nombre = `${(this.tarjeta().nombre || 'mi-tarjeta')
       .replace(/\s+/g, '-')
       .toLowerCase()}.vcf`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    try {
+      const resultado = await this.archivos.guardar(
+        blob,
+        nombre,
+        this.tarjeta().nombre || 'Mi tarjeta'
+      );
+      this.mensaje.set(
+        resultado === 'cancelado'
+          ? 'Se cerró el envío sin guardar. Puedes intentarlo de nuevo.'
+          : 'Tarjeta lista. Elige "Añadir a contactos" para tenerla en tu agenda.'
+      );
+    } catch {
+      this.mensaje.set('No se pudo guardar la tarjeta en este dispositivo.');
+    }
   }
 }

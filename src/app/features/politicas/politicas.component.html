@@ -115,9 +115,40 @@
     <h2><i class="fas fa-mobile-screen-button"></i> 3. Uso desde el celular</h2>
 
     <p>
-      sistem es una web responsive: se usa desde el navegador del teléfono, sin tienda de aplicaciones.
-      Por eso el almacenamiento local del navegador es tu sesión: ten presente lo siguiente.
+      sistem se usa de dos formas: como web responsive desde el navegador del teléfono y, para quien
+      instala la aplicación, como app nativa que contiene esa misma web. En el navegador el
+      almacenamiento local es tu sesión; en la aplicación funciona igual, con la diferencia de que el
+      sistema operativo sí puede pedirte permisos. Estos son los que la aplicación declara y para qué
+      sirven.
     </p>
+
+    <h3>Permisos que pide la aplicación</h3>
+    <ul>
+      <li><strong>Internet.</strong> Para comunicarte con el servidor: iniciar sesión, ver tu perfil,
+        chatear y cargar tus datos. Sin él la app no muestra nada.</li>
+      <li><strong>Ubicación (aproximada y precisa).</strong> Solo la usa la lectura de etiquetas NFC
+        cuando el seguimiento está activado, para saber en qué zona se hizo el escaneo. La ubicación
+        aproximada alimenta primero el dashboard y, solo si autorizas casillas aparte, el mercadeo por
+        proximidad y las promociones de entidades cercanas: mira la sección 5. No se guarda la
+        ubicación en segundo plano ni se reconstruyen trayectos, rutinas, domicilios ni horarios.</li>
+      <li><strong>Lectura y escritura de etiquetas NFC.</strong> Para acercar el celular a tu tarjeta y
+        abrirla, y para programar etiquetas vírgenes con tu enlace. El permiso se usa únicamente
+        mientras tienes la pantalla de NFC abierta.</li>
+    </ul>
+
+    <h3>Permisos que NO pedimos</h3>
+    <ul>
+      <li><strong>Acceso a tus fotos, tu cámara ni tu galería.</strong> Cuando cambias tu foto de
+        perfil o tu portada, el sistema abre su propio selector de imágenes y la app recibe solo el
+        archivo que tú elegiste. Por eso no necesitamos permiso sobre el resto de tu carrete.</li>
+      <li><strong>Acceso a tu almacenamiento compartido.</strong> La hoja de vida en PDF y la tarjeta
+        de contacto (.vcf) se escriben en el espacio privado de la app y se entregan por el diálogo
+        nativo «Compartir». Nada se copia a las carpetas públicas del teléfono y ningún archivo queda
+        accesible para otras aplicaciones más allá de la vez que tú compartes.</li>
+      <li><strong>Acceso a tus contactos, tu agenda, tu teléfono o tus notificaciones.</strong> La
+        tarjeta se guarda en tu agenda solo si tú eliges «Añadir a contactos» en el diálogo del
+        sistema; la app no lee ni escribe tu agenda por su cuenta.</li>
+    </ul>
 
     <ul>
       <li>No dejes la sesión abierta en teléfonos compartidos ni en navegadores de otras personas.</li>
@@ -125,10 +156,9 @@
         dispositivos» cuando vuelvas a tu equipo.</li>
       <li>Activa bloqueo de pantalla en el teléfono: quien desbloquea el dispositivo puede abrir la
         app si quedó la sesión.</li>
-      <li>El sistema no pide acceso a tu cámara ni a tus contactos. La ubicación solo la puede llegar a
-        pedir la pantalla pública que se abre al escanear una etiqueta, y únicamente si el seguimiento
-        está activado. Esa zona aproximada alimenta primero el dashboard y, solo si autorizas casillas
-        aparte, el mercadeo por proximidad y las promociones de entidades cercanas: mira la sección 5.</li>
+      <li>Puedes revocar cualquier permiso desde Ajustes del teléfono → Aplicaciones → sistem →
+        Permisos. Al revocar la ubicación, la lectura de etiquetas sigue funcionando: simplemente no
+        se registra la zona del escaneo.</li>
       <li>Los enlaces que generas (hoja de vida pública, tarjeta NFC) se abren igual en celular;
         revisa su visibilidad desde Ajustes.</li>
     </ul>

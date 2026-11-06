@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">sistem</string>
+    <string name="title_activity_main">sistem</string>
+    <string name="package_name">com.nfcsoft.sistem</string>
+    <string name="custom_url_scheme">com.nfcsoft.sistem</string>
+</resources>

@@ -21,7 +21,7 @@
           <button class="back-btn" (click)="svc.backToContacts()">
             <i class="fa-solid fa-arrow-left"></i>
           </button>
-          <div class="avatar-wrap">
+          <div class="avatar-wrap clickable" (click)="svc.abrirPerfilDe(contact)" title="Ver perfil">
             @if (contact.avatar) {
               <img [src]="contact.avatar" [alt]="contact.name" />
             } @else {
@@ -31,7 +31,7 @@
           </div>
           <div>
             <div class="name-row">
-              <h3>{{ contact.name }}</h3>
+              <h3 class="clickable" (click)="svc.abrirPerfilDe(contact)" title="Ver perfil">{{ contact.name }}</h3>
               @if (contact.isAi) { <span class="ai-badge">IA</span> }
             </div>
             <p [class.ai-text]="contact.isAi">{{ contact.statusText }}</p>

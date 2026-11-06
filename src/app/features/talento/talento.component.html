@@ -49,7 +49,7 @@
       <li class="perfil">
         <a
           class="perfil-link"
-          [routerLink]="p.gitUsername ? '/app/perfil/' + p.gitUsername : '/app/perfil'">
+          [routerLink]="'/app/perfil/' + (p.gitUsername || p.id)">
 
           @if (p.avatarUrl) {
             <img class="avatar" [src]="p.avatarUrl" [alt]="p.fullName" />

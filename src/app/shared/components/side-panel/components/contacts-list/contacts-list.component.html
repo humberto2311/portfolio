@@ -16,7 +16,7 @@
     <h5 class="section-title">Chats</h5>
     @for (contact of conversaciones; track contact.id) {
       <div class="contact-item" (click)="select(contact)">
-        <div class="avatar-wrap">
+        <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
           @if (contact.avatar) {
             <img [src]="contact.avatar" [alt]="contact.name" />
           } @else {
@@ -26,7 +26,7 @@
         </div>
         <div class="info">
           <div class="top-row">
-            <h4>{{ contact.name }}</h4>
+            <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)">{{ contact.name }}</h4>
             <span class="time">{{ contact.time }}</span>
           </div>
           <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
@@ -44,12 +44,16 @@
     <h5 class="section-title">Personas</h5>
     @for (persona of sugerencias; track persona.id) {
       <div class="contact-item" (click)="seleccionarPersona(persona)">
-        <div class="avatar-wrap">
-          <span class="avatar-initials">{{ iniciales(persona.fullName) }}</span>
+        <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)" title="Ver perfil">
+          @if (persona.avatarUrl) {
+            <img [src]="persona.avatarUrl" [alt]="persona.fullName" />
+          } @else {
+            <span class="avatar-initials">{{ iniciales(persona.fullName) }}</span>
+          }
         </div>
         <div class="info">
           <div class="top-row">
-            <h4>{{ persona.fullName }}</h4>
+            <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)">{{ persona.fullName }}</h4>
           </div>
           <p class="preview">{{ persona.gitUsername ? '@' + persona.gitUsername : 'Iniciar chat' }}</p>
         </div>

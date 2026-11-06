@@ -101,3 +101,8 @@
 }
 
 .panel-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+// El avatar y el nombre del chat llevan al perfil de esa persona
+.clickable { cursor: pointer; }
+.clickable:hover { color: #00f2fe; }
+.clickable:hover .avatar-initials { color: #00f2fe; }

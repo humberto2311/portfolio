@@ -1,14 +1,27 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 import { take } from 'rxjs';
 import { Contact, ActiveView } from '../models/contact.model';
 import { ChatMessage, ChatMessageApi, Conversacion } from '../models/chat.model';
 import { ChatService } from './chat.service';
 import { AuthService } from './auth.service';
 
+/** Lo mínimo que hace falta para abrir un chat desde una tarjeta de persona. */
+export interface DestinoChat {
+  id: string;
+  name: string;
+  avatar?: string | null;
+  gitUsername?: string | null;
+  statusText?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SidePanelService {
   private chatService = inject(ChatService);
   private auth = inject(AuthService);
+  private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   readonly isOpen = signal(false);
   readonly activeView = signal<ActiveView>('contacts');
@@ -57,8 +70,41 @@ export class SidePanelService {
     }
   }
 
+  /** El avatar o el nombre de un chat abre el perfil de ESA persona, nunca el propio. */
+  abrirPerfilDe(contact: { id: string; gitUsername?: string | null; isAi?: boolean } | null): void {
+    if (!contact || contact.isAi) return;
+
+    const destino = contact.gitUsername || contact.id;
+    if (!destino) return;
+
+    this.close();
+    this.router.navigate(['/app/perfil', destino]);
+  }
+
   close(): void {
     this.isOpen.set(false);
+  }
+
+  /**
+   * Desde cualquier tarjeta de persona: abre el chat con ella. Si se pulsó en
+   * una página del layout público, donde el panel no está montado, baja al área privada.
+   */
+  abrirChatCon(destino: DestinoChat): void {
+    this.openChat({
+      id: String(destino.id),
+      name: destino.name,
+      avatar: destino.avatar ?? '',
+      status: 'offline',
+      statusText: destino.statusText ?? (destino.gitUsername ? `@${destino.gitUsername}` : ''),
+      lastMsg: '',
+      time: '',
+      unread: 0,
+      gitUsername: destino.gitUsername ?? undefined,
+    });
+
+    if (isPlatformBrowser(this.platformId) && !this.router.url.startsWith('/app')) {
+      this.router.navigate(['/app']);
+    }
   }
 
   backToContacts(): void {

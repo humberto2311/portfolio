@@ -118,12 +118,6 @@
               <span class="eyebrow">Edición manual</span>
               <h3 class="card-title">Datos del currículum</h3>
             </div>
-            <div class="cv-form-actions">
-              <button class="btn-ghost" type="button" (click)="cancelarEdicion()">Cancelar</button>
-              <button class="btn-primary" type="button" (click)="guardarPerfil()" [disabled]="guardando">
-                {{ guardando ? 'Guardando…' : 'Guardar datos' }}
-              </button>
-            </div>
           </header>
 
           <div class="field-grid">
@@ -164,10 +158,49 @@
               <span>Bio corta (tarjeta de bienvenida)</span>
               <textarea rows="2" [(ngModel)]="form.shortBio" placeholder="Una o dos líneas"></textarea>
             </label>
-            <label class="field">
-              <span>Foto (URL)</span>
-              <input type="text" [(ngModel)]="form.avatarUrl" placeholder="https://…" />
-            </label>
+            <div class="field field-wide foto-cv">
+              <span>Foto del CV</span>
+
+              <div class="foto-cv__vista">
+                @if (form.avatarUrl) {
+                  <img [src]="form.avatarUrl" alt="Foto actual del CV" />
+                } @else {
+                  <span class="foto-cv__sin"><i class="fa-regular fa-image"></i> Sin foto: el CV se muestra con tus iniciales.</span>
+                }
+              </div>
+
+              <div class="foto-cv__barra">
+                <button type="button" class="btn-foto" (click)="abrirGaleriaFoto()">
+                  <i class="fa-solid fa-images"></i> Elegir de mi galería
+                </button>
+                <button type="button" class="btn-foto" (click)="elegirArchivoFoto()">
+                  <i class="fa-solid fa-upload"></i> Subir nueva
+                </button>
+                <button type="button" class="btn-foto sin-foto" [class.activo]="!form.avatarUrl" (click)="elegirFoto('')">
+                  <i class="fa-regular fa-circle-xmark"></i> No poner foto
+                </button>
+              </div>
+
+              @if (mostrandoGaleria) {
+                <div class="foto-cv__galeria">
+                  @if (cargandoGaleria) {
+                    <p class="foto-cv__estado">Cargando fotos…</p>
+                  } @else if (fotosGaleria.length === 0) {
+                    <p class="foto-cv__estado">
+                      Aún no tienes fotos. Publica una o cambia tu portada para llenar la galería.
+                    </p>
+                  } @else {
+                    @for (f of fotosGaleria; track f.id) {
+                      <button type="button" class="mini-foto" (click)="elegirFoto(f.url)">
+                        <img [src]="f.url" [alt]="'Foto del perfil'" loading="lazy" />
+                      </button>
+                    }
+                  }
+                </div>
+              }
+
+              <input type="text" [(ngModel)]="form.avatarUrl" placeholder="o pega la URL de una imagen" />
+            </div>
             <label class="field">
               <span>PDF de la hoja de vida (URL)</span>
               <input type="text" [(ngModel)]="form.resumePdfUrl" placeholder="assets/docs/…" />
@@ -420,7 +453,6 @@
                 <div class="gestor-botones">
                   <span class="clave-badge">{{ seccion.sectionKey }}</span>
                   <span class="contador-badge">{{ seccion.items.length }} ítem{{ seccion.items.length === 1 ? '' : 's' }}</span>
-                  <button class="btn-save" type="button" (click)="guardarSeccion(seccion)">Guardar</button>
                   <button class="btn-danger" type="button" (click)="eliminarSeccion(seccion)">Eliminar</button>
                 </div>
               </div>
@@ -440,7 +472,6 @@
                         <button class="btn-link" type="button" (click)="alternarItem(item)">
                           {{ item.abierto ? 'Cerrar' : 'Editar' }}
                         </button>
-                        <button class="btn-save" type="button" (click)="guardarItem(seccion, item)">Guardar</button>
                         <button class="btn-danger" type="button" (click)="eliminarItem(seccion, item)">Eliminar</button>
                       </div>
                     </div>
@@ -495,5 +526,18 @@
       }
 
     </div>
+
+    @if (editando) {
+      <!-- Un único guardado para todo el editor: antes había uno por sección y uno por ítem. -->
+      <div class="cv-guardar-barra">
+        <span>Datos, secciones e ítems se guardan juntos.</span>
+        <div class="cv-guardar-botones">
+          <button class="btn-ghost" type="button" (click)="cancelarEdicion()" [disabled]="guardando">Cancelar</button>
+          <button class="btn-primary" type="button" (click)="guardarTodo()" [disabled]="guardando">
+            {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </div>
+    }
   </main>
 </div>

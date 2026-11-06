@@ -1135,10 +1135,30 @@ html { scroll-behavior: smooth; }
   .card-title { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
 }
 
-.cv-form-actions {
+/* Barra única de guardado del editor: reemplaza los botones por sección y por ítem. */
+.cv-guardar-barra {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 5;
+  margin-top: 1rem;
   display: flex;
-  gap: 0.6rem;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  background: rgba(11, 15, 25, 0.92);
+  backdrop-filter: blur(6px);
+  color: $text-muted;
+  font-size: 0.85rem;
+
+  .cv-guardar-botones {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
 }
 
 .field-grid {
@@ -1676,6 +1696,114 @@ html { scroll-behavior: smooth; }
 }
 
 .btn-add-item { margin-top: 0.25rem; }
+
+// ==========================================
+// FOTO DEL CV (galería, subida nueva, iniciales de respaldo)
+// ==========================================
+.foto-cv {
+  gap: 0.55rem;
+
+  &__vista {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid $border-soft;
+    }
+  }
+
+  &__sin {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.76rem;
+    color: $text-muted;
+  }
+
+  &__barra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  &__galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border-radius: 0.65rem;
+    border: 1px dashed $border-soft;
+    background: rgba(8, 13, 24, 0.45);
+  }
+
+  &__estado {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.78rem;
+    color: $text-muted;
+  }
+}
+
+.btn-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba($accent-cyan, 0.28);
+  background: rgba($accent-cyan, 0.06);
+  color: $text-main;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba($accent-cyan, 0.6);
+    background: rgba($accent-cyan, 0.14);
+  }
+
+  &.quitar {
+    border-color: rgba($accent-danger, 0.3);
+    background: transparent;
+    color: $accent-danger;
+  }
+
+  &.sin-foto {
+    border-style: dashed;
+  }
+
+  &.activo {
+    border-style: solid;
+    border-color: rgba($accent-cyan, 0.75);
+    background: rgba($accent-cyan, 0.16);
+    color: $accent-cyan;
+  }
+}
+
+.mini-foto {
+  padding: 0;
+  border: 1px solid $border-soft;
+  border-radius: 0.5rem;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 72px;
+    object-fit: cover;
+  }
+
+  &:hover { border-color: rgba($accent-cyan, 0.6); }
+}
 
 @media (max-width: 900px) {
   .field-grid { grid-template-columns: 1fr; }

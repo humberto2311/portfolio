@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { switchMap, finalize, catchError } from 'rxjs/operators';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, firstValueFrom } from 'rxjs';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { AuthService } from '../../core/services/auth.service';
+import { UserProfileService } from '../../core/services/user-profile.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ArchivoService } from '../../core/services/archivo.service';
+import { FotoPerfil, UserPhotoService } from '../../core/services/user-photo.service';
 import { ResumeProfile, ResumeSection } from '../../core/models/resume.model';
 
 /** Una fila clave/valor del JSON que guarda cada item. */
@@ -50,6 +53,9 @@ export class InformacionPersonalComponent implements OnInit {
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
+  private archivos = inject(ArchivoService);
+  private fotosSvc = inject(UserPhotoService);
+  private userProfile = inject(UserProfileService);
   public router = inject(Router);
 
   public loading = true;
@@ -96,6 +102,59 @@ export class InformacionPersonalComponent implements OnInit {
 
   /** Copia editable de las secciones; se reconstruye al entrar en modo edición. */
   public seccionesEditables: SeccionEditable[] = [];
+
+  // ====== FOTO DEL CV ======
+
+  fotosGaleria: FotoPerfil[] = [];
+  mostrandoGaleria = false;
+  cargandoGaleria = false;
+
+  /** Abre el selector: galería del perfil (user_photos) + la foto de perfil. */
+  abrirGaleriaFoto(): void {
+    if (this.mostrandoGaleria) {
+      this.mostrandoGaleria = false;
+      return;
+    }
+
+    this.mostrandoGaleria = true;
+    const miId = String(this.authService.currentUser()?.id ?? '');
+    if (!miId || this.cargandoGaleria) return;
+
+    this.cargandoGaleria = true;
+    this.fotosSvc.listar(miId).subscribe({
+      next: (lista) => {
+        this.fotosGaleria = lista ?? [];
+        this.cargandoGaleria = false;
+      },
+      error: () => {
+        this.fotosGaleria = [];
+        this.cargandoGaleria = false;
+      }
+    });
+  }
+
+  elegirFoto(url: string): void {
+    this.form.avatarUrl = url;
+    this.mostrandoGaleria = false;
+  }
+
+  /** Sube una imagen nueva desde el dispositivo y la deja en el formulario. */
+  elegirArchivoFoto(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+
+    input.onchange = () => {
+      const archivo = input.files?.[0];
+      if (!archivo) return;
+
+      const lector = new FileReader();
+      lector.onload = () => this.elegirFoto(String(lector.result));
+      lector.onerror = () => this.toast.show('No se pudo leer la imagen');
+      lector.readAsDataURL(archivo);
+    };
+    input.click();
+  }
 
   /** Las que ya tienen su propio bloque visual no se repiten abajo. */
   private readonly CLAVES_CONOCIDAS = ['experience', 'education', 'skill', 'metric'];
@@ -288,19 +347,21 @@ export class InformacionPersonalComponent implements OnInit {
     });
   }
 
-  private guardarArchivo(blob: Blob) {
+  private async guardarArchivo(blob: Blob): Promise<void> {
     const slug = (this.perfilCv?.publicSlug || this.nombre)
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
       .toLowerCase().trim()
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hoja-de-vida-${slug || 'cv'}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    this.toast.show('Hoja de vida generada');
+    const nombre = `hoja-de-vida-${slug || 'cv'}.pdf`;
+    try {
+      const resultado = await this.archivos.guardar(blob, nombre, 'Hoja de vida');
+      this.toast.show(
+        resultado === 'cancelado' ? 'Se cerró sin enviar el PDF.' : 'Hoja de vida lista'
+      );
+    } catch {
+      this.toast.show('No se pudo guardar la hoja de vida en este dispositivo');
+    }
   }
 
   toggleVisibilidad() {
@@ -410,6 +471,7 @@ export class InformacionPersonalComponent implements OnInit {
     this.nombre = profile.fullName || 'Sin nombre';
     this.iniciales = this.generarIniciales(this.nombre);
     this.photoUrl = profile.photoUrl?.trim() || profile.avatarUrl?.trim() || null;
+    if (!this.photoUrl) this.aplicarFotoPredeterminadaDelPerfil(profile.userProfileId);
     this.rol = profile.headline || '';
     this.perfilProfesional = profile.summary || '';
     this.welcomeDesc = profile.shortBio || '';
@@ -422,6 +484,19 @@ export class InformacionPersonalComponent implements OnInit {
       { icono: 'fab fa-github', texto: profile.githubUrl }
     ];
     this.contacto = contactoRaw.filter(c => c.texto != null && c.texto.trim() !== '');
+  }
+
+  /** Sin foto propia en el CV: se usa la del perfil social y, si no hay, quedan las iniciales. */
+  private aplicarFotoPredeterminadaDelPerfil(userProfileId?: string): void {
+    if (!userProfileId) return;
+
+    this.userProfile.getPerfilCompletoPorId(userProfileId).subscribe({
+      next: (perfil) => {
+        const avatar = (perfil?.avatarUrl || '').trim();
+        if (avatar && !this.photoUrl) this.photoUrl = avatar;
+      },
+      error: () => { /* sin foto de perfil: el avatar grande muestra las iniciales */ }
+    });
   }
 
   private generarIniciales(fullName: string): string {
@@ -539,27 +614,80 @@ export class InformacionPersonalComponent implements OnInit {
     };
   }
 
-  guardarPerfil() {
+  /**
+   * Un solo guardado para todo el editor: antes cada sección y cada ítem tenían
+   * su propio botón y el usuario no sabía cuál había persistido.
+   */
+  async guardarTodo(): Promise<void> {
     if (!this.profileId || this.guardando) return;
-    this.guardando = true;
 
-    // El backend copia estos campos uno a uno: hay que reenviar isPublic y publicSlug
-    // o el PUT los deja en null (el CV quedaría sin publicar y sin enlace público).
+    if (this.seccionesEditables.some(sec => !sec.title.trim())) {
+      this.toast.show('Cada sección necesita un título');
+      return;
+    }
+
+    this.guardando = true;
+    try {
+      // El backend copia estos campos uno a uno: hay que reenviar isPublic y publicSlug
+      // o el PUT los deja en null (el CV quedaría sin publicar y sin enlace público).
+      await firstValueFrom(this.resumeSave.updateProfile(this.profileId, {
+        ...this.form,
+        publicSlug: this.perfilCv?.publicSlug ?? undefined,
+        isPublic: this.esPublico,
+      }));
+
+      for (const [orden, seccion] of this.seccionesEditables.entries()) {
+        await this.guardarSeccionDe(seccion, orden);
+      }
+
+      this.toast.show('CV guardado');
+      this.recargar();
+    } catch {
+      this.toast.show('No se pudo guardar el CV');
+    } finally {
+      this.guardando = false;
+    }
+  }
+
+  private async guardarSeccionDe(seccion: SeccionEditable, orden: number): Promise<void> {
+    if (!this.profileId) return;
+    seccion.displayOrder = orden;
+
     const payload = {
-      ...this.form,
-      publicSlug: this.perfilCv?.publicSlug ?? undefined,
-      isPublic: this.esPublico,
+      sectionKey: seccion.sectionKey,
+      title: seccion.title.trim(),
+      icon: seccion.icon,
+      displayOrder: seccion.displayOrder,
+      isActive: seccion.isActive,
     };
 
-    this.resumeSave.updateProfile(this.profileId, payload).pipe(
-      finalize(() => this.guardando = false)
-    ).subscribe({
-      next: (profile) => {
-        this.handleSuccess(profile, this.seccionesRaw);
-        this.toast.show('Datos del CV actualizados');
-      },
-      error: () => this.toast.show('No se pudieron guardar los datos'),
-    });
+    const guardada = seccion.nueva
+      ? await firstValueFrom(this.resumeSave.crearSeccion(this.profileId, payload))
+      : await firstValueFrom(this.resumeSave.actualizarSeccion(seccion.id!, payload));
+
+    seccion.id = guardada.id ?? seccion.id;
+    seccion.nueva = false;
+
+    for (const item of seccion.items) {
+      await this.guardarItemDe(seccion, item);
+    }
+  }
+
+  private async guardarItemDe(seccion: SeccionEditable, item: ItemEditable): Promise<void> {
+    const content = this.contenidoDe(item);
+    if (Object.values(content).every(v => v === '' || v === null || v === undefined)) return;
+
+    const payload = { content, displayOrder: seccion.items.indexOf(item), source: item.source };
+
+    const guardado = item.nuevo
+      ? await firstValueFrom(this.resumeSave.crearItem(seccion.id!, payload))
+      : await firstValueFrom(this.resumeSave.actualizarItem(item.id!, payload));
+
+    item.id = guardado.id ?? item.id;
+    item.nuevo = false;
+    item.abierto = false;
+    item.original = content;
+    item.pares = this.paresDe(content);
   }
 
   // ====== GESTOR DE SECCIONES ======
@@ -618,35 +746,6 @@ export class InformacionPersonalComponent implements OnInit {
       isActive: true,
       items: [],
       nueva: true,
-    });
-  }
-
-  guardarSeccion(seccion: SeccionEditable) {
-    if (!this.profileId) return;
-    if (!seccion.title.trim()) {
-      this.toast.show('La sección necesita un título');
-      return;
-    }
-
-    const payload = {
-      sectionKey: seccion.sectionKey,
-      title: seccion.title.trim(),
-      icon: seccion.icon,
-      displayOrder: seccion.displayOrder,
-      isActive: seccion.isActive,
-    };
-
-    const peticion$ = seccion.nueva
-      ? this.resumeSave.crearSeccion(this.profileId, payload)
-      : this.resumeSave.actualizarSeccion(seccion.id!, payload);
-
-    peticion$.subscribe({
-      next: () => {
-        seccion.nueva = false;
-        this.toast.show(`Sección "${payload.title}" guardada`);
-        this.recargar();
-      },
-      error: () => this.toast.show('No se pudo guardar la sección'),
     });
   }
 
@@ -765,38 +864,6 @@ export class InformacionPersonalComponent implements OnInit {
 
   tieneSeccion(sectionKey: string): boolean {
     return this.seccionesEditables.some(sec => sec.sectionKey === sectionKey);
-  }
-
-  guardarItem(seccion: SeccionEditable, item: ItemEditable) {
-    if (!seccion.id) {
-      this.toast.show('Guarda primero la sección');
-      return;
-    }
-
-    const content = this.contenidoDe(item);
-    if (Object.values(content).every(v => v === '' || v === null)) {
-      this.toast.show('El item no tiene contenido');
-      return;
-    }
-
-    const payload = { content, displayOrder: seccion.items.indexOf(item), source: item.source };
-
-    const peticion$ = item.nuevo
-      ? this.resumeSave.crearItem(seccion.id, payload)
-      : this.resumeSave.actualizarItem(item.id!, payload);
-
-    peticion$.subscribe({
-      next: (guardado) => {
-        item.id = guardado.id ?? item.id;
-        item.nuevo = false;
-        item.abierto = false;
-        item.original = content;
-        item.pares = this.paresDe(content);
-        this.toast.show('Item guardado');
-        this.recargar();
-      },
-      error: () => this.toast.show('No se pudo guardar el item'),
-    });
   }
 
   eliminarItem(seccion: SeccionEditable, item: ItemEditable) {

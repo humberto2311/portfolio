@@ -37,7 +37,7 @@
 
   <!-- Lista -->
   <ul class="contactos-tab__list" *ngIf="filteredList.length; else emptyState">
-    <li class="contacto" *ngFor="let c of filteredList" (click)="irAlPerfil(activeSubTab === 'seguidos' ? c.usernameContact : c.usernameUser)">
+    <li class="contacto" *ngFor="let c of filteredList" (click)="irAlPerfil(c)">
       
       <div class="contacto__avatar">
         <img *ngIf="c.avatarUrl" [src]="c.avatarUrl" alt="Avatar">
@@ -51,27 +51,23 @@
           {{ activeSubTab === 'seguidos' ? c.nombreContact : c.nombreUser }}
         </span>
         <span class="contacto__meta">
-          {{ activeSubTab === 'seguidos' ? 'Lo sigues desde' : 'Te sigue desde' }} 
+          {{ esMiPerfil
+            ? (activeSubTab === 'seguidos' ? 'Lo sigues desde' : 'Te sigue desde')
+            : (activeSubTab === 'seguidos' ? 'Sigue desde' : 'Seguidor desde') }}
           {{ c.connectedAt | date:'MMM yyyy' }}
         </span>
       </div>
 
-      <div class="contacto__actions" (click)="$event.stopPropagation()">
+      <div class="contacto__actions" (click)="$event.stopPropagation()" *ngIf="!esYoMismo(c)">
         <button class="btn btn--ghost" (click)="enviarMensaje(c)">Mensaje</button>
-        
-        <button 
-          *ngIf="activeSubTab === 'seguidores'" 
-          class="btn btn--primary" 
-          (click)="seguirDeVuelta(c)">
-          Seguir de vuelta
-        </button>
-        
-        <button 
-          *ngIf="activeSubTab === 'seguidos'" 
-          class="btn btn--danger" 
-          (click)="dejarDeSeguir(c)">
-          Dejar de seguir
-        </button>
+
+        @if (yaLoSigo(c)) {
+          <button class="btn btn--danger" (click)="dejarDeSeguir(c)">Dejar de seguir</button>
+        } @else {
+          <button class="btn btn--primary" (click)="seguir(c)">
+            {{ activeSubTab === 'seguidores' ? 'Seguir de vuelta' : 'Seguir' }}
+          </button>
+        }
       </div>
     </li>
   </ul>
@@ -80,7 +76,9 @@
     <div class="contactos-tab__empty">
       <span class="contactos-tab__empty-icon">👥</span>
       <p class="contactos-tab__empty-title">
-        {{ searchTerm ? 'Sin resultados' : (activeSubTab === 'seguidos' ? 'Aún no sigues a nadie' : 'No tienes seguidores') }}
+        {{ searchTerm ? 'Sin resultados' : (esMiPerfil
+          ? (activeSubTab === 'seguidos' ? 'Aún no sigues a nadie' : 'No tienes seguidores')
+          : (activeSubTab === 'seguidos' ? 'No sigue a nadie' : 'No tiene seguidores')) }}
       </p>
       <p class="contactos-tab__empty-sub" *ngIf="!searchTerm">
         {{ activeSubTab === 'seguidos' ? 'Cuando sigas a alguien, aparecerá aquí.' : 'Cuando alguien te siga, aparecerá aquí.' }}

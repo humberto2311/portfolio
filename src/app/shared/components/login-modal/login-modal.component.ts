@@ -1,6 +1,7 @@
 import { Component, inject, signal, effect, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Capacitor } from '@capacitor/core';
 import { ModalService } from '../../../core/services/modal.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -25,6 +26,9 @@ export class LoginModalComponent implements OnInit {
 
   readonly showPassword = signal(false);
   readonly maxDate = new Date().toISOString().split('T')[0];
+
+  /** Google rechaza el user-agent embebido del WebView, así que en la app solo queda correo + código. */
+  readonly nativa = Capacitor.isNativePlatform();
 
   /** Los 6 dígitos que llegaron por correo. */
   codigo = '';

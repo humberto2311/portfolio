@@ -222,6 +222,58 @@ $border-soft: rgba(255, 255, 255, 0.08);
             color: $accent-cyan;
           }
         }
+
+        // USUARIO AUTENTICADO: chip navegable + botón salir aparte
+        .user-menu {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+
+          .user-chip {
+            // Sin el padding propio: toma el estilo de `li a` de arriba.
+            max-width: 240px;
+
+            .user-avatar {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 24px;
+              height: 24px;
+              flex-shrink: 0;
+              border-radius: 50%;
+              background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+              color: #0b0f19;
+              font-size: 0.72rem;
+              font-weight: 700;
+              text-transform: uppercase;
+            }
+
+            .user-name {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          }
+
+          .user-salir {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: none;
+            border: 1px solid transparent;
+            color: $text-secondary;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+              color: #ff6b6b;
+              background: rgba(255, 107, 107, 0.08);
+              border-color: rgba(255, 107, 107, 0.25);
+            }
+          }
+        }
       }
     }
   }
@@ -294,6 +346,10 @@ $border-soft: rgba(255, 255, 255, 0.08);
           }
           .cv-generator-link { justify-content: center; margin-left: 0; margin-top: 0.5rem; }
           .login-link { justify-content: center; margin-left: 0; margin-top: 0.25rem; }
+          .user-menu { width: 100%; margin-top: 0.25rem;
+            .user-chip { flex: 1; max-width: none; justify-content: flex-start; }
+            .user-salir { padding: 0.5rem 0.7rem; }
+          }
         }
       }
     }

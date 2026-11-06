@@ -33,15 +33,33 @@
         </div>
 
         @if (mostrarSugerencias()) {
+          <div class="filtros-nav">
+            @for (f of filtros; track f) {
+              <button
+                type="button"
+                class="filtro-chip"
+                [class.activo]="filtro() === f"
+                (click)="cambiarFiltro(f)">
+                {{ f }}
+              </button>
+            }
+          </div>
+
           <ul class="sugerencias-nav">
-            @for (s of sugerencias(); track s.username; let i = $index) {
+            @for (s of visibles(); track s.username; let i = $index) {
               <li>
                 <button
                   type="button"
                   [class.activa]="i === indice()"
                   (mouseenter)="indice.set(i)"
                   (click)="irAPerfil(s)">
-                  <span class="avatar-mini">{{ s.iniciales }}</span>
+                  <span class="avatar-mini">
+                    @if (s.avatarUrl) {
+                      <img [src]="s.avatarUrl" [alt]="'Foto de ' + s.nombre" />
+                    } @else {
+                      {{ s.iniciales }}
+                    }
+                  </span>
                   <span class="datos">
                     <strong>{{ s.nombre }}</strong>
                     <small>&#64;{{ s.username }}</small>
@@ -49,6 +67,9 @@
                   <span class="relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
                 </button>
               </li>
+            }
+            @if (visibles().length === 0) {
+              <li class="vacio">Nadie con esa relación</li>
             }
           </ul>
         }

@@ -9,7 +9,13 @@
     <!-- Publicación original (la que ya existe) -->
     <article class="post-original">
       <header>
-        <div class="avatar">{{ post.iniciales }}</div>
+        <div class="avatar">
+          @if (post.autorAvatar) {
+            <img [src]="post.autorAvatar" [alt]="'Foto de ' + post.autor" />
+          } @else {
+            {{ post.iniciales }}
+          }
+        </div>
         <div class="datos">
           <strong>{{ post.autor }}</strong>
           <small>{{ post.tiempo }}</small>
@@ -44,7 +50,13 @@
                 [class.activa]="i === indice()"
                 (mouseenter)="indice.set(i)"
                 (click)="elegir(s)">
-                <span class="avatar-sm">{{ s.iniciales }}</span>
+                <span class="avatar-sm">
+                  @if (s.avatarUrl) {
+                    <img [src]="s.avatarUrl" [alt]="'Foto de ' + s.nombre" />
+                  } @else {
+                    {{ s.iniciales }}
+                  }
+                </span>
                 <span class="info">
                   <strong>{{ s.nombre }}</strong>
                   <small>&#64;{{ s.username }}</small>

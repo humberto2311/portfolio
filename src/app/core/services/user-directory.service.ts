@@ -65,19 +65,41 @@ export class UserDirectoryService {
   }
 
   /**
-   * Busca por username o nombre. El término puede venir con o sin @.
-   * Si no hay coincidencias locales, cae al buscador del backend.
+   * Busca por username o nombre en TODA la app, no solo en la red cercana.
+   * El backend trae a cualquier usuario; la red local aporta la etiqueta de relación.
    */
   buscar(termino: string, limite = 8): Observable<SugerenciaUsuario[]> {
     const query = termino.replace(/^@/, '').toLowerCase().trim();
+    if (!query) return of([]);
 
     return this.cargarRed().pipe(
-      switchMap((red) => {
-        const locales = this.filtrar(red, query).slice(0, limite);
-        if (locales.length > 0 || query.length < 2) return of(locales);
-        return this.buscarRemoto(query, limite);
-      })
+      switchMap((red) =>
+        // El avatar viaja como base64 dentro de la respuesta, así que se piden
+        // solo los que caben en el desplegable: 3x era un MB por búsqueda.
+        this.buscarRemoto(query, limite).pipe(
+          map((remoto) => this.combinar(red, remoto, query, limite))
+        )
+      )
     );
+  }
+
+  private combinar(
+    red: SugerenciaUsuario[],
+    remoto: SugerenciaUsuario[],
+    query: string,
+    limite: number
+  ): SugerenciaUsuario[] {
+    const mapa = new Map<string, SugerenciaUsuario>();
+
+    for (const s of this.filtrar(red, query)) {
+      mapa.set(s.username.toLowerCase(), s);
+    }
+    for (const s of remoto) {
+      const clave = s.username.toLowerCase();
+      if (!mapa.has(clave)) mapa.set(clave, s);
+    }
+
+    return this.filtrar(Array.from(mapa.values()), query).slice(0, limite);
   }
 
   private construir(
@@ -167,6 +189,7 @@ export class UserDirectoryService {
             username: p.gitUsername as string,
             nombre: p.fullName || (p.gitUsername as string),
             iniciales: this.iniciales(p.fullName || p.gitUsername || '?'),
+            avatarUrl: p.avatarUrl ?? undefined,
             relacion: 'Sugerido',
           }))
       ),

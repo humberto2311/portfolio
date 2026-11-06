@@ -1,6 +1,10 @@
 <div class="user-menu-wrapper">
   <button class="avatar-btn" (click)="toggleMenu()" aria-label="Menú de usuario">
-    <span class="initials">{{ getInitials() }}</span>
+    @if (avatar()) {
+      <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+    } @else {
+      <span class="initials">{{ getInitials() }}</span>
+    }
   </button>
 
   @if (menuOpen()) {

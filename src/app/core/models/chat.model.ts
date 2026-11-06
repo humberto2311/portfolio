@@ -33,6 +33,7 @@ export interface UsuarioBuscado {
   id: string;
   fullName: string;
   gitUsername?: string | null;
+  avatarUrl?: string | null;
 }
 
 

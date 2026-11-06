@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PerfilService } from '../../../../core/services/perfil.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserProfileService } from '../../../../core/services/user-profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import {
   SugerenciaUsuario,
@@ -34,6 +35,9 @@ export class CrearPostComponent implements OnInit {
   private authService = inject(AuthService);
   private toast = inject(ToastService);
   private directorio = inject(UserDirectoryService);
+  private perfiles = inject(UserProfileService);
+
+  readonly miAvatar = this.perfiles.avatar;
 
   texto = '';
   imagenPreview = signal<string | null>(null);
@@ -47,6 +51,7 @@ export class CrearPostComponent implements OnInit {
 
   ngOnInit(): void {
     this.directorio.cargarRed().subscribe();
+    this.perfiles.cargarMiAvatar();
   }
 
   get inicialesUsuario(): string {

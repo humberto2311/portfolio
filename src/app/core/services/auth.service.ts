@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthUser } from '../models/AuthUser';
+import { ModalService } from './modal.service';
 import { environment } from '../../../environments/environment';
 
 /** Lo que /api/cuenta/estado dice de la cuenta conectada. */
@@ -36,6 +37,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private modal = inject(ModalService);
 
   private readonly API_URL = `${environment.apiUrl}/api/auth`;
   private readonly CUENTA_URL = `${environment.apiUrl}/api/cuenta`;
@@ -247,12 +249,13 @@ export class AuthService {
     this.router.navigate(['/app']);
   }
 
-  /** Guarda token y usuario en la sesión local, sin mover a nadie de pantalla. */
+  /** Guarda token y usuario en la sesión local y baja el modal; no mueve a nadie de pantalla. */
   private guardarSesion(res: { token: string; user: AuthUser }) {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('token', res.token);
     }
 
+    this.modal.closeLogin();
     this.currentUser.set(res.user);
     this.isAuthenticated.set(true);
     this.isLoading.set(false);

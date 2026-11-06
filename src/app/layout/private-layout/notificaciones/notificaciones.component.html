@@ -21,7 +21,13 @@
             <h5>Te siguen</h5>
             @for (s of seguidores(); track s.conexion.userId) {
               <div class="seguidor" (click)="irAPerfil(s.conexion)">
-                <span class="avatar-sm">{{ iniciales(s.conexion) }}</span>
+                <span class="avatar-sm">
+                  @if (s.conexion.avatarUrl) {
+                    <img [src]="s.conexion.avatarUrl" [alt]="'Foto de ' + nombre(s.conexion)" />
+                  } @else {
+                    {{ iniciales(s.conexion) }}
+                  }
+                </span>
                 <span class="datos">
                   <strong>{{ nombre(s.conexion) }}</strong>
                   @if (s.conexion.usernameUser) {

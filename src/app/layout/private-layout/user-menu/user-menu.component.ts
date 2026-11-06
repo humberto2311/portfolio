@@ -1,7 +1,8 @@
-import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, signal, HostListener, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserProfileService } from '../../../core/services/user-profile.service';
 
 @Component({
   selector: 'app-user-menu',
@@ -10,13 +11,19 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './user-menu.component.html',
   styleUrls: ['./user-menu.component.scss']
 })
-export class UserMenuComponent {
+export class UserMenuComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private elRef = inject(ElementRef);
+  private perfiles = inject(UserProfileService);
 
   readonly user = this.auth.currentUser;
   readonly menuOpen = signal(false);
+  readonly avatar = this.perfiles.avatar;
+
+  ngOnInit(): void {
+    this.perfiles.cargarMiAvatar();
+  }
 
   toggleMenu() { this.menuOpen.update(v => !v); }
 

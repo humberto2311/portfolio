@@ -16,7 +16,7 @@
 }
 
 .solicitud {
-  border-top: 1px solid rgba($bg-border, 0.7);
+  border-top: 1px solid color-mix(in srgb, var(--bg-border) 70%, transparent);
   padding: 0.8rem 0;
   display: flex;
   flex-direction: column;
@@ -120,7 +120,7 @@
   }
 
   .btn-aceptar {
-    background: linear-gradient(135deg, $cyan-main, $cyan-secondary);
+    background: $cyan-main;
     border: none;
     color: #001018;
 

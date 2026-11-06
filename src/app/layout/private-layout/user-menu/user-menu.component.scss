@@ -1,127 +1,128 @@
-@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import '../../../shared/styles/variables';
 
-$bg-main: #0b0f19;
-$bg-card: #131826;
-$bg-hover: #1b2235;
-$border-color: rgba(0, 242, 254, 0.2);
-
-$cyan-accent: #00f2fe;
-$coral-danger: #ff5c7c;
-
-$text-bright: #ffffff;
-$text-main: #cfd6e4;
-$text-muted: #8891a3;
-
-.user-menu-wrapper {
+.user-menu {
   position: relative;
 }
 
-.avatar-btn {
-  width: 44px;
-  height: 44px;
+.user-menu__disparador {
+  @include touch-target(38px);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 2px solid $cyan-accent;
-  background: $bg-card;
-  color: $cyan-accent;
+  border: 1px solid $bg-border;
+  background: $bg-elevated;
+  color: $text-light;
+  font-size: 0.85rem;
   font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px rgba($cyan-accent, 0.4);
+    border-color: $text-faint;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
   }
 }
 
-.dropdown {
+.user-menu__desplegable {
   position: absolute;
   right: 0;
-  top: 56px;
-  min-width: 240px;
+  top: calc(100% + 10px);
+  width: 268px;
+  max-width: calc(100vw - 24px);
+  padding: 6px;
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  animation: fadeIn 0.2s ease-out;
+  border: 1px solid $bg-border;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.75);
+  z-index: 960;
+}
 
-  .dropdown-header {
-    padding: 10px;
-    color: $text-bright;
-    
-    strong {
-      display: block;
-      font-size: 0.95rem;
-    }
-    
-    small {
-      color: $text-muted;
-      font-size: 0.8rem;
-      display: block;
-      margin-top: 2px;
-    }
-  }
+.user-menu__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid $bg-border;
+}
 
-  hr {
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    margin: 6px 0;
-  }
+.user-menu__foto {
+  @include avatar-base(40px, 0.85rem);
 
-  button {
-    width: 100%;
-    text-align: left;
-    padding: 10px 12px;
-    background: transparent;
-    border: none;
-    color: $text-main;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-family: inherit; // Para que use la misma fuente del proyecto
-    transition: background 0.15s, color 0.15s;
-    
-    // Alineación perfecta para el icono y el texto
-    display: flex;
-    align-items: center;
-    gap: 12px; 
-
-    i {
-      width: 16px;
-      text-align: center;
-      font-size: 1rem;
-      color: inherit;
-    }
-
-    &:hover {
-      background: rgba($cyan-accent, 0.08);
-      color: $cyan-accent;
-    }
-
-    &.logout {
-      color: $coral-danger;
-      
-      &:hover {
-        background: rgba($coral-danger, 0.1);
-        color: $coral-danger;
-      }
-    }
+  &--iniciales {
+    color: $text-muted;
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+.user-menu__identidad {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    font-size: 0.78rem;
+    color: $text-muted;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.user-menu__desplegable button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: $text-light;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  i {
+    width: 18px;
+    text-align: center;
+    color: $text-muted;
+  }
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+.user-menu__salir {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: 1px solid $bg-border;
+  border-radius: 0 0 10px 10px;
+  color: $danger !important;
+
+  i {
+    color: $danger;
+  }
 }

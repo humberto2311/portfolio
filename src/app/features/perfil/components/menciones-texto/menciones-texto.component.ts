@@ -30,7 +30,7 @@ interface Parte {
       }
 
       .mencion {
-        color: #00f2fe;
+        color: #4a9eff;
         cursor: pointer;
         font-weight: 600;
         text-decoration: none;

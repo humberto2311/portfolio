@@ -5,8 +5,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 25, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.65);
   display: grid;
   place-items: center;
   z-index: 9999;
@@ -16,14 +15,14 @@
 
 .modal-card {
   position: relative;
-  width: min(470px, 94vw);
-  max-height: 90vh;
+  width: min(470px, 100%);
+  max-height: calc(100dvh - 2rem);
   overflow-y: auto;
-  background: #12161f;
-  border: 1px solid rgba(0, 220, 255, 0.18);
+  background: $bg-card;
+  border: 1px solid $bg-border;
   border-radius: 16px;
   padding: 1.6rem 1.5rem 1.4rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -39,7 +38,7 @@
   color: $text-muted;
   cursor: pointer;
   padding: 0.25rem;
-  &:hover { color: $cyan-main; }
+  &:hover { color: $accent; }
 }
 
 .titulo {
@@ -49,7 +48,6 @@
   padding-right: 1.5rem;
 }
 
-/* ===== Publicación original ===== */
 .post-original {
   background: $bg-card;
   border: 1px solid $bg-border;
@@ -95,7 +93,6 @@
 .avatar { @include avatar-base(36px, 0.8rem); }
 .avatar-sm { @include avatar-base(30px, 0.72rem); }
 
-/* ===== Campo único de descripción ===== */
 .campo-descripcion {
   position: relative;
 
@@ -113,7 +110,7 @@
     resize: vertical;
 
     &::placeholder { color: $text-muted; }
-    &:focus { outline: none; border-color: $cyan-main; }
+    &:focus { outline: none; border-color: $accent; }
   }
 }
 
@@ -125,8 +122,8 @@
   list-style: none;
   margin: 0;
   padding: 0.3rem;
-  background: #0d1527;
-  border: 1px solid $cyan-main;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
   max-height: 190px;
@@ -165,16 +162,15 @@
       text-overflow: ellipsis;
     }
 
-    small { font-size: 0.7rem; color: $cyan-main; }
+    small { font-size: 0.7rem; color: $accent; }
   }
 
   .relacion {
     font-size: 0.62rem;
-    text-transform: uppercase;
     letter-spacing: 0.03em;
-    color: $cyan-main;
-    border: 1px solid rgba(0, 242, 254, 0.4);
-    background: $cyan-dim;
+    color: $accent;
+    border: 1px solid rgba(74, 158, 255, 0.4);
+    background: $accent-soft;
     border-radius: 999px;
     padding: 0.1rem 0.4rem;
     white-space: nowrap;
@@ -193,13 +189,13 @@
   color: $text-muted;
   line-height: 1.4;
 
-  strong { color: $cyan-main; }
+  strong { color: $accent; }
 }
 
 .error {
   margin: 0;
   font-size: 0.78rem;
-  color: #ff5c7a;
+  color: $danger;
 }
 
 .acciones {
@@ -226,9 +222,11 @@
   }
 
   .btn-pri {
-    background: linear-gradient(135deg, #00dcff, #0090ff);
-    color: #001018;
-    &:hover:not(:disabled) { transform: translateY(-1px); }
+    background: $accent;
+    color: #08090b;
+    border-radius: 999px;
+    padding: 0.55rem 1.15rem;
+    &:hover:not(:disabled) { background: $accent-strong; }
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 }

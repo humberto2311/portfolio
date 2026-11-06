@@ -4,20 +4,19 @@
   @include card-base;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 12px;
 }
 
-/* Descripción de quien compartió (va encima del post original) */
 .compartido {
-  border-left: 2px solid $cyan-main;
-  padding: 0.15rem 0 0.15rem 0.75rem;
+  border-left: 2px solid $bg-border;
+  padding: 2px 0 2px 12px;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 6px;
 
   .compartido-texto {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     line-height: 1.5;
     color: $text-light;
     white-space: pre-wrap;
@@ -27,31 +26,35 @@
   .compartido-botones {
     display: flex;
     align-items: center;
-    gap: 0.9rem;
+    gap: 14px;
     flex-wrap: wrap;
   }
 
   .compartido-editor {
     width: 100%;
     background: $bg-input;
-    border: 1px solid $cyan-main;
-    border-radius: 8px;
+    border: 1px solid $bg-border;
+    border-radius: 10px;
     color: $text-light;
-    padding: 0.5rem 0.7rem;
-    font-size: 0.85rem;
+    padding: 8px 12px;
+    font-size: 0.875rem;
     font-family: inherit;
     resize: vertical;
     outline: none;
+
+    &:focus {
+      border-color: $accent;
+    }
   }
 
   .btn-mini {
-    background: $cyan-main;
-    color: #001018;
+    background: $accent;
+    color: #08090b;
     border: none;
-    border-radius: 6px;
-    padding: 0.3rem 0.7rem;
-    font-size: 0.72rem;
-    font-weight: 700;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
     cursor: pointer;
 
     &.sec {
@@ -64,7 +67,9 @@
   .peligro {
     color: $text-muted;
 
-    &:hover { color: #ef4444; }
+    &:hover {
+      color: $danger;
+    }
   }
 
   .ver-original {
@@ -72,68 +77,90 @@
     background: transparent;
     border: none;
     padding: 0;
-    color: $cyan-main;
-    font-size: 0.72rem;
-    font-weight: 600;
+    color: $accent;
+    font-size: 0.78rem;
+    font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 6px;
 
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
 .post-head {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 10px;
 
   .autor-click {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 10px;
     flex: 1;
     min-width: 0;
     cursor: pointer;
 
-    &:hover h4 { color: $cyan-main; }
+    &:hover h4 {
+      text-decoration: underline;
+    }
   }
 
-  .avatar { @include avatar-base(40px, 0.85rem); }
+  .avatar {
+    @include avatar-base(42px, 0.85rem);
+  }
 
-  .head-info { flex: 1; min-width: 0; }
+  .head-info {
+    flex: 1;
+    min-width: 0;
+  }
 
   h4 {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: $text-light;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.2s;
   }
 
   .meta {
-    font-size: 0.7rem;
+    font-size: 0.78rem;
     color: $text-muted;
-    margin: 0;
-    i { color: $cyan-main; }
+    margin: 1px 0 0;
+
+    i {
+      color: $text-faint;
+      font-size: 0.7rem;
+    }
   }
 
   .more {
+    @include touch-target(34px);
     background: transparent;
     border: none;
+    border-radius: 50%;
     color: $text-muted;
     cursor: pointer;
-    padding: 0.4rem;
+
+    &:hover {
+      background: $bg-hover;
+      color: $text-light;
+    }
   }
 }
 
 .post-text {
-  font-size: 0.88rem;
+  font-size: 0.925rem;
   color: $text-light;
-  line-height: 1.5;
+  line-height: 1.55;
   margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .post-image {
@@ -141,150 +168,200 @@
   overflow: hidden;
   border: 1px solid $bg-border;
 
-  img { width: 100%; max-height: 380px; object-fit: cover; display: block; }
+  img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    display: block;
+  }
 }
 
 .metrics {
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid $bg-border;
+  font-size: 0.78rem;
   color: $text-muted;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba($bg-border, 0.6);
-  font-family: monospace;
 
-  .likes i { color: $cyan-main; margin-right: 0.3rem; }
+  .likes i {
+    color: $accent;
+    margin-right: 5px;
+  }
 }
 
 .reactions {
   display: flex;
-  justify-content: space-around;
-  padding-top: 0.4rem;
+  gap: 4px;
 
   button {
     flex: 1;
     background: transparent;
     border: none;
     color: $text-muted;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.5rem;
-    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    min-height: 40px;
+    border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 8px;
 
-    &:hover { background: $bg-main; color: $cyan-main; }
-    &.liked { color: $cyan-main; }
+    &:hover {
+      background: $bg-hover;
+      color: $text-light;
+    }
+
+    &.liked {
+      color: $accent;
+    }
   }
 }
 
 .comments {
-  border-top: 1px solid rgba($bg-border, 0.6);
-  padding-top: 0.7rem;
+  border-top: 1px solid $bg-border;
+  padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 10px;
 }
 
 .comment {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 
-  .avatar-sm { cursor: pointer; }
+  .avatar-sm {
+    cursor: pointer;
+  }
 
   .autor-comentario {
     cursor: pointer;
-    transition: color 0.2s;
-    &:hover { color: $cyan-main; }
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   .bubble {
-    background: $bg-main;
+    background: $bg-elevated;
     border: 1px solid $bg-border;
-    padding: 0.5rem 0.8rem;
-    border-radius: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
     flex: 1;
+    min-width: 0;
 
     .bubble-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 8px;
     }
 
-    .more { padding: 0.1rem 0.3rem; }
+    .more {
+      padding: 2px 6px;
+    }
 
-    strong { font-size: 0.78rem; color: $text-light; display: block; }
-    p { font-size: 0.78rem; color: $text-muted; margin: 0.15rem 0 0; }
+    strong {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: $text-light;
+      display: block;
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: $text-muted;
+      margin: 3px 0 0;
+      word-break: break-word;
+    }
 
     .editar-comentario {
       width: 100%;
-      margin-top: 0.35rem;
+      margin-top: 6px;
       background: $bg-input;
       border: 1px solid $bg-border;
       color: $text-light;
-      padding: 0.4rem 0.6rem;
+      padding: 6px 10px;
       border-radius: 8px;
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       outline: none;
 
-      &:focus { border-color: $cyan-main; }
+      &:focus {
+        border-color: $accent;
+      }
     }
   }
 
   .comment-actions {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.35rem;
+    gap: 12px;
+    margin-top: 6px;
 
     button {
       background: transparent;
       border: none;
       padding: 0;
       cursor: pointer;
-      font-size: 0.7rem;
+      font-size: 0.78rem;
       color: $text-muted;
 
-      &:hover { color: $cyan-main; }
-      &.liked { color: $cyan-main; }
-      &.primary { font-weight: 600; color: $cyan-main; }
+      &:hover {
+        color: $text-light;
+      }
+
+      &.liked {
+        color: $accent;
+      }
+
+      &.primary {
+        font-weight: 600;
+        color: $accent;
+      }
     }
   }
 }
 
-.avatar-sm { @include avatar-base(28px, 0.7rem); }
+.avatar-sm {
+  @include avatar-base(30px, 0.72rem);
+}
 
 .comment-input {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 
   input {
     flex: 1;
-    background: $bg-input;
+    min-width: 0;
+    background: transparent;
     border: 1px solid $bg-border;
     color: $text-light;
-    padding: 0.45rem 0.8rem;
-    border-radius: 10px;
-    font-size: 0.78rem;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
     outline: none;
 
-    &:focus { border-color: $cyan-main; }
+    &::placeholder {
+      color: $text-faint;
+    }
+
+    &:focus {
+      border-color: $accent;
+    }
   }
 
   button {
+    @include touch-target(34px);
     background: transparent;
     border: none;
-    color: $cyan-main;
+    color: $accent;
     cursor: pointer;
-    padding: 0.4rem;
   }
 }
-/* Al final de tu post-card.component.scss */
 
 .more-options-container {
   position: relative;
@@ -294,71 +371,86 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: $bg-main;
+  background: $bg-card;
   border: 1px solid $bg-border;
-  border-radius: 8px;
-  padding: 0.4rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  min-width: 130px;
-  z-index: 10;
-  animation: fadeIn 0.15s ease-out;
+  min-width: 150px;
+  z-index: 20;
 
   button {
     background: transparent;
     border: none;
     color: $text-light;
-    padding: 0.5rem 0.8rem;
+    padding: 8px 10px;
     text-align: left;
-    font-size: 0.8rem;
-    border-radius: 6px;
+    font-size: 0.85rem;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: 0.2s;
+    gap: 10px;
+
+    i {
+      width: 14px;
+      text-align: center;
+      color: $text-muted;
+    }
 
     &:hover {
-      background: $bg-input;
+      background: $bg-hover;
     }
 
     &.btn-delete {
-      color: #ef4444; // Rojo para borrar
-      &:hover { background: rgba(239, 68, 68, 0.1); }
+      color: $danger;
+
+      i {
+        color: $danger;
+      }
+
+      &:hover {
+        background: rgba(229, 72, 77, 0.12);
+      }
     }
   }
 }
 
-/* Estilos de la zona de edición */
 .edit-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 
   .edit-input {
     width: 100%;
     background: $bg-input;
-    border: 1px solid $cyan-main; // Borde cyan para indicar modo edición
+    border: 1px solid $bg-border;
     color: $text-light;
-    border-radius: 8px;
-    padding: 0.6rem;
-    font-size: 0.88rem;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
     font-family: inherit;
     resize: vertical;
-    min-height: 80px;
+    min-height: 88px;
     outline: none;
+
+    &:focus {
+      border-color: $accent;
+    }
   }
 
   .edit-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: 8px;
 
     button {
-      padding: 0.4rem 0.8rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       border: none;
@@ -367,18 +459,33 @@
     .btn-cancel {
       background: transparent;
       color: $text-muted;
-      &:hover { color: $text-light; }
+      border: 1px solid $bg-border;
+
+      &:hover {
+        color: $text-light;
+      }
     }
 
     .btn-save {
-      background: $cyan-main;
-      color: $bg-main;
-      &:hover { background: $cyan-hover; }
+      background: $accent;
+      color: #08090b;
+
+      &:hover {
+        background: $accent-strong;
+      }
     }
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+@media (max-width: 520px) {
+  .post-card {
+    padding: 14px 12px 10px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .reactions button {
+    min-height: 44px;
+  }
 }

@@ -1,30 +1,79 @@
 @import '@fortawesome/fontawesome-free/css/all.min.css';
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
 :root {
-  /* Fondos */
-  --bg-dark: #0b0f19;
-  --bg-main: #0f172a; 
-  --bg-navbar: rgba(15, 23, 42, 0.85);
-  --bg-navbar-scrolled: rgba(8, 13, 24, 0.95);
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-sidebar: #080d18;
-  
-  /* Textos */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  
-  /* Acentos */
-  --accent-cyan: #00f2fe;
-  --accent-blue: #4facfe;
-  
-  /* Bordes */
-  --border-soft: #1e293b; 
-  --border-cyan: rgba(0, 242, 254, 0.2);
-  
-  /* Fuentes */
-  --font-main: 'Poppins', sans-serif;
+  color-scheme: dark;
+
+  --bg-main: #0b0d10;
+  --bg-dark: #0b0d10;
+  --bg-navbar: rgba(11, 13, 16, 0.92);
+  --bg-navbar-scrolled: #0b0d10;
+  --bg-elevated: #171b21;
+  --bg-card: #121519;
+  --bg-sidebar: #0f1216;
+  --bg-input: #0f1216;
+  --bg-hover: #1a1e24;
+  --bg-border: #23282f;
+  --border-soft: #23282f;
+
+  --text-primary: #e6e8ea;
+  --text-secondary: #8b949e;
+  --text-muted: #8b949e;
+  --text-faint: #6e7681;
+
+  --accent: #4a9eff;
+  --accent-cyan: #4a9eff;
+  --accent-strong: #2f7fe0;
+  --accent-soft: rgba(74, 158, 255, 0.14);
+  --accent-border: rgba(74, 158, 255, 0.3);
+  --border-cyan: rgba(74, 158, 255, 0.3);
+  --accent-blue: #6cb8ff;
+  --on-accent: #08090b;
+
+  --warning: #f5b75e;
+  --danger: #e5484d;
+  --success: #3fb950;
+
+  --font-main: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  --tabbar-h: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+:root[data-tema='claro'] {
+  color-scheme: light;
+
+  --bg-main: #f5f6f8;
+  --bg-dark: #f5f6f8;
+  --bg-navbar: rgba(255, 255, 255, 0.92);
+  --bg-navbar-scrolled: #ffffff;
+  --bg-elevated: #eef0f4;
+  --bg-card: #ffffff;
+  --bg-sidebar: #eef0f4;
+  --bg-input: #ffffff;
+  --bg-hover: #e7eaef;
+  --bg-border: #d9dee5;
+  --border-soft: #d9dee5;
+
+  --text-primary: #161a1f;
+  --text-secondary: #5a646f;
+  --text-muted: #5a646f;
+  --text-faint: #7d8792;
+
+  --accent: #1f6feb;
+  --accent-cyan: #1f6feb;
+  --accent-strong: #1a5bca;
+  --accent-soft: rgba(31, 111, 235, 0.1);
+  --accent-border: rgba(31, 111, 235, 0.28);
+  --border-cyan: rgba(31, 111, 235, 0.28);
+  --accent-blue: #3d85f5;
+  --on-accent: #ffffff;
+
+  --warning: #b5730a;
+  --danger: #cf2d36;
+  --success: #1a7f37;
 }
 
 * {
@@ -33,12 +82,26 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 html, body {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   overflow-x: hidden;
   font-family: var(--font-main);
   background-color: var(--bg-main);
   color: var(--text-primary);
-  border-bottom: 1px solid var(--border-soft);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
 }

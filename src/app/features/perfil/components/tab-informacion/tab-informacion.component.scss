@@ -17,7 +17,6 @@
     font-size: 0.8rem;
     color: $cyan-main;
     font-family: monospace;
-    text-transform: uppercase;
     margin: 0 0 0.8rem;
     letter-spacing: 1px;
   }
@@ -106,8 +105,8 @@
 
 /* Resumen corto de la hoja de vida importada */
 .cv-resumen {
-  border: 1px solid rgba($cyan-main, 0.25);
-  background: rgba($cyan-main, 0.04);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
   border-radius: 12px;
   padding: 0.9rem 1rem;
   margin-bottom: 1rem;
@@ -115,7 +114,6 @@
   h4 {
     margin: 0 0 0.5rem;
     font-size: 0.78rem;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
     color: $cyan-main;
     display: flex;
@@ -143,7 +141,6 @@
     .cv-seccion-titulo {
       display: block;
       font-size: 0.68rem;
-      text-transform: uppercase;
       letter-spacing: 0.07em;
       color: $cyan-main;
       margin-bottom: 0.25rem;

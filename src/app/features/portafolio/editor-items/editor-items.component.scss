@@ -3,7 +3,7 @@ $bg-main: #0b0f19;
 $bg-panel: #131826;
 $text-primary: #f1f5f9;
 $text-secondary: #8891a3;
-$accent-cyan: #00f2fe;
+$accent-cyan: #4a9eff;
 $border-soft: rgba(255, 255, 255, 0.08);
 
 
@@ -22,14 +22,14 @@ $border-soft: rgba(255, 255, 255, 0.08);
 
     .editor-icon {
       font-size: 2rem;
-      background: rgba(0, 242, 254, 0.1);
+      background: rgba(74, 158, 255, 0.1);
       width: 48px;
       height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 12px;
-      border: 1px solid rgba(0, 242, 254, 0.2);
+      border: 1px solid rgba(74, 158, 255, 0.2);
     }
 
     h2 {
@@ -44,8 +44,8 @@ $border-soft: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.1));
-    border: 1px solid rgba(0, 242, 254, 0.4);
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(79, 172, 254, 0.1));
+    border: 1px solid rgba(74, 158, 255, 0.4);
     color: $accent-cyan;
     padding: 10px 20px;
     border-radius: 10px;
@@ -55,8 +55,8 @@ $border-soft: rgba(255, 255, 255, 0.08);
     transition: all 0.2s ease;
 
     &:hover {
-      background: rgba(0, 242, 254, 0.2);
-      box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+      background: rgba(74, 158, 255, 0.2);
+      box-shadow: none;
       transform: translateY(-1px);
     }
   }
@@ -82,13 +82,13 @@ $border-soft: rgba(255, 255, 255, 0.08);
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.3), transparent);
       opacity: 0;
       transition: opacity 0.2s;
     }
 
     &:hover {
-      border-color: rgba(0, 242, 254, 0.2);
+      border-color: rgba(74, 158, 255, 0.2);
       &::before { opacity: 1; }
     }
 
@@ -99,14 +99,13 @@ $border-soft: rgba(255, 255, 255, 0.08);
       margin-bottom: 20px;
 
       .item-number {
-        background: rgba(0, 242, 254, 0.1);
+        background: rgba(74, 158, 255, 0.1);
         color: $accent-cyan;
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.05em;
-        text-transform: uppercase;
       }
 
       .btn-delete {
@@ -164,8 +163,8 @@ $border-soft: rgba(255, 255, 255, 0.08);
           transition: border-color 0.2s;
 
           &:focus {
-            border-color: rgba(0, 242, 254, 0.5);
-            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.1);
+            border-color: rgba(74, 158, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
           }
 
           &::placeholder { color: #4b5563; }
@@ -200,7 +199,7 @@ $border-soft: rgba(255, 255, 255, 0.08);
     align-items: center;
     gap: 8px;
     background: transparent;
-    border: 1px dashed rgba(0, 242, 254, 0.4);
+    border: 1px dashed rgba(74, 158, 255, 0.4);
     color: $accent-cyan;
     padding: 14px 24px;
     border-radius: 12px;
@@ -211,9 +210,9 @@ $border-soft: rgba(255, 255, 255, 0.08);
     margin-top: 10px;
 
     &:hover {
-      background: rgba(0, 242, 254, 0.1);
+      background: rgba(74, 158, 255, 0.1);
       border-style: solid;
-      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.15);
+      box-shadow: 0 4px 15px rgba(74, 158, 255, 0.15);
     }
   }
 }

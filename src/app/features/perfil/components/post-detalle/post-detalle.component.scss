@@ -6,7 +6,6 @@
   position: fixed;
   inset: 0;
   background: rgba(10, 15, 25, 0.78);
-  backdrop-filter: blur(6px);
   display: grid;
   place-items: center;
   z-index: 10000;
@@ -103,7 +102,7 @@
     font-size: 0.72rem;
     color: $text-muted;
     font-family: monospace;
-    border-top: 1px solid rgba($bg-border, 0.7);
+    border-top: 1px solid color-mix(in srgb, var(--bg-border) 70%, transparent);
     padding-top: 0.5rem;
 
     i { color: $cyan-main; margin-right: 0.3rem; }

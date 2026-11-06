@@ -1,29 +1,73 @@
-@import '@fortawesome/fontawesome-free/css/all.min.css';
-.private-layout-container {
+@import '../../shared/styles/variables';
+
+.shell {
+  min-height: 100dvh;
+  background: $bg-main;
+  color: $text-light;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell__body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: #0b0f19;
-  color: #cfd6e4;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100dvh;
 }
 
-.main-content {
+.shell__main {
   flex: 1;
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px 14px calc(#{$tabbar-height} + 28px + var(--safe-bottom));
 }
 
-@media (max-width: 768px) {
-  .main-content {
-    padding: 16px;
+@media (min-width: $bp-desktop) {
+  .shell__body {
+    padding-left: $rail-collapsed;
+  }
+
+  .shell__main {
+    max-width: 900px;
+    padding: 24px 24px 72px;
   }
 }
-.private-layout-container {
-  transform: none !important;
-  filter: none !important;
-  perspective: none !important;
-  will-change: auto !important;
+
+@media (min-width: 1181px) {
+  .shell__body {
+    padding-left: $rail-width;
+  }
+
+  .shell--rail-mini .shell__body {
+    padding-left: $rail-collapsed;
+  }
+}
+
+@media (min-width: 1440px) {
+  .shell__main {
+    max-width: 1000px;
+    padding: 32px 40px 88px;
+  }
+}
+
+.shell__main--full {
+  max-width: none;
+  padding: 12px 12px calc(#{$tabbar-height} + 24px + var(--safe-bottom));
+}
+
+.shell__footer {
+  display: block;
+  background: $bg-sidebar;
+}
+
+@media (max-width: 1023.98px) {
+  .shell__footer {
+    padding-bottom: calc(#{$tabbar-height} + var(--safe-bottom));
+  }
+}
+
+@media (min-width: $bp-desktop) {
+  .shell__main--full {
+    padding: 20px 24px 56px;
+  }
 }

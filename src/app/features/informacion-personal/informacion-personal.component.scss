@@ -1,60 +1,44 @@
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
-// ==========================================
-// VARIABLES GLOBALES
-// ==========================================
-$bg-dark: #0b0f19;
-$bg-main: #0f172a;
-$bg-card: rgba(15, 23, 42, 0.75);
-$bg-sidebar: #080d18;
-$text-main: #f1f5f9;
-$text-muted: #94a3b8;
-$accent-cyan: #00f2fe;
-$accent-blue: #4facfe;
-$border-color: rgba(0, 242, 254, 0.2);
-$border-soft: rgba(255, 255, 255, 0.08);
+$bg-dark: var(--bg-main);
+$bg-main: var(--bg-main);
+$bg-card: var(--bg-card);
+$bg-sidebar: var(--bg-sidebar);
+$text-main: var(--text-primary);
+$text-muted: var(--text-muted);
+$accent-cyan: var(--accent);
+$accent-blue: var(--accent-blue);
+$border-color: var(--bg-border);
+$border-soft: var(--bg-border);
 
-$accent-warning: #fbbf24;
-$accent-danger: #f87171;
+$accent-warning: var(--warning);
+$accent-danger: var(--danger);
 
-// ==========================================
-// GLOBAL
-// ==========================================
 :host {
   display: block;
   background-color: $bg-dark;
   color: $text-main;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  min-height: 100vh;
 }
 
 html { scroll-behavior: smooth; }
 * { box-sizing: border-box; }
 
-// ==========================================
-// GLASS PANEL BASE
-// ==========================================
 .glass-panel {
   background: $bg-card;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid $border-soft;
   border-radius: 1rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    border-color: rgba($accent-cyan, 0.3);
-    box-shadow: 0 12px 35px -10px rgba($accent-cyan, 0.2);
+    border-color: color-mix(in srgb, $accent-cyan 30%, transparent);
+    box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.55);
   }
 }
 
-// ==========================================
-// LAYOUT
-// ==========================================
 .dashboard-container {
   display: flex;
-  min-height: 100vh;
-  background: radial-gradient(ellipse at top, rgba(0, 242, 254, 0.06) 0%, transparent 50%), $bg-dark;
+  background: radial-gradient(ellipse at top, var(--bg-hover) 0%, transparent 50%), $bg-dark;
 }
 
 .sidebar {
@@ -66,8 +50,8 @@ html { scroll-behavior: smooth; }
   flex-direction: column;
   gap: 1.5rem;
   position: sticky;
-  top: 0;
-  height: 100vh;
+  top: 16px;
+  height: auto;
   overflow-y: auto;
 
   .logo {
@@ -80,7 +64,7 @@ html { scroll-behavior: smooth; }
       font-size: 1.5rem;
       font-weight: 900;
       letter-spacing: -0.03em;
-      background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+      background: $accent-cyan;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -91,8 +75,7 @@ html { scroll-behavior: smooth; }
       height: 0.5rem;
       border-radius: 50%;
       background: $accent-cyan;
-      box-shadow: 0 0 10px $accent-cyan;
-    }
+      box-shadow: none;    }
   }
 
   .menu {
@@ -102,11 +85,9 @@ html { scroll-behavior: smooth; }
     flex: 1;
 
     .menu-label {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-size: 0.65rem;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
+      color: var(--text-faint);
       font-weight: 600;
       padding: 0.5rem 0.75rem 0.25rem;
     }
@@ -135,12 +116,11 @@ html { scroll-behavior: smooth; }
         width: 1.25rem;
         display: inline-flex;
         justify-content: center;
-        color: $accent-cyan; 
-        transition: color 0.2s ease;
+        color: $accent-cyan;        transition: color 0.2s ease;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--bg-hover);
         color: $text-main;
 
         .menu-icon {
@@ -149,7 +129,7 @@ html { scroll-behavior: smooth; }
       }
 
       &.active {
-        background: rgba(0, 242, 254, 0.08);
+        background: var(--bg-hover);
         color: $accent-cyan;
         border-left-color: $accent-cyan;
 
@@ -160,16 +140,16 @@ html { scroll-behavior: smooth; }
 
       &.highlight-link {
         color: $accent-cyan;
-        background: rgba(0, 242, 254, 0.05);
-        border: 1px solid rgba(0, 242, 254, 0.2);
+        background: rgba(74, 158, 255, 0.05);
+        border: 1px solid var(--bg-border);
 
         .menu-icon {
           color: $accent-cyan;
         }
 
         &:hover {
-          background: rgba(0, 242, 254, 0.1);
-          border-color: rgba(0, 242, 254, 0.4);
+          background: rgba(74, 158, 255, 0.1);
+          border-color: rgba(74, 158, 255, 0.4);
         }
       }
     }
@@ -185,11 +165,11 @@ html { scroll-behavior: smooth; }
       gap: 0.5rem;
       padding: 0.4rem 0.75rem;
       border-radius: 999px;
-      background: rgba(0, 242, 254, 0.08);
-      border: 1px solid rgba(0, 242, 254, 0.2);
+      background: var(--bg-hover);
+      border: 1px solid var(--bg-border);
       color: $accent-cyan;
       font-size: 0.7rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-weight: 600;
 
       .dot {
@@ -197,22 +177,18 @@ html { scroll-behavior: smooth; }
         height: 0.45rem;
         border-radius: 50%;
         background: $accent-cyan;
-        box-shadow: 0 0 8px $accent-cyan;
-      }
+        box-shadow: none;      }
     }
   }
 }
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: clamp(1rem, 2vw, 2rem);
   overflow-y: auto;
   min-width: 0;
 }
 
-// ==========================================
-// TOPBAR
-// ==========================================
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -224,11 +200,9 @@ html { scroll-behavior: smooth; }
   .topbar-title {
     .eyebrow {
       display: block;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-size: 0.68rem;
       color: $accent-cyan;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
       font-weight: 600;
       margin-bottom: 0.25rem;
     }
@@ -237,7 +211,7 @@ html { scroll-behavior: smooth; }
       margin: 0;
       font-size: 1.5rem;
       font-weight: 800;
-      color: #fff;
+      color: var(--text-primary);
     }
   }
 
@@ -251,20 +225,20 @@ html { scroll-behavior: smooth; }
       align-items: center;
       gap: 0.4rem;
       padding: 0.5rem 0.85rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-hover);
       border: 1px solid $border-soft;
       border-radius: 0.5rem;
       color: $text-main;
       text-decoration: none;
       font-size: 0.75rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-weight: 600;
       transition: all 0.2s;
       cursor: pointer;
 
       &:hover {
-        background: rgba(0, 242, 254, 0.08);
-        border-color: rgba(0, 242, 254, 0.4);
+        background: var(--bg-hover);
+        border-color: rgba(74, 158, 255, 0.4);
         color: $accent-cyan;
       }
 
@@ -278,14 +252,11 @@ html { scroll-behavior: smooth; }
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      border: 2px solid rgba(0, 242, 254, 0.3);
+      border: 2px solid rgba(74, 158, 255, 0.3);
     }
   }
 }
 
-// ==========================================
-// GRID LAYOUT
-// ==========================================
 .grid-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -304,7 +275,7 @@ html { scroll-behavior: smooth; }
   gap: 0.5rem;
   margin: 0 0 1.25rem 0;
   font-size: 1rem;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 700;
   padding-bottom: 0.85rem;
   border-bottom: 1px solid $border-soft;
@@ -312,16 +283,13 @@ html { scroll-behavior: smooth; }
   svg { color: $accent-cyan; }
 }
 
-// ==========================================
-// WELCOME CARD
-// ==========================================
 .welcome-card {
   grid-column: 1 / 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
-  background: linear-gradient(135deg, rgba(0, 242, 254, 0.08) 0%, rgba(15, 23, 42, 0.95) 60%);
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-card) 60%);
 
   .welcome-text {
     flex: 1;
@@ -332,11 +300,11 @@ html { scroll-behavior: smooth; }
       gap: 0.4rem;
       padding: 0.3rem 0.75rem;
       background: rgba(8, 51, 68, 0.6);
-      border: 1px solid rgba(0, 242, 254, 0.3);
+      border: 1px solid rgba(74, 158, 255, 0.3);
       border-radius: 999px;
       color: $accent-cyan;
       font-size: 0.65rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-weight: 600;
       letter-spacing: 0.05em;
       margin-bottom: 0.85rem;
@@ -353,7 +321,7 @@ html { scroll-behavior: smooth; }
     h1 {
       font-size: 2rem;
       font-weight: 900;
-      color: #fff;
+      color: var(--text-primary);
       margin: 0 0 0.5rem 0;
       letter-spacing: -0.02em;
       line-height: 1.15;
@@ -362,7 +330,7 @@ html { scroll-behavior: smooth; }
     .welcome-role {
       color: $accent-cyan;
       font-size: 0.85rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       font-weight: 500;
       margin: 0 0 0.85rem 0;
     }
@@ -382,8 +350,8 @@ html { scroll-behavior: smooth; }
       height: 140px;
       border-radius: 50%;
       overflow: hidden;
-      border: 3px solid rgba(0, 242, 254, 0.3);
-      box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+      border: 3px solid rgba(74, 158, 255, 0.3);
+      box-shadow: none;
 
       img {
         width: 100%;
@@ -394,9 +362,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// BOTONES
-// ==========================================
 .action-buttons {
   display: flex;
   gap: 0.75rem;
@@ -419,32 +384,29 @@ html { scroll-behavior: smooth; }
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
-    color: #0b0f19;
-    box-shadow: 0 8px 24px -8px rgba($accent-cyan, 0.5);
+    background: $accent-cyan;
+    color: var(--on-accent);
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.55);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px -8px rgba($accent-cyan, 0.6);
+      box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6);
     }
   }
 
   .btn-secondary {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--bg-border);
     color: $text-main;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba($accent-cyan, 0.4);
+      background: var(--bg-hover);
+      border-color: color-mix(in srgb, $accent-cyan 40%, transparent);
       color: $accent-cyan;
     }
   }
 }
 
-// ==========================================
-// PROFILE CARD (CONTACTO)
-// ==========================================
 .profile-card {
   grid-column: 2 / 3;
 
@@ -460,7 +422,7 @@ html { scroll-behavior: smooth; }
       padding: 0.6rem 0;
       font-size: 0.82rem;
       color: $text-muted;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--bg-hover);
 
       &:last-child { border-bottom: none; }
 
@@ -482,13 +444,13 @@ html { scroll-behavior: smooth; }
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(0, 242, 254, 0.08);
-    border: 1px solid rgba(0, 242, 254, 0.2);
+    background: var(--bg-hover);
+    border: 1px solid var(--bg-border);
     color: $accent-cyan;
     padding: 0.4rem 0.85rem;
     border-radius: 999px;
     font-size: 0.72rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
     font-weight: 600;
     margin-top: 1rem;
 
@@ -497,15 +459,11 @@ html { scroll-behavior: smooth; }
       height: 0.45rem;
       background: $accent-cyan;
       border-radius: 50%;
-      box-shadow: 0 0 10px $accent-cyan;
-      animation: pulse 2s infinite;
+      box-shadow: none;      animation: pulse 2s infinite;
     }
   }
 }
 
-// ==========================================
-// MÉTRICAS
-// ==========================================
 .metricas-grid {
   grid-column: 1 / 3;
   display: grid;
@@ -528,10 +486,10 @@ html { scroll-behavior: smooth; }
     .metrica-tendencia {
       font-size: 0.7rem;
       font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: inherit;
       padding: 0.2rem 0.55rem;
       border-radius: 0.3rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-hover);
     }
   }
 
@@ -539,7 +497,7 @@ html { scroll-behavior: smooth; }
     font-size: 2rem;
     font-weight: 900;
     margin: 0 0 0.25rem 0;
-    color: #fff;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
   }
 
@@ -547,20 +505,17 @@ html { scroll-behavior: smooth; }
     margin: 0;
     color: $text-muted;
     font-size: 0.8rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
   }
 }
 
-// ==========================================
-// RESUMEN PROFESIONAL
-// ==========================================
 .resumen-card {
   grid-column: 1 / 3;
-  background: linear-gradient(to right, rgba(0, 242, 254, 0.04), rgba(15, 23, 42, 0.95));
+  background: linear-gradient(to right, color-mix(in srgb, var(--accent) 4%, transparent), var(--bg-card));
   border-left: 3px solid $accent-cyan !important;
 
   .resumen-texto {
-    color: #cbd5e1;
+    color: var(--text-primary);
     line-height: 1.7;
     font-size: 0.88rem;
     margin: 0;
@@ -568,9 +523,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// EXPERIENCIA
-// ==========================================
 .experiencia-card {
   grid-column: 1 / 3;
 
@@ -585,7 +537,7 @@ html { scroll-behavior: smooth; }
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-hover);
     border: 1px solid $border-soft;
     padding: 0.9rem 1rem;
     border-radius: 0.75rem;
@@ -594,14 +546,14 @@ html { scroll-behavior: smooth; }
 
     &:hover {
       transform: translateY(-3px);
-      border-color: rgba($accent-cyan, 0.35);
-      background: rgba(0, 242, 254, 0.04);
+      border-color: color-mix(in srgb, $accent-cyan 35%, transparent);
+      background: rgba(74, 158, 255, 0.04);
     }
 
     .empresa-icono {
       font-size: 1.2rem;
-      background: rgba(0, 242, 254, 0.08);
-      border: 1px solid rgba(0, 242, 254, 0.15);
+      background: var(--bg-hover);
+      border: 1px solid rgba(74, 158, 255, 0.15);
       padding: 0.45rem;
       border-radius: 0.5rem;
       color: $accent-cyan;
@@ -615,7 +567,7 @@ html { scroll-behavior: smooth; }
 
       h4 {
         margin: 0;
-        color: #fff;
+        color: var(--text-primary);
         font-size: 0.88rem;
         font-weight: 600;
         overflow-wrap: anywhere;
@@ -631,7 +583,7 @@ html { scroll-behavior: smooth; }
 
       .empresa-descripcion {
         margin: 0.35rem 0 0 0;
-        color: rgba($text-muted, 0.85);
+        color: color-mix(in srgb, $text-muted 85%, transparent);
         font-size: 0.72rem;
         line-height: 1.4;
         display: -webkit-box;
@@ -647,18 +599,17 @@ html { scroll-behavior: smooth; }
 
       span {
         display: inline-block;
-        background: rgba(0, 242, 254, 0.08);
+        background: var(--bg-hover);
         color: $accent-cyan;
         padding: 0.25rem 0.6rem;
         border-radius: 0.35rem;
         font-size: 0.66rem;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: inherit;
         font-weight: 600;
         white-space: nowrap;
       }
     }
 
-    // En pantallas angostas la fecha baja debajo, nunca se desborda.
     @media (max-width: 520px) {
       .empresa-fecha {
         margin-left: 0;
@@ -668,9 +619,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// FORMACIÓN (TIMELINE)
-// ==========================================
 .formacion-card {
   grid-column: 1 / 3;
 
@@ -688,7 +636,7 @@ html { scroll-behavior: smooth; }
       top: 0.5rem;
       bottom: 0.5rem;
       width: 2px;
-      background: linear-gradient(to bottom, rgba(0, 242, 254, 0.4), rgba(0, 242, 254, 0.05));
+      background: linear-gradient(to bottom, rgba(74, 158, 255, 0.4), rgba(74, 158, 255, 0.05));
     }
   }
 
@@ -705,7 +653,7 @@ html { scroll-behavior: smooth; }
       margin-top: 6px;
       position: relative;
       z-index: 2;
-      box-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+      box-shadow: none;
       flex-shrink: 0;
     }
 
@@ -717,13 +665,13 @@ html { scroll-behavior: smooth; }
         font-size: 0.72rem;
         color: $accent-cyan;
         font-weight: 700;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: inherit;
         margin-bottom: 0.15rem;
       }
 
       h4 {
         margin: 0;
-        color: #fff;
+        color: var(--text-primary);
         font-size: 0.9rem;
         font-weight: 600;
       }
@@ -737,9 +685,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// CARRUSEL DE TECNOLOGÍAS
-// ==========================================
 .carrusel-card {
   grid-column: 1 / 3;
   overflow: hidden;
@@ -764,7 +709,7 @@ html { scroll-behavior: smooth; }
   }
 
   .tech-item {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-hover);
     border: 1px solid $border-soft;
     padding: 0.65rem 1.4rem;
     border-radius: 999px;
@@ -778,8 +723,8 @@ html { scroll-behavior: smooth; }
     transition: all 0.2s;
 
     &:hover {
-      border-color: rgba($accent-cyan, 0.4);
-      background: rgba(0, 242, 254, 0.05);
+      border-color: color-mix(in srgb, $accent-cyan 40%, transparent);
+      background: rgba(74, 158, 255, 0.05);
     }
 
     i {
@@ -793,9 +738,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// INTERRUPTOR PÚBLICO/PRIVADO (TOGGLE)
-// ==========================================
 .toggle-wrapper {
   display: inline-flex;
   align-items: center;
@@ -804,19 +746,18 @@ html { scroll-behavior: smooth; }
 
   .toggle-label {
     font-size: 0.75rem;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
     font-weight: 600;
     color: $text-muted;
     transition: color 0.3s;
   }
 
-  // El switch en sí
   .toggle-switch {
     position: relative;
     width: 46px;
     height: 24px;
     border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-border);
     border: 1px solid $border-soft;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -824,7 +765,6 @@ html { scroll-behavior: smooth; }
     display: flex;
     align-items: center;
 
-    // La bolita que rueda
     .toggle-thumb {
       position: absolute;
       top: 2px;
@@ -832,26 +772,24 @@ html { scroll-behavior: smooth; }
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background-color: #475569; // Gris (inactivo)
+      background-color: var(--text-faint);
       transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    // Cuando está PÚBLICO (Activado)
     &.is-public {
-      background-color: rgba(0, 242, 254, 0.2);
-      border-color: rgba(0, 242, 254, 0.5);
+      background-color: var(--bg-border);
+      border-color: rgba(74, 158, 255, 0.5);
 
       .toggle-thumb {
-        left: 23px; // Se rueda a la derecha
-        background-color: $accent-cyan; // Cyan
-        box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+        left: 23px;
+        background-color: $accent-cyan;
+        box-shadow: none;
       }
     }
 
-    // Efecto hover
     &:hover:not(:disabled) {
-      border-color: rgba(0, 242, 254, 0.4);
+      border-color: rgba(74, 158, 255, 0.4);
     }
 
     &:disabled {
@@ -860,15 +798,11 @@ html { scroll-behavior: smooth; }
     }
   }
 
-  // Si está público, cambiamos el color del texto
   &:has(.toggle-switch.is-public) .toggle-label {
     color: $accent-cyan;
   }
 }
 
-// ==========================================
-// ANIMACIONES
-// ==========================================
 @keyframes scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -883,9 +817,6 @@ html { scroll-behavior: smooth; }
   to { transform: rotate(360deg); }
 }
 
-// ==========================================
-// RESPONSIVE
-// ==========================================
 @media (max-width: 1024px) {
   .grid-layout { grid-template-columns: 1fr; }
   .welcome-card,
@@ -956,33 +887,27 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// LOADING SCREEN
-// ==========================================
 .loading-screen {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 70vh;
   background-color: $bg-dark;
   color: $accent-cyan;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   gap: 1.5rem;
 
   .spinner {
     width: 50px;
     height: 50px;
-    border: 3px solid rgba(0, 242, 254, 0.2);
+    border: 3px solid var(--bg-border);
     border-top-color: $accent-cyan;
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
 }
 
-// ==========================================
-// AVATARES CON INICIALES (FALLBACK)
-// ==========================================
 .mini-avatar-initials {
   display: inline-flex;
   align-items: center;
@@ -990,8 +915,7 @@ html { scroll-behavior: smooth; }
   background: $bg-sidebar;
   color: $accent-cyan;
   font-weight: 900;
-  font-size: 0.9rem; 
-  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;  font-family: inherit;
   letter-spacing: 0.05em;
   user-select: none;
 }
@@ -1005,30 +929,24 @@ html { scroll-behavior: smooth; }
   background: $bg-sidebar;
   color: $accent-cyan;
   font-weight: 900;
-  font-size: 3.5rem; 
-  font-family: 'JetBrains Mono', monospace;
+  font-size: 3.5rem;  font-family: inherit;
   letter-spacing: -0.02em;
   user-select: none;
 }
-/* =========================================
-   ESTADO DE ERROR (CV Privado / No existe)
-   ========================================= */
+
 .error-screen {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #0b1120; /* Color de fondo base de tu app */
-  color: #fff;
+  min-height: 70vh;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   text-align: center;
   padding: 20px;
-  font-family: 'Inter', sans-serif; /* Ajusta a tu tipografía */
-
+  font-family: 'Inter', sans-serif;
   .error-content {
-    background: rgba(30, 41, 59, 0.6); /* Efecto Glass */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
+    border: 1px solid var(--bg-border);
     padding: 48px 32px;
     border-radius: 20px;
     max-width: 480px;
@@ -1037,27 +955,27 @@ html { scroll-behavior: smooth; }
 
     svg {
       margin-bottom: 24px;
-      filter: drop-shadow(0 0 16px rgba(239, 68, 68, 0.4)); /* Glow rojo */
+      filter: none;
     }
 
     h2 {
       font-size: 26px;
       margin-bottom: 12px;
       font-weight: 700;
-      color: #f8fafc;
+      color: var(--text-primary);
       letter-spacing: -0.5px;
     }
 
     p {
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-bottom: 32px;
       font-size: 16px;
       line-height: 1.6;
     }
 
     .btn-primary {
-      background: #0ea5e9; /* Azul de tu tema */
-      color: #ffffff;
+      background: var(--accent);
+      color: var(--on-accent);
       border: none;
       padding: 12px 24px;
       border-radius: 10px;
@@ -1071,11 +989,10 @@ html { scroll-behavior: smooth; }
       text-decoration: none;
 
       &:hover {
-        background: #0284c7;
+        background: var(--accent-strong);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
       }
-      
       &:active {
         transform: translateY(0);
       }
@@ -1083,17 +1000,14 @@ html { scroll-behavior: smooth; }
   }
 }
 
-// ==========================================
-// EDICIÓN MANUAL DEL CV
-// ==========================================
 .btn-edit {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba($accent-cyan, 0.35);
-  background: rgba($accent-cyan, 0.08);
+  border: 1px solid color-mix(in srgb, $accent-cyan 35%, transparent);
+  background: color-mix(in srgb, $accent-cyan 8%, transparent);
   color: $accent-cyan;
   font-family: inherit;
   font-size: 0.75rem;
@@ -1103,8 +1017,8 @@ html { scroll-behavior: smooth; }
   transition: all 0.2s ease;
 
   &:hover {
-    background: rgba($accent-cyan, 0.16);
-    border-color: rgba($accent-cyan, 0.6);
+    background: color-mix(in srgb, $accent-cyan 16%, transparent);
+    border-color: color-mix(in srgb, $accent-cyan 60%, transparent);
     transform: translateY(-1px);
   }
 }
@@ -1124,10 +1038,8 @@ html { scroll-behavior: smooth; }
 
   .eyebrow {
     display: block;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
     font-size: 0.68rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
     color: $accent-cyan;
     margin-bottom: 0.35rem;
   }
@@ -1135,7 +1047,6 @@ html { scroll-behavior: smooth; }
   .card-title { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
 }
 
-/* Barra única de guardado del editor: reemplaza los botones por sección y por ítem. */
 .cv-guardar-barra {
   position: sticky;
   bottom: 1rem;
@@ -1150,7 +1061,6 @@ html { scroll-behavior: smooth; }
   border: 1px solid rgba(148, 163, 184, 0.25);
   border-radius: 12px;
   background: rgba(11, 15, 25, 0.92);
-  backdrop-filter: blur(6px);
   color: $text-muted;
   font-size: 0.85rem;
 
@@ -1176,7 +1086,6 @@ html { scroll-behavior: smooth; }
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: $text-muted;
   }
 
@@ -1191,7 +1100,7 @@ html { scroll-behavior: smooth; }
 
     small {
       font-size: 0.68rem;
-      color: rgba($text-muted, 0.7);
+      color: color-mix(in srgb, $text-muted 70%, transparent);
     }
   }
 
@@ -1207,12 +1116,12 @@ html { scroll-behavior: smooth; }
     font-size: 0.88rem;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-    &::placeholder { color: rgba($text-muted, 0.55); }
+    &::placeholder { color: color-mix(in srgb, $text-muted 55%, transparent); }
 
     &:focus {
       outline: none;
-      border-color: rgba($accent-cyan, 0.55);
-      box-shadow: 0 0 0 3px rgba($accent-cyan, 0.12);
+      border-color: color-mix(in srgb, $accent-cyan 55%, transparent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, $accent-cyan 12%, transparent);
     }
   }
 
@@ -1233,8 +1142,8 @@ html { scroll-behavior: smooth; }
 
   &:hover {
     color: $text-main;
-    border-color: rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--accent-border);
+    background: var(--bg-hover);
   }
 }
 
@@ -1246,25 +1155,22 @@ html { scroll-behavior: smooth; }
   padding: 0.62rem 1.1rem;
   border: none;
   border-radius: 0.6rem;
-  background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
+  background: $accent-cyan;
   color: $bg-dark;
   font-family: inherit;
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px -8px rgba($accent-cyan, 0.5);
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.55);
   transition: all 0.2s ease;
 
   &:hover { transform: translateY(-2px); }
   &:disabled { opacity: 0.6; cursor: progress; transform: none; }
 }
 
-// ==========================================
-// SECCIONES PERSONALIZADAS (cuadro + items dentro)
-// ==========================================
 .seccion-libre {
   grid-column: 1 / -1;
-  border-left: 3px solid rgba($accent-cyan, 0.45);
+  border-left: 3px solid color-mix(in srgb, $accent-cyan 45%, transparent);
 
   .seccion-libre-titulo {
     font-size: 1.15rem;
@@ -1288,11 +1194,11 @@ html { scroll-behavior: smooth; }
   padding: 1rem 1.15rem;
   border-radius: 0.75rem;
   border: 1px solid $border-soft;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+  background: linear-gradient(180deg, var(--bg-hover), transparent);
   transition: border-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    border-color: rgba($accent-cyan, 0.3);
+    border-color: color-mix(in srgb, $accent-cyan 30%, transparent);
     transform: translateX(2px);
   }
 }
@@ -1313,13 +1219,13 @@ html { scroll-behavior: smooth; }
 
 .libre-item-meta {
   flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-size: 0.72rem;
   color: $accent-cyan;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  border: 1px solid rgba($accent-cyan, 0.25);
-  background: rgba($accent-cyan, 0.06);
+  border: 1px solid color-mix(in srgb, $accent-cyan 25%, transparent);
+  background: color-mix(in srgb, $accent-cyan 6%, transparent);
 }
 
 .libre-item-detalle {
@@ -1330,9 +1236,6 @@ html { scroll-behavior: smooth; }
   white-space: pre-line;
 }
 
-// ==========================================
-// GESTOR DE SECCIONES E ÍTEMS
-// ==========================================
 .gestor-hint {
   margin-top: 0.35rem;
   font-size: 0.78rem;
@@ -1347,8 +1250,8 @@ html { scroll-behavior: smooth; }
   margin-bottom: 1rem;
 
   &.es-nueva {
-    border-color: rgba($accent-warning, 0.5);
-    background: rgba($accent-warning, 0.05);
+    border-color: color-mix(in srgb, $accent-warning 50%, transparent);
+    background: color-mix(in srgb, $accent-warning 5%, transparent);
   }
 }
 
@@ -1382,7 +1285,6 @@ html { scroll-behavior: smooth; }
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: $text-muted;
 }
 
@@ -1392,8 +1294,8 @@ html { scroll-behavior: smooth; }
   gap: 0.45rem;
   padding: 0.5rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba($accent-cyan, 0.28);
-  background: rgba($accent-cyan, 0.06);
+  border: 1px solid color-mix(in srgb, $accent-cyan 28%, transparent);
+  background: color-mix(in srgb, $accent-cyan 6%, transparent);
   color: $text-main;
   font-family: inherit;
   font-size: 0.78rem;
@@ -1402,8 +1304,8 @@ html { scroll-behavior: smooth; }
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    border-color: rgba($accent-cyan, 0.6);
-    background: rgba($accent-cyan, 0.14);
+    border-color: color-mix(in srgb, $accent-cyan 60%, transparent);
+    background: color-mix(in srgb, $accent-cyan 14%, transparent);
     transform: translateY(-1px);
   }
 
@@ -1422,8 +1324,8 @@ html { scroll-behavior: smooth; }
   margin: 0 0 1.25rem;
   padding: 0.85rem 1rem;
   border-radius: 0.65rem;
-  border: 1px dashed rgba($accent-cyan, 0.35);
-  background: rgba($accent-cyan, 0.05);
+  border: 1px dashed color-mix(in srgb, $accent-cyan 35%, transparent);
+  background: color-mix(in srgb, $accent-cyan 5%, transparent);
   color: $text-muted;
   font-size: 0.84rem;
   line-height: 1.5;
@@ -1432,13 +1334,13 @@ html { scroll-behavior: smooth; }
 }
 
 .clave-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-size: 0.68rem;
   color: $text-muted;
   padding: 0.25rem 0.55rem;
   border-radius: 0.4rem;
   border: 1px solid $border-soft;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-hover);
 }
 
 .btn-save,
@@ -1454,19 +1356,19 @@ html { scroll-behavior: smooth; }
 }
 
 .btn-save {
-  border: 1px solid rgba($accent-cyan, 0.4);
-  background: rgba($accent-cyan, 0.1);
+  border: 1px solid color-mix(in srgb, $accent-cyan 40%, transparent);
+  background: color-mix(in srgb, $accent-cyan 10%, transparent);
   color: $accent-cyan;
 
-  &:hover { background: rgba($accent-cyan, 0.2); }
+  &:hover { background: color-mix(in srgb, $accent-cyan 20%, transparent); }
 }
 
 .btn-danger {
-  border: 1px solid rgba($accent-danger, 0.35);
+  border: 1px solid color-mix(in srgb, $accent-danger 35%, transparent);
   background: transparent;
   color: $accent-danger;
 
-  &:hover { background: rgba($accent-danger, 0.12); }
+  &:hover { background: color-mix(in srgb, $accent-danger 12%, transparent); }
 }
 
 .btn-link {
@@ -1488,10 +1390,10 @@ html { scroll-behavior: smooth; }
 .item-row {
   border-radius: 0.65rem;
   border: 1px solid $border-soft;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-hover);
   overflow: hidden;
 
-  &.abierto { border-color: rgba($accent-cyan, 0.3); }
+  &.abierto { border-color: color-mix(in srgb, $accent-cyan 30%, transparent); }
 }
 
 .item-row-head {
@@ -1544,8 +1446,7 @@ html { scroll-behavior: smooth; }
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba($text-muted, 0.85);
+  color: color-mix(in srgb, $text-muted 85%, transparent);
 }
 
 .par-icono {
@@ -1560,10 +1461,10 @@ html { scroll-behavior: smooth; }
     border: 1px solid $border-soft;
     background: rgba(8, 13, 24, 0.8);
     color: $text-main;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: inherit;
     font-size: 0.8rem;
 
-    &:focus { outline: none; border-color: rgba($accent-cyan, 0.5); }
+    &:focus { outline: none; border-color: color-mix(in srgb, $accent-cyan 50%, transparent); }
   }
 }
 
@@ -1576,8 +1477,8 @@ html { scroll-behavior: smooth; }
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  border: 1px solid rgba($accent-cyan, 0.25);
-  background: rgba($accent-cyan, 0.07);
+  border: 1px solid color-mix(in srgb, $accent-cyan 25%, transparent);
+  background: color-mix(in srgb, $accent-cyan 7%, transparent);
   color: $accent-cyan;
   font-size: 1rem;
 }
@@ -1618,8 +1519,8 @@ html { scroll-behavior: smooth; }
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  border: 1px solid rgba($accent-cyan, 0.2);
-  background: rgba($accent-cyan, 0.06);
+  border: 1px solid color-mix(in srgb, $accent-cyan 20%, transparent);
+  background: color-mix(in srgb, $accent-cyan 6%, transparent);
   color: $accent-cyan;
   font-size: 0.95rem;
 }
@@ -1627,15 +1528,14 @@ html { scroll-behavior: smooth; }
 .item-fuente,
 .contador-badge {
   flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-size: 0.64rem;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: $text-muted;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
   border: 1px solid $border-soft;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-hover);
 }
 
 .items-vacias {
@@ -1659,12 +1559,12 @@ html { scroll-behavior: smooth; }
 
   &:focus {
     outline: none;
-    border-color: rgba($accent-cyan, 0.5);
+    border-color: color-mix(in srgb, $accent-cyan 50%, transparent);
   }
 }
 
 .par-clave {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: inherit;
   font-size: 0.75rem;
   color: $accent-cyan;
 }
@@ -1675,7 +1575,7 @@ html { scroll-behavior: smooth; }
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba($accent-danger, 0.3);
+  border: 1px solid color-mix(in srgb, $accent-danger 30%, transparent);
   background: transparent;
   color: $accent-danger;
   font-size: 1.05rem;
@@ -1683,7 +1583,7 @@ html { scroll-behavior: smooth; }
   cursor: pointer;
   transition: all 0.2s ease;
 
-  &:hover { background: rgba($accent-danger, 0.12); }
+  &:hover { background: color-mix(in srgb, $accent-danger 12%, transparent); }
 }
 
 .btn-add-campo,
@@ -1697,9 +1597,6 @@ html { scroll-behavior: smooth; }
 
 .btn-add-item { margin-top: 0.25rem; }
 
-// ==========================================
-// FOTO DEL CV (galería, subida nueva, iniciales de respaldo)
-// ==========================================
 .foto-cv {
   gap: 0.55rem;
 
@@ -1755,8 +1652,8 @@ html { scroll-behavior: smooth; }
   gap: 0.4rem;
   padding: 0.45rem 0.8rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba($accent-cyan, 0.28);
-  background: rgba($accent-cyan, 0.06);
+  border: 1px solid color-mix(in srgb, $accent-cyan 28%, transparent);
+  background: color-mix(in srgb, $accent-cyan 6%, transparent);
   color: $text-main;
   font-family: inherit;
   font-size: 0.75rem;
@@ -1765,12 +1662,12 @@ html { scroll-behavior: smooth; }
   transition: all 0.2s ease;
 
   &:hover {
-    border-color: rgba($accent-cyan, 0.6);
-    background: rgba($accent-cyan, 0.14);
+    border-color: color-mix(in srgb, $accent-cyan 60%, transparent);
+    background: color-mix(in srgb, $accent-cyan 14%, transparent);
   }
 
   &.quitar {
-    border-color: rgba($accent-danger, 0.3);
+    border-color: color-mix(in srgb, $accent-danger 30%, transparent);
     background: transparent;
     color: $accent-danger;
   }
@@ -1781,8 +1678,8 @@ html { scroll-behavior: smooth; }
 
   &.activo {
     border-style: solid;
-    border-color: rgba($accent-cyan, 0.75);
-    background: rgba($accent-cyan, 0.16);
+    border-color: color-mix(in srgb, $accent-cyan 75%, transparent);
+    background: color-mix(in srgb, $accent-cyan 16%, transparent);
     color: $accent-cyan;
   }
 }
@@ -1802,7 +1699,7 @@ html { scroll-behavior: smooth; }
     object-fit: cover;
   }
 
-  &:hover { border-color: rgba($accent-cyan, 0.6); }
+  &:hover { border-color: color-mix(in srgb, $accent-cyan 60%, transparent); }
 }
 
 @media (max-width: 900px) {
@@ -1811,4 +1708,39 @@ html { scroll-behavior: smooth; }
   .gestor-botones { justify-content: flex-start; flex-wrap: wrap; }
   .par-row { grid-template-columns: 1fr; }
   .item-row-head { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-container {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    width: auto;
+    border-right: none;
+    border-bottom: 1px solid $border-soft;
+    padding: 1rem 0.75rem;
+    gap: 0.75rem;
+
+    .menu {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .menu-label,
+    .menu-divider,
+    .logo,
+    .sidebar-footer {
+      display: none;
+    }
+
+    .menu a {
+      padding: 0.45rem 0.7rem;
+      border: 1px solid $border-soft;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+  }
 }

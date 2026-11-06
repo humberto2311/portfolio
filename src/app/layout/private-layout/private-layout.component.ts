@@ -1,13 +1,46 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PrivateNavbarComponent } from './navbar/navbar.component';
+import { SideNavComponent } from './side-nav/side-nav.component';
+import { TabBarComponent } from './tab-bar/tab-bar.component';
 import { SidePanelComponent } from '../../shared/components/side-panel/side-panel.component';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { RailStateService } from '../../core/services/rail-state.service';
+import { TemaService } from '../../core/services/tema.service';
 
 @Component({
   selector: 'app-private-layout',
   standalone: true,
-  imports: [RouterOutlet, PrivateNavbarComponent, SidePanelComponent],
+  imports: [RouterOutlet, PrivateNavbarComponent, SideNavComponent, TabBarComponent, SidePanelComponent, FooterComponent],
   templateUrl: './private-layout.component.html',
   styleUrls: ['./private-layout.component.scss'],
 })
-export class PrivateLayoutComponent {}
+export class PrivateLayoutComponent {
+  readonly rail = inject(RailStateService);
+  readonly anchoCompleto = signal(false);
+
+  private readonly router = inject(Router);
+  private readonly tema = inject(TemaService);
+
+  constructor() {
+    this.leerRuta();
+    this.router.events
+      .pipe(
+        filter((evento): evento is NavigationEnd => evento instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.leerRuta());
+
+    this.tema.pintar(false);
+  }
+
+  private leerRuta(): void {
+    let rama = this.router.routerState.snapshot.root;
+    while (rama.firstChild) {
+      rama = rama.firstChild;
+    }
+    this.anchoCompleto.set(rama.data['anchoCompleto'] === true);
+  }
+}

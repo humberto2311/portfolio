@@ -1,46 +1,62 @@
-// === PALETA CYBER DARK ===
-$bg-main: #060b14;
-$bg-navbar: #080e1a;
-$bg-sidebar: #080e1a;
-$bg-card: #0d1527;
-$bg-input: #0b1220;
-$bg-border: #16243d;
-$bg-hover: #131f38;
+$bg-main: var(--bg-main);
+$bg-navbar: var(--bg-navbar);
+$bg-sidebar: var(--bg-sidebar);
+$bg-card: var(--bg-card);
+$bg-elevated: var(--bg-elevated);
+$bg-input: var(--bg-input);
+$bg-border: var(--bg-border);
+$bg-hover: var(--bg-hover);
 
-$cyan-main: #00f2fe;
-$cyan-secondary: #4facfe;
-$cyan-hover: #00b8e6;
-$cyan-dim: rgba(0, 242, 254, 0.12);
+$accent: var(--accent);
+$accent-strong: var(--accent-strong);
+$accent-soft: var(--accent-soft);
+$accent-border: var(--accent-border);
+$on-accent: var(--on-accent);
+$cyan-main: var(--accent);
+$cyan-secondary: var(--accent-blue);
+$cyan-hover: var(--accent-strong);
+$cyan-dim: var(--accent-soft);
+$border-cyan: var(--accent-border);
+$glow-cyan: transparent;
 
-$text-light: #e2e8f0;
-$text-muted: #94a3b8;
+$danger: var(--danger);
+$success: var(--success);
+$warning: var(--warning);
 
-$border-cyan: rgba(0, 242, 254, 0.25);
-$glow-cyan: rgba(0, 242, 254, 0.15);
+$text-light: var(--text-primary);
+$text-muted: var(--text-muted);
+$text-faint: var(--text-faint);
 
-// === MIXINS ===
+$rail-width: 236px;
+$rail-collapsed: 68px;
+$tabbar-height: 56px;
+$topbar-height: 60px;
+
+$bp-desktop: 1024px;
+$bp-tablet: 768px;
+
 @mixin neon-glow($intensity: 0.35) {
-  box-shadow: 0 0 14px rgba(0, 242, 254, $intensity);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 @mixin card-base {
   background: $bg-card;
   border: 1px solid $bg-border;
-  border-radius: 16px;
-  padding: 1.25rem;
+  border-radius: 14px;
+  padding: 1.125rem;
 }
 
 @mixin avatar-base($size: 40px, $font-size: 0.85rem) {
   width: $size;
   height: $size;
   border-radius: 50%;
-  border: 1px solid $cyan-main;
-  color: $cyan-main;
-  background: $bg-main;
+  border: 1px solid $bg-border;
+  color: $text-light;
+  background: $bg-elevated;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 600;
   font-size: $font-size;
   flex-shrink: 0;
   overflow: hidden;
@@ -51,4 +67,17 @@ $glow-cyan: rgba(0, 242, 254, 0.15);
     object-fit: cover;
     display: block;
   }
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+@mixin touch-target($size: 44px) {
+  min-width: $size;
+  min-height: $size;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

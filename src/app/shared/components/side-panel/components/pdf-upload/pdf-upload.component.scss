@@ -45,7 +45,7 @@
     &:hover { background: rgba(79, 70, 229, 0.3); }
   }
 
-  .hint { font-size: 11px; color: #64748b; }
+  .hint { font-size: 11px; color: #8b949e; }
 }
 
 .file-preview {
@@ -68,13 +68,13 @@
   }
 
   .btn-remove {
-    background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;
+    background: none; border: none; color: #8b949e; cursor: pointer; padding: 4px;
     &:hover { color: #ef4444; }
   }
 }
 
 .btn-upload {
-  background: linear-gradient(to right, #4f46e5, #9333ea);
+  background: #4a9eff;
   color: white;
   border: none;
   padding: 14px;

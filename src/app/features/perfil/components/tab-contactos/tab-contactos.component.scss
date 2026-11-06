@@ -224,7 +224,6 @@ $bp-md: 768px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    text-transform: uppercase;
     overflow: hidden;
 
     img {
@@ -296,8 +295,7 @@ $bp-md: 768px;
 
     &:hover:not(:disabled) {
       background: rgba($color-cyan, 0.25);
-      box-shadow: 0 0 10px rgba($color-cyan, 0.2);
-    }
+      box-shadow: none;    }
   }
 
   &--ghost {

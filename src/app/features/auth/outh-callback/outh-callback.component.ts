@@ -22,12 +22,12 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       height: 100vh;
       background-color: #0b0f19;
-      color: #00f2fe;
+      color: #4a9eff;
       font-family: 'Inter', sans-serif;
     }
     .spinner {
-      border: 4px solid rgba(0, 242, 254, 0.2);
-      border-top: 4px solid #00f2fe;
+      border: 4px solid rgba(74, 158, 255, 0.2);
+      border-top: 4px solid #4a9eff;
       border-radius: 50%;
       width: 40px;
       height: 40px;

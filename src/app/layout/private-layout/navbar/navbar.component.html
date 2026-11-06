@@ -1,85 +1,76 @@
-<header class="navbar-header">
-  <nav class="navbar-container">
-    <a routerLink="/app" class="navbar-brand" (click)="isMobileMenuOpen.set(false)">
-      <div class="brand-company">
-        <img src="assets/images/logo.png" alt="NFC-Soft Logo" class="brand-logo">
-      </div>
-      <div class="brand-divider"></div>
-      <div class="brand-personal">
-        <span class="person-name">{{ user()?.fullName }}</span>
-        <span class="person-role">{{ rolPerfil() || 'User' }}</span>
-      </div>
-    </a>
+<header class="topbar">
+  <a class="topbar__marca" routerLink="/app" aria-label="Inicio">
+    <img src="assets/images/logo.png" alt="NFC-Soft" />
+  </a>
 
-    <button class="mobile-toggle" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen()">
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-    </button>
+  <div class="topbar__busqueda">
+    <div class="campo">
+      <i class="fa-solid fa-magnifying-glass campo__icono" aria-hidden="true"></i>
+      <input
+        #campo
+        type="search"
+        placeholder="Buscar personas"
+        aria-label="Buscar personas por nombre o usuario"
+        autocomplete="off"
+        [value]="searchQuery"
+        (input)="onSearchInput(campo.value)"
+        (keydown)="onKeydown($event)"
+      />
+      @if (searchQuery) {
+        <button type="button" class="campo__limpiar" aria-label="Limpiar búsqueda" (click)="limpiar(campo)">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
 
-    <div class="navbar-collapse" [class.active]="isMobileMenuOpen()">
-      <div class="search-wrap">
-        <div class="search-box">
-          <input
-            type="text"
-            placeholder="Buscar personas por nombre o @usuario"
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchInput($event)"
-            (keydown)="onKeydown($event)"
-          />
-          <button (click)="onSearch()" aria-label="Buscar">
-            <i class="fas fa-search"></i>
-          </button>
+    @if (mostrarSugerencias()) {
+      <div class="popover">
+        <div class="filtros" role="tablist">
+          @for (f of filtros; track f) {
+            <button
+              type="button"
+              role="tab"
+              class="filtro"
+              [class.activo]="filtro() === f"
+              (click)="cambiarFiltro(f)">
+              {{ f }}
+            </button>
+          }
         </div>
 
-        @if (mostrarSugerencias()) {
-          <div class="filtros-nav">
-            @for (f of filtros; track f) {
+        <ul class="resultados">
+          @for (s of visibles(); track s.username; let i = $index) {
+            <li>
               <button
                 type="button"
-                class="filtro-chip"
-                [class.activo]="filtro() === f"
-                (click)="cambiarFiltro(f)">
-                {{ f }}
+                [class.activo]="i === indice()"
+                (mouseenter)="indice.set(i)"
+                (click)="irAPerfil(s)">
+                <span class="resultados__avatar">
+                  @if (s.avatarUrl) {
+                    <img [src]="s.avatarUrl" [alt]="'Foto de ' + s.nombre" />
+                  } @else {
+                    {{ s.iniciales }}
+                  }
+                </span>
+                <span class="resultados__datos">
+                  <strong>{{ s.nombre }}</strong>
+                  <small>&#64;{{ s.username }}</small>
+                </span>
+                <span class="resultados__relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
               </button>
-            }
-          </div>
-
-          <ul class="sugerencias-nav">
-            @for (s of visibles(); track s.username; let i = $index) {
-              <li>
-                <button
-                  type="button"
-                  [class.activa]="i === indice()"
-                  (mouseenter)="indice.set(i)"
-                  (click)="irAPerfil(s)">
-                  <span class="avatar-mini">
-                    @if (s.avatarUrl) {
-                      <img [src]="s.avatarUrl" [alt]="'Foto de ' + s.nombre" />
-                    } @else {
-                      {{ s.iniciales }}
-                    }
-                  </span>
-                  <span class="datos">
-                    <strong>{{ s.nombre }}</strong>
-                    <small>&#64;{{ s.username }}</small>
-                  </span>
-                  <span class="relacion" [class.otro]="s.relacion === 'Sugerido'">{{ s.relacion }}</span>
-                </button>
-              </li>
-            }
-            @if (visibles().length === 0) {
-              <li class="vacio">Nadie con esa relación</li>
-            }
-          </ul>
-        }
+            </li>
+          }
+          @if (visibles().length === 0) {
+            <li class="resultados__vacio">Nadie con esa relación</li>
+          }
+        </ul>
       </div>
+    }
+  </div>
 
-      <div class="navbar-actions">
-        <app-notificaciones />
-        <app-dropdown-menu />
-        <app-user-menu />
-      </div>
-    </div>
-  </nav>
+  <div class="topbar__acciones">
+    <app-notificaciones />
+    <app-user-menu />
+  </div>
 </header>

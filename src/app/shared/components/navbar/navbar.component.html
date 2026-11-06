@@ -1,87 +1,104 @@
-<header class="navbar-header" [class.is-scrolled]="isScrolled()">
-  <nav class="navbar-container">
+<header class="pub" [class.pub--compact]="isScrolled()">
+  <div class="pub__inner">
 
-    <!-- BRANDING -->
-    <a [routerLink]="['/']" class="navbar-brand" (click)="closeMenus()">
-      <div class="brand-company">
-        <img src="assets/images/logo.png" alt="NFC-Soft Logo" class="brand-logo">
-      </div>
-      <div class="brand-divider"></div>
-      <div class="brand-personal">
-       <span class="person-name">Humberto Lozano</span>
-        <span class="person-role">Backend Developer</span>
-      </div>
+    <a class="pub__marca" [routerLink]="['/']" title="NFC-Soft" (click)="cerrarMenu()">
+      <span class="pub__nombre">NFC-Soft</span>
     </a>
 
-    <!-- Botón Hamburguesa -->
-    <button
-      class="mobile-toggle"
-      (click)="toggleMobileMenu()"
-      [attr.aria-expanded]="isMobileMenuOpen()"
-      aria-label="Abrir menú de navegación">
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-      <span class="hamburger-bar"></span>
-    </button>
-
-    <!-- Menú Principal -->
-    <div class="navbar-links" [class.active]="isMobileMenuOpen()">
-      <ul>
-        <li>
-          <a
-            [routerLink]="['/informacion-personal']"
-            routerLinkActive="active-link"
-            (click)="closeMenus()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            Información Personal
-          </a>
-        </li>
-
-        <li>
-          <a
-            [routerLink]="['/proyectos']"
-            routerLinkActive="active-link"
-            (click)="closeMenus()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-            </svg>
-            Proyectos & Código
-          </a>
-        </li>
-
-        <!-- LOGIN / USUARIO -->
-        <li class="login-item">
-          <!-- Si NO está autenticado -->
+    @if (esInicio()) {
+      <nav class="pub__secciones" aria-label="Secciones">
+        @for (seccion of secciones; track seccion.id) {
           <button
-            *ngIf="!auth.isAuthenticated()"
-            class="login-link"
-            (click)="openLogin('login')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
-            </svg>
-            Login
+            type="button"
+            class="pub__enlace"
+            [class.pub__enlace--activa]="seccionActiva() === seccion.id"
+            (click)="irA(seccion)">
+            {{ seccion.etiqueta }}
           </button>
+        }
+      </nav>
+    } @else {
+      <a class="pub__volver" [routerLink]="['/']" (click)="cerrarMenu()">
+        <i class="fa-solid fa-arrow-left"></i>
+        Volver al inicio
+      </a>
+    }
 
-          <!-- Si YA está autenticado -->
-          <div *ngIf="auth.isAuthenticated()" class="user-menu">
-            <a class="user-chip" [routerLink]="['/app/perfil']" (click)="closeMenus()" title="Ver mi perfil">
-              <span class="user-avatar">
-                {{ auth.currentUser()?.fullName?.charAt(0) || 'U' }}
-              </span>
-              <span class="user-name">{{ auth.currentUser()?.fullName }}</span>
-            </a>
+    <div class="pub__acciones">
+      <a class="pub__creador" [routerLink]="['/perfil', usuarioCreador]" (click)="cerrarMenu()"
+         title="Hoja de vida y perfil profesional del creador">
+        <i class="fa-solid fa-id-card"></i>
+        <span>Sobre el creador</span>
+      </a>
 
-            <button class="user-salir" (click)="logout()" title="Cerrar sesión">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
-              </svg>
-            </button>
-          </div>
-        </li>
-      </ul>
+      <button type="button" class="pub__tema" (click)="alternarTema()"
+              [attr.aria-label]="tema.claro() ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'"
+              [title]="tema.claro() ? 'Modo oscuro' : 'Modo claro'">
+        <i class="fa-solid" [class.fa-moon]="!tema.claro()" [class.fa-sun]="tema.claro()"></i>
+        <span>{{ tema.claro() ? 'Modo oscuro' : 'Modo claro' }}</span>
+      </button>
+
+      <button type="button" class="pub__cta" (click)="abrirLogin('login')">Ingresar</button>
+
+      <button type="button" class="pub__menu" [attr.aria-expanded]="isMobileMenuOpen()"
+              [attr.aria-label]="isMobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'" (click)="alternarMenu()">
+        <i class="fa-solid" [class.fa-bars]="!isMobileMenuOpen()" [class.fa-xmark]="isMobileMenuOpen()"></i>
+      </button>
     </div>
+  </div>
 
-  </nav>
+  @if (esInicio() && progreso() > 0) {
+    <span class="pub__progreso" [style.width.%]="progreso()"></span>
+  }
+
+  @if (isMobileMenuOpen()) {
+    <div class="pub__panel">
+      @if (esInicio()) {
+        @for (seccion of secciones; track seccion.id) {
+          <button type="button" class="pub__fila" (click)="irA(seccion)">
+            <span class="pub__fila-icono"><i [class]="seccion.icono"></i></span>
+            <span class="pub__fila-texto">
+              <strong>{{ seccion.etiqueta }}</strong>
+              <small>{{ seccion.detalle }}</small>
+            </span>
+            <i class="fa-solid fa-chevron-right pub__fila-flecha"></i>
+          </button>
+        }
+      } @else {
+        <a class="pub__fila" [routerLink]="['/']" (click)="cerrarMenu()">
+          <span class="pub__fila-icono"><i class="fa-solid fa-house"></i></span>
+          <span class="pub__fila-texto">
+            <strong>Inicio</strong>
+            <small>Conoce qué es NFC-Soft</small>
+          </span>
+          <i class="fa-solid fa-chevron-right pub__fila-flecha"></i>
+        </a>
+      }
+
+      <a class="pub__fila" [routerLink]="['/perfil', usuarioCreador]" (click)="cerrarMenu()">
+        <span class="pub__fila-icono"><i class="fa-solid fa-id-card"></i></span>
+        <span class="pub__fila-texto">
+          <strong>Sobre el creador</strong>
+          <small>Su perfil profesional y sus proyectos</small>
+        </span>
+        <i class="fa-solid fa-chevron-right pub__fila-flecha"></i>
+      </a>
+
+      <button type="button" class="pub__fila" (click)="alternarTema()">
+        <span class="pub__fila-icono">
+          <i class="fa-solid" [class.fa-moon]="!tema.claro()" [class.fa-sun]="tema.claro()"></i>
+        </span>
+        <span class="pub__fila-texto">
+          <strong>{{ tema.claro() ? 'Modo oscuro' : 'Modo claro' }}</strong>
+          <small>{{ tema.claro() ? 'Ideal para leer de noche' : 'Ideal para ver en pleno día' }}</small>
+        </span>
+        <i class="fa-solid fa-chevron-right pub__fila-flecha"></i>
+      </button>
+
+      <div class="pub__panel-acciones">
+        <button type="button" class="pub__entra pub__entra--principal" (click)="abrirLogin('login')">Ingresar</button>
+        <button type="button" class="pub__alta" (click)="abrirLogin('register')">¿No tienes perfil? Crea uno gratis</button>
+      </div>
+    </div>
+  }
 </header>

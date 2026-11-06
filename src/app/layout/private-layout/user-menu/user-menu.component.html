@@ -1,37 +1,52 @@
-<div class="user-menu-wrapper">
-  <button class="avatar-btn" (click)="toggleMenu()" aria-label="Menú de usuario">
+<div class="user-menu">
+  <button class="user-menu__disparador" type="button" (click)="toggleMenu()" [attr.aria-expanded]="menuOpen()" aria-label="Menú de usuario">
     @if (avatar()) {
       <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
     } @else {
-      <span class="initials">{{ getInitials() }}</span>
+      <span class="user-menu__iniciales">{{ getInitials() }}</span>
     }
   </button>
 
   @if (menuOpen()) {
-    <div class="dropdown" (click)="$event.stopPropagation()">
-      <div class="dropdown-header">
-        <strong>{{ user()?.fullName }}</strong>
-        <small>{{ user()?.email }}</small>
+    <div class="user-menu__desplegable">
+      <div class="user-menu__cabecera">
+        @if (avatar()) {
+          <img class="user-menu__foto" [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+        } @else {
+          <span class="user-menu__foto user-menu__foto--iniciales">{{ getInitials() }}</span>
+        }
+        <span class="user-menu__identidad">
+          <strong>{{ user()?.fullName }}</strong>
+          @if (rol()) {
+            <small>{{ rol() }}</small>
+          }
+          <small>{{ user()?.email }}</small>
+        </span>
       </div>
-      
-      <hr />
-      
-      <button (click)="goTo('/app/perfil')">
-        <i class="fas fa-user"></i> Mi perfil
-      </button>
-      
-      <button (click)="goTo('/app/ajustes/cuenta')">
-        <i class="fas fa-cog"></i> Ajustes de cuenta
+
+      <button type="button" (click)="goTo('/app/perfil')">
+        <i class="fa-solid fa-user" aria-hidden="true"></i>
+        <span>Mi perfil</span>
       </button>
 
-      <button (click)="goTo('/app/ajustes/seguridad')">
-        <i class="fas fa-shield-alt"></i> Seguridad
+      <button type="button" (click)="goTo('/app/hub')">
+        <i class="fa-solid fa-link" aria-hidden="true"></i>
+        <span>Mis enlaces</span>
       </button>
-      
-      <hr />
-      
-      <button class="logout" (click)="logout()">
-        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+
+      <button type="button" (click)="goTo('/app/ajustes/cuenta')">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        <span>Ajustes de cuenta</span>
+      </button>
+
+      <button type="button" (click)="goTo('/app/ajustes/seguridad')">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        <span>Seguridad</span>
+      </button>
+
+      <button type="button" class="user-menu__salir" (click)="logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+        <span>Cerrar sesión</span>
       </button>
     </div>
   }

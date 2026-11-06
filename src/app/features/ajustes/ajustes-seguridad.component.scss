@@ -64,7 +64,6 @@
   font-size: .72rem;
   font-weight: 700;
   letter-spacing: .04em;
-  text-transform: uppercase;
   padding: .3rem .6rem;
   border-radius: 999px;
   white-space: nowrap;
@@ -172,10 +171,10 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  background: var(--accent-cyan);
   color: #001018;
 
-  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0, 242, 254, .3); }
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74, 158, 255, .3); }
   &:disabled { opacity: .55; cursor: not-allowed; }
 }
 

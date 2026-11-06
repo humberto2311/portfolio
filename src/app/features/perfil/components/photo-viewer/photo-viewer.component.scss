@@ -4,7 +4,7 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(4, 8, 15, 0.92);
+  background: #05070a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,7 +23,6 @@
     align-items: center;
     justify-content: center;
 
-    // Transparente para que el gris del fondo se vea alrededor de la foto.
     background: transparent;
     min-width: 0;
     padding: clamp(0.5rem, 2.5vw, 2rem);
@@ -318,10 +317,10 @@
 }
 
 .primario {
-  background: linear-gradient(135deg, $cyan-main 0%, $cyan-secondary 100%);
+  background: $accent;
   border: none;
-  border-radius: 8px;
-  color: #061018;
+  border-radius: 999px;
+  color: #08090b;
   font-size: 0.76rem;
   font-weight: 700;
   padding: 0.35rem 0.7rem;

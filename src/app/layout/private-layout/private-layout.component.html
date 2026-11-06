@@ -1,10 +1,16 @@
-<div class="private-layout-container">
-  <app-private-navbar />
+<div class="shell" [class.shell--rail-mini]="rail.colapsado()">
+  <app-side-nav />
 
-  <main class="main-content">
-    <router-outlet />
-  </main>
+  <div class="shell__body">
+    <app-private-navbar />
 
-  <!-- Panel lateral global -->
+    <main class="shell__main" [class.shell__main--full]="anchoCompleto()">
+      <router-outlet />
+    </main>
+
+    <app-footer class="shell__footer" />
+  </div>
+
+  <app-tab-bar />
   <app-side-panel />
 </div>

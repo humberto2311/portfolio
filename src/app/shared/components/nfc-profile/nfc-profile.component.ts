@@ -62,9 +62,8 @@ export class NfcProfileComponent implements OnInit {
     this.modalSvc.openLogin(tab);
   }
 
-  // AGREGA ESTE MÉTODO PARA EL BOTÓN "VER QUÉ HACE LA APP"
   scrollToGit(): void {
-    const el = document.getElementById('git');
+    const el = document.getElementById('como-funciona');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }

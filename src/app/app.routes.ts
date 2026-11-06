@@ -17,6 +17,8 @@ import { TarjetaPublicaComponent } from './features/tarjeta-publica/tarjeta-publ
 import { PoliticasComponent } from './features/politicas/politicas.component';
 import { AjustesCuentaComponent } from './features/ajustes/ajustes-cuenta.component';
 import { AjustesSeguridadComponent } from './features/ajustes/ajustes-seguridad.component';
+import { AccesoNativoComponent } from './features/auth/acceso-nativo/acceso-nativo.component';
+import { accesoNativoGuard } from './core/guards/acceso-nativo.guard';
 
 export const routes: Routes = [
   // Tarjeta de contacto pública (destino del QR / NFC)
@@ -25,6 +27,7 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [accesoNativoGuard],
 
     children: [
 { 
@@ -47,14 +50,15 @@ export const routes: Routes = [
 
   { path: 'oauth2/callback', component: OAuthCallbackComponent },
 
+  { path: 'acceso', component: AccesoNativoComponent, canActivate: [publicGuard] },
+
   {
     path: 'app',
     component: PrivateLayoutComponent,
     canActivate: [authGuard], 
     children: [
       { path: '', component: FeedComponent },
-      { path: 'informacion-personal', component: InformacionPersonalComponent }, // 👈 Modo Edición
-      { path: 'proyectos', component: ProyectosComponent },
+      { path: 'informacion-personal', component: InformacionPersonalComponent, data: { anchoCompleto: true } },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'perfil', component: PerfilComponent },
       { path: 'perfil/:username', component: PerfilComponent },

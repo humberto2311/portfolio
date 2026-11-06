@@ -1,22 +1,16 @@
-<div class="feed-fullscreen-bg">
-  <div class="feed-list">
-    
-    @if (cargando()) {
-      <div class="loader">
-        <span class="spinner"></span>
-        <span>Cargando feed...</span>
-      </div>
-    } @else {
-      
-      <app-crear-post />
+<div class="feed">
+  @if (cargando()) {
+    <div class="loader">
+      <span class="spinner"></span>
+      <span>Cargando feed...</span>
+    </div>
+  } @else {
+    <app-crear-post />
 
-      @for (post of publicacionesVisibles(); track post.uid) {
-        <app-post-card [post]="post" />
-      }
-
+    @for (post of publicacionesVisibles(); track post.uid) {
+      <app-post-card [post]="post" />
     }
-
-  </div>
+  }
 
   <app-toast />
 </div>

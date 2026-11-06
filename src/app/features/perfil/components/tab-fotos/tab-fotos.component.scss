@@ -46,16 +46,24 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, $cyan-main 0%, $cyan-secondary 100%);
-  color: #061018;
+  background: $accent;
+  color: #08090b;
   border: none;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-height: 36px;
+  padding: 0.45rem 0.9rem;
   cursor: pointer;
 
-  &:disabled { opacity: 0.6; cursor: default; }
+  &:hover:not(:disabled) {
+    background: $accent-strong;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 }
 
 .seccion {
@@ -66,8 +74,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
   margin-bottom: 1.2rem;
 }
 
@@ -81,10 +89,12 @@
     object-fit: cover;
     border-radius: 10px;
     border: 1px solid $bg-border;
-    transition: 0.2s;
+    transition: opacity 0.2s ease;
     cursor: zoom-in;
 
-    &:hover { opacity: 0.85; transform: scale(1.02); }
+    &:hover {
+      opacity: 0.85;
+    }
   }
 }
 
@@ -94,16 +104,17 @@
   right: 6px;
 
   .more {
-    background: rgba(6, 11, 20, 0.75);
-    border: 1px solid $bg-border;
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
     color: $text-light;
-    border-radius: 8px;
-    width: 28px;
-    height: 28px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
-    backdrop-filter: blur(4px);
 
-    &:hover { color: $cyan-main; border-color: $border-cyan; }
+    &:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
   }
 
   .dropdown-menu {

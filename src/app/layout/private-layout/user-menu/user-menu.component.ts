@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
+import { ResumeService } from '../../../core/services/resume.service';
 
 @Component({
   selector: 'app-user-menu',
@@ -16,13 +17,38 @@ export class UserMenuComponent implements OnInit {
   private router = inject(Router);
   private elRef = inject(ElementRef);
   private perfiles = inject(UserProfileService);
+  private resumes = inject(ResumeService);
 
   readonly user = this.auth.currentUser;
   readonly menuOpen = signal(false);
   readonly avatar = this.perfiles.avatar;
+  readonly rol = signal<string>('');
 
   ngOnInit(): void {
     this.perfiles.cargarMiAvatar();
+
+    const usuario = this.user();
+    if (!usuario?.id) return;
+
+    this.perfiles.getPerfilCompletoPorId(usuario.id).subscribe({
+      next: (perfil) => {
+        const rol = (perfil?.role || perfil?.headline || '').trim();
+
+        if (rol && rol.toLowerCase() !== 'user') {
+          this.rol.set(rol);
+          return;
+        }
+
+        this.resumes.getProfileByUserId(usuario.id).subscribe({
+          next: (rp) => {
+            const headline = (rp?.headline || '').trim();
+            if (headline) this.rol.set(headline);
+          },
+          error: () => {},
+        });
+      },
+      error: () => {},
+    });
   }
 
   toggleMenu() { this.menuOpen.update(v => !v); }
@@ -39,13 +65,14 @@ export class UserMenuComponent implements OnInit {
     return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'U';
   }
 
-  goTo(path: string) { 
-    this.menuOpen.set(false); 
-    this.router.navigate([path]); 
+  goTo(path: string) {
+    this.menuOpen.set(false);
+    this.router.navigate([path]);
   }
-  
-  logout() { 
-    this.auth.logout(); 
-    this.router.navigate(['/']); 
+
+  logout() {
+    this.menuOpen.set(false);
+    this.auth.logout();
+    this.router.navigate(['/']);
   }
 }

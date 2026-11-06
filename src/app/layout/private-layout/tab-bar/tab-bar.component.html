@@ -1,0 +1,70 @@
+<div class="hoja-fondo" [class.visible]="hoja()" (click)="cerrarHoja()"></div>
+
+<nav class="tabbar" aria-label="Navegación">
+  <a class="tab" routerLink="/app" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="activo">
+    <i class="tab__icon fa-solid fa-house" aria-hidden="true"></i>
+    <span class="tab__label">Inicio</span>
+  </a>
+
+  <a class="tab" routerLink="/app/talento" routerLinkActive="activo">
+    <i class="tab__icon fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    <span class="tab__label">Talento</span>
+  </a>
+
+  <button type="button" class="tab" (click)="abrirMensajes()">
+    <i class="tab__icon fa-solid fa-comment-dots" aria-hidden="true"></i>
+    <span class="tab__label">Mensajes</span>
+  </button>
+
+  <a class="tab tab--perfil" routerLink="/app/perfil" routerLinkActive="activo">
+    <span class="tab__avatar">
+      @if (avatar()) {
+        <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+      } @else {
+        <span>{{ iniciales() }}</span>
+      }
+    </span>
+    <span class="tab__label">Perfil</span>
+  </a>
+
+  <button type="button" class="tab" [class.activo]="hoja()" (click)="alternarHoja()" [attr.aria-expanded]="hoja()">
+    <i class="tab__icon fa-solid fa-bars" aria-hidden="true"></i>
+    <span class="tab__label">Más</span>
+  </button>
+</nav>
+
+@if (hoja()) {
+  <div class="hoja" role="dialog" aria-label="Más opciones">
+    <div class="hoja__arrastre"></div>
+
+    <div class="hoja__cuenta">
+      <span class="hoja__avatar">
+        @if (avatar()) {
+          <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+        } @else {
+          <span>{{ iniciales() }}</span>
+        }
+      </span>
+      <span class="hoja__datos">
+        <strong>{{ user()?.fullName }}</strong>
+        <small>{{ user()?.email }}</small>
+      </span>
+    </div>
+
+    <ul class="hoja__lista">
+      @for (extra of extras; track extra.label) {
+        <li>
+          <button type="button" (click)="ir(extra.ruta!)">
+            <i [class]="extra.icon" aria-hidden="true"></i>
+            <span>{{ extra.label }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <button type="button" class="hoja__salir" (click)="logout()">
+      <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
+}

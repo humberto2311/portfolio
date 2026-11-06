@@ -1,4 +1,4 @@
-import { Component, inject, signal, effect, computed, OnInit } from '@angular/core';
+import { Component, Input, inject, signal, effect, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Capacitor } from '@capacitor/core';
@@ -23,6 +23,8 @@ export class LoginModalComponent implements OnInit {
   modalSvc = inject(ModalService);
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
+
+  @Input() empotrado = false;
 
   readonly showPassword = signal(false);
   readonly maxDate = new Date().toISOString().split('T')[0];
@@ -146,6 +148,9 @@ export class LoginModalComponent implements OnInit {
   }
 
   close() {
+    if (this.empotrado) {
+      return;
+    }
     this.modalSvc.closeLogin();
     this.auth.cancelarVerificacion();
     this.codigo = '';

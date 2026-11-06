@@ -1,24 +1,23 @@
-// Paleta sincronizada con tu Navbar (Cyan Neon + Dark Navy)
 @import '@fortawesome/fontawesome-free/css/all.min.css';
-$bg-main: #0b0f19;
-$bg-card: #131826;
-$bg-hover: #1b2235;
-$border-color: rgba(0, 242, 254, 0.2);
+$bg-main: #0b0d10;
+$bg-card: #121519;
+$bg-hover: #1a1e24;
+$border-color: #23282f;
 
-$cyan-accent: #00f2fe;
-$emerald-active: #10b981;
-$coral-danger: #ff5c7c;
+$cyan-accent: #4a9eff;
+$emerald-active: #3fb950;
+$coral-danger: #e5484d;
 
 $text-bright: #ffffff;
-$text-main: #cfd6e4;
-$text-muted: #8891a3;
+$text-main: #e6e8ea;
+$text-muted: #8b949e;
 
 .hub-container {
-  min-height: calc(100vh - 80px);
+  min-height: 0;
   background-color: $bg-main;
   color: $text-main;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  padding: 32px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 20px 16px calc(24px + var(--safe-bottom));
 }
 
 .hub-header {
@@ -99,8 +98,7 @@ $text-muted: #8891a3;
         height: 8px;
         border-radius: 50%;
         background-color: $cyan-accent;
-        box-shadow: 0 0 8px $cyan-accent;
-        animation: pulse 1.5s infinite;
+        box-shadow: none;        animation: pulse 1.5s infinite;
       }
     }
   }
@@ -150,8 +148,7 @@ $text-muted: #8891a3;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0 15px rgba($cyan-accent, 0.4);
-      }
+        box-shadow: none;      }
     }
   }
 
@@ -357,7 +354,7 @@ $text-muted: #8891a3;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  background: #4a9eff;
   color: #0d1117;
   border: none;
   padding: 10px 18px;
@@ -394,7 +391,6 @@ $text-muted: #8891a3;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,6 +1,4 @@
 <div class="app-layout">
-  
-  <!-- 👇 LA MAGIA: Si está logueado usa el privado, si no, el público -->
   @if (authService.isAuthenticated()) {
     <app-private-navbar></app-private-navbar>
   } @else {
@@ -12,7 +10,6 @@
   </main>
 
   <app-login-modal></app-login-modal>
-  
-  <!-- El footer quizás quieras ocultarlo también si está logueado, pero eso depende de ti -->
+
   <app-footer></app-footer>
 </div>

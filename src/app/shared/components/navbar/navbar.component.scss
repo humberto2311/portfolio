@@ -1,362 +1,396 @@
-// ==========================================
-// PALETA NFC-SOFT
-// ==========================================
-$bg-navbar: rgba(11, 15, 25, 0.75);
-$bg-navbar-scrolled: rgba(8, 13, 24, 0.95);
-$text-primary: #f1f5f9;
-$text-secondary: #94a3b8;
-$accent-cyan: #00f2fe;
-$accent-blue: #4facfe;
-$border-soft: rgba(255, 255, 255, 0.08);
+@import '../../styles/variables';
 
-.navbar-header {
+$alto: 64px;
+
+.pub {
   position: sticky;
   top: 0;
-  z-index: 1000;
-  background-color: $bg-navbar;
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid $border-soft; /* LÍNEA DE DIVISIÓN RESTAURADA */
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 900;
+  background: $bg-main;
+  border-bottom: 1px solid $bg-border;
+  transition: box-shadow 0.25s ease;
 
-  // Línea inferior con glow cyan
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0, 242, 254, 0.4) 50%, transparent 100%);
-    pointer-events: none;
-    opacity: 0.6;
+  &--compact {
+    box-shadow: 0 8px 20px -16px rgba(0, 0, 0, 0.9);
+  }
+}
+
+.pub__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  min-height: $alto;
+  padding: 0 clamp(16px, 3.5vw, 32px);
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 28px);
+}
+
+.pub__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+
+  &:hover .pub__nombre {
+    color: $text-light;
+  }
+}
+
+.pub__nombre {
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: $text-light;
+  transition: color 0.2s ease;
+}
+
+.pub__secciones {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+}
+
+.pub__enlace {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: $text-muted;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+
+  &:hover {
+    color: $text-light;
+    background: $bg-hover;
   }
 
-  &.is-scrolled {
-    background-color: $bg-navbar-scrolled;
-    box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.5);
-    border-bottom-color: rgba(0, 242, 254, 0.15);
-  }
+  &--activa {
+    color: $text-light;
+    background: $bg-elevated;
 
-  .navbar-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0.65rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  // ==========================================
-  // BRANDING (Empresa + Persona)
-  // ==========================================
-  .navbar-brand {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    gap: 1.25rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      .brand-logo {
-        filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.6));
-      }
-      .person-name {
-        color: $accent-cyan;
-      }
-    }
-
-    .brand-company {
-      display: flex;
-      align-items: center;
-      .brand-logo {
-        height: 44px; 
-        width: auto;
-        object-fit: contain;
-        transition: filter 0.3s ease;
-      }
-    }
-
-    .brand-divider {
-      width: 1px;
-      height: 32px;
-      background: linear-gradient(to bottom, transparent, rgba(0, 242, 254, 0.4), transparent);
-    }
-
-    .brand-personal {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      line-height: 1.15;
-
-      .person-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: $text-primary;
-        letter-spacing: -0.01em;
-        transition: color 0.2s ease;
-      }
-
-      .person-role {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.6rem;
-        color: $accent-cyan;
-        text-transform: uppercase;
-        letter-spacing: 0.15em;
-        margin-top: 2px;
-      }
-    }
-  }
-
-  // ==========================================
-  // LINKS
-  // ==========================================
-  .navbar-links {
-    ul {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-
-      li {
-        a {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          color: $text-secondary;
-          text-decoration: none;
-          font-size: 0.85rem;
-          font-weight: 500;
-          padding: 0.5rem 0.85rem;
-          border-radius: 0.5rem;
-          background: none;
-          border: 1px solid transparent;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-family: inherit;
-
-          &:hover {
-            color: $text-primary;
-            background: rgba(0, 242, 254, 0.06);
-            border-color: rgba(0, 242, 254, 0.15);
-          }
-
-          // Estado Activo (RouterLinkActive)
-          &.active-link {
-            color: $accent-cyan;
-            background: rgba(0, 242, 254, 0.1);
-            border-color: rgba(0, 242, 254, 0.3);
-            position: relative;
-
-            &::before {
-              content: '';
-              position: absolute;
-              left: 50%;
-              bottom: -1px;
-              transform: translateX(-50%);
-              width: 60%;
-              height: 2px;
-              background: linear-gradient(90deg, transparent, $accent-cyan, transparent);
-              border-radius: 2px;
-            }
-          }
-        }
-
-        // CTA Gradiente (Generar CV)
-        .cv-generator-link {
-          color: #0b0f19;
-          background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
-          border: none;
-          font-weight: 700;
-          padding: 0.55rem 1rem;
-          box-shadow: 0 4px 14px -4px rgba(0, 242, 254, 0.5);
-          margin-left: 0.5rem;
-
-          &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px -4px rgba(0, 242, 254, 0.7);
-            color: #0b0f19;
-            background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
-            border-color: transparent;
-          }
-
-          svg { filter: brightness(0.15); }
-        }
-
-        // GitHub (Outline Cyan)
-        .github-link {
-          color: $accent-cyan;
-          background: rgba(0, 242, 254, 0.06);
-          border: 1px solid rgba(0, 242, 254, 0.3);
-
-          &:hover {
-            background: rgba(0, 242, 254, 0.12);
-            border-color: rgba(0, 242, 254, 0.5);
-            color: $accent-cyan;
-          }
-        }
-
-             // LOGIN (Estilo secundario oscuro)
-        .login-link {
-          display: inline-flex;       /* Alinea el ícono y el texto */
-          align-items: center;        /* Centrado vertical */
-          gap: 0.4rem;                /* Espacio entre ícono y texto */
-          color: $accent-cyan;
-          background: rgba(0, 242, 254, 0.06);
-          border: 1px solid rgba(0, 242, 254, 0.3);
-          font-family: inherit;       /* Hereda la fuente del navbar */
-          font-size: 0.85rem;
-          font-weight: 500;
-          padding: 0.5rem 0.85rem;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
-
-          &:hover {
-            background: rgba(0, 242, 254, 0.12);
-            border-color: rgba(0, 242, 254, 0.5);
-            color: $accent-cyan;
-          }
-        }
-
-        // USUARIO AUTENTICADO: chip navegable + botón salir aparte
-        .user-menu {
-          display: flex;
-          align-items: center;
-          gap: 0.35rem;
-
-          .user-chip {
-            // Sin el padding propio: toma el estilo de `li a` de arriba.
-            max-width: 240px;
-
-            .user-avatar {
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 24px;
-              height: 24px;
-              flex-shrink: 0;
-              border-radius: 50%;
-              background: linear-gradient(135deg, $accent-cyan 0%, $accent-blue 100%);
-              color: #0b0f19;
-              font-size: 0.72rem;
-              font-weight: 700;
-              text-transform: uppercase;
-            }
-
-            .user-name {
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-          }
-
-          .user-salir {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            background: none;
-            border: 1px solid transparent;
-            color: $text-secondary;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-              color: #ff6b6b;
-              background: rgba(255, 107, 107, 0.08);
-              border-color: rgba(255, 107, 107, 0.25);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // ==========================================
-  // HAMBURGUESA Y RESPONSIVE
-  // ==========================================
-  .mobile-toggle {
-    display: none;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 26px;
-    height: 18px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-
-    .hamburger-bar {
-      height: 2px;
-      width: 100%;
-      background-color: $text-primary;
-      border-radius: 2px;
-      transition: all 0.25s ease;
-    }
-
-    &[aria-expanded="true"] {
-      .hamburger-bar:nth-child(1) { transform: translateY(8px) rotate(45deg); background-color: $accent-cyan; }
-      .hamburger-bar:nth-child(2) { opacity: 0; }
-      .hamburger-bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); background-color: $accent-cyan; }
-    }
-  }
-
-  @media (max-width: 768px) {
-    .mobile-toggle { display: flex; }
-
-    .navbar-brand {
-      .brand-divider, .brand-personal { display: none; }
-      .brand-company .brand-logo { height: 38px; }
-    }
-
-    .navbar-links {
-      display: none;
+    &::after {
+      content: '';
       position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      width: 100%;
-      background-color: rgba(8, 13, 24, 0.98);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0, 242, 254, 0.15);
-      padding: 1rem 1.25rem;
-      box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.6);
-
-      &.active {
-        display: block;
-        animation: slideDown 0.25s ease-out;
-      }
-
-      ul {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.35rem;
-
-        li {
-          a {
-            width: 100%;
-            padding: 0.75rem 0.9rem;
-            justify-content: flex-start;
-          }
-          .cv-generator-link { justify-content: center; margin-left: 0; margin-top: 0.5rem; }
-          .login-link { justify-content: center; margin-left: 0; margin-top: 0.25rem; }
-          .user-menu { width: 100%; margin-top: 0.25rem;
-            .user-chip { flex: 1; max-width: none; justify-content: flex-start; }
-            .user-salir { padding: 0.5rem 0.7rem; }
-          }
-        }
-      }
+      left: 50%;
+      bottom: 3px;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 2px;
+      border-radius: 2px;
+      background: $accent;
     }
   }
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.pub__volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: $text-muted;
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color 0.18s ease, background-color 0.18s ease;
+
+  &:hover {
+    color: $text-light;
+    background: $bg-hover;
+  }
+}
+
+.pub__acciones {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pub__creador {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border: 1px solid $bg-border;
+  border-radius: 999px;
+  background: $bg-elevated;
+  color: $text-muted;
+  font-size: 0.84rem;
+  font-weight: 550;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+
+  i {
+    font-size: 0.8rem;
+    color: $accent;
+  }
+
+  &:hover {
+    color: $text-light;
+    background: $bg-hover;
+    border-color: $accent-border;
+  }
+}
+
+.pub__tema {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.18s ease, background-color 0.18s ease;
+
+  i {
+    font-size: 0.88rem;
+  }
+
+  &:hover {
+    color: $text-light;
+    background: $bg-hover;
+  }
+}
+
+.pub__cta {
+  @include touch-target(38px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: $accent;
+  color: $on-accent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+
+  &:hover {
+    background: $accent-strong;
+  }
+}
+
+.pub__menu {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid $bg-border;
+  border-radius: 10px;
+  background: $bg-elevated;
+  color: $text-light;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+.pub__progreso {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  background: $accent;
+  transition: width 0.12s linear;
+}
+
+.pub__panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid $bg-border;
+  background: $bg-card;
+  box-shadow: 0 18px 34px -24px rgba(0, 0, 0, 0.95);
+  padding: 10px 14px 14px;
+}
+
+.pub__fila {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: $text-light;
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    background: $bg-hover;
+  }
+
+  & + .pub__fila {
+    margin-top: 2px;
+  }
+}
+
+.pub__fila-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
+  color: $accent;
+  font-size: 0.85rem;
+}
+
+.pub__fila-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  strong {
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 0.78rem;
+    color: $text-muted;
+  }
+}
+
+.pub__fila-flecha {
+  margin-left: auto;
+  color: $text-faint;
+  font-size: 0.72rem;
+}
+
+.pub__panel-acciones {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid $bg-border;
+}
+
+.pub__entra {
+  width: 100%;
+  @include touch-target(42px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid $bg-border;
+  border-radius: 999px;
+  background: transparent;
+  color: $text-light;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 550;
+  cursor: pointer;
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+.pub__entra--principal {
+  border-color: $accent;
+  background: $accent;
+  color: $on-accent;
+  font-weight: 650;
+
+  &:hover {
+    background: $accent-strong;
+    border-color: $accent-strong;
+  }
+}
+
+.pub__alta {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    color: $text-light;
+  }
+}
+
+@media (max-width: 1120px) {
+  .pub__creador span,
+  .pub__tema span {
+    display: none;
+  }
+
+  .pub__creador,
+  .pub__tema {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 899px) {
+  .pub__secciones,
+  .pub__volver,
+  .pub__creador {
+    display: none;
+  }
+
+  .pub__menu {
+    display: inline-flex;
+  }
+
+  .pub__panel {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .pub__inner {
+    gap: 10px;
+    padding: 0 14px;
+  }
+
+  .pub__nombre {
+    font-size: 0.95rem;
+  }
+
+  .pub__cta {
+    padding: 0 13px;
+    font-size: 0.8rem;
+  }
+
+  .pub__tema {
+    padding: 7px 9px;
+    font-size: 0.85rem;
+  }
 }

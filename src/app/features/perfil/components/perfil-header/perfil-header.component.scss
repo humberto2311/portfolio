@@ -1,93 +1,95 @@
-$cyan-glow: #00f2fe;
-$bg-dark: #0f172a;
-$bg-card: #1e293b;
-$text-main: #ffffff;
+@import '../../../../shared/styles/variables';
 
 .header-card {
-  background-color: $bg-card;
+  background: $bg-card;
+  border: 1px solid $bg-border;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .cover-banner {
-  height: 240px;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  height: 220px;
+  background: $bg-elevated no-repeat center / cover;
   position: relative;
 
-  &.abrible { cursor: zoom-in; }
+  &.abrible {
+    cursor: zoom-in;
+  }
 
   .cover-actions {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 12px;
+    right: 12px;
     display: flex;
     gap: 8px;
   }
 
   .btn-edit-cover {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
     cursor: pointer;
-    backdrop-filter: blur(4px);
 
-    &:hover { background: rgba(255, 255, 255, 0.2); }
-    &.quitar { padding: 8px 12px; }
-    &:disabled { opacity: 0.6; cursor: default; }
-  }
+    &:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.75);
+    }
 
-  @media (max-width: 768px) {
-    height: 170px;
+    &.quitar {
+      padding: 0 12px;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
   }
 }
 
-.header-body { 
-  padding: 0 24px 24px 24px; 
-
-  @media (max-width: 768px) {
-    padding: 0 16px 16px 16px;
-  }
+.header-body {
+  padding: 0 20px 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .header-row {
   display: flex;
   align-items: flex-end;
-  gap: 24px;
-  margin-top: -50px;
+  gap: 20px;
+  margin-top: -55px;
   flex-wrap: wrap;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-top: -60px;
-    gap: 16px;
-  }
 }
 
-.avatar-block .avatar-wrapper {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: $bg-dark;
-  border: 4px solid $bg-card;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 2px $cyan-glow, 0 0 15px rgba(0, 242, 254, 0.3);
-  
+.avatar-block {
+  .avatar-wrapper {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: $bg-card;
+    border: 4px solid $bg-card;
+    box-shadow: 0 0 0 1px $bg-border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.abrible {
+      cursor: zoom-in;
+    }
+  }
+
   .initials {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: $cyan-glow;
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: $text-muted;
   }
 
   .profile-img {
@@ -100,109 +102,109 @@ $text-main: #ffffff;
 
   .btn-edit-avatar {
     position: absolute;
-    right: 4px;
-    bottom: 4px;
-    width: 34px;
-    height: 34px;
+    right: 2px;
+    bottom: 2px;
+    @include touch-target(34px);
     border-radius: 50%;
     border: 2px solid $bg-card;
-    background: rgba(0, 0, 0, 0.55);
-    color: $cyan-glow;
+    background: $bg-elevated;
+    color: $text-light;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
 
-    &:hover:not(:disabled) { background: rgba(0, 0, 0, 0.8); }
-    &:disabled { opacity: 0.6; cursor: default; }
+    &:hover:not(:disabled) {
+      background: $bg-hover;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
   }
 }
 
 .user-info {
   flex: 1;
   margin-top: 40px;
-  min-width: 0; /* 👈 Clave para que el texto largo no desborde el contenedor flex */
-
-  @media (max-width: 768px) {
-    margin-top: 0;
-    width: 100%;
-  }
+  min-width: 0;
 
   .name-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    /* Sin flex-wrap para que el chulo siempre se quede al lado */
-    flex-wrap: nowrap; 
+    overflow-wrap: anywhere;
 
-    @media (max-width: 768px) {
-      justify-content: center;
+    h1 {
+      display: inline;
+      font-size: clamp(1.15rem, 0.95rem + 0.9vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: $text-light;
+      margin: 0;
+      line-height: 1.3;
     }
 
-    h1 { 
-      font-size: 1.8rem; 
-      color: $text-main; 
-      margin: 0; 
-      line-height: 1.2;
-      /* 👇 Si el nombre es muy largo, se ajusta o se corta sin empujar el chulo hacia abajo */
-      word-break: break-word; 
-      
-      @media (max-width: 768px) {
-        font-size: 1.5rem;
-      }
-    }
-
-    .verified { 
-      color: $cyan-glow; 
-      font-size: 1.2rem;
-      /* 👇 Evita que el chulo se aplaste o se deforme */
-      flex-shrink: 0; 
-      margin-top: 4px; 
+    .verified {
+      display: inline-block;
+      vertical-align: -0.14em;
+      margin-left: 7px;
+      color: $accent;
+      font-size: clamp(0.95rem, 0.8rem + 0.45vw, 1.15rem);
     }
   }
 
-  .rol { 
-    color: $cyan-glow; 
-    font-size: 1rem; 
-    margin: 4px 0 8px 0; 
+  .rol {
+    color: $text-muted;
+    font-size: clamp(0.78rem, 0.68rem + 0.5vw, 0.95rem);
+    margin: 4px 0 10px;
+    line-height: 1.35;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
 
   .rol-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
 
-    .rol { margin: 0 0 2px 0; }
+    .rol {
+      margin: 0 0 2px;
+      min-width: 0;
+    }
 
     .rol-input {
-      background: rgba(6, 11, 20, 0.9);
-      border: 1px solid $cyan-glow;
+      background: $bg-input;
+      border: 1px solid $bg-border;
       border-radius: 8px;
-      color: $text-main;
+      color: $text-light;
       font-size: 0.9rem;
       font-family: inherit;
-      padding: 0.3rem 0.6rem;
-      min-width: 260px;
+      padding: 6px 10px;
+      width: 100%;
+      min-width: 0;
+      max-width: 320px;
       outline: none;
+
+      &:focus {
+        border-color: $accent;
+      }
     }
 
     .btn-rol {
-      background: transparent;
-      border: 1px solid rgba(0, 242, 254, 0.35);
-      color: $cyan-glow;
-      width: 26px;
-      height: 26px;
-      border-radius: 7px;
+      @include touch-target(30px);
+      background: $bg-elevated;
+      border: 1px solid $bg-border;
+      color: $text-light;
+      border-radius: 8px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       flex-shrink: 0;
 
-      &:hover:not(:disabled) { background: rgba(0, 242, 254, 0.12); }
-      &:disabled { opacity: 0.6; cursor: wait; }
+      &:hover:not(:disabled) {
+        background: $bg-hover;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
     }
   }
 
@@ -210,34 +212,37 @@ $text-main: #ffffff;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(0, 242, 254, 0.1);
-    color: $cyan-glow;
+    background: $accent-soft;
+    color: $accent;
     padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    border: 1px solid rgba(0, 242, 254, 0.2);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
 
     .dot {
       width: 6px;
       height: 6px;
-      background: $cyan-glow;
+      background: currentColor;
       border-radius: 50%;
     }
 
     &.badge-toggle {
       cursor: pointer;
       font-family: inherit;
-      transition: 0.2s;
+      border: none;
 
-      &:hover:not(:disabled) { background: rgba(0, 242, 254, 0.2); }
-      &:disabled { opacity: 0.6; cursor: wait; }
+      &:hover:not(:disabled) {
+        background: rgba(74, 158, 255, 0.22);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
 
       &.sin-disponibilidad {
-        color: #f59e0b;
-        border-color: rgba(245, 158, 11, 0.4);
-        background: rgba(245, 158, 11, 0.1);
-
-        .dot { background: #f59e0b; }
+        color: #d99123;
+        background: rgba(217, 145, 35, 0.14);
       }
     }
   }
@@ -245,27 +250,22 @@ $text-main: #ffffff;
 
 .actions {
   display: flex;
-  gap: 12px;
-  margin-top: 40px;
+  gap: 10px;
+  margin-top: 32px;
   flex-wrap: wrap;
 
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: center;
-    margin-top: 16px;
-  }
-
   button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     border: none;
-    transition: all 0.2s;
     white-space: nowrap;
 
     &:disabled {
@@ -275,47 +275,106 @@ $text-main: #ffffff;
   }
 
   .btn-follow {
-    background-color: $cyan-glow;
-    color: #000;
+    background: $accent;
+    color: #08090b;
 
-    &:hover:not(:disabled) { 
-      background-color: darken($cyan-glow, 10%); 
+    &:hover:not(:disabled) {
+      background: $accent-strong;
     }
 
     &.skeleton {
-      width: 110px; 
+      width: 110px;
     }
   }
 
   .btn-follow.following {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: $text-main;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    
+    background: $bg-elevated;
+    color: $text-light;
+    border: 1px solid $bg-border;
+
     &:hover:not(:disabled) {
-      background-color: rgba(239, 68, 68, 0.2);
-      color: #ef4444;
-      border-color: #ef4444;
+      background: rgba(229, 72, 77, 0.12);
+      color: $danger;
+      border-color: $danger;
     }
   }
 
   .btn-outline {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: $text-main;
-    
-    &:hover:not(:disabled) { 
-      background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid $bg-border;
+    color: $text-light;
+
+    &:hover:not(:disabled) {
+      background: $bg-hover;
     }
   }
 
   .btn-primary {
-    background: rgba(0, 242, 254, 0.15);
-    color: $cyan-glow;
-    border: 1px solid rgba(0, 242, 254, 0.3);
-    
-    &:hover:not(:disabled) { 
-      background: rgba(0, 242, 254, 0.25); 
+    background: $accent-soft;
+    color: $accent;
+    border: 1px solid $accent-border;
+
+    &:hover:not(:disabled) {
+      background: rgba(74, 158, 255, 0.22);
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .cover-banner {
+    height: 150px;
+  }
+
+  .header-body {
+    padding: 0 14px 16px;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: -64px;
+    gap: 14px;
+  }
+
+  .avatar-block .avatar-wrapper {
+    width: 96px;
+    height: 96px;
+  }
+
+  .user-info {
+    margin-top: 0;
+    width: 100%;
+
+    .name-row h1 {
+      font-size: 1.3rem;
+    }
+
+    .rol-row {
+      justify-content: center;
+    }
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: center;
+    margin-top: 14px;
+
+    button {
+      flex: 1 1 auto;
+      min-height: 44px;
+      padding: 0 12px;
+      font-size: 0.82rem;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 430px) {
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 }

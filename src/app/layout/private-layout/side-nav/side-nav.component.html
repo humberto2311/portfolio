@@ -1,0 +1,69 @@
+<nav class="rail" [class.rail--mini]="rail.colapsado()" aria-label="Navegación principal">
+  <a class="rail__marca" routerLink="/app" [title]="'NFC-Soft'">
+    <img src="assets/images/logo.png" alt="NFC-Soft" />
+    <span>NFC-Soft</span>
+  </a>
+
+  <button
+    type="button"
+    class="rail__colapsar"
+    (click)="rail.alternar()"
+    [attr.aria-expanded]="!rail.colapsado()"
+    [title]="rail.colapsado() ? 'Expandir menú' : 'Colapsar menú'">
+    <i
+      class="rail__icon"
+      [class]="rail.colapsado() ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"
+      aria-hidden="true"></i>
+    <span>Colapsar</span>
+  </button>
+
+  <ul class="rail__lista">
+    @for (item of navegacion; track item.label) {
+      <li>
+        @if (item.accion === 'mensajes') {
+          <button type="button" class="rail__item" [class.activo]="mensajes.isOpen()" [title]="item.label" (click)="abrirMensajes()">
+            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+            <span class="rail__etiqueta">{{ item.label }}</span>
+          </button>
+        } @else {
+          <a
+            class="rail__item"
+            [title]="item.label"
+            [routerLink]="item.ruta"
+            routerLinkActive="activo"
+            [routerLinkActiveOptions]="{ exact: !!item.exacto }">
+            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+            <span class="rail__etiqueta">{{ item.label }}</span>
+          </a>
+        }
+      </li>
+    }
+  </ul>
+
+  <div class="rail__empuje"></div>
+
+  <ul class="rail__lista rail__lista--pie">
+    @for (item of salida; track item.label) {
+      <li>
+        <a class="rail__item" [title]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
+          <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+          <span class="rail__etiqueta">{{ item.label }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+
+  <a class="rail__yo" routerLink="/app/perfil" routerLinkActive="activo" [title]="user()?.fullName ?? 'Mi perfil'">
+    <span class="rail__avatar">
+      @if (avatar()) {
+        <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+      } @else {
+        <span>{{ iniciales() }}</span>
+      }
+    </span>
+    <span class="rail__datos">
+      <strong>{{ user()?.fullName }}</strong>
+      <small>{{ subtitulo() }}</small>
+    </span>
+  </a>
+</nav>

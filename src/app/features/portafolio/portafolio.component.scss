@@ -6,10 +6,10 @@ $bg-panel: #131826;
 $bg-input: #0e1421;
 $text-primary: #f1f5f9;
 $text-secondary: #8891a3;
-$accent-cyan: #00f2fe;
-$accent-blue: #4facfe;
+$accent-cyan: #4a9eff;
+$accent-blue: #6cb8ff;
 $border-soft: rgba(255, 255, 255, 0.08);
-$border-cyan: rgba(0, 242, 254, 0.25);
+$border-cyan: rgba(74, 158, 255, 0.25);
 
 :host {
   display: block;
@@ -38,8 +38,6 @@ $border-cyan: rgba(0, 242, 254, 0.25);
     display: inline-block;
     color: $accent-cyan;
     font-size: 0.7rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
     font-weight: 700;
     margin-bottom: 0.4rem;
   }
@@ -88,13 +86,13 @@ $border-cyan: rgba(0, 242, 254, 0.25);
   }
 
   &.primary {
-    background: linear-gradient(135deg, $accent-cyan, $accent-blue);
+    background: $accent-cyan;
     color: #04121c;
-    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.18);
+    box-shadow: 0 6px 20px rgba(74, 158, 255, 0.18);
 
     &:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(0, 242, 254, 0.28);
+      box-shadow: 0 8px 24px rgba(74, 158, 255, 0.28);
     }
   }
 
@@ -112,12 +110,12 @@ $border-cyan: rgba(0, 242, 254, 0.25);
   &.dashed {
     width: 100%;
     justify-content: center;
-    background: rgba(0, 242, 254, 0.04);
+    background: rgba(74, 158, 255, 0.04);
     border: 1px dashed $border-cyan;
     color: $accent-cyan;
 
     &:hover {
-      background: rgba(0, 242, 254, 0.08);
+      background: rgba(74, 158, 255, 0.08);
     }
   }
 }
@@ -129,7 +127,7 @@ $border-cyan: rgba(0, 242, 254, 0.25);
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: rgba(0, 242, 254, 0.08);
+  background: rgba(74, 158, 255, 0.08);
   border: 1px solid $border-cyan;
   color: $text-primary;
   padding: 0.7rem 1rem;
@@ -186,8 +184,8 @@ $border-cyan: rgba(0, 242, 254, 0.25);
 
     &.active {
       border-color: $accent-cyan;
-      background: rgba(0, 242, 254, 0.07);
-      box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.25) inset;
+      background: rgba(74, 158, 255, 0.07);
+      box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.25) inset;
     }
 
     .tarjeta-tab-content {
@@ -291,7 +289,7 @@ $border-cyan: rgba(0, 242, 254, 0.25);
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: rgba(0, 242, 254, 0.12);
+      background: rgba(74, 158, 255, 0.12);
       color: $accent-cyan;
       font-size: 0.72rem;
       font-weight: 800;
@@ -346,7 +344,7 @@ $border-cyan: rgba(0, 242, 254, 0.25);
     align-items: center;
     justify-content: center;
     border-radius: 0.5rem;
-    background: rgba(0, 242, 254, 0.1);
+    background: rgba(74, 158, 255, 0.1);
     color: $accent-cyan;
     font-size: 0.85rem;
   }
@@ -367,8 +365,8 @@ $border-cyan: rgba(0, 242, 254, 0.25);
 
   &.active {
     border-color: $accent-cyan;
-    background: rgba(0, 242, 254, 0.07);
-    box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.25) inset;
+    background: rgba(74, 158, 255, 0.07);
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.25) inset;
   }
 }
 
@@ -389,7 +387,6 @@ $border-cyan: rgba(0, 242, 254, 0.25);
   span {
     font-size: 0.72rem;
     color: $text-secondary;
-    text-transform: uppercase;
     letter-spacing: 0.06em;
     font-weight: 600;
   }
@@ -411,7 +408,7 @@ $border-cyan: rgba(0, 242, 254, 0.25);
 
     &:focus {
       border-color: $accent-cyan;
-      box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.1);
+      box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
     }
   }
 }
@@ -432,7 +429,7 @@ textarea {
 
   &:focus {
     border-color: $accent-cyan;
-    box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.1);
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
   }
 }
 
@@ -497,7 +494,6 @@ textarea {
     margin: 0 0 0.6rem;
     font-size: 0.8rem;
     color: $text-secondary;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
 
     i {
@@ -533,7 +529,7 @@ textarea {
 
   &:hover:not(.agregado) {
     border-color: $border-cyan;
-    background: rgba(0, 242, 254, 0.07);
+    background: rgba(74, 158, 255, 0.07);
   }
 
   &.agregado {
@@ -567,8 +563,7 @@ textarea {
   gap: 0.45rem;
   color: $text-secondary;
   font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   font-weight: 600;
 
   i {
@@ -591,7 +586,7 @@ textarea {
     inset: -40% -30% auto auto;
     width: 220px;
     height: 220px;
-    background: radial-gradient(circle, rgba(0, 242, 254, 0.14), transparent 70%);
+    background: radial-gradient(circle, rgba(74, 158, 255, 0.14), transparent 70%);
     pointer-events: none;
   }
 
@@ -609,7 +604,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 242, 254, 0.1);
+    background: rgba(74, 158, 255, 0.1);
     border: 1px solid $border-cyan;
     color: $accent-cyan;
     font-weight: 800;
@@ -673,8 +668,7 @@ textarea {
     .notas-label {
       display: block;
       font-size: 0.66rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.06em;
       color: $text-secondary;
       margin-bottom: 0.3rem;
     }
@@ -698,7 +692,6 @@ textarea {
 
     .brand {
       font-size: 0.66rem;
-      letter-spacing: 0.18em;
       color: $accent-cyan;
       font-weight: 800;
     }
@@ -706,7 +699,6 @@ textarea {
     .tipo {
       font-size: 0.66rem;
       color: $text-secondary;
-      text-transform: uppercase;
       letter-spacing: 0.08em;
     }
   }
@@ -734,7 +726,6 @@ textarea {
   inset: 0;
   z-index: 1200;
   background: rgba(3, 6, 12, 0.78);
-  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -90,7 +90,7 @@
     <!-- GRID DE PROYECTOS -->
     <div class="grid-proyectos">
       <article
-        *ngFor="let p of proyectosFiltrados"
+        *ngFor="let p of proyectosFiltrados; trackBy: trackPorId"
         class="tarjeta-proyecto glass-panel"
         [class.is-inactive]="modoPrivado && !p.isPublic"
         (mousemove)="onCardTilt($event, p)"

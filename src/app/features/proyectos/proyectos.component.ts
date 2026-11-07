@@ -47,6 +47,7 @@ export class ProyectosComponent implements OnInit {
   public editForm: Partial<Proyecto> = {};
   public confirmandoEliminarId: number | null = null;
   public buscandoRemoto = false;
+  private soloPunteroFine: boolean | null = null;
 
   ngOnInit() {
     const enRutaPrivada = this.router.url.startsWith('/app');
@@ -277,6 +278,7 @@ export class ProyectosComponent implements OnInit {
 
   abrirPanel(proyecto: Proyecto) {
     if (this.modoEdicion) return;
+    this.resetCardTilt(proyecto);
     this.proyectoActivo = proyecto;
     this.panelAbierto = true;
     this.pestanaActiva = 'codigo';
@@ -301,7 +303,16 @@ export class ProyectosComponent implements OnInit {
     }
   }
 
+  trackPorId(_indice: number, proyecto: Proyecto): number {
+    return proyecto.id;
+  }
+
   onCardTilt(event: MouseEvent, proyecto: Proyecto): void {
+    if (this.soloPunteroFine === null) {
+      this.soloPunteroFine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    }
+    if (!this.soloPunteroFine) return;
+
     const card = document.getElementById('card-' + proyecto.name);
     if (!card) return;
     const rect = card.getBoundingClientRect();

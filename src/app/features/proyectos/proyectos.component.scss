@@ -388,7 +388,8 @@ $border-soft: var(--bg-border);
   align-items: center;
   gap: 0.35rem;
   z-index: 2;
-  opacity: 0;
+  opacity: 1;
+  transform: translateZ(30px);
   transition: opacity 0.2s;
 
   .btn-estado {
@@ -458,8 +459,15 @@ $border-soft: var(--bg-border);
   }
 }
 
-.tarjeta-proyecto:hover .card-actions {
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .card-actions {
+    opacity: 0;
+  }
+
+  .tarjeta-proyecto:hover .card-actions,
+  .tarjeta-proyecto:focus-within .card-actions {
+    opacity: 1;
+  }
 }
 
 .confirm-delete {
@@ -472,6 +480,7 @@ $border-soft: var(--bg-border);
   gap: 0.75rem;
   border-radius: 1rem;
   z-index: 3;
+  transform: translateZ(40px);
   color: $text-light;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.85rem;

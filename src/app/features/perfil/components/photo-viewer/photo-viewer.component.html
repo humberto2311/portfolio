@@ -1,19 +1,91 @@
-<div class="visor" (click)="cerrar()">
-  <div class="visor__panel" (click)="$event.stopPropagation()">
+<div class="visor" (click)="cerrarSiFondo($event)">
+  <div class="visor__panel">
     <div class="visor__imagen">
-      <img [src]="foto.url" alt="Foto ampliada" />
+      @if (tieneAnterior) {
+        <button type="button" class="nav nav--antes" (click)="mover(-1)" title="Foto anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      }
+
+      <img [src]="foto.url" [alt]="textoAlternativo() || 'Foto ampliada'" />
+
+      @if (tieneSiguiente) {
+        <button type="button" class="nav nav--despues" (click)="mover(1)" title="Foto siguiente">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      }
     </div>
 
     <aside class="visor__lateral">
       <header class="lateral__cabecera">
-        <h3>Foto</h3>
-        <button type="button" class="cerrar" (click)="cerrar()" title="Cerrar">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3>
+          Foto
+          @if (puedeNavegar) {
+            <span class="contador">{{ indice + 1 }} de {{ galeria.length }}</span>
+          }
+        </h3>
+
+        <div class="cabecera__acciones">
+          @if (esMiPerfil) {
+            <div class="mas mas--foto">
+              <button type="button" class="boton" (click)="toggleMenuFoto($event)" title="Opciones de la foto">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+
+              @if (menuFoto()) {
+                <div class="menu">
+                  <button type="button" (click)="comenzarAlt()">
+                    <i class="fa-solid fa-font"></i> Cambiar texto alternativo
+                  </button>
+
+                  @if (fechaSubida) {
+                    <p class="dato"><i class="fa-regular fa-calendar"></i> Publicada {{ fechaSubida }}</p>
+                  }
+                  @if (fechaEdicion) {
+                    <p class="dato"><i class="fa-regular fa-clock"></i> Editada {{ fechaEdicion }}</p>
+                  }
+
+                  <button type="button" [disabled]="aplicandoUso()" (click)="usarComo('avatar')">
+                    <i class="fa-regular fa-user"></i> Usar como foto de perfil
+                  </button>
+                  <button type="button" [disabled]="aplicandoUso()" (click)="usarComo('portada')">
+                    <i class="fa-regular fa-image"></i> Usar como portada
+                  </button>
+
+                  <button type="button" (click)="compartir()">
+                    <i class="fa-solid fa-share-nodes"></i> Compartir
+                  </button>
+                  <button type="button" class="peligro" (click)="eliminar()">
+                    <i class="fa-solid fa-trash"></i> Eliminar foto
+                  </button>
+                </div>
+              }
+            </div>
+          } @else {
+            <button type="button" class="boton" (click)="compartir()" title="Descargar la foto">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          }
+
+          <button type="button" class="cerrar" (click)="cerrar()" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </header>
 
       <div class="lateral__descripcion">
-        @if (editandoDescripcion()) {
+        @if (editandoAlt()) {
+          <span class="descripcion__titulo">Texto alternativo</span>
+          <textarea
+            rows="3"
+            placeholder="Describe la foto para quien no pueda verla"
+            [(ngModel)]="textoAlt"
+            (keyup.escape)="cancelarAlt()"></textarea>
+          <div class="descripcion__acciones">
+            <button type="button" class="primario" [disabled]="guardandoAlt()" (click)="guardarAlt()">Guardar</button>
+            <button type="button" (click)="cancelarAlt()">Cancelar</button>
+          </div>
+        } @else if (editandoDescripcion()) {
           <textarea
             rows="3"
             placeholder="¿Qué quieres contar sobre esta foto?"
@@ -42,17 +114,6 @@
           {{ likes() }}
         </button>
         <span class="total">{{ totalComentarios() }} comentarios</span>
-
-        @if (esMiPerfil) {
-          <div class="acciones">
-            <button type="button" (click)="compartir()">
-              <i class="fa-solid fa-share-nodes"></i> Compartir
-            </button>
-            <button type="button" class="peligro" (click)="eliminar()">
-              <i class="fa-solid fa-trash"></i> Eliminar
-            </button>
-          </div>
-        }
       </div>
 
       <div class="lateral__comentarios">

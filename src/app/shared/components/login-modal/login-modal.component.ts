@@ -98,6 +98,19 @@ export class LoginModalComponent implements OnInit {
     this.form.reset();
   }
 
+  mensajeDe(campo: string): string {
+    const control = this.form.get(campo);
+    if (!control?.invalid || !(control.touched || control.dirty)) return '';
+
+    const errores = control.errors ?? {};
+    if (errores['required']) return 'Este dato es obligatorio.';
+    if (errores['email']) return 'Escribe un correo válido, con @ y dominio.';
+    if (errores['minlength']) return `Escribe al menos ${errores['minlength']['requiredLength']} caracteres.`;
+    if (errores['pattern']) return 'Escribe el número con código de país, por ejemplo +57 300 123 4567.';
+    if (errores['clavesDistintas']) return 'Las contraseñas no coinciden.';
+    return '';
+  }
+
   switchTab(tab: 'login' | 'register') {
     this.modalSvc.loginTab.set(tab);
     this.auth.cancelarVerificacion();

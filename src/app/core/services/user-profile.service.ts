@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserProfile } from '../models/proyecto';
 import { AuthService } from './auth.service';
@@ -42,6 +42,12 @@ export class UserProfileService {
   guardarMiPerfilSocial(dto: any): Observable<any> {
     return this.http.post<any>(`${this.API}/social/me`, dto).pipe(
       tap((guardado) => this.aplicarAvatar(guardado))
+    );
+  }
+
+  usarFotoEnMiPerfil(photoUrl: string, campo: 'avatarUrl' | 'coverUrl'): Observable<any> {
+    return this.getMiPerfilSocial().pipe(
+      switchMap((social) => this.guardarMiPerfilSocial({ ...(social ?? {}), [campo]: photoUrl }))
     );
   }
 

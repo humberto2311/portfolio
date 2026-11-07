@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { switchMap, finalize, catchError } from 'rxjs/operators';
@@ -11,6 +12,7 @@ import { UserProfileService } from '../../core/services/user-profile.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ArchivoService } from '../../core/services/archivo.service';
 import { FotoPerfil, UserPhotoService } from '../../core/services/user-photo.service';
+import { imagenDePerfilComoDataUrl } from '../../core/utils/imagen.util';
 import { ResumeProfile, ResumeSection } from '../../core/models/resume.model';
 
 /** Una fila clave/valor del JSON que guarda cada item. */
@@ -80,6 +82,8 @@ export class InformacionPersonalComponent implements OnInit {
   public esPropietario = false;
   public cambiandoVisibilidad = false;
   public generandoPdf = false;
+  public sinHojaDeVida = false;
+  public creandoHojaDeVida = false;
 
   private readonly DEFAULT_FULL_NAME = 'Humberto Jose Lozano Verbel';
 
@@ -99,6 +103,8 @@ export class InformacionPersonalComponent implements OnInit {
     avatarUrl: '',
     resumePdfUrl: '',
   };
+
+  private avatarAlEditar = '';
 
   /** Copia editable de las secciones; se reconstruye al entrar en modo edición. */
   public seccionesEditables: SeccionEditable[] = [];
@@ -138,6 +144,11 @@ export class InformacionPersonalComponent implements OnInit {
     this.mostrandoGaleria = false;
   }
 
+  get fotoVisible(): string | null {
+    if (!this.editando) return this.photoUrl;
+    return (this.form.avatarUrl ?? '').trim() || null;
+  }
+
   /** Sube una imagen nueva desde el dispositivo y la deja en el formulario. */
   elegirArchivoFoto(): void {
     const input = document.createElement('input');
@@ -148,10 +159,10 @@ export class InformacionPersonalComponent implements OnInit {
       const archivo = input.files?.[0];
       if (!archivo) return;
 
-      const lector = new FileReader();
-      lector.onload = () => this.elegirFoto(String(lector.result));
-      lector.onerror = () => this.toast.show('No se pudo leer la imagen');
-      lector.readAsDataURL(archivo);
+      imagenDePerfilComoDataUrl(archivo, 'avatar').then(
+        (dataUrl) => this.elegirFoto(dataUrl),
+        () => this.toast.show('No se pudo procesar la imagen')
+      );
     };
     input.click();
   }
@@ -219,6 +230,7 @@ export class InformacionPersonalComponent implements OnInit {
   private resolverPerfil() {
     this.loading = true;
     this.errorMessage = null;
+    this.sinHojaDeVida = false;
 
     const urlParam = this.route.snapshot.paramMap.get('username') || this.route.snapshot.paramMap.get('id');
     const isEditRoute = this.router.url.includes('/app/informacion-personal');
@@ -254,7 +266,7 @@ export class InformacionPersonalComponent implements OnInit {
     
     if (currentUser && currentUser.id) {
       this.esPropietario = true;
-      this.ensureAndLoad(currentUser.id);
+      this.loadByUserId(currentUser.id);
     } else {
       if (isEditRoute) {
         this.loading = false;
@@ -278,58 +290,56 @@ export class InformacionPersonalComponent implements OnInit {
         if (res.profile) {
           this.handleSuccess(res.profile, res.sections);
         } else {
-          this.setError();
+          this.mostrarSinHojaODerror();
         }
       },
-      error: (err) => {
-        console.warn('[CV] CV no disponible para este usuario:', err);
-        this.setError();
-      }
+      error: (err) => this.alFallarCarga(err)
     });
   }
 
-  private ensureAndLoad(userId: string) {
-    this.resumeSave.ensureProfile(userId).subscribe({
+  private alFallarCarga(err: unknown): void {
+    this.loading = false;
+
+    const codigo = err instanceof HttpErrorResponse ? err.status : 0;
+    if (codigo === 404) {
+      this.mostrarSinHojaODerror();
+      return;
+    }
+
+    console.warn('[CV] CV no disponible para este usuario:', err);
+    if (codigo === 401 || codigo === 403) {
+      this.setError('Inicia sesión para ver esta hoja de vida.');
+      return;
+    }
+    this.setError('No pudimos cargar tu hoja de vida. Intenta de nuevo en unos segundos.');
+  }
+
+  private mostrarSinHojaODerror() {
+    if (this.esPropietario) {
+      this.sinHojaDeVida = true;
+      this.loading = false;
+      return;
+    }
+    this.setError();
+  }
+
+  crearHojaDeVida() {
+    const userId = this.authService.currentUser()?.id;
+    if (!userId || this.creandoHojaDeVida) return;
+
+    this.creandoHojaDeVida = true;
+    this.resumeSave.ensureProfile(userId).pipe(
+      finalize(() => this.creandoHojaDeVida = false)
+    ).subscribe({
       next: (profile) => {
-        if (profile && profile.id) {
-          this.profileId = profile.id;
-          this.esPublico = !!profile.isPublic;
-          
-          this.resumeService.getFullResume(profile.id).subscribe({
-            next: (res) => {
-              if (res.profile) {
-                this.handleSuccess(res.profile, res.sections);
-              } else {
-                this.setError();
-              }
-            },
-            error: (err) => {
-              console.error('Error cargando secciones:', err);
-              this.handleSuccess(profile, []); 
-            }
-          });
+        if (profile?.id) {
+          this.toast.show('Hoja de vida creada');
+          this.resolverPerfil();
         } else {
-          this.setError();
+          this.toast.show('No se pudo crear la hoja de vida');
         }
       },
-      error: (err) => {
-        console.error('❌ [CV] Error en ensureProfile:', err);
-        this.resumeService.getProfileByUserId(userId).subscribe({
-          next: (profile) => {
-            if (profile && profile.id) {
-              this.profileId = profile.id;
-              this.esPublico = !!profile.isPublic;
-              this.resumeService.getFullResume(profile.id).subscribe({
-                next: (res) => this.handleSuccess(res.profile, res.sections),
-                error: () => this.setError()
-              });
-            } else {
-              this.setError();
-            }
-          },
-          error: () => this.setError()
-        });
-      }
+      error: () => this.toast.show('No se pudo crear la hoja de vida')
     });
   }
 
@@ -355,9 +365,9 @@ export class InformacionPersonalComponent implements OnInit {
 
     const nombre = `hoja-de-vida-${slug || 'cv'}.pdf`;
     try {
-      const resultado = await this.archivos.guardar(blob, nombre, 'Hoja de vida');
+      const resultado = await this.archivos.descargar(blob, nombre, 'Hoja de vida');
       this.toast.show(
-        resultado === 'cancelado' ? 'Se cerró sin enviar el PDF.' : 'Hoja de vida lista'
+        resultado === 'cancelado' ? 'Se cerró sin guardar el PDF.' : 'Hoja de vida descargada'
       );
     } catch {
       this.toast.show('No se pudo guardar la hoja de vida en este dispositivo');
@@ -470,8 +480,10 @@ export class InformacionPersonalComponent implements OnInit {
   private mapProfile(profile: ResumeProfile) {
     this.nombre = profile.fullName || 'Sin nombre';
     this.iniciales = this.generarIniciales(this.nombre);
-    this.photoUrl = profile.photoUrl?.trim() || profile.avatarUrl?.trim() || null;
-    if (!this.photoUrl) this.aplicarFotoPredeterminadaDelPerfil(profile.userProfileId);
+
+    const fotoGuardada = profile.photoUrl ?? profile.avatarUrl ?? null;
+    this.photoUrl = fotoGuardada?.trim() || null;
+    if (fotoGuardada === null) this.aplicarFotoPredeterminadaDelPerfil(profile.userProfileId);
     this.rol = profile.headline || '';
     this.perfilProfesional = profile.summary || '';
     this.welcomeDesc = profile.shortBio || '';
@@ -609,9 +621,10 @@ export class InformacionPersonalComponent implements OnInit {
       location: p.location ?? '',
       githubUrl: p.githubUrl ?? '',
       linkedinUrl: p.linkedinUrl ?? '',
-      avatarUrl: p.avatarUrl ?? p.photoUrl ?? '',
+      avatarUrl: this.photoUrl ?? p.avatarUrl ?? p.photoUrl ?? '',
       resumePdfUrl: p.resumePdfUrl ?? '',
     };
+    this.avatarAlEditar = this.form.avatarUrl;
   }
 
   /**
@@ -628,17 +641,10 @@ export class InformacionPersonalComponent implements OnInit {
 
     this.guardando = true;
     try {
-      // El backend copia estos campos uno a uno: hay que reenviar isPublic y publicSlug
-      // o el PUT los deja en null (el CV quedaría sin publicar y sin enlace público).
-      await firstValueFrom(this.resumeSave.updateProfile(this.profileId, {
-        ...this.form,
-        publicSlug: this.perfilCv?.publicSlug ?? undefined,
-        isPublic: this.esPublico,
-      }));
-
-      for (const [orden, seccion] of this.seccionesEditables.entries()) {
-        await this.guardarSeccionDe(seccion, orden);
-      }
+      await firstValueFrom(this.resumeSave.updateProfile(this.profileId, this.payloadDelPerfil()));
+      await Promise.all(
+        this.seccionesEditables.map((seccion, orden) => this.guardarSeccionDe(seccion, orden))
+      );
 
       this.toast.show('CV guardado');
       this.recargar();
@@ -649,28 +655,63 @@ export class InformacionPersonalComponent implements OnInit {
     }
   }
 
+  private payloadDelPerfil(): Partial<ResumeProfile> {
+    const payload: Partial<ResumeProfile> = {
+      ...this.form,
+      publicSlug: this.perfilCv?.publicSlug ?? undefined,
+      isPublic: this.esPublico,
+    };
+
+    if (payload.avatarUrl === this.avatarAlEditar) delete payload.avatarUrl;
+    return payload;
+  }
+
   private async guardarSeccionDe(seccion: SeccionEditable, orden: number): Promise<void> {
     if (!this.profileId) return;
     seccion.displayOrder = orden;
 
-    const payload = {
-      sectionKey: seccion.sectionKey,
-      title: seccion.title.trim(),
-      icon: seccion.icon,
-      displayOrder: seccion.displayOrder,
-      isActive: seccion.isActive,
-    };
+    if (seccion.nueva || this.seccionCambió(seccion, orden)) {
+      const payload = {
+        sectionKey: seccion.sectionKey,
+        title: seccion.title.trim(),
+        icon: seccion.icon,
+        displayOrder: seccion.displayOrder,
+        isActive: seccion.isActive,
+      };
 
-    const guardada = seccion.nueva
-      ? await firstValueFrom(this.resumeSave.crearSeccion(this.profileId, payload))
-      : await firstValueFrom(this.resumeSave.actualizarSeccion(seccion.id!, payload));
+      const guardada = seccion.nueva
+        ? await firstValueFrom(this.resumeSave.crearSeccion(this.profileId, payload))
+        : await firstValueFrom(this.resumeSave.actualizarSeccion(seccion.id!, payload));
 
-    seccion.id = guardada.id ?? seccion.id;
-    seccion.nueva = false;
-
-    for (const item of seccion.items) {
-      await this.guardarItemDe(seccion, item);
+      seccion.id = guardada.id ?? seccion.id;
+      seccion.nueva = false;
     }
+
+    const porGuardar = seccion.items.filter(item => item.nuevo || this.itemCambió(item));
+    await Promise.all(porGuardar.map(item => this.guardarItemDe(seccion, item)));
+  }
+
+  private seccionCambió(seccion: SeccionEditable, orden: number): boolean {
+    const original = this.seccionesRaw.find(s => s.id === seccion.id);
+    if (!original) return true;
+
+    return original.title !== seccion.title.trim()
+      || original.icon !== seccion.icon
+      || original.isActive !== seccion.isActive
+      || original.displayOrder !== orden;
+  }
+
+  private itemCambió(item: ItemEditable): boolean {
+    const nuevo = this.contenidoDe(item);
+    const anterior = item.original ?? {};
+    const claves = new Set([...Object.keys(nuevo), ...Object.keys(anterior)]);
+
+    for (const clave of claves) {
+      const n = JSON.stringify(nuevo[clave] ?? '');
+      const a = JSON.stringify(anterior[clave] ?? '');
+      if (n !== a) return true;
+    }
+    return false;
   }
 
   private async guardarItemDe(seccion: SeccionEditable, item: ItemEditable): Promise<void> {

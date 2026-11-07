@@ -1,6 +1,7 @@
 <div class="pdf-upload-container">
   <p class="description">
-    Sube tu hoja de vida en formato PDF. Nuestra IA extraerá la información y llenará tu perfil automáticamente.
+    Sube tu hoja de vida en PDF: la IA lee el documento y llena tu CV. Actualiza lo que haya venido
+    de otro PDF y deja intacta la información que escribiste a mano.
   </p>
 
   @if (!selectedFile() && !uploadResult()) {
@@ -35,7 +36,7 @@
 
     <button class="btn-upload" (click)="upload()" [disabled]="isUploading()">
       @if (isUploading()) {
-        <i class="fa-solid fa-spinner fa-spin"></i> Procesando con IA...
+        <i class="fa-solid fa-spinner fa-spin"></i> Leyendo el PDF con IA, puede tardar unos minutos
       } @else {
         <i class="fa-solid fa-wand-magic-sparkles"></i> Extraer información
       }
@@ -45,8 +46,8 @@
   @if (uploadResult(); as result) {
     <div class="result-box success">
       <i class="fa-solid fa-circle-check"></i>
-      <h4>¡Importación Exitosa!</h4>
-      <p>Se crearon {{ result.sectionsCreated }} secciones y {{ result.itemsCreated }} elementos en tu perfil.</p>
+      <h4>¡Listo!</h4>
+      <p>Se actualizaron {{ result.sectionsCreated }} secciones y {{ result.itemsCreated }} elementos de tu hoja de vida.</p>
       <button class="btn-reset" (click)="uploadResult.set(null)">Subir otro PDF</button>
     </div>
   }

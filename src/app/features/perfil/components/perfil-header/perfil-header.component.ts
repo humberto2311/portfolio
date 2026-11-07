@@ -49,6 +49,8 @@ export class PerfilHeaderComponent implements OnChanges {
 
   /** Foto del header abierta en grande: avatar o portada, con likes y comentarios. */
   fotoAbierta = signal<FotoPerfil | null>(null);
+  fotosGaleria = signal<FotoPerfil[]>([]);
+  private fotoDelHeader: FotoPerfil | null = null;
   private tipoAbierto: 'avatar' | 'portada' = 'avatar';
 
   get disponible(): boolean {
@@ -184,14 +186,31 @@ export class PerfilHeaderComponent implements OnChanges {
 
     this.tipoAbierto = tipo;
     this.fotosSvc.asegurar(this.perfil.id, url).subscribe({
-      next: (foto) => this.fotoAbierta.set(foto),
+      next: (foto) => this.abrirConGaleria(foto),
       error: () => this.toast.show('Esta foto todavía no admite comentarios'),
     });
   }
 
+  private abrirConGaleria(foto: FotoPerfil): void {
+    this.fotoDelHeader = foto;
+    this.fotoAbierta.set(foto);
+
+    this.fotosSvc.listar(this.perfil.id).subscribe({
+      next: (lista) => this.fotosGaleria.set(this.conAbierta(lista ?? [], foto)),
+      error: () => this.fotosGaleria.set([foto]),
+    });
+  }
+
+  private conAbierta(lista: FotoPerfil[], foto: FotoPerfil): FotoPerfil[] {
+    const sinRepetida = lista.filter((f) => f.id !== foto.id);
+    return sinRepetida.length === lista.length ? [foto, ...sinRepetida] : lista;
+  }
+
   /** Borrar desde el visor también despega la foto del perfil: el backend ya lo hace, aquí se refleja. */
-  alEliminarFoto(): void {
+  alEliminarFoto(photoId: number): void {
     this.fotoAbierta.set(null);
+    if (this.fotoDelHeader?.id !== photoId) return;
+
     if (this.tipoAbierto === 'avatar') this.perfil.avatarUrl = undefined;
     else this.perfil.coverUrl = undefined;
   }

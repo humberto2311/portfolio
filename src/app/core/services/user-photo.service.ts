@@ -9,6 +9,9 @@ export interface FotoPerfil {
   userId?: string;
   url: string;
   descripcion?: string | null;
+  textoAlternativo?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   likesCount?: number;
   likedByMe?: boolean;
   commentsCount?: number;
@@ -38,6 +41,10 @@ export class UserPhotoService {
 
   cambiarDescripcion(photoId: number, descripcion: string): Observable<FotoPerfil> {
     return this.http.put<FotoPerfil>(`${this.API_URL}/id/${photoId}/descripcion`, { descripcion });
+  }
+
+  cambiarTextoAlternativo(photoId: number, textoAlternativo: string): Observable<FotoPerfil> {
+    return this.http.put<FotoPerfil>(`${this.API_URL}/id/${photoId}/texto-alternativo`, { textoAlternativo });
   }
 
   comentarios(photoId: number, page = 0, size = 20): Observable<Page<CommentDto>> {

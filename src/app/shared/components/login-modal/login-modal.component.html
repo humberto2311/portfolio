@@ -106,18 +106,19 @@
       <ng-container *ngIf="esRegistro()">
         
         <label>
-          <span>Nombre completo</span>
+          <span>Nombre completo <i class="obligado">*</i></span>
           <input type="text" formControlName="name" placeholder="Humberto Lozano" autocomplete="name">
         </label>
+        <p class="campo-error" *ngIf="mensajeDe('name') as error">{{ error }}</p>
 
         <div class="form-row">
           <label>
-            <span>Teléfono</span>
+            <span>Teléfono <i class="obligado">*</i></span>
             <input type="tel" formControlName="phone" placeholder="+57 300..." autocomplete="tel">
           </label>
 
           <label>
-            <span>Género</span>
+            <span>Género <i class="obligado">*</i></span>
             <select formControlName="gender">
               <option value="" disabled selected>Selecciona</option>
               <option value="masculino">Masculino</option>
@@ -127,23 +128,27 @@
             </select>
           </label>
         </div>
+        <p class="campo-error" *ngIf="mensajeDe('phone') as error">{{ error }}</p>
+        <p class="campo-error" *ngIf="mensajeDe('gender') as error">{{ error }}</p>
 
         <label>
-          <span>Fecha de nacimiento</span>
+          <span>Fecha de nacimiento <i class="obligado">*</i></span>
           <input type="date" formControlName="birthDate" [max]="maxDate">
         </label>
+        <p class="campo-error" *ngIf="mensajeDe('birthDate') as error">{{ error }}</p>
 
         <div class="divider" style="margin: 0.5rem 0;"><span>datos de acceso</span></div>
       </ng-container>
 
       <!-- CAMPOS PARA TODOS (LOGIN Y REGISTRO) -->
       <label>
-        <span>Correo electrónico</span>
+        <span>Correo electrónico <i class="obligado">*</i></span>
         <input type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email">
       </label>
+      <p class="campo-error" *ngIf="mensajeDe('email') as error">{{ error }}</p>
 
       <label>
-        <span>Contraseña</span>
+        <span>Contraseña <i class="obligado">*</i></span>
         <div class="input-password">
           <input
             [type]="showPassword() ? 'text' : 'password'"
@@ -156,6 +161,7 @@
           </button>
         </div>
       </label>
+      <p class="campo-error" *ngIf="mensajeDe('password') as error">{{ error }}</p>
 
       <!-- Solo en registro: medidor de fuerza y la contraseña escrita por segunda vez -->
       <ng-container *ngIf="esRegistro()">
@@ -168,18 +174,14 @@
         </div>
 
         <label>
-          <span>Confirmar contraseña</span>
+          <span>Confirmar contraseña <i class="obligado">*</i></span>
           <input
             [type]="showPassword() ? 'text' : 'password'"
             formControlName="confirmPassword"
             placeholder="Escríbela otra vez"
             autocomplete="new-password">
         </label>
-
-        <p class="error"
-           *ngIf="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.errors?.['clavesDistintas']">
-          Las contraseñas no coinciden.
-        </p>
+        <p class="campo-error" *ngIf="mensajeDe('confirmPassword') as error">{{ error }}</p>
 
         <p class="politicas">
           Al crear la cuenta aceptas las

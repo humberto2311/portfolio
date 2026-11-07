@@ -121,7 +121,8 @@
     position: absolute;
     right: 0;
     top: 32px;
-    min-width: 150px;
+    min-width: 232px;
+    max-width: min(232px, calc(100vw - 2rem));
     background: $bg-card;
     border: 1px solid $bg-border;
     border-radius: 10px;
@@ -146,6 +147,12 @@
 
       &:hover { background: $bg-hover; color: $cyan-main; }
       &.btn-delete:hover { color: #f87171; }
+
+      &:disabled {
+        color: $text-muted;
+        cursor: default;
+        background: transparent;
+      }
     }
   }
 }

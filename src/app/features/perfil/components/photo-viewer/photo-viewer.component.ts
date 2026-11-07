@@ -5,9 +5,11 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
+  SimpleChanges,
   computed,
   inject,
   signal,
@@ -36,12 +38,14 @@ import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.comp
   templateUrl: './photo-viewer.component.html',
   styleUrls: ['./photo-viewer.component.scss'],
 })
-export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @Input({ required: true }) foto!: FotoPerfil;
   @Input() esMiPerfil = false;
+  @Input() galeria: FotoPerfil[] = [];
 
   @Output() cerrado = new EventEmitter<void>();
   @Output() descripcionCambiada = new EventEmitter<FotoPerfil>();
+  @Output() fotoCambiada = new EventEmitter<FotoPerfil>();
   @Output() eliminada = new EventEmitter<number>();
 
   private fotos = inject(UserPhotoService);
@@ -71,6 +75,13 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   comentarioEditando = signal<string | null>(null);
   textoComentarioEditado = '';
 
+  menuFoto = signal(false);
+  textoAlternativo = signal(this.foto.textoAlternativo ?? '');
+  editandoAlt = signal(false);
+  guardandoAlt = signal(false);
+  textoAlt = '';
+  aplicandoUso = signal(false);
+
   readonly avatar = this.miPerfil.avatar;
   readonly iniciales = computed(() => {
     const nombre = this.auth.currentUser()?.fullName ?? '';
@@ -79,6 +90,42 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     if (partes.length === 1) return partes[0].charAt(0).toUpperCase();
     return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
   });
+
+  get indice(): number {
+    return this.galeria.findIndex((f) => f.id === this.foto.id);
+  }
+
+  get puedeNavegar(): boolean {
+    return this.galeria.length > 1 && this.indice > -1;
+  }
+
+  get tieneAnterior(): boolean {
+    return this.puedeNavegar && this.indice > 0;
+  }
+
+  get tieneSiguiente(): boolean {
+    return this.puedeNavegar && this.indice < this.galeria.length - 1;
+  }
+
+  get fechaSubida(): string {
+    return this.fechaLegible(this.foto.createdAt);
+  }
+
+  get fechaEdicion(): string {
+    const crea = this.foto.createdAt;
+    const edita = this.foto.updatedAt;
+    if (!edita || !crea || crea.slice(0, 10) === edita.slice(0, 10)) return '';
+    return this.fechaLegible(edita);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const cambio = changes['foto'];
+    if (!cambio || cambio.firstChange) return;
+    if (cambio.currentValue?.id === cambio.previousValue?.id) return;
+
+    this.aplicarFoto();
+    this.cargarComentarios();
+  }
 
   ngOnInit(): void {
     this.miPerfil.cargarMiAvatar();
@@ -99,6 +146,21 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     document.body.style.overflow = this.scrollPrevio;
     this.el.nativeElement.remove();
+  }
+
+  private aplicarFoto(): void {
+    this.likes.set(this.foto.likesCount ?? 0);
+    this.likedByMe.set(this.foto.likedByMe ?? false);
+    this.totalComentarios.set(this.foto.commentsCount ?? 0);
+    this.comentarios.set([]);
+    this.descripcion.set(this.foto.descripcion ?? '');
+    this.textoAlternativo.set(this.foto.textoAlternativo ?? '');
+    this.editandoDescripcion.set(false);
+    this.editandoAlt.set(false);
+    this.comentarioMenu.set(null);
+    this.comentarioEditando.set(null);
+    this.menuFoto.set(false);
+    this.cargando.set(true);
   }
 
   private cargarComentarios(): void {
@@ -122,6 +184,22 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: () => this.toast.show('No se pudo registrar el me gusta'),
     });
+  }
+
+  // ====== NAVEGACIÓN DE LA GALERÍA ======
+
+  mover(paso: number): void {
+    const destino = this.galeria[this.indice + paso];
+    if (destino) this.fotoCambiada.emit(destino);
+  }
+
+  @HostListener('document:keydown.arrowleft', ['$event'])
+  @HostListener('document:keydown.arrowright', ['$event'])
+  onFlecha(event: KeyboardEvent): void {
+    const foco = event.target as HTMLElement | null;
+    if (foco && (foco.tagName === 'INPUT' || foco.tagName === 'TEXTAREA')) return;
+
+    this.mover(event.key === 'ArrowLeft' ? -1 : 1);
   }
 
   // ====== DESCRIPCIÓN ======
@@ -239,9 +317,80 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  // ====== TEXTO ALTERNATIVO ======
+
+  comenzarAlt(): void {
+    this.menuFoto.set(false);
+    this.textoAlt = this.textoAlternativo() ?? '';
+    this.editandoAlt.set(true);
+  }
+
+  cancelarAlt(): void {
+    this.editandoAlt.set(false);
+    this.textoAlt = '';
+  }
+
+  guardarAlt(): void {
+    if (this.guardandoAlt()) return;
+
+    this.guardandoAlt.set(true);
+    this.fotos.cambiarTextoAlternativo(this.foto.id, this.textoAlt.trim()).subscribe({
+      next: (foto) => {
+        this.textoAlternativo.set(foto.textoAlternativo ?? '');
+        this.editandoAlt.set(false);
+        this.guardandoAlt.set(false);
+        this.toast.show('Texto alternativo guardado');
+      },
+      error: () => {
+        this.guardandoAlt.set(false);
+        this.toast.show('No se pudo guardar el texto alternativo');
+      },
+    });
+  }
+
   // ====== ACCIONES DE LA FOTO ======
 
+  toggleMenuFoto(event: Event): void {
+    event.stopPropagation();
+    this.menuFoto.update((abierto) => !abierto);
+  }
+
+  @HostListener('document:click')
+  onClickFuera(): void {
+    this.menuFoto.set(false);
+  }
+
+  usarComo(tipo: 'avatar' | 'portada'): void {
+    if (!this.esMiPerfil || this.aplicandoUso()) return;
+
+    this.aplicandoUso.set(true);
+    this.menuFoto.set(false);
+    const campo = tipo === 'avatar' ? 'avatarUrl' : 'coverUrl';
+
+    this.miPerfil.usarFotoEnMiPerfil(this.foto.url, campo).subscribe({
+      next: () => {
+        this.aplicarEnPantalla(tipo);
+        this.aplicandoUso.set(false);
+        this.toast.show(tipo === 'avatar' ? 'Foto de perfil actualizada' : 'Portada actualizada');
+      },
+      error: () => {
+        this.aplicandoUso.set(false);
+        this.toast.show('No se pudo usar esa foto en el perfil');
+      },
+    });
+  }
+
+  private aplicarEnPantalla(tipo: 'avatar' | 'portada'): void {
+    if (!this.perfiles.perfil()) return;
+
+    this.perfiles.perfil.update((p) => {
+      if (!p) return p;
+      return tipo === 'avatar' ? { ...p, avatarUrl: this.foto.url } : { ...p, coverUrl: this.foto.url };
+    });
+  }
+
   compartir(): void {
+    this.menuFoto.set(false);
     this.archivos.guardar(this.aBlob(this.foto.url), 'foto-perfil', 'Foto del perfil').then((resultado) => {
       if (resultado === 'cancelado') return;
       this.toast.show(resultado === 'compartido' ? 'Foto compartida' : 'Foto descargada');
@@ -249,6 +398,7 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   eliminar(): void {
+    this.menuFoto.set(false);
     this.fotos.borrar(this.foto.id).subscribe({
       next: () => {
         this.eliminada.emit(this.foto.id);
@@ -262,6 +412,10 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cerrado.emit();
   }
 
+  cerrarSiFondo(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.cerrar();
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
     this.cerrar();
@@ -273,6 +427,15 @@ export class PhotoViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.toast.show('Debes iniciar sesión para interactuar');
     this.modal.openLogin();
     return false;
+  }
+
+  private fechaLegible(iso?: string | null): string {
+    if (!iso) return '';
+
+    const fecha = new Date(iso);
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   /** Las fotos se guardan como data URL; para compartirlas hace falta el binario. */

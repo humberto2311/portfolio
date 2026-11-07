@@ -37,11 +37,20 @@
 
               @if (menuAbierto() === f.id) {
                 <div class="dropdown-menu">
+                  <button type="button" [disabled]="ocupado()" (click)="usarEn(f, 'avatarUrl')">
+                    <i class="fa-regular fa-user"></i> Úsala como foto de perfil
+                  </button>
+                  <button type="button" [disabled]="ocupado()" (click)="usarEn(f, 'coverUrl')">
+                    <i class="fa-regular fa-image"></i> Utilizar como foto de portada
+                  </button>
+                  <button type="button" [disabled]="ocupado()" (click)="usarEnCv(f)">
+                    <i class="fa-regular fa-file-lines"></i> Usar en mi hoja de vida
+                  </button>
                   <button type="button" (click)="descargar(f)">
-                    <i class="fa-solid fa-share-nodes"></i> Compartir
+                    <i class="fa-solid fa-download"></i> Descargar
                   </button>
                   <button type="button" class="btn-delete" (click)="eliminar(f)">
-                    <i class="fa-solid fa-trash"></i> Eliminar
+                    <i class="fa-solid fa-trash"></i> Eliminar foto
                   </button>
                 </div>
               }
@@ -69,8 +78,10 @@
 @if (ampliada(); as foto) {
   <app-photo-viewer
     [foto]="foto"
+    [galeria]="fotos()"
     [esMiPerfil]="esMiPerfil"
     (cerrado)="cerrar()"
+    (fotoCambiada)="ampliada.set($event)"
     (eliminada)="alEliminar($event)"
     (descripcionCambiada)="alCambiarDescripcion($event)" />
 }

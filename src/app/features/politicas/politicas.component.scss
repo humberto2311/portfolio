@@ -101,7 +101,7 @@ section {
 
   ol { padding-left: 1.3rem; }
 
-  a {
+  a:not(.boton) {
     color: var(--accent-cyan);
     text-decoration: none;
 

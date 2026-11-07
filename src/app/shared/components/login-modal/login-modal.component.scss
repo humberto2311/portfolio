@@ -153,6 +153,22 @@
     cursor: pointer;
     &:hover { opacity: 1; }
   }
+
+  input.ng-touched.ng-invalid,
+  select.ng-touched.ng-invalid {
+    border-color: rgba(248, 113, 113, .6);
+  }
+
+  .obligado {
+    font-style: normal;
+    color: $danger;
+  }
+
+  .campo-error {
+    margin: -.4rem 0 0;
+    font-size: .76rem;
+    color: $danger;
+  }
 }
 
 .form-row {

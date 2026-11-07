@@ -1,8 +1,12 @@
 import { Component, HostListener, Input, OnChanges, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { finalize, of, switchMap } from 'rxjs';
 import { PerfilService } from '../../../../core/services/perfil.service';
 import { Publicacion } from '../../../../core/models/perfil.model';
 import { FotoPerfil, UserPhotoService } from '../../../../core/services/user-photo.service';
+import { UserProfileService } from '../../../../core/services/user-profile.service';
+import { ResumeService } from '../../../../core/services/resume.service';
+import { ResumeSaveService } from '../../../../core/services/resume-save.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ArchivoService } from '../../../../core/services/archivo.service';
 import { PostCardComponent } from '../post-card/post-card.component';
@@ -21,6 +25,9 @@ export class TabFotosComponent implements OnChanges {
 
   private fotosSvc = inject(UserPhotoService);
   private perfilService = inject(PerfilService);
+  private miPerfil = inject(UserProfileService);
+  private resume = inject(ResumeService);
+  private resumeSave = inject(ResumeSaveService);
   private toast = inject(ToastService);
   private archivos = inject(ArchivoService);
 
@@ -29,6 +36,7 @@ export class TabFotosComponent implements OnChanges {
   ampliada = signal<FotoPerfil | null>(null);
   cargando = signal(true);
   subiendo = signal(false);
+  ocupado = signal(false);
 
   publicaciones = this.perfilService.publicaciones;
 
@@ -76,14 +84,70 @@ export class TabFotosComponent implements OnChanges {
 
   eliminar(foto: FotoPerfil): void {
     this.menuAbierto.set(null);
-    this.alEliminar(foto.id);
-    this.toast.show('Foto eliminada');
+
+    this.fotosSvc.borrar(foto.id).subscribe({
+      next: () => {
+        this.alEliminar(foto.id);
+        this.toast.show('Foto eliminada');
+      },
+      error: () => this.toast.show('No se pudo eliminar la foto'),
+    });
   }
 
-  /** El visor grande ya borró la foto en el backend: aquí solo se quita de la rejilla. */
   alEliminar(photoId: number): void {
+    const borrada = this.fotos().find(f => f.id === photoId);
+
     this.fotos.update(list => list.filter(f => f.id !== photoId));
     this.cerrar();
+    if (borrada) this.despegarDelPerfil(borrada);
+  }
+
+  private despegarDelPerfil(foto: FotoPerfil): void {
+    const enPantalla = this.perfilService.perfil();
+    if (!enPantalla) return;
+
+    const avatar = enPantalla.avatarUrl === foto.url ? undefined : enPantalla.avatarUrl;
+    const portada = enPantalla.coverUrl === foto.url ? undefined : enPantalla.coverUrl;
+    if (avatar === enPantalla.avatarUrl && portada === enPantalla.coverUrl) return;
+
+    this.perfilService.perfil.update(p => (p ? { ...p, avatarUrl: avatar, coverUrl: portada } : p));
+    this.toast.show('La foto ya no está en el perfil');
+  }
+
+  usarEn(foto: FotoPerfil, campo: 'avatarUrl' | 'coverUrl'): void {
+    if (this.ocupado()) return;
+
+    this.menuAbierto.set(null);
+    this.ocupado.set(true);
+    this.miPerfil.usarFotoEnMiPerfil(foto.url, campo).subscribe({
+      next: () => {
+        this.ocupado.set(false);
+        this.perfilService.perfil.update(p =>
+          p ? { ...p, [campo]: foto.url } : p
+        );
+        this.toast.show(campo === 'avatarUrl' ? 'Foto de perfil actualizada' : 'Portada actualizada');
+      },
+      error: () => {
+        this.ocupado.set(false);
+        this.toast.show('No se pudo usar esa foto en el perfil');
+      },
+    });
+  }
+
+  usarEnCv(foto: FotoPerfil): void {
+    if (this.ocupado() || !this.userId) return;
+
+    this.menuAbierto.set(null);
+    this.ocupado.set(true);
+
+    this.resume.getProfileByUserId(this.userId).pipe(
+      switchMap(cv => (cv?.id ? of(cv) : this.resumeSave.ensureProfile(this.userId))),
+      switchMap(cv => this.resumeSave.updateProfile(cv.id!, { ...cv, avatarUrl: foto.url })),
+      finalize(() => this.ocupado.set(false)),
+    ).subscribe({
+      next: () => this.toast.show('Foto usada en tu hoja de vida'),
+      error: () => this.toast.show('No se pudo usar esa foto en el CV'),
+    });
   }
 
   alCambiarDescripcion(foto: FotoPerfil): void {

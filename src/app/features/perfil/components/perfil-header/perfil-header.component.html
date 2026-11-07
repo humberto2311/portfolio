@@ -131,9 +131,11 @@
   @if (fotoAbierta(); as foto) {
     <app-photo-viewer
       [foto]="foto"
+      [galeria]="fotosGaleria()"
       [esMiPerfil]="esMiPerfil"
       (cerrado)="fotoAbierta.set(null)"
+      (fotoCambiada)="fotoAbierta.set($event)"
       (descripcionCambiada)="fotoAbierta.set($event)"
-      (eliminada)="alEliminarFoto()" />
+      (eliminada)="alEliminarFoto($event)" />
   }
 </div>

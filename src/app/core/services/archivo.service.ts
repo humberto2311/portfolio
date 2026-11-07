@@ -29,6 +29,13 @@ export class ArchivoService {
     return this.guardarWeb(blob, archivo);
   }
 
+  async descargar(blob: Blob, nombre: string, titulo?: string): Promise<ResultadoArchivo> {
+    const archivo = nombreSeguro(nombre);
+
+    if (this.esNativa) return this.guardarNativo(blob, archivo, titulo);
+    return this.bajarWeb(blob, archivo);
+  }
+
   /**
    * Reparte un enlace por el selector nativo. En web devuelve 'no-soportado'
    * cuando el navegador no tiene Web Share, para que la pantalla copie el
@@ -94,6 +101,10 @@ export class ArchivoService {
       }
     }
 
+    return this.bajarWeb(blob, nombre);
+  }
+
+  private async bajarWeb(blob: Blob, nombre: string): Promise<ResultadoArchivo> {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

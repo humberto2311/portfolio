@@ -1,7 +1,7 @@
 <!-- 1. ESTADO DE CARGA -->
 <div class="loading-screen" *ngIf="loading">
   <div class="spinner"></div>
-  <h2>Cargando Portafolio desde la Base de Datos...</h2>
+  <h2>Cargando tu hoja de vida…</h2>
 </div>
 
 <!-- 2. ESTADO DE ERROR (CV Privado o Inexistente) -->
@@ -16,8 +16,28 @@
   </div>
 </div>
 
-<!-- 3. CONTENIDO PRINCIPAL -->
-<div class="dashboard-container" *ngIf="!loading && !errorMessage">
+<!-- 3. SIN HOJA DE VIDA (el usuario aún no la crea) -->
+<div class="error-screen" *ngIf="!loading && sinHojaDeVida">
+  <div class="error-content">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.6H8V12zm0 4h6v1.6H8V16z"/>
+    </svg>
+    <h2>Aún no tienes hoja de vida</h2>
+    <p>
+      Aquí no se arma sola: primero llenas tus datos, tu rol, tus proyectos y tus
+      enlaces. Cuando la creas puedes editar cada sección y descargar el PDF.
+    </p>
+    <button type="button" class="btn-primary" (click)="crearHojaDeVida()" [disabled]="creandoHojaDeVida">
+      {{ creandoHojaDeVida ? 'Creando…' : 'Crear mi hoja de vida' }}
+    </button>
+    <button type="button" class="btn-secondary" (click)="router.navigate(['/app'])">
+      Ir a llenar mi perfil
+    </button>
+  </div>
+</div>
+
+<!-- 4. CONTENIDO PRINCIPAL -->
+<div class="dashboard-container" *ngIf="!loading && !errorMessage && !sinHojaDeVida">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -103,8 +123,8 @@
         </button>
         
         <!-- Avatar -->
-        <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre" class="mini-avatar">
-        <span *ngIf="!photoUrl" class="mini-avatar mini-avatar-initials">{{ iniciales }}</span>
+        <img *ngIf="fotoVisible" [src]="fotoVisible" [alt]="nombre" class="mini-avatar">
+        <span *ngIf="!fotoVisible" class="mini-avatar mini-avatar-initials">{{ iniciales }}</span>
       </div>
     </header>
 
@@ -191,8 +211,9 @@
                     </p>
                   } @else {
                     @for (f of fotosGaleria; track f.id) {
-                      <button type="button" class="mini-foto" (click)="elegirFoto(f.url)">
-                        <img [src]="f.url" [alt]="'Foto del perfil'" loading="lazy" />
+                      <button type="button" class="mini-foto" [class.seleccionada]="f.url === form.avatarUrl"
+                              (click)="elegirFoto(f.url)" title="Usar esta foto de la galería">
+                        <img [src]="f.url" [alt]="f.textoAlternativo || 'Foto del perfil'" loading="lazy" />
                       </button>
                     }
                   }
@@ -234,8 +255,8 @@
 
         <div class="welcome-image">
           <div class="avatar-grande">
-            <img *ngIf="photoUrl" [src]="photoUrl" [alt]="nombre">
-            <span *ngIf="!photoUrl" class="avatar-initials">{{ iniciales }}</span>
+            <img *ngIf="fotoVisible" [src]="fotoVisible" [alt]="nombre">
+            <span *ngIf="!fotoVisible" class="avatar-initials">{{ iniciales }}</span>
           </div>
         </div>
       </div>

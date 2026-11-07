@@ -5,8 +5,9 @@
         <textarea
           class="compartido-editor"
           rows="2"
+          appMenciones
           [(ngModel)]="textoCompartido"
-          placeholder="Descripción del compartido..."></textarea>
+          placeholder="Añade una descripción, usa @ para etiquetar"></textarea>
         <div class="compartido-botones">
           <button type="button" class="btn-mini" (click)="guardarCompartido()">Guardar</button>
           <button type="button" class="btn-mini sec" (click)="cancelarCompartido()">Cancelar</button>
@@ -73,7 +74,7 @@
 
   @if (estaEditando()) {
     <div class="edit-section">
-      <textarea [(ngModel)]="textoEditado" class="edit-input"></textarea>
+      <textarea [(ngModel)]="textoEditado" appMenciones class="edit-input"></textarea>
       <div class="edit-actions">
         <button class="btn-cancel" (click)="cancelarEdicion()">Cancelar</button>
         <button class="btn-save" (click)="guardarEdicion()">Guardar cambios</button>
@@ -148,8 +149,9 @@
               <input
                 class="editar-comentario"
                 type="text"
+                appMenciones
                 [(ngModel)]="textoComentarioEditado"
-                (keyup.enter)="guardarEdicionComentario(c)"
+                (keydown.enter)="guardarEdicionComentario(c)"
                 (keyup.escape)="cancelarEdicionComentario()" />
               <div class="comment-actions">
                 <button class="primary" (click)="guardarEdicionComentario(c)">Guardar</button>
@@ -177,9 +179,10 @@
         </div>
         <input
           type="text"
+          appMenciones
           [(ngModel)]="nuevoComentario"
           placeholder="Escribe un comentario..."
-          (keyup.enter)="enviarComentario()" />
+          (keydown.enter)="enviarComentario()" />
         <button (click)="enviarComentario()">
           <i class="fa-solid fa-paper-plane"></i>
         </button>

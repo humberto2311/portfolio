@@ -25,9 +25,9 @@
   margin: 0;
   padding: .7rem .9rem;
   border-radius: 10px;
-  background: rgba(255, 92, 122, .12);
-  border: 1px solid rgba(255, 92, 122, .35);
-  color: #ffb3c2;
+  background: var(--bg-elevated);
+  border: 1px solid var(--danger);
+  color: var(--danger);
   font-size: .85rem;
 }
 
@@ -66,7 +66,7 @@
   input, select {
     width: 100%;
     padding: .6rem .75rem;
-    background: #0d1117;
+    background: var(--bg-input);
     border: 1px solid var(--border-soft);
     border-radius: 9px;
     color: var(--text-primary);
@@ -83,11 +83,6 @@
     background-repeat: no-repeat;
     background-position: right .7rem center;
     background-size: 1em;
-  }
-
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: .5;
   }
 }
 
@@ -109,7 +104,7 @@
 .error {
   margin: 0;
   font-size: .8rem;
-  color: #ff5c7a;
+  color: var(--danger);
 }
 
 .actions {
@@ -136,7 +131,7 @@
 
 .btn-primary {
   background: var(--accent-cyan);
-  color: #001018;
+  color: var(--on-accent);
 
   &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74, 158, 255, .3); }
   &:disabled { opacity: .55; cursor: not-allowed; }
@@ -158,6 +153,39 @@
   gap: 1rem;
 
   strong { color: var(--text-primary); font-size: .95rem; }
+}
+
+.tema-opciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .6rem;
+}
+
+.tema-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s;
+
+  i { font-size: .9rem; }
+
+  &:hover { color: var(--text-primary); border-color: var(--border-cyan); }
+}
+
+.tema-opcion.activa {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  background: var(--bg-elevated);
 }
 
 /* Celular: una columna, botones a todo el ancho */

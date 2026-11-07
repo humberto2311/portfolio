@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { ModalService } from '../../../core/services/modal.service';
 import { TemaService } from '../../../core/services/tema.service';
+import { LogoComponent } from '../logo/logo.component';
 
 interface SeccionLanding {
   id: string;
@@ -16,7 +17,7 @@ interface SeccionLanding {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, LogoComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })

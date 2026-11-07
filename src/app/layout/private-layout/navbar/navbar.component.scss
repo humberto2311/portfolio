@@ -17,12 +17,7 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-
-  img {
-    height: 26px;
-    width: auto;
-    object-fit: contain;
-  }
+  color: var(--text-primary);
 }
 
 .topbar__busqueda {
@@ -134,7 +129,7 @@
   &.activo {
     background: $accent;
     border-color: $accent;
-    color: #08090b;
+    color: var(--on-accent);
     font-weight: 600;
   }
 }

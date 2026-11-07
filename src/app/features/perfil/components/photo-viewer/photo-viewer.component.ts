@@ -26,15 +26,12 @@ import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ArchivoService } from '../../../../core/services/archivo.service';
 import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.component';
+import { MencionesDirective } from '../../../../shared/directives/menciones.directive';
 
-/**
- * La foto en grande, con descripción, me gusta y comentarios, como en Facebook.
- * Se abre desde la galería y desde el avatar o la portada del perfil, propio o ajeno.
- */
 @Component({
   selector: 'app-photo-viewer',
   standalone: true,
-  imports: [CommonModule, FormsModule, MencionesTextoComponent],
+  imports: [CommonModule, FormsModule, MencionesTextoComponent, MencionesDirective],
   templateUrl: './photo-viewer.component.html',
   styleUrls: ['./photo-viewer.component.scss'],
 })
@@ -58,15 +55,15 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
   private el = inject(ElementRef) as ElementRef<HTMLElement>;
   private scrollPrevio = '';
 
-  likes = signal(this.foto.likesCount ?? 0);
-  likedByMe = signal(this.foto.likedByMe ?? false);
+  likes = signal(0);
+  likedByMe = signal(false);
   comentarios = signal<Comentario[]>([]);
-  totalComentarios = signal(this.foto.commentsCount ?? 0);
+  totalComentarios = signal(0);
   cargando = signal(true);
   enviando = signal(false);
   guardandoDescripcion = signal(false);
 
-  descripcion = signal(this.foto.descripcion ?? '');
+  descripcion = signal('');
   editandoDescripcion = signal(false);
   textoDescripcion = '';
 
@@ -76,7 +73,7 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
   textoComentarioEditado = '';
 
   menuFoto = signal(false);
-  textoAlternativo = signal(this.foto.textoAlternativo ?? '');
+  textoAlternativo = signal('');
   editandoAlt = signal(false);
   guardandoAlt = signal(false);
   textoAlt = '';
@@ -132,15 +129,11 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
   }
 
   ngOnInit(): void {
+    this.aplicarFoto();
     this.miPerfil.cargarMiAvatar();
     this.cargarComentarios();
   }
 
-  /**
-   * Cualquier ancestro con transform o filter (el fadeIn de .tab-content, por ejemplo)
-   * convierte a `position: fixed` en relativo a ese div, y el visor deja de ocupar la
-   * pantalla. Colgado del body ya no tiene jefes que lo recorten.
-   */
   ngAfterViewInit(): void {
     document.body.appendChild(this.el.nativeElement);
     this.scrollPrevio = document.body.style.overflow;

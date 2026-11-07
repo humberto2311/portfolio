@@ -24,15 +24,32 @@
     align-items: center;
     justify-content: center;
 
-    background: transparent;
+    background: #05070a;
     min-width: 0;
+    overflow: hidden;
     padding: clamp(0.5rem, 2.5vw, 2rem);
+  }
 
-    img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
+  &__fondo {
+    position: absolute;
+    inset: -12%;
+    width: 124%;
+    height: 124%;
+    object-fit: cover;
+    filter: blur(34px) saturate(1.15) brightness(0.5);
+    opacity: 0.75;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  &__foto {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.95);
   }
 
   &__lateral {
@@ -48,6 +65,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   width: 2.4rem;
   height: 2.4rem;
   display: flex;
@@ -59,6 +77,7 @@
   color: $text-light;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 
   &:hover { color: $cyan-main; border-color: $border-cyan; }
 
@@ -164,12 +183,21 @@
     }
 
     button {
-      background: transparent;
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: $accent;
       border: none;
-      color: $cyan-main;
+      color: var(--on-accent);
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      transition: filter 0.18s ease;
 
+      &:hover:not(:disabled) { filter: brightness(1.12); }
       &:disabled { opacity: 0.5; cursor: default; }
     }
   }
@@ -370,7 +398,7 @@
   background: $accent;
   border: none;
   border-radius: 999px;
-  color: #08090b;
+  color: var(--on-accent);
   font-size: 0.76rem;
   font-weight: 700;
   padding: 0.35rem 0.7rem;
@@ -396,6 +424,32 @@
   color: $text-muted;
   font-size: 0.8rem;
   margin: 0;
+}
+
+.vacio {
+  margin: auto;
+  text-align: center;
+  color: $text-muted;
+
+  i {
+    font-size: 1.4rem;
+    opacity: 0.55;
+  }
+
+  p {
+    margin: 0.55rem 0 0;
+    font-size: 0.82rem;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav {
+    opacity: 0.3;
+  }
+
+  .visor__imagen:hover .nav {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 720px) {

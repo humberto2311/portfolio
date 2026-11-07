@@ -126,5 +126,20 @@
       </div>
     </section>
 
+    <section class="card">
+      <h2><i class="fas fa-circle-half-stroke"></i> Apariencia</h2>
+
+      <p class="helper">Se guarda en este dispositivo y aplica tanto a la app como a las páginas públicas.</p>
+
+      <div class="tema-opciones">
+        <button type="button" class="tema-opcion" [class.activa]="!tema.claro()" (click)="ponerTema(false)">
+          <i class="fas fa-moon"></i> Oscuro
+        </button>
+        <button type="button" class="tema-opcion" [class.activa]="tema.claro()" (click)="ponerTema(true)">
+          <i class="fas fa-sun"></i> Claro
+        </button>
+      </div>
+    </section>
+
   </ng-container>
 </div>

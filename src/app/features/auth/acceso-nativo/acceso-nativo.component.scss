@@ -24,11 +24,10 @@
 }
 
 .acceso__logo {
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-  display: block;
+  display: flex;
+  justify-content: center;
   margin: 0 auto .75rem;
+  color: var(--accent-cyan);
 }
 
 .acceso__nombre {
@@ -61,11 +60,6 @@
 @media (min-width: 600px) {
   .acceso {
     gap: 2rem;
-  }
-
-  .acceso__logo {
-    width: 64px;
-    height: 64px;
   }
 
   .acceso__nombre {

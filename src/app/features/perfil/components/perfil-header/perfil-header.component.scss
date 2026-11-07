@@ -1,5 +1,57 @@
 @import '../../../../shared/styles/variables';
 
+@mixin cabecera-vertical {
+  .header-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: -64px;
+    gap: 14px;
+  }
+
+  .avatar-block .avatar-wrapper {
+    width: 96px;
+    height: 96px;
+  }
+
+  .user-info {
+    flex: none;
+    margin-top: 0;
+    width: 100%;
+
+    .name-row h1 {
+      font-size: 1.3rem;
+    }
+
+    .rol-row {
+      justify-content: center;
+    }
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: center;
+    margin-top: 14px;
+
+    button {
+      flex: 1 1 auto;
+      min-height: 44px;
+      padding: 0 12px;
+      font-size: 0.82rem;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+}
+
+@mixin acciones-en-cuadricula {
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
 .header-card {
   background: $bg-card;
   border: 1px solid $bg-border;
@@ -107,6 +159,7 @@
   padding: 0 20px 20px;
   position: relative;
   z-index: 1;
+  container-type: inline-size;
 }
 
 .header-row {
@@ -327,7 +380,7 @@
 
   .btn-follow {
     background: $accent;
-    color: #08090b;
+    color: var(--on-accent);
 
     &:hover:not(:disabled) {
       background: $accent-strong;
@@ -380,52 +433,17 @@
     padding: 0 14px 16px;
   }
 
-  .header-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-top: -64px;
-    gap: 14px;
-  }
-
-  .avatar-block .avatar-wrapper {
-    width: 96px;
-    height: 96px;
-  }
-
-  .user-info {
-    margin-top: 0;
-    width: 100%;
-
-    .name-row h1 {
-      font-size: 1.3rem;
-    }
-
-    .rol-row {
-      justify-content: center;
-    }
-  }
-
-  .actions {
-    width: 100%;
-    justify-content: center;
-    margin-top: 14px;
-
-    button {
-      flex: 1 1 auto;
-      min-height: 44px;
-      padding: 0 12px;
-      font-size: 0.82rem;
-      white-space: normal;
-      text-align: center;
-    }
-  }
+  @include cabecera-vertical;
 }
 
 @media (max-width: 430px) {
-  .actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
+  @include acciones-en-cuadricula;
+}
+
+@container (max-width: 560px) {
+  @include cabecera-vertical;
+}
+
+@container (max-width: 430px) {
+  @include acciones-en-cuadricula;
 }

@@ -22,7 +22,7 @@ export class LayoutComponent {
 
   constructor() {
     effect(() => {
-      this.tema.pintar(this.tema.claro() && !this.authService.isAuthenticated());
+      this.tema.pintar(this.tema.claro());
     });
   }
 }

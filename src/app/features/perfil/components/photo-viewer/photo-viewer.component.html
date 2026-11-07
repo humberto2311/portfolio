@@ -1,13 +1,15 @@
 <div class="visor" (click)="cerrarSiFondo($event)">
   <div class="visor__panel">
     <div class="visor__imagen">
+      <img class="visor__fondo" [src]="foto.url" alt="" aria-hidden="true" />
+
       @if (tieneAnterior) {
         <button type="button" class="nav nav--antes" (click)="mover(-1)" title="Foto anterior">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
       }
 
-      <img [src]="foto.url" [alt]="textoAlternativo() || 'Foto ampliada'" />
+      <img class="visor__foto" [src]="foto.url" [alt]="textoAlternativo() || 'Foto ampliada'" />
 
       @if (tieneSiguiente) {
         <button type="button" class="nav nav--despues" (click)="mover(1)" title="Foto siguiente">
@@ -22,6 +24,9 @@
           Foto
           @if (puedeNavegar) {
             <span class="contador">{{ indice + 1 }} de {{ galeria.length }}</span>
+          }
+          @if (fechaSubida) {
+            <span class="contador">{{ fechaSubida }}</span>
           }
         </h3>
 
@@ -88,7 +93,8 @@
         } @else if (editandoDescripcion()) {
           <textarea
             rows="3"
-            placeholder="¿Qué quieres contar sobre esta foto?"
+            appMenciones
+            placeholder="¿Qué quieres contar sobre esta foto? Escribe @ para etiquetar"
             [(ngModel)]="textoDescripcion"
             (keyup.escape)="cancelarDescripcion()"></textarea>
           <div class="descripcion__acciones">
@@ -97,7 +103,11 @@
           </div>
         } @else {
           <p class="descripcion__texto" [class.vacia]="!descripcion()">
-            {{ descripcion() || 'Sin descripción' }}
+            @if (descripcion()) {
+              <app-menciones-texto [texto]="descripcion()" />
+            } @else {
+              Sin descripción
+            }
           </p>
           @if (esMiPerfil) {
             <button type="button" class="descripcion__editar" (click)="comenzarDescripcion()">
@@ -122,7 +132,10 @@
         } @else if (sinFila) {
           <p class="estado">Esta foto todavía no admite comentarios.</p>
         } @else if (comentarios().length === 0) {
-          <p class="estado">Sé el primero en comentar.</p>
+          <div class="vacio">
+            <i class="fa-regular fa-comment-dots"></i>
+            <p>Sé el primero en comentar.</p>
+          </div>
         }
 
         @for (c of comentarios(); track c.id) {
@@ -161,8 +174,9 @@
               @if (comentarioEditando() === c.id) {
                 <input
                   type="text"
+                  appMenciones
                   [(ngModel)]="textoComentarioEditado"
-                  (keyup.enter)="guardarEdicion(c)"
+                  (keydown.enter)="guardarEdicion(c)"
                   (keyup.escape)="cancelarEdicion()" />
                 <div class="burbuja__acciones">
                   <button type="button" class="primario" (click)="guardarEdicion(c)">Guardar</button>
@@ -190,9 +204,10 @@
         </div>
         <input
           type="text"
+          appMenciones
           [(ngModel)]="nuevoComentario"
           placeholder="Escribe un comentario..."
-          (keyup.enter)="enviarComentario()" />
+          (keydown.enter)="enviarComentario()" />
         <button type="button" [disabled]="enviando()" (click)="enviarComentario()">
           <i class="fa-solid fa-paper-plane"></i>
         </button>

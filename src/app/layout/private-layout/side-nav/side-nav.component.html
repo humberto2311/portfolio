@@ -1,7 +1,6 @@
 <nav class="rail" [class.rail--mini]="rail.colapsado()" aria-label="Navegación principal">
   <a class="rail__marca" routerLink="/app" [title]="'NFC-Soft'">
-    <img src="assets/images/logo.png" alt="NFC-Soft" />
-    <span>NFC-Soft</span>
+    <app-logo [nombre]="!rail.colapsado()" />
   </a>
 
   <ul class="rail__lista">

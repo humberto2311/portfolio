@@ -9,7 +9,6 @@
     padding: 6px 0 10px;
   }
 
-  .rail__marca span,
   .rail__etiqueta,
   .rail__datos,
   .rail__colapsar span {
@@ -79,13 +78,6 @@
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
-
-  img {
-    height: 26px;
-    width: auto;
-    object-fit: contain;
-    flex-shrink: 0;
-  }
 }
 
 .rail__item {

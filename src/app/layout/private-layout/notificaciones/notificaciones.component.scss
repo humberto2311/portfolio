@@ -154,7 +154,7 @@
     flex-shrink: 0;
     background: $accent;
     border: 1px solid $accent;
-    color: #08090b;
+    color: var(--on-accent);
     font-size: 0.78rem;
     font-weight: 600;
     padding: 6px 14px;

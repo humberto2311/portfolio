@@ -4,6 +4,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { RailStateService } from '../../../core/services/rail-state.service';
+import { LogoComponent } from '../../../shared/components/logo/logo.component';
 
 interface RailItem {
   label: string;
@@ -16,7 +17,7 @@ interface RailItem {
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, LogoComponent],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
 })

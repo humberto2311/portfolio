@@ -49,7 +49,7 @@
 
   .btn-mini {
     background: $accent;
-    color: #08090b;
+    color: var(--on-accent);
     border: none;
     border-radius: 999px;
     padding: 6px 14px;
@@ -468,7 +468,7 @@
 
     .btn-save {
       background: $accent;
-      color: #08090b;
+      color: var(--on-accent);
 
       &:hover {
         background: $accent-strong;

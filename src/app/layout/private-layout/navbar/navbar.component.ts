@@ -10,11 +10,12 @@ import {
 } from '../../../core/services/user-directory.service';
 import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { NotificacionesComponent } from '../notificaciones/notificaciones.component';
+import { LogoComponent } from '../../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-private-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, UserMenuComponent, NotificacionesComponent],
+  imports: [CommonModule, RouterLink, UserMenuComponent, NotificacionesComponent, LogoComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })

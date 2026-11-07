@@ -16,6 +16,7 @@ export class TemaService {
 
   guardar(claro: boolean): void {
     this.claro.set(claro);
+    this.pintar(claro);
     if (this.hayNavegador()) {
       localStorage.setItem(CLAVE, claro ? 'claro' : 'oscuro');
     }

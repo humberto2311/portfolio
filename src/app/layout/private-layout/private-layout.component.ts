@@ -34,7 +34,7 @@ export class PrivateLayoutComponent {
       )
       .subscribe(() => this.leerRuta());
 
-    this.tema.pintar(false);
+    this.tema.pintar(this.tema.claro());
   }
 
   private leerRuta(): void {

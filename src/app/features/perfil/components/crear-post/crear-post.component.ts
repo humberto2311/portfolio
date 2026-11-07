@@ -1,9 +1,7 @@
 import {
   Component,
-  ElementRef,
   Input,
   OnInit,
-  ViewChild,
   inject,
   signal,
 } from '@angular/core';
@@ -13,15 +11,12 @@ import { PerfilService } from '../../../../core/services/perfil.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { UserProfileService } from '../../../../core/services/user-profile.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import {
-  SugerenciaUsuario,
-  UserDirectoryService,
-} from '../../../../core/services/user-directory.service';
+import { MencionesDirective } from '../../../../shared/directives/menciones.directive';
 
 @Component({
   selector: 'app-crear-post',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MencionesDirective],
   templateUrl: './crear-post.component.html',
   styleUrls: ['./crear-post.component.scss']
 })
@@ -29,12 +24,9 @@ export class CrearPostComponent implements OnInit {
   /** true cuando se publica en el muro de otra persona (queda pendiente). */
   @Input() destinoAjeno = false;
 
-  @ViewChild('entrada') entradaRef?: ElementRef<HTMLInputElement>;
-
   private perfilService = inject(PerfilService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
-  private directorio = inject(UserDirectoryService);
   private perfiles = inject(UserProfileService);
 
   readonly miAvatar = this.perfiles.avatar;
@@ -43,14 +35,7 @@ export class CrearPostComponent implements OnInit {
   imagenPreview = signal<string | null>(null);
   publicando = signal(false);
 
-  // --- Sugerencias @ ---
-  sugerencias = signal<SugerenciaUsuario[]>([]);
-  indice = signal(0);
-  abiertoSugerencias = signal(false);
-  private tokenInicio = -1;
-
   ngOnInit(): void {
-    this.directorio.cargarRed().subscribe();
     this.perfiles.cargarMiAvatar();
   }
 
@@ -62,84 +47,6 @@ export class CrearPostComponent implements OnInit {
     if (partes.length === 1) return partes[0].charAt(0).toUpperCase();
 
     return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
-  }
-
-  // ====== @ SUGERENCIAS ======
-
-  onInput(event: Event): void {
-    const el = event.target as HTMLInputElement;
-    this.texto = el.value;
-
-    const caret = el.selectionStart ?? el.value.length;
-    const antes = el.value.slice(0, caret);
-    const match = /(?:^|[\s(])@([\w.\-]*)$/.exec(antes);
-
-    if (!match) {
-      this.cerrarSugerencias();
-      return;
-    }
-
-    this.tokenInicio = caret - match[1].length - 1;
-    this.indice.set(0);
-
-    this.directorio.buscar(match[1], 8).subscribe({
-      next: (lista) => {
-        this.sugerencias.set(lista);
-        this.abiertoSugerencias.set(lista.length > 0);
-      },
-      error: () => this.cerrarSugerencias(),
-    });
-  }
-
-  onKeydown(event: KeyboardEvent): void {
-    if (!this.abiertoSugerencias()) {
-      if (event.key === 'Enter') this.publicar();
-      return;
-    }
-
-    const total = this.sugerencias().length;
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      this.indice.update((i) => (i + 1) % total);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      this.indice.update((i) => (i - 1 + total) % total);
-    } else if (event.key === 'Enter') {
-      event.preventDefault();
-      this.elegir(this.sugerencias()[this.indice()]);
-    } else if (event.key === 'Escape') {
-      this.cerrarSugerencias();
-    }
-  }
-
-  elegir(sugerencia: SugerenciaUsuario): void {
-    if (this.tokenInicio < 0) return;
-
-    const antes = this.texto.slice(0, this.tokenInicio);
-    const resto = this.texto
-      .slice(this.tokenInicio)
-      .replace(/^@[\w.\-]*/, '')
-      .replace(/^\s+/, '');
-    const insertado = `@${sugerencia.username} `;
-    this.texto = antes + insertado + resto;
-
-    const posicion = (antes + insertado).length;
-    this.cerrarSugerencias();
-
-    setTimeout(() => {
-      const el = this.entradaRef?.nativeElement;
-      if (el) {
-        el.focus();
-        el.setSelectionRange(posicion, posicion);
-      }
-    });
-  }
-
-  private cerrarSugerencias(): void {
-    this.abiertoSugerencias.set(false);
-    this.sugerencias.set([]);
-    this.tokenInicio = -1;
   }
 
   // ====== IMAGEN ======

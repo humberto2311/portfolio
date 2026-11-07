@@ -274,12 +274,6 @@ export class PerfilHeaderComponent implements OnChanges {
     const url = tipo === 'avatar' ? this.perfil.avatarUrl : this.perfil.coverUrl;
     if (!url) return;
 
-    if (!this.authService.isAuthenticated()) {
-      this.toast.show('Debes iniciar sesión para ver la foto en grande');
-      this.modalSvc.openLogin();
-      return;
-    }
-
     this.tipoAbierto = tipo;
     this.urlAbierta = url;
     this.fotoDelHeader = { id: 0, userId: this.perfil.id, url };

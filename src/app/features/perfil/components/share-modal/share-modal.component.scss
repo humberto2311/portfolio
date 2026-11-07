@@ -223,7 +223,7 @@
 
   .btn-pri {
     background: $accent;
-    color: #08090b;
+    color: var(--on-accent);
     border-radius: 999px;
     padding: 0.55rem 1.15rem;
     &:hover:not(:disabled) { background: $accent-strong; }

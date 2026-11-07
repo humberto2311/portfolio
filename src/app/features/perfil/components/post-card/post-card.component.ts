@@ -9,6 +9,7 @@ import { UserProfileService } from '../../../../core/services/user-profile.servi
 import { ShareModalComponent } from '../share-modal/share-modal.component';
 import { PostDetalleComponent } from '../post-detalle/post-detalle.component';
 import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.component';
+import { MencionesDirective } from '../../../../shared/directives/menciones.directive';
 
 @Component({
   selector: 'app-post-card',
@@ -19,6 +20,7 @@ import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.comp
     ShareModalComponent,
     PostDetalleComponent,
     MencionesTextoComponent,
+    MencionesDirective,
   ],
   templateUrl: './post-card.component.html',
   styleUrls: ['./post-card.component.scss']

@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 
 import { AuthService, EstadoCuenta } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { TemaService } from '../../core/services/tema.service';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { ResumeProfile } from '../../core/models/resume.model';
@@ -22,6 +23,7 @@ export class AjustesCuentaComponent implements OnInit {
   private toast = inject(ToastService);
   private resume = inject(ResumeService);
   private resumeSave = inject(ResumeSaveService);
+  readonly tema = inject(TemaService);
 
   readonly generos = [
     { valor: 'masculino', texto: 'Masculino' },
@@ -168,5 +170,10 @@ export class AjustesCuentaComponent implements OnInit {
 
   get cvVisible(): boolean {
     return this.cv?.isPublic === true;
+  }
+
+  ponerTema(claro: boolean): void {
+    if (this.tema.claro() === claro) return;
+    this.tema.guardar(claro);
   }
 }

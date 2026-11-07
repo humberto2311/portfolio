@@ -51,7 +51,7 @@
     font-size: 0.72rem;
     flex-shrink: 0;
 
-    &:hover { background: rgba(74, 158, 255, 0.1); border-color: $cyan-main; }
+    &:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: $cyan-main; }
   }
 
   .bio-editor {
@@ -76,7 +76,7 @@
 
     .btn-mini {
       background: $cyan-main;
-      color: #001018;
+      color: var(--on-accent);
       border: none;
       border-radius: 6px;
       padding: 0.3rem 0.75rem;

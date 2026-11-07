@@ -1,16 +1,16 @@
 @import '@fortawesome/fontawesome-free/css/all.min.css';
-$bg-main: #0b0d10;
-$bg-card: #121519;
-$bg-hover: #1a1e24;
+$bg-main: var(--bg-main);
+$bg-card: var(--bg-card);
+$bg-hover: var(--bg-hover);
 $border-color: var(--bg-border);
 
-$cyan-accent: #4a9eff;
-$emerald-active: #3fb950;
-$coral-danger: #e5484d;
+$cyan-accent: var(--accent);
+$emerald-active: var(--success);
+$coral-danger: var(--danger);
 
-$text-bright: #ffffff;
-$text-main: #e6e8ea;
-$text-muted: #8b949e;
+$text-bright: var(--text-primary);
+$text-main: var(--text-primary);
+$text-muted: var(--text-muted);
 
 .hub-container {
   min-height: 0;
@@ -25,7 +25,7 @@ $text-muted: #8b949e;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid $border-color;
   margin-bottom: 28px;
 
   .brand {
@@ -37,8 +37,8 @@ $text-muted: #8b949e;
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      background: rgba($cyan-accent, 0.1);
-      border: 1px solid rgba($cyan-accent, 0.3);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
       color: $cyan-accent;
       display: flex;
       align-items: center;
@@ -73,7 +73,7 @@ $text-muted: #8b949e;
 .active-preview-card {
   background: $bg-card;
   border-radius: 16px;
-  border: 1px solid rgba($cyan-accent, 0.3);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   padding: 24px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
   height: fit-content;
@@ -88,8 +88,8 @@ $text-muted: #8b949e;
       font-size: 0.75rem;
       font-weight: 700;
       color: $cyan-accent;
-      background: rgba($cyan-accent, 0.1);
-      border: 1px solid rgba($cyan-accent, 0.3);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
       padding: 6px 12px;
       border-radius: 20px;
 
@@ -98,7 +98,8 @@ $text-muted: #8b949e;
         height: 8px;
         border-radius: 50%;
         background-color: $cyan-accent;
-        box-shadow: none;        animation: pulse 1.5s infinite;
+        box-shadow: none;
+        animation: pulse 1.5s infinite;
       }
     }
   }
@@ -111,7 +112,7 @@ $text-muted: #8b949e;
       width: 60px;
       height: 60px;
       border-radius: 14px;
-      background: rgba($cyan-accent, 0.1);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
       color: $cyan-accent;
       display: flex;
       align-items: center;
@@ -144,11 +145,11 @@ $text-muted: #8b949e;
       font-weight: 700;
       border-radius: 10px;
       text-decoration: none;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: none;      }
+      }
     }
   }
 
@@ -181,7 +182,7 @@ $text-muted: #8b949e;
 
     .count-tag {
       font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.05);
+      background: color-mix(in srgb, var(--text-primary) 5%, transparent);
       padding: 4px 8px;
       border-radius: 6px;
       color: $text-muted;
@@ -199,26 +200,26 @@ $text-muted: #8b949e;
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+    border: 1px solid $border-color;
     border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s;
 
     &:hover {
       background: $bg-hover;
-      border-color: rgba($cyan-accent, 0.3);
+      border-color: color-mix(in srgb, var(--accent) 30%, transparent);
     }
 
     &.is-active {
-      border-color: rgba($cyan-accent, 0.6);
-      background: rgba($cyan-accent, 0.04);
+      border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+      background: color-mix(in srgb, var(--accent) 4%, transparent);
     }
 
     // CV privado: la tarjeta se ve apagada hasta que se publique
     &.is-privado {
       .item-icon {
-        background: rgba(255, 255, 255, 0.03);
+        background: color-mix(in srgb, var(--text-primary) 3%, transparent);
         color: $text-muted;
         filter: grayscale(100%);
       }
@@ -252,7 +253,7 @@ $text-muted: #8b949e;
         width: 36px;
         height: 36px;
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
+        background: color-mix(in srgb, var(--text-primary) 5%, transparent);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -282,11 +283,11 @@ $text-muted: #8b949e;
         font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.05);
+        background: color-mix(in srgb, var(--text-primary) 5%, transparent);
         color: $text-muted;
 
         &.active {
-          background: rgba($cyan-accent, 0.15);
+          background: color-mix(in srgb, var(--accent) 15%, transparent);
           color: $cyan-accent;
           font-weight: 600;
         }
@@ -299,15 +300,15 @@ $text-muted: #8b949e;
         font-size: 0.75rem;
         padding: 4px 10px;
         border-radius: 12px;
-        border: 1px solid rgba($coral-danger, 0.35);
-        background: rgba($coral-danger, 0.1);
+        border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+        background: color-mix(in srgb, var(--danger) 10%, transparent);
         color: $coral-danger;
         cursor: pointer;
         transition: all 0.2s;
 
         &.publicado {
-          border-color: rgba($emerald-active, 0.35);
-          background: rgba($emerald-active, 0.12);
+          border-color: color-mix(in srgb, var(--success) 35%, transparent);
+          background: color-mix(in srgb, var(--success) 12%, transparent);
           color: $emerald-active;
         }
 
@@ -334,12 +335,12 @@ $text-muted: #8b949e;
         justify-content: center;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.08);
+          background: $bg-hover;
           color: $text-bright;
         }
 
         &.delete-btn:hover {
-          background: rgba($coral-danger, 0.15);
+          background: color-mix(in srgb, var(--danger) 15%, transparent);
           color: $coral-danger;
         }
       }
@@ -375,7 +376,7 @@ $text-muted: #8b949e;
 .btn-secondary {
   background: transparent;
   color: $text-muted;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid $border-color;
   padding: 10px 18px;
   border-radius: 10px;
   font-weight: 500;
@@ -383,7 +384,7 @@ $text-muted: #8b949e;
 
   &:hover {
     color: $text-bright;
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
   }
 }
 
@@ -445,8 +446,8 @@ $text-muted: #8b949e;
       input[type="text"],
       input[type="url"],
       textarea {
-        background: $bg-main;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--bg-input);
+        border: 1px solid $border-color;
         border-radius: 8px;
         padding: 10px 12px;
         color: $text-bright;
@@ -466,8 +467,8 @@ $text-muted: #8b949e;
           width: 38px;
           height: 38px;
           border-radius: 8px;
-          background: $bg-main;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: var(--bg-input);
+          border: 1px solid $border-color;
           color: $text-muted;
           cursor: pointer;
           display: flex;
@@ -477,7 +478,7 @@ $text-muted: #8b949e;
           &.selected {
             border-color: $cyan-accent;
             color: $cyan-accent;
-            background: rgba($cyan-accent, 0.1);
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
           }
         }
       }
@@ -507,7 +508,7 @@ $text-muted: #8b949e;
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba($cyan-accent, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba($cyan-accent, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba($cyan-accent, 0); }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px transparent; }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 transparent; }
 }

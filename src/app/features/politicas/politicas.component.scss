@@ -113,7 +113,7 @@ section {
     padding: .75rem .9rem;
     border-left: 3px solid var(--accent-cyan);
     border-radius: 8px;
-    background: rgba(74, 158, 255, .06);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
     font-size: .82rem;
 
     i {
@@ -141,7 +141,7 @@ section {
   color: var(--on-accent);
   transition: .2s;
 
-  &:hover:not(.secundario) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74, 158, 255, .28); }
+  &:hover:not(.secundario) { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent); }
 
   &.secundario {
     background: transparent;

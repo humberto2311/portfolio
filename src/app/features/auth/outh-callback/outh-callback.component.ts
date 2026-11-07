@@ -21,13 +21,13 @@ import { CommonModule } from '@angular/common';
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #0b0f19;
-      color: #4a9eff;
+      background-color: var(--bg-main);
+      color: var(--accent);
       font-family: 'Inter', sans-serif;
     }
     .spinner {
-      border: 4px solid rgba(74, 158, 255, 0.2);
-      border-top: 4px solid #4a9eff;
+      border: 4px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-top: 4px solid var(--accent);
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -43,7 +43,7 @@ import { CommonModule } from '@angular/common';
       font-weight: 600;
     }
     p {
-      color: #8891a3;
+      color: var(--text-muted);
       font-size: 0.9rem;
     }
   `]

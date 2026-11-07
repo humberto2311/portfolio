@@ -1,9 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { VcardService } from '../../core/services/vcard.service';
 import { ArchivoService } from '../../core/services/archivo.service';
+import { DisenoService } from '../../core/services/diseno.service';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 
 @Component({
@@ -13,10 +15,11 @@ import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
   templateUrl: './tarjeta-publica.component.html',
   styleUrls: ['./tarjeta-publica.component.scss'],
 })
-export class TarjetaPublicaComponent implements OnInit {
+export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private vcardService = inject(VcardService);
   private archivos = inject(ArchivoService);
+  private diseno = inject(DisenoService);
 
   private userId = '';
   private slug = '';
@@ -25,6 +28,9 @@ export class TarjetaPublicaComponent implements OnInit {
   noEncontrada = signal(false);
   tarjeta = signal<VCardPayload | null>(null);
   aviso = signal<string | null>(null);
+  disenoAjeno = signal(false);
+
+  private readonly destroyRef = inject(DestroyRef);
 
   /** true cuando se abrió desde el QR / NFC (?auto=1): guarda el contacto solo. */
   modoNfc = signal(false);
@@ -39,6 +45,14 @@ export class TarjetaPublicaComponent implements OnInit {
       this.cargando.set(false);
       return;
     }
+
+    this.diseno.cargarDeUsuario(this.userId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((d) => {
+        const tarjeta = this.diseno.estaTarjeta(d);
+        this.disenoAjeno.set(tarjeta.activo);
+        this.diseno.aplicarAjeno(tarjeta);
+      });
 
     const peticion$ = this.slug
       ? this.vcardService.tarjetaPorSlug(this.userId, this.slug)
@@ -59,6 +73,11 @@ export class TarjetaPublicaComponent implements OnInit {
         this.cargando.set(false);
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.disenoAjeno.set(false);
+    this.diseno.limpiarAjeno();
   }
 
   readonly iniciales = computed(() => {

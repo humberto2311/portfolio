@@ -1,9 +1,10 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { VcardService } from '../../core/services/vcard.service';
 import { ArchivoService } from '../../core/services/archivo.service';
+import { DisenoService } from '../../core/services/diseno.service';
 import {
   CampoExtraVcard,
   CategoriaCampo,
@@ -39,9 +40,20 @@ interface GrupoCampos {
   templateUrl: './portafolio.component.html',
   styleUrls: ['./portafolio.component.scss'],
 })
-export class PortafolioComponent implements OnInit {
+export class PortafolioComponent implements OnInit, OnDestroy {
   private vcardService = inject(VcardService);
   private archivos = inject(ArchivoService);
+  private diseno = inject(DisenoService);
+
+  constructor() {
+    effect(() => {
+      this.diseno.aplicarPrevia(this.diseno.estaTarjeta(this.diseno.propio()));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.diseno.limpiarPrevia();
+  }
 
   cargando = signal(true);
   guardando = signal(false);

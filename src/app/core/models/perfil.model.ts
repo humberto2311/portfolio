@@ -88,6 +88,11 @@ export interface PerfilData {
   coverUrl?: string;
   coverPosition?: string;
   avatarUrl?: string;
+  disenoAcento?: string;
+  disenoSecundario?: string;
+  disenoFondoUrl?: string;
+  disenoCss?: string;
+  disenoActivo?: boolean;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos';

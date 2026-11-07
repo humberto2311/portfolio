@@ -3,6 +3,10 @@
 .shell {
   min-height: 100dvh;
   background: $bg-main;
+  background-image: var(--fondo-imagen);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: $text-light;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;

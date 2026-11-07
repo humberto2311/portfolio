@@ -116,13 +116,13 @@
     border: 1px solid $bg-border;
     color: $text-muted;
 
-    &:hover:not(:disabled) { color: #ef4444; border-color: rgba(239, 68, 68, 0.5); }
+    &:hover:not(:disabled) { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
   }
 
   .btn-aceptar {
     background: $cyan-main;
     border: none;
-    color: #001018;
+    color: var(--on-accent);
 
     &:hover:not(:disabled) { transform: translateY(-1px); }
   }

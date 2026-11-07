@@ -169,7 +169,7 @@
     font-size: 0.62rem;
     letter-spacing: 0.03em;
     color: $accent;
-    border: 1px solid rgba(74, 158, 255, 0.4);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
     background: $accent-soft;
     border-radius: 999px;
     padding: 0.1rem 0.4rem;

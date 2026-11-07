@@ -9,6 +9,10 @@
     gap: 14px;
   }
 
+  .avatar-block {
+    align-self: center;
+  }
+
   .avatar-block .avatar-wrapper {
     width: 96px;
     height: 96px;
@@ -171,6 +175,8 @@
 }
 
 .avatar-block {
+  align-self: flex-start;
+
   .avatar-wrapper {
     position: relative;
     width: 128px;
@@ -227,7 +233,7 @@
 
 .user-info {
   flex: 1 1 260px;
-  margin-top: 40px;
+  margin-top: 72px;
   min-width: 0;
 
   .name-row {
@@ -335,7 +341,7 @@
       border: none;
 
       &:hover:not(:disabled) {
-        background: rgba(74, 158, 255, 0.22);
+        background: color-mix(in srgb, var(--accent) 22%, transparent);
       }
 
       &:disabled {
@@ -344,8 +350,8 @@
       }
 
       &.sin-disponibilidad {
-        color: #d99123;
-        background: rgba(217, 145, 35, 0.14);
+        color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 14%, transparent);
       }
     }
   }
@@ -397,7 +403,7 @@
     border: 1px solid $bg-border;
 
     &:hover:not(:disabled) {
-      background: rgba(229, 72, 77, 0.12);
+      background: color-mix(in srgb, var(--danger) 12%, transparent);
       color: $danger;
       border-color: $danger;
     }
@@ -419,7 +425,7 @@
     border: 1px solid $accent-border;
 
     &:hover:not(:disabled) {
-      background: rgba(74, 158, 255, 0.22);
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
     }
   }
 }

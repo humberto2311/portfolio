@@ -1,15 +1,15 @@
 
-$color-bg-main: #0d1117;
-$color-surface: #1b2230;
-$color-surface-hover: #253046;
-$color-text: #e6edf3;
-$color-text-muted: #8b949e;
-$color-border: #30363d;
+$color-bg-main: var(--bg-main);
+$color-surface: var(--bg-elevated);
+$color-surface-hover: var(--bg-hover);
+$color-text: var(--text-primary);
+$color-text-muted: var(--text-secondary);
+$color-border: var(--bg-border);
 
-$color-cyan: #00f0ff;
-$color-cyan-hover: #00c4d1;
-$color-purple: #a371f7;
-$color-danger: #f85149;
+$color-cyan: var(--accent);
+$color-cyan-hover: var(--accent-strong);
+$color-purple: var(--accent-alt);
+$color-danger: var(--danger);
 
 $radius-md: 12px;
 $radius-pill: 999px;
@@ -51,7 +51,7 @@ $bp-md: 768px;
   }
 
   &__count {
-    background: rgba($color-text-muted, 0.15);
+    background: color-mix(in srgb, #{$color-text-muted} 15%, transparent);
     color: $color-text-muted;
     font-size: .8rem;
     font-weight: 600;
@@ -86,7 +86,7 @@ $bp-md: 768px;
 
     &:focus {
       border-color: $color-cyan;
-      box-shadow: 0 0 0 2px rgba($color-cyan, .2);
+      box-shadow: 0 0 0 2px color-mix(in srgb, #{$color-cyan} 20%, transparent);
     }
   }
 
@@ -128,7 +128,7 @@ $bp-md: 768px;
 
       /* El contador dentro de la pestaña */
       .subtab-count {
-        background: rgba($color-text-muted, 0.15);
+        background: color-mix(in srgb, #{$color-text-muted} 15%, transparent);
         color: $color-text-muted;
         font-size: 0.75rem;
         font-weight: 700;
@@ -142,7 +142,7 @@ $bp-md: 768px;
 
         // Cuando la pestaña está activa, el contador se ilumina en cian
         .subtab-count {
-          background: rgba($color-cyan, 0.15);
+          background: color-mix(in srgb, #{$color-cyan} 15%, transparent);
           color: $color-cyan;
         }
 
@@ -208,16 +208,16 @@ $bp-md: 768px;
   transition: background .15s;
 
   &:hover {
-    background: rgba($color-surface-hover, 0.5);
+    background: color-mix(in srgb, #{$color-surface-hover} 50%, transparent);
   }
 
   &__avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: rgba($color-cyan, 0.1);
+    background: color-mix(in srgb, #{$color-cyan} 10%, transparent);
     color: $color-cyan;
-    border: 1px solid rgba($color-cyan, 0.3);
+    border: 1px solid color-mix(in srgb, #{$color-cyan} 30%, transparent);
     font-weight: 700;
     font-size: 1rem;
     display: flex;
@@ -289,12 +289,12 @@ $bp-md: 768px;
 
 
   &--primary {
-    background: rgba($color-cyan, 0.15);
+    background: color-mix(in srgb, #{$color-cyan} 15%, transparent);
     color: $color-cyan;
-    border: 1px solid rgba($color-cyan, 0.4);
+    border: 1px solid color-mix(in srgb, #{$color-cyan} 40%, transparent);
 
     &:hover:not(:disabled) {
-      background: rgba($color-cyan, 0.25);
+      background: color-mix(in srgb, #{$color-cyan} 25%, transparent);
       box-shadow: none;    }
   }
 
@@ -312,10 +312,10 @@ $bp-md: 768px;
   &--danger {
     background: transparent;
     color: $color-danger;
-    border: 1px solid rgba($color-danger, 0.5);
+    border: 1px solid color-mix(in srgb, #{$color-danger} 50%, transparent);
 
     &:hover:not(:disabled) { 
-      background: rgba($color-danger, 0.1); 
+      background: color-mix(in srgb, #{$color-danger} 10%, transparent); 
     }
   }
 }

@@ -155,7 +155,7 @@
 
   input.ng-touched.ng-invalid,
   select.ng-touched.ng-invalid {
-    border-color: rgba(248, 113, 113, .6);
+    border-color: color-mix(in srgb, var(--danger) 60%, transparent);
   }
 
   .obligado {
@@ -271,8 +271,8 @@
   margin: 0;
   font-size: .76rem;
   color: var(--warning);
-  background: rgba(245, 183, 94, .1);
-  border: 1px solid rgba(245, 183, 94, .25);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
   border-radius: 8px;
   padding: .45rem .6rem;
 }

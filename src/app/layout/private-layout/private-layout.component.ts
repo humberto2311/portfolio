@@ -10,6 +10,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { PrimerIngresoComponent } from './primer-ingreso/primer-ingreso.component';
 import { RailStateService } from '../../core/services/rail-state.service';
 import { TemaService } from '../../core/services/tema.service';
+import { DisenoService } from '../../core/services/diseno.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -24,6 +25,7 @@ export class PrivateLayoutComponent {
 
   private readonly router = inject(Router);
   private readonly tema = inject(TemaService);
+  private readonly diseno = inject(DisenoService);
 
   constructor() {
     this.leerRuta();
@@ -35,6 +37,7 @@ export class PrivateLayoutComponent {
       .subscribe(() => this.leerRuta());
 
     this.tema.pintar(this.tema.claro());
+    this.diseno.cargarPropio().subscribe();
   }
 
   private leerRuta(): void {

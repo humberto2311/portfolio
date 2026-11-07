@@ -25,9 +25,9 @@
   margin: 0;
   padding: .7rem .9rem;
   border-radius: 10px;
-  background: rgba(255, 92, 122, .12);
-  border: 1px solid rgba(255, 92, 122, .35);
-  color: #ffb3c2;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  color: var(--danger);
   font-size: .85rem;
 }
 
@@ -67,14 +67,14 @@
   padding: .3rem .6rem;
   border-radius: 999px;
   white-space: nowrap;
-  background: rgba(255, 200, 97, .14);
-  color: #ffc861;
-  border: 1px solid rgba(255, 200, 97, .35);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
 
   &.ok {
-    background: rgba(52, 211, 153, .14);
-    color: #34d399;
-    border-color: rgba(52, 211, 153, .35);
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 35%, transparent);
   }
 }
 
@@ -91,7 +91,7 @@
     justify-content: space-between;
     gap: 1rem;
     padding-bottom: .55rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .05);
+    border-bottom: 1px solid var(--bg-border);
     font-size: .88rem;
 
     &:last-child { border-bottom: none; padding-bottom: 0; }
@@ -143,7 +143,7 @@
 .error {
   margin: 0;
   font-size: .8rem;
-  color: #ff5c7a;
+  color: var(--danger);
 }
 
 .actions {
@@ -172,9 +172,9 @@
 
 .btn-primary {
   background: var(--accent-cyan);
-  color: #001018;
+  color: var(--on-accent);
 
-  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74, 158, 255, .3); }
+  &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent); }
   &:disabled { opacity: .55; cursor: not-allowed; }
 }
 
@@ -189,16 +189,16 @@
 
 .btn-danger {
   background: transparent;
-  border-color: rgba(255, 92, 122, .45);
-  color: #ff8ea3;
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  color: var(--danger);
 
-  &:hover:not(:disabled) { background: rgba(255, 92, 122, .12); }
+  &:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 12%, transparent); }
   &:disabled { opacity: .55; cursor: not-allowed; }
 
   &.pedir {
-    background: rgba(255, 92, 122, .16);
-    border-color: #ff5c7a;
-    color: #ffd0da;
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    border-color: var(--danger);
+    color: var(--danger);
   }
 }
 

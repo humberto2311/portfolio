@@ -127,15 +127,333 @@
     </section>
 
     <section class="card">
+      <h2><i class="fas fa-palette"></i> Diseño de perfil</h2>
+
+      <p class="helper">
+        Escoge tus colores, tu fondo y tu propio CSS. Quien abra tu perfil verá este diseño;
+        tú lo ves en toda la app. La tarjeta de contacto tiene su propio espacio más abajo.
+      </p>
+
+      <div class="field">
+        <label for="diseno-acento">Color principal</label>
+        <div class="goteros">
+          <button
+            type="button"
+            class="gotero"
+            *ngFor="let color of paleta"
+            [class.activo]="acento === color"
+            [style.background]="color"
+            [attr.title]="color"
+            (click)="cambiarAcento(color)"
+          ></button>
+          <input
+            id="diseno-acento"
+            type="color"
+            [value]="acento"
+            (input)="cambiarAcento($any($event.target).value)"
+          >
+          <input
+            class="hex"
+            type="text"
+            [value]="acento"
+            (input)="cambiarAcento($any($event.target).value)"
+            placeholder="#4a9eff"
+            maxlength="7"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="diseno-secundario">Color de apoyo <small>(opcional)</small></label>
+        <div class="goteros">
+          <input
+            id="diseno-secundario"
+            type="color"
+            [value]="secundario || '#4a9eff'"
+            (input)="cambiarSecundario($any($event.target).value)"
+          >
+          <input
+            class="hex"
+            type="text"
+            [value]="secundario"
+            (input)="cambiarSecundario($any($event.target).value)"
+            placeholder="sin color de apoyo"
+            maxlength="7"
+            spellcheck="false"
+          >
+          <button type="button" class="btn-ghost" *ngIf="secundario" (click)="cambiarSecundario('')">Quitar</button>
+        </div>
+        <small>Da el matiz de las superficies y las zonas claras del perfil.</small>
+      </div>
+
+      <div class="field">
+        <label>Fondo del perfil</label>
+
+        <div class="fondos" *ngIf="galeria().length; else sinFondos">
+          <button
+            type="button"
+            class="fondo"
+            *ngFor="let foto of galeria()"
+            [class.activo]="fondoUrl === foto.url"
+            (click)="elegirFondo(foto.url)"
+          >
+            <img [src]="foto.url" [alt]="foto.textoAlternativo || 'Fondo del perfil'">
+          </button>
+        </div>
+        <ng-template #sinFondos>
+          <small>Aún no tienes fotos en tu galería. Puedes subir una imagen aquí mismo.</small>
+        </ng-template>
+
+        <div class="actions">
+          <label class="btn-ghost">
+            <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))">
+            Subir imagen
+          </label>
+          <button type="button" class="btn-ghost" *ngIf="fondoUrl" (click)="elegirFondo(null)">Sin fondo</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="diseno-css">CSS del perfil</label>
+        <textarea
+          id="diseno-css"
+          rows="7"
+          class="codigo"
+          spellcheck="false"
+          [value]="css"
+          (input)="cambiarCss($any($event.target).value)"
+          placeholder=".header-card { border-radius: 24px; }"></textarea>
+        <small>
+          Solo estilos. Se rechazan importaciones, URLs externas, scripts y todo lo que pueda tapar la interfaz de otras personas.
+        </small>
+      </div>
+
+      <div class="referencia">
+        <p class="referencia__titulo">Estos son los nombres que puedes usar. La miniatura de abajo solo muestra colores y fondo: para ver el CSS abre tu perfil.</p>
+        <ul>
+          <li><code>.perfil-container</code><span>Toda la página del perfil</span></li>
+          <li><code>.cover-banner</code><span>La portada</span></li>
+          <li><code>.header-card</code><span>El cuadro con tus datos</span></li>
+          <li><code>.avatar-wrapper</code><span>El círculo de la foto</span></li>
+          <li><code>.profile-img</code><span>Tu foto de perfil</span></li>
+          <li><code>.initials</code><span>Las letras cuando no hay foto</span></li>
+          <li><code>.user-info</code><span>Nombre, rol y estadísticas</span></li>
+          <li><code>.rol</code><span>El texto del rol</span></li>
+          <li><code>.btn-follow</code><span>El botón Seguir</span></li>
+          <li><code>.actions</code><span>Los botones del encabezado</span></li>
+          <li><code>.tab-content</code><span>Lo que hay dentro de las pestañas</span></li>
+        </ul>
+      </div>
+
+      <div class="vista-previa diseno-visita" *ngIf="acento || css || fondoUrl">
+        <div class="previa__portada"></div>
+        <div class="previa__cuerpo">
+          <span class="previa__avatar">{{ inicialesPrevias() }}</span>
+          <div class="previa__datos">
+            <strong>{{ nombre || 'Tu nombre' }}</strong>
+            <span>Tu rol profesional</span>
+          </div>
+          <button type="button" class="previa__btn" tabindex="-1">Seguir</button>
+        </div>
+        <div class="previa__chips">
+          <span>Angular</span><span>Java</span><span>PostgreSQL</span>
+        </div>
+      </div>
+
+      <p class="aviso" *ngIf="erroresDiseno.length">
+        <span *ngFor="let error of erroresDiseno">{{ error }}</span>
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="guardarDiseno()" [disabled]="guardandoDiseno">
+          {{ guardandoDiseno ? 'Guardando…' : 'Guardar diseño' }}
+        </button>
+        <button type="button" class="btn-ghost" *ngIf="css || fondoUrl || acento !== '#4a9eff' || secundario"
+                (click)="quitarDiseno()" [disabled]="guardandoDiseno">
+          Quitar mi diseño
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><i class="fas fa-id-card"></i> Diseño de la tarjeta</h2>
+
+      <p class="helper">
+        Esta es la página que se abre cuando alguien escanea tu tarjeta o toca tu QR.
+        Lo que dejes vacío aquí se toma del diseño de tu perfil, incluido el fondo.
+      </p>
+
+      <div class="field">
+        <label for="tarjeta-acento">Color principal de la tarjeta</label>
+        <div class="goteros">
+          <button
+            type="button"
+            class="gotero"
+            *ngFor="let color of paleta"
+            [class.activo]="acentoTarjeta === color"
+            [style.background]="color"
+            [attr.title]="color"
+            (click)="cambiarAcentoTarjeta(color)"
+          ></button>
+          <input
+            id="tarjeta-acento"
+            type="color"
+            [value]="acentoTarjeta || acento"
+            (input)="cambiarAcentoTarjeta($any($event.target).value)"
+          >
+          <input
+            class="hex"
+            type="text"
+            [value]="acentoTarjeta"
+            (input)="cambiarAcentoTarjeta($any($event.target).value)"
+            placeholder="el del perfil"
+            maxlength="7"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="tarjeta-secundario">Color de apoyo de la tarjeta <small>(opcional)</small></label>
+        <div class="goteros">
+          <input
+            id="tarjeta-secundario"
+            type="color"
+            [value]="secundarioTarjeta || secundario || '#4a9eff'"
+            (input)="cambiarSecundarioTarjeta($any($event.target).value)"
+          >
+          <input
+            class="hex"
+            type="text"
+            [value]="secundarioTarjeta"
+            (input)="cambiarSecundarioTarjeta($any($event.target).value)"
+            placeholder="el del perfil"
+            maxlength="7"
+            spellcheck="false"
+          >
+          <button type="button" class="btn-ghost" *ngIf="secundarioTarjeta" (click)="cambiarSecundarioTarjeta('')">Quitar</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="tarjeta-css">CSS de la tarjeta</label>
+        <textarea
+          id="tarjeta-css"
+          rows="7"
+          class="codigo"
+          spellcheck="false"
+          [value]="cssTarjeta"
+          (input)="cambiarCssTarjeta($any($event.target).value)"
+          placeholder=".tarjeta { border-radius: 28px; }&#10;.guardar { font-weight: 800; letter-spacing: .04em; }"></textarea>
+        <small>
+          Se aplica tal cual a la página de la tarjeta. Aquí abajo ves el resultado en vivo.
+        </small>
+      </div>
+
+      <div class="referencia">
+        <p class="referencia__titulo">Cada nombre y lo que toca dentro de la tarjeta:</p>
+        <ul>
+          <li><code>.tarjeta-page</code><span>Toda la pantalla, detrás de la tarjeta</span></li>
+          <li><code>.tarjeta</code><span>El cuadro de la tarjeta completo</span></li>
+          <li><code>.brillo</code><span>El halo de luz del rincón superior</span></li>
+          <li><code>.tarjeta-head</code><span>La fila de arriba: iniciales, nombre y puesto</span></li>
+          <li><code>.avatar</code><span>El círculo con tus iniciales</span></li>
+          <li><code>.identidad h1</code><span>Tu nombre</span></li>
+          <li><code>.rol</code><span>El puesto y la empresa</span></li>
+          <li><code>.acciones-rapidas</code><span>La fila de Llamar, Correo, Web y Compartir</span></li>
+          <li><code>.accion</code><span>Cada botón de esa fila</span></li>
+          <li><code>.filas</code><span>El bloque con todos tus datos</span></li>
+          <li><code>.fila</code><span>Cada dato: teléfono, correo, enlaces y campos extra</span></li>
+          <li><code>.fila i</code><span>El icono de cada dato</span></li>
+          <li><code>.notas</code><span>El recuadro de las notas</span></li>
+          <li><code>.guardar</code><span>El botón "Guardar en mis contactos"</span></li>
+          <li><code>.pie</code><span>La línea de abajo con NFC-SOFT y el tipo de tarjeta</span></li>
+          <li><code>.pista</code><span>El texto que queda bajo la tarjeta</span></li>
+        </ul>
+      </div>
+
+      <div class="tarjeta-previa diseno-previa">
+        <article class="tarjeta">
+          <div class="brillo"></div>
+
+          <header class="tarjeta-head">
+            <div class="avatar">{{ inicialesPrevias() }}</div>
+            <div class="identidad">
+              <h1>{{ nombre || 'Tu nombre' }}</h1>
+              <p class="rol">Tu puesto <span>· Tu empresa</span></p>
+            </div>
+          </header>
+
+          <div class="acciones-rapidas">
+            <span class="accion"><i class="fa-solid fa-phone"></i> Llamar</span>
+            <span class="accion"><i class="fa-solid fa-envelope"></i> Correo</span>
+            <span class="accion"><i class="fa-solid fa-globe"></i> Web</span>
+            <span class="accion"><i class="fa-solid fa-share-nodes"></i> Compartir</span>
+          </div>
+
+          <div class="filas">
+            <div class="fila"><i class="fa-solid fa-phone"></i><span>{{ telefono || '+57 300 000 0000' }}</span></div>
+            <div class="fila"><i class="fa-solid fa-envelope"></i><span>{{ email }}</span></div>
+          </div>
+
+          <div class="notas">
+            <span class="notas-label"><i class="fa-solid fa-note-sticky"></i> Notas</span>
+            <p>El texto que escribas en la tarjeta aparece aquí.</p>
+          </div>
+
+          <button type="button" class="guardar" tabindex="-1">
+            <i class="fa-solid fa-address-card"></i>
+            Guardar en mis contactos
+          </button>
+
+          <footer class="pie">
+            <span class="marca">NFC-SOFT</span>
+            <span class="tipo">profesional</span>
+          </footer>
+        </article>
+      </div>
+
+      <p class="aviso" *ngIf="erroresDiseno.length">
+        <span *ngFor="let error of erroresDiseno">{{ error }}</span>
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="guardarDiseno()" [disabled]="guardandoDiseno">
+          {{ guardandoDiseno ? 'Guardando…' : 'Guardar diseño de la tarjeta' }}
+        </button>
+        <button type="button" class="btn-ghost" *ngIf="acentoTarjeta || secundarioTarjeta || cssTarjeta"
+                (click)="quitarDisenoTarjeta()" [disabled]="guardandoDiseno">
+          Que use el diseño de mi perfil
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
       <h2><i class="fas fa-circle-half-stroke"></i> Apariencia</h2>
 
-      <p class="helper">Se guarda en este dispositivo y aplica tanto a la app como a las páginas públicas.</p>
+      <p class="helper">
+        Se guarda en este dispositivo y aplica tanto a la app como a las páginas públicas.
+      </p>
+      <p class="helper" *ngIf="diseno.propio().activo">
+        Con tu diseño activo, el tema cambia las superficies de fondo y tu color de acento se ajusta para leerse bien en cada modo.
+      </p>
 
       <div class="tema-opciones">
-        <button type="button" class="tema-opcion" [class.activa]="!tema.claro()" (click)="ponerTema(false)">
+        <button
+          type="button"
+          class="tema-opcion"
+          [class.activa]="!tema.claro()"
+          (click)="ponerTema(false)"
+        >
           <i class="fas fa-moon"></i> Oscuro
         </button>
-        <button type="button" class="tema-opcion" [class.activa]="tema.claro()" (click)="ponerTema(true)">
+        <button
+          type="button"
+          class="tema-opcion"
+          [class.activa]="tema.claro()"
+          (click)="ponerTema(true)"
+        >
           <i class="fas fa-sun"></i> Claro
         </button>
       </div>

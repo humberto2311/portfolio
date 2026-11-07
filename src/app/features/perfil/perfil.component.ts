@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PerfilService } from '../../core/services/perfil.service';
 import { AuthService } from '../../core/services/auth.service';
+import { DisenoService } from '../../core/services/diseno.service';
 import { TabId } from '../../core/models/perfil.model';
 
 import { PerfilHeaderComponent } from './components/perfil-header/perfil-header.component';
@@ -30,9 +31,10 @@ import { ToastComponent } from './components/toast/toast.component';
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss']
 })
-export class PerfilComponent implements OnInit {
+export class PerfilComponent implements OnInit, OnDestroy {
   private perfilService = inject(PerfilService);
   private authService = inject(AuthService);
+  private diseno = inject(DisenoService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -42,6 +44,7 @@ export class PerfilComponent implements OnInit {
 
   seccionActiva: TabId = 'publicaciones';
   esMiPerfil = false;
+  disenoAplicado = signal(false);
 
   errorCarga: string | null = null;
 
@@ -102,6 +105,45 @@ export class PerfilComponent implements OnInit {
     } else {
       this.esMiPerfil = false;
     }
+
+    this.aplicarDisenoDelPerfil();
+  }
+
+  private aplicarDisenoDelPerfil(): void {
+    const p = this.perfil();
+
+    if (!p) {
+      this.disenoAplicado.set(false);
+      this.diseno.limpiarAjeno();
+      return;
+    }
+
+    if (this.esMiPerfil) {
+      this.disenoAplicado.set(this.diseno.propio().activo);
+      this.diseno.limpiarAjeno();
+      return;
+    }
+
+    const visita = !!p.disenoActivo;
+    this.disenoAplicado.set(visita);
+
+    if (!visita) {
+      this.diseno.limpiarAjeno();
+      return;
+    }
+
+    this.diseno.aplicarAjeno({
+      acento: p.disenoAcento ?? null,
+      secundario: p.disenoSecundario ?? null,
+      fondoUrl: p.disenoFondoUrl ?? null,
+      css: p.disenoCss ?? null,
+      activo: true,
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.disenoAplicado.set(false);
+    this.diseno.limpiarAjeno();
   }
 
   cambiarSeccion(tab: TabId): void {

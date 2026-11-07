@@ -1,4 +1,4 @@
-<div class="perfil-container">
+<div class="perfil-container" [class.diseno-visita]="disenoAplicado()">
   @if (cargando()) {
     <div class="loader">
       <span class="spinner"></span>
@@ -28,10 +28,10 @@
         }
       </div>
     } @else {
-      <div class="error-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: white;">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
+      <div class="error-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: var(--text-primary);">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--danger); margin-bottom: 20px;"></i>
         <h2>No se pudo cargar el perfil</h2>
-        <p style="color: #94a3b8;">Hubo un problema de conexión con el servidor o el perfil no existe.</p>
+        <p style="color: var(--text-muted);">Hubo un problema de conexión con el servidor o el perfil no existe.</p>
       </div>
     }
   }

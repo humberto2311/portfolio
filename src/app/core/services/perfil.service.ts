@@ -398,6 +398,11 @@ export class PerfilService {
       coverUrl: data.coverUrl || undefined,
       coverPosition: data.coverPosition || undefined,
       avatarUrl: data.avatarUrl || undefined,
+      disenoAcento: data.disenoAcento || undefined,
+      disenoSecundario: data.disenoSecundario || undefined,
+      disenoFondoUrl: data.disenoFondoUrl || undefined,
+      disenoCss: data.disenoCss || undefined,
+      disenoActivo: Boolean(data.disenoActivo),
     };
   }
 

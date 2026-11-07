@@ -4,17 +4,25 @@
 :root {
   color-scheme: dark;
 
-  --bg-main: #0b0d10;
-  --bg-dark: #0b0d10;
+  --base-main: #0b0d10;
+  --base-elevated: #171b21;
+  --base-card: #121519;
+  --base-sidebar: #0f1216;
+  --base-input: #0f1216;
+  --base-hover: #1a1e24;
+  --base-border: #23282f;
+
+  --bg-main: var(--base-main);
+  --bg-dark: var(--base-main);
   --bg-navbar: rgba(11, 13, 16, 0.92);
-  --bg-navbar-scrolled: #0b0d10;
-  --bg-elevated: #171b21;
-  --bg-card: #121519;
-  --bg-sidebar: #0f1216;
-  --bg-input: #0f1216;
-  --bg-hover: #1a1e24;
-  --bg-border: #23282f;
-  --border-soft: #23282f;
+  --bg-navbar-scrolled: var(--base-main);
+  --bg-elevated: var(--base-elevated);
+  --bg-card: var(--base-card);
+  --bg-sidebar: var(--base-sidebar);
+  --bg-input: var(--base-input);
+  --bg-hover: var(--base-hover);
+  --bg-border: var(--base-border);
+  --border-soft: var(--base-border);
 
   --text-primary: #e6e8ea;
   --text-secondary: #8b949e;
@@ -29,6 +37,9 @@
   --border-cyan: rgba(74, 158, 255, 0.3);
   --accent-blue: #6cb8ff;
   --on-accent: #08090b;
+  --accent-alt: #4a9eff;
+
+  --fondo-imagen: none;
 
   --warning: #f5b75e;
   --danger: #e5484d;
@@ -45,17 +56,25 @@
 :root[data-tema='claro'] {
   color-scheme: light;
 
-  --bg-main: #f5f6f8;
-  --bg-dark: #f5f6f8;
+  --base-main: #f5f6f8;
+  --base-elevated: #eef0f4;
+  --base-card: #ffffff;
+  --base-sidebar: #eef0f4;
+  --base-input: #ffffff;
+  --base-hover: #e7eaef;
+  --base-border: #d9dee5;
+
+  --bg-main: var(--base-main);
+  --bg-dark: var(--base-main);
   --bg-navbar: rgba(255, 255, 255, 0.92);
   --bg-navbar-scrolled: #ffffff;
-  --bg-elevated: #eef0f4;
-  --bg-card: #ffffff;
-  --bg-sidebar: #eef0f4;
-  --bg-input: #ffffff;
-  --bg-hover: #e7eaef;
-  --bg-border: #d9dee5;
-  --border-soft: #d9dee5;
+  --bg-elevated: var(--base-elevated);
+  --bg-card: var(--base-card);
+  --bg-sidebar: var(--base-sidebar);
+  --bg-input: var(--base-input);
+  --bg-hover: var(--base-hover);
+  --bg-border: var(--base-border);
+  --border-soft: var(--base-border);
 
   --text-primary: #161a1f;
   --text-secondary: #5a646f;
@@ -70,10 +89,21 @@
   --border-cyan: rgba(31, 111, 235, 0.28);
   --accent-blue: #3d85f5;
   --on-accent: #ffffff;
+  --accent-alt: #1f6feb;
+
+  --fondo-imagen: none;
 
   --warning: #9c6208;
   --danger: #cf2d36;
   --success: #1a7f37;
+}
+
+.diseno-visita {
+  background-image: var(--fondo-imagen);
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 * {

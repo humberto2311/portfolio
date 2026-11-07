@@ -79,7 +79,7 @@
 }
 
 .aviso {
-  color: #fca5a5;
+  color: var(--danger);
 }
 
 .resultados {
@@ -117,7 +117,7 @@
 
 .avatar-text {
   align-items: center;
-  background: rgba(79, 172, 254, 0.15);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent-blue);
   display: flex;
   font-family: var(--font-mono);
@@ -155,7 +155,7 @@
   margin-top: 0.7rem;
 
   .chip {
-    background: rgba(74, 158, 255, 0.08);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
     border: 1px solid var(--border-cyan);
     border-radius: 999px;
     color: var(--text-primary);

@@ -119,7 +119,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
     }
 
     if (this.esMiPerfil) {
-      this.disenoAplicado.set(this.diseno.propio().activo);
+      this.disenoAplicado.set(false);
       this.diseno.limpiarAjeno();
       return;
     }

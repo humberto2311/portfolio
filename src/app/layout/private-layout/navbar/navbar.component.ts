@@ -34,7 +34,7 @@ export class PrivateNavbarComponent implements OnDestroy {
   mostrarSugerencias = signal(false);
 
   readonly filtro = signal<'Todos' | RelacionUsuario>('Todos');
-  readonly filtros: ('Todos' | RelacionUsuario)[] = ['Todos', 'Sigues', 'Te sigue', 'Sugerido'];
+  readonly filtros: ('Todos' | RelacionUsuario)[] = ['Todos', 'Por NFC', 'Sigues', 'Te sigue', 'Sugerido'];
 
   readonly visibles = computed(() => {
     const lista = this.sugerencias();

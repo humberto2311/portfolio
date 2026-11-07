@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { VcardService } from '../../core/services/vcard.service';
 import { ArchivoService } from '../../core/services/archivo.service';
+import { ToqueNfcService } from '../../core/services/toque-nfc.service';
 import { DisenoService } from '../../core/services/diseno.service';
 import { TemaService } from '../../core/services/tema.service';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
@@ -21,10 +22,12 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   private vcardService = inject(VcardService);
   private archivos = inject(ArchivoService);
   private diseno = inject(DisenoService);
+  private toques = inject(ToqueNfcService);
   readonly tema = inject(TemaService);
 
   private userId = '';
   private slug = '';
+  private registroHecho = false;
 
   cargando = signal(true);
   noEncontrada = signal(false);
@@ -69,6 +72,7 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
         this.cargando.set(false);
 
         if (t && this.modoNfc()) {
+          this.registrarToque();
           setTimeout(() => this.guardarContacto(), 700);
         }
       },
@@ -101,6 +105,19 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
 
   alternarTema(): void {
     this.tema.guardar(!this.tema.claro());
+  }
+
+  private async registrarToque(): Promise<void> {
+    if (this.registroHecho || !this.userId) return;
+    this.registroHecho = true;
+
+    await this.toques.registrar({
+      usuarioId: this.userId,
+      tarjeta: this.tarjeta()?.slug ?? this.slug,
+      enlace: typeof window === 'undefined' ? undefined : window.location.href,
+      origen: this.archivos.esNativa ? 'ETIQUETA' : 'NAVEGADOR',
+      tieneApp: this.archivos.esNativa,
+    });
   }
 
   guardarContacto(): void {

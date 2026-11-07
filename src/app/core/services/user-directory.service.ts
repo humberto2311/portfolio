@@ -6,8 +6,9 @@ import { ConexionDto, UserProfileDto } from '../models/perfil.model';
 import { ConnectionService } from './connection.service';
 import { PerfilService } from './perfil.service';
 import { AuthService } from './auth.service';
+import { ContactoNfc, ToqueNfcService } from './toque-nfc.service';
 
-export type RelacionUsuario = 'Sigues' | 'Te sigue' | 'Sugerido';
+export type RelacionUsuario = 'Sigues' | 'Te sigue' | 'Por NFC' | 'Sugerido';
 
 export interface SugerenciaUsuario {
   username: string;
@@ -26,6 +27,7 @@ export class UserDirectoryService {
   private connectionService = inject(ConnectionService);
   private perfilService = inject(PerfilService);
   private authService = inject(AuthService);
+  private toques = inject(ToqueNfcService);
 
   private red: SugerenciaUsuario[] = [];
   private carga$?: Observable<SugerenciaUsuario[]>;
@@ -36,6 +38,7 @@ export class UserDirectoryService {
     if (this.carga$) return this.carga$;
 
     this.carga$ = forkJoin({
+      tocados: this.toques.sugerencias().pipe(catchError(() => of([] as ContactoNfc[]))),
       siguiendo: this.connectionService
         .getMyFollowing()
         .pipe(catchError(() => of([] as ConexionDto[]))),
@@ -44,8 +47,8 @@ export class UserDirectoryService {
         .pipe(catchError(() => of([] as ConexionDto[]))),
       todos: this.perfilService.listarUsuarios(),
     }).pipe(
-      map(({ siguiendo, seguidores, todos }) =>
-        this.construir(siguiendo, seguidores, todos)
+      map(({ tocados, siguiendo, seguidores, todos }) =>
+        this.construir(tocados, siguiendo, seguidores, todos)
       ),
       catchError(() => of([] as SugerenciaUsuario[])),
       tap((lista) => {
@@ -103,6 +106,7 @@ export class UserDirectoryService {
   }
 
   private construir(
+    tocados: ContactoNfc[],
     siguiendo: ConexionDto[],
     seguidores: ConexionDto[],
     todos: UserProfileDto[]
@@ -114,6 +118,16 @@ export class UserDirectoryService {
       if (!clave || mapa.has(clave) || this.esMiUsuario(s.username)) return;
       mapa.set(clave, s);
     };
+
+    for (const c of tocados ?? []) {
+      if (!c.usuario) continue;
+      agregar({
+        username: c.usuario,
+        nombre: c.nombre || c.usuario,
+        iniciales: this.iniciales(c.nombre || c.usuario),
+        relacion: 'Por NFC',
+      });
+    }
 
     for (const c of siguiendo ?? []) {
       agregar({
@@ -162,9 +176,10 @@ export class UserDirectoryService {
     };
 
     const prioridad: Record<RelacionUsuario, number> = {
-      'Sigues': 0,
-      'Te sigue': 1,
-      'Sugerido': 2,
+      'Por NFC': 0,
+      'Sigues': 1,
+      'Te sigue': 2,
+      'Sugerido': 3,
     };
 
     return red

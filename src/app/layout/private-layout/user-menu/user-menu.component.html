@@ -34,6 +34,11 @@
         <span>Mis enlaces</span>
       </button>
 
+      <button type="button" *ngIf="nativa" (click)="goTo('/app/emisora')">
+        <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
+        <span>Emitir por NFC</span>
+      </button>
+
       <button type="button" (click)="goTo('/app/ajustes/cuenta')">
         <i class="fa-solid fa-gear" aria-hidden="true"></i>
         <span>Ajustes de cuenta</span>

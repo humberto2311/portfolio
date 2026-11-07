@@ -66,7 +66,11 @@ export const routes: Routes = [
       { path: 'hub', component: LinkHubComponent },
       { path: 'talento', component: TalentoComponent },
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
-      { path: 'ajustes/seguridad', component: AjustesSeguridadComponent }
+      { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
+      {
+        path: 'emisora',
+        loadComponent: () => import('./features/emisora/emisora-nfc.component').then((m) => m.EmisoraNfcComponent)
+      }
     ]
   },
 

@@ -1,0 +1,168 @@
+<div class="emisora-page">
+
+  <header class="page-head">
+    <h1>Emitir por NFC</h1>
+    <p>Pantalla solo para el teléfono: acerca tu dispositivo al de la otra persona y le llega tu tarjeta.</p>
+  </header>
+
+  <section class="card" *ngIf="!esNativa">
+    <h2><i class="fa-solid fa-mobile-screen"></i> Disponible solo en la app</h2>
+    <p class="parrafo">
+      Emitir y recibir por NFC necesita el hardware del teléfono. Instala la app de NFC-Soft en tu
+      celular y abre esta pantalla desde el menú de usuario.
+    </p>
+    <div class="actions">
+      <a class="btn-ghost" routerLink="/app/hub">Ver mis enlaces</a>
+    </div>
+  </section>
+
+  <ng-container *ngIf="esNativa">
+
+    <p class="aviso" *ngIf="error"><span>{{ error }}</span></p>
+    <p class="aviso ok" *ngIf="aviso"><span>{{ aviso }}</span></p>
+
+    <section class="card">
+      <h2><i class="fa-solid fa-shield-halved"></i> Permisos</h2>
+      <p class="parrafo">
+        La app usa estos permisos para tu ficha, tus fotos, la búsqueda por cercanía y los avisos.
+        Puedes negar los que no quieras y seguir usando el resto.
+      </p>
+
+      <ul class="permisos">
+        <li *ngFor="let grupo of grupos" [class.ok]="concedido(grupo)">
+          <i [class]="grupo.icono" aria-hidden="true"></i>
+          <span>{{ grupo.etiqueta }}</span>
+          <em>{{ concedido(grupo) ? 'Permitido' : 'Pendiente' }}</em>
+        </li>
+      </ul>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" (click)="activarPermisos()">Pedir permisos</button>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="info() as telefono">
+      <h2><i class="fa-solid fa-mobile"></i> Tu teléfono</h2>
+
+      <dl class="datos">
+        <div><dt>Marca</dt><dd>{{ telefono.marca }} {{ telefono.fabricante }}</dd></div>
+        <div><dt>Modelo</dt><dd>{{ telefono.modelo }}</dd></div>
+        <div><dt>Sistema</dt><dd>{{ telefono.sistema }} {{ telefono.versionSistema }}</dd></div>
+        <div><dt>NFC</dt><dd>{{ telefono.tieneNfc ? (telefono.nfcActivado ? 'Activado' : 'Apagado') : 'Sin NFC' }}</dd></div>
+        <div><dt>Emulación</dt><dd>{{ telefono.emulacionDisponible ? 'Soportada' : 'No reportada' }}</dd></div>
+      </dl>
+
+      <p class="parrafo" *ngIf="telefono.tieneNfc && !telefono.nfcActivado">
+        Enciende el NFC en los ajustes del teléfono para poder emitir y leer.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2><i class="fa-solid fa-tower-broadcast"></i> Enviar mi tarjeta</h2>
+
+      <div class="field">
+        <label for="tarjeta">Tarjeta</label>
+        <select id="tarjeta" [ngModel]="slug()" (ngModelChange)="seleccionarTarjeta($event)">
+          <option *ngFor="let t of tarjetas()" [value]="t.slug">{{ t.nombre || t.slug }}</option>
+        </select>
+        <small>Se envía el enlace público de esa tarjeta, el mismo que abre su navegador.</small>
+      </div>
+
+      <div class="field">
+        <label for="enlace">Enlace que se entrega</label>
+        <input id="enlace" type="url" [(ngModel)]="enlace" placeholder="https://" [disabled]="emitiendo()">
+        <small>Puedes cambiarlo por cualquier enlace que tengas configurado en la app.</small>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" *ngIf="!emitiendo()" (click)="emitir()" [disabled]="!puedeEmitir">
+          {{ ocupado() ? 'Preparando…' : 'Empezar a emitir' }}
+        </button>
+        <button type="button" class="btn-ghost" *ngIf="emitiendo()" (click)="dejarDeEmitir()">Dejar de emitir</button>
+        <button type="button" class="btn-ghost" (click)="copiar()">Copiar enlace</button>
+      </div>
+
+      <p class="parrafo emitiendo" *ngIf="emitiendo()">
+        <span class="pulso"></span>
+        Emitiendo. Mantén la pantalla encendida y pega el dorso de tu teléfono al otro.
+        Si la otra persona no tiene la app, su navegador abre este enlace solo.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2><i class="fa-solid fa-arrow-down-to-line"></i> Recibir una tarjeta</h2>
+      <p class="parrafo">
+        Acerca el teléfono que está emitiendo. Lo que llegue se muestra aquí y se le registra a esa
+        persona el toque con tu ubicación y el modelo de tu teléfono.
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn-primary" *ngIf="!escuchando()" (click)="escuchar()" [disabled]="ocupado()">
+          Empezar a recibir
+        </button>
+        <button type="button" class="btn-ghost" *ngIf="escuchando()" (click)="pararEscucha()">Dejar de recibir</button>
+      </div>
+
+      <div class="recibido" *ngIf="recibido() as toque">
+        <p class="parrafo" *ngIf="toque.texto"><strong>Mensaje:</strong> {{ toque.texto }}</p>
+
+        <div class="field" *ngIf="toque.enlace as urlTarjeta">
+          <label>Tarjeta recibida</label>
+          <input type="url" [value]="urlTarjeta" readonly>
+          <a class="btn-ghost" [href]="urlTarjeta" target="_blank" rel="noopener">Abrir la tarjeta</a>
+        </div>
+
+        <p class="parrafo" *ngIf="!toque.enlace">
+          El teléfono emitió sin enlace: se guardó la información que traía.
+        </p>
+      </div>
+    </section>
+
+    <section class="card" *ngIf="sugerencias().length">
+      <h2><i class="fa-solid fa-user-plus"></i> Sugerencias de amistad</h2>
+      <p class="parrafo">
+        Recibiste o enviaste su tarjeta por NFC y todavía no se siguen.
+      </p>
+
+      <ul class="toques">
+        <li *ngFor="let persona of sugerencias()">
+          <a class="linea" [routerLink]="['/app/perfil', persona.usuario || persona.id]">
+            <strong>{{ persona.nombre || persona.usuario }}</strong>
+            <span class="origen" *ngIf="persona.usuario">{{ '@' + persona.usuario }}</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><i class="fa-solid fa-clock-rotate-left"></i> Toques a mis tarjetas</h2>
+      <p class="parrafo">
+        {{ totalToques() === 0 ? 'Todavía nadie ha recibido una tarjeta tuya por NFC.' : totalToques() + ' toques registrados.' }}
+      </p>
+
+      <ul class="toques" *ngIf="listaToques().length">
+        <li *ngFor="let toque of listaToques()">
+          <div class="linea">
+            <strong>{{ toque.tarjeta || 'tarjeta' }}</strong>
+            <span class="origen">{{ origen(toque.origen) }}</span>
+          </div>
+          <div class="linea" *ngIf="toque.visitanteId">
+            <strong>{{ toque.visitanteNombre || 'Usuario' }}</strong>
+            <span class="origen" *ngIf="toque.visitanteUsuario">{{ '@' + toque.visitanteUsuario }}</span>
+          </div>
+          <div class="linea suave">
+            <span *ngIf="toque.creadoEn">{{ toque.creadoEn | date:'d/MM/y HH:mm' }}</span>
+            <span *ngIf="toque.dispositivoModelo">{{ toque.dispositivoModelo }}</span>
+            <span *ngIf="toque.latitud && toque.longitud">{{ toque.latitud | number:'1.2-4' }}, {{ toque.longitud | number:'1.2-4' }}</span>
+            <span *ngIf="toque.visitante">{{ toque.visitante }}</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" (click)="cargarToques()">Actualizar</button>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

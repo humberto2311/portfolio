@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
@@ -33,6 +34,9 @@ export class TabBarComponent {
     { label: 'Proyectos', icon: 'fa-solid fa-diagram-project', ruta: '/app/proyectos' },
     { label: 'Mis enlaces', icon: 'fa-solid fa-link', ruta: '/app/hub' },
     { label: 'Hoja de vida', icon: 'fa-solid fa-file-lines', ruta: '/app/informacion-personal' },
+    ...(Capacitor.isNativePlatform()
+      ? [{ label: 'Emitir por NFC', icon: 'fa-solid fa-tower-broadcast', ruta: '/app/emisora' }]
+      : []),
     { label: 'Ajustes de cuenta', icon: 'fa-solid fa-gear', ruta: '/app/ajustes/cuenta' },
     { label: 'Seguridad', icon: 'fa-solid fa-shield-halved', ruta: '/app/ajustes/seguridad' },
   ];

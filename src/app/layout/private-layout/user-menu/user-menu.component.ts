@@ -1,5 +1,6 @@
 import { Component, inject, signal, HostListener, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
@@ -25,6 +26,7 @@ export class UserMenuComponent implements OnInit {
   readonly menuOpen = signal(false);
   readonly avatar = this.perfiles.avatar;
   readonly rol = signal<string>('');
+  readonly nativa = Capacitor.isNativePlatform();
 
   ngOnInit(): void {
     this.perfiles.cargarMiAvatar();

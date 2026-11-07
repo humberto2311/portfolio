@@ -3,6 +3,7 @@
     <button
       class="tab-btn"
       [class.active]="tabActiva === tab.id"
+      [class.oculto-movil]="tab.soloPc"
       (click)="seleccionar(tab.id)">
       <i class="fa-solid" [ngClass]="tab.icon"></i>
       <span>{{ tab.label }}</span>

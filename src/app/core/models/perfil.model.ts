@@ -86,6 +86,7 @@ export interface PerfilData {
   fotos: string[];
   contactos: ContactoRed[];
   coverUrl?: string;
+  coverPosition?: string;
   avatarUrl?: string;
 }
 

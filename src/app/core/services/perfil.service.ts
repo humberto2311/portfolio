@@ -396,6 +396,7 @@ export class PerfilService {
       fotos: Array.isArray(data.fotos) ? data.fotos : [],
       contactos: Array.isArray(data.contactos) ? data.contactos : [],
       coverUrl: data.coverUrl || undefined,
+      coverPosition: data.coverPosition || undefined,
       avatarUrl: data.avatarUrl || undefined,
     };
   }

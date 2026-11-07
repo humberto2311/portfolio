@@ -34,3 +34,7 @@
     font-weight: 700;
   }
 }
+
+@media (max-width: $bp-tablet) {
+  .tab-btn.oculto-movil { display: none; }
+}

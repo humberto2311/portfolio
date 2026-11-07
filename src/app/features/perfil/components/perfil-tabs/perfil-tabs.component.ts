@@ -13,11 +13,11 @@ export class PerfilTabsComponent {
   @Input({ required: true }) tabActiva!: TabId;
   @Output() tabChanged = new EventEmitter<TabId>();
 
-  tabs: { id: TabId; label: string; icon: string }[] = [
+  tabs: { id: TabId; label: string; icon: string; soloPc?: boolean }[] = [
     { id: 'publicaciones', label: 'Publicaciones', icon: 'fa-newspaper' },
     { id: 'informacion',   label: 'Información',   icon: 'fa-circle-info' },
     { id: 'fotos',         label: 'Fotos',         icon: 'fa-images' },
-    { id: 'amigos',        label: 'Contactos',     icon: 'fa-users' }
+    { id: 'amigos',        label: 'Contactos',     icon: 'fa-users', soloPc: true }
   ];
 
   seleccionar(id: TabId): void {

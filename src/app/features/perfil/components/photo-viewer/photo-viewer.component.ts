@@ -91,6 +91,10 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
     return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
   });
 
+  get sinFila(): boolean {
+    return this.foto.id <= 0;
+  }
+
   get indice(): number {
     return this.galeria.findIndex((f) => f.id === this.foto.id);
   }
@@ -164,6 +168,12 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
   }
 
   private cargarComentarios(): void {
+    if (this.sinFila) {
+      this.comentarios.set([]);
+      this.cargando.set(false);
+      return;
+    }
+
     this.fotos.comentarios(this.foto.id).subscribe({
       next: (page) => {
         this.comentarios.set(page.content.map((c) => this.perfiles.mapComentario(c)));
@@ -399,6 +409,8 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
 
   eliminar(): void {
     this.menuFoto.set(false);
+    if (!this.puedeEscribir()) return;
+
     this.fotos.borrar(this.foto.id).subscribe({
       next: () => {
         this.eliminada.emit(this.foto.id);
@@ -423,6 +435,10 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
 
   /** Sin sesión se puede mirar, pero no likear ni comentar. */
   private puedeEscribir(): boolean {
+    if (this.sinFila) {
+      this.toast.show('Esta foto todavía no admite comentarios');
+      return false;
+    }
     if (this.auth.isAuthenticated()) return true;
     this.toast.show('Debes iniciar sesión para interactuar');
     this.modal.openLogin();

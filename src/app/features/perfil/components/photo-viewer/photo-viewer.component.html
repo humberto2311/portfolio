@@ -119,6 +119,8 @@
       <div class="lateral__comentarios">
         @if (cargando()) {
           <p class="estado">Cargando comentarios…</p>
+        } @else if (sinFila) {
+          <p class="estado">Esta foto todavía no admite comentarios.</p>
         } @else if (comentarios().length === 0) {
           <p class="estado">Sé el primero en comentar.</p>
         }

@@ -4,19 +4,6 @@
     <span>NFC-Soft</span>
   </a>
 
-  <button
-    type="button"
-    class="rail__colapsar"
-    (click)="rail.alternar()"
-    [attr.aria-expanded]="!rail.colapsado()"
-    [title]="rail.colapsado() ? 'Expandir menú' : 'Colapsar menú'">
-    <i
-      class="rail__icon"
-      [class]="rail.colapsado() ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"
-      aria-hidden="true"></i>
-    <span>Colapsar</span>
-  </button>
-
   <ul class="rail__lista">
     @for (item of navegacion; track item.label) {
       <li>
@@ -52,6 +39,19 @@
       </li>
     }
   </ul>
+
+  <button
+    type="button"
+    class="rail__colapsar"
+    (click)="rail.alternar()"
+    [attr.aria-expanded]="!rail.colapsado()"
+    [title]="rail.colapsado() ? 'Expandir menú' : 'Colapsar menú'">
+    <i
+      class="rail__icon"
+      [class]="rail.colapsado() ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"
+      aria-hidden="true"></i>
+    <span>Colapsar</span>
+  </button>
 
   <a class="rail__yo" routerLink="/app/perfil" routerLinkActive="activo" [title]="user()?.fullName ?? 'Mi perfil'">
     <span class="rail__avatar">

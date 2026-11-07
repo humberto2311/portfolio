@@ -34,11 +34,6 @@
         <span>Mis enlaces</span>
       </button>
 
-      <button type="button" (click)="abrirGuia()">
-        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
-        <span>¿Cómo funciona la app?</span>
-      </button>
-
       <button type="button" (click)="goTo('/app/ajustes/cuenta')">
         <i class="fa-solid fa-gear" aria-hidden="true"></i>
         <span>Ajustes de cuenta</span>
@@ -47,6 +42,11 @@
       <button type="button" (click)="goTo('/app/ajustes/seguridad')">
         <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
         <span>Seguridad</span>
+      </button>
+
+      <button type="button" (click)="abrirGuia()">
+        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        <span>¿Cómo funciona la app?</span>
       </button>
 
       <button type="button" class="user-menu__salir" (click)="logout()">

@@ -17,6 +17,7 @@ interface CambiosPerfilSocial {
   state?: string;
   avatarUrl?: string;
   coverUrl?: string;
+  coverPosition?: string;
 }
 
 @Component({
@@ -68,26 +69,37 @@ export class PerfilHeaderComponent implements OnChanges {
   private actualizarPerfilSocial(
     cambios: CambiosPerfilSocial,
     exito: string,
-    fracaso: string
+    fracaso: string,
+    alFallar?: () => void
   ): void {
     this.userProfileService.getMiPerfilSocial().subscribe({
-      next: (social) => this.escribir({ ...(social ?? {}), ...cambios }, cambios, exito, fracaso),
+      next: (social) => this.escribir({ ...(social ?? {}), ...cambios }, cambios, exito, fracaso, alFallar),
       error: () => this.escribir(
-        { role: this.perfil.rol, state: this.perfil.estado, ...cambios }, cambios, exito, fracaso
+        { role: this.perfil.rol, state: this.perfil.estado, ...cambios }, cambios, exito, fracaso, alFallar
       ),
     });
   }
 
-  private escribir(data: any, cambios: CambiosPerfilSocial, exito: string, fracaso: string): void {
+  private escribir(
+    data: any,
+    cambios: CambiosPerfilSocial,
+    exito: string,
+    fracaso: string,
+    alFallar?: () => void
+  ): void {
     this.userProfileService.guardarMiPerfilSocial(data).subscribe({
       next: () => {
         if (cambios.role !== undefined) this.perfil.rol = cambios.role;
         if (cambios.state !== undefined) this.perfil.estado = cambios.state;
         if (cambios.avatarUrl !== undefined) this.perfil.avatarUrl = cambios.avatarUrl;
         if (cambios.coverUrl !== undefined) this.perfil.coverUrl = cambios.coverUrl;
+        if (cambios.coverPosition !== undefined) this.perfil.coverPosition = cambios.coverPosition;
         this.exito(exito);
       },
-      error: () => this.fracaso(fracaso),
+      error: () => {
+        this.fracaso(fracaso);
+        alFallar?.();
+      },
     });
   }
 
@@ -153,11 +165,14 @@ export class PerfilHeaderComponent implements OnChanges {
     this.subiendoImagen = true;
 
     imagenDePerfilComoDataUrl(archivo, tipo).then(
-      (dataUrl) => this.actualizarPerfilSocial(
-        tipo === 'avatar' ? { avatarUrl: dataUrl } : { coverUrl: dataUrl },
-        tipo === 'avatar' ? 'Foto de perfil actualizada' : 'Portada actualizada',
-        'No se pudo guardar la imagen'
-      ),
+      (dataUrl) => {
+        if (tipo === 'portada') this.posicionY.set(50);
+        this.actualizarPerfilSocial(
+          tipo === 'avatar' ? { avatarUrl: dataUrl } : { coverUrl: dataUrl, coverPosition: '50% 50%' },
+          tipo === 'avatar' ? 'Foto de perfil actualizada' : 'Portada actualizada',
+          'No se pudo guardar la imagen'
+        );
+      },
       () => this.fracaso('No se pudo procesar la imagen')
     );
   }
@@ -167,13 +182,94 @@ export class PerfilHeaderComponent implements OnChanges {
     if (!this.esMiPerfil || this.subiendoImagen) return;
 
     this.subiendoImagen = true;
+    this.posicionY.set(50);
     this.actualizarPerfilSocial({ coverUrl: '' }, 'Portada eliminada', 'No se pudo quitar la portada');
+  }
+
+  acomodando = false;
+  posicionY = signal(50);
+  private arrastrando = false;
+  private toqueY = 0;
+  private toquePosicion = 50;
+  private portadaMovida = false;
+
+  get fondoPortada(): string {
+    return `50% ${this.posicionY()}%`;
+  }
+
+  clicPortada(): void {
+    if (this.acomodando) return;
+    if (this.portadaMovida) {
+      this.portadaMovida = false;
+      return;
+    }
+    this.abrirVisor('portada');
+  }
+
+  alternarAcomodo(): void {
+    if (!this.esMiPerfil) return;
+    this.acomodando = !this.acomodando;
+    if (!this.acomodando) this.guardarPosicion();
+  }
+
+  centrarPortada(): void {
+    this.posicionY.set(50);
+    this.guardarPosicion();
+  }
+
+  onToqueInicio(event: PointerEvent): void {
+    if (!this.acomodando) return;
+
+    this.arrastrando = true;
+    this.toqueY = event.clientY;
+    this.toquePosicion = this.posicionY();
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+  }
+
+  onToqueMover(event: PointerEvent): void {
+    if (!this.arrastrando) return;
+
+    const alto = (event.currentTarget as HTMLElement).getBoundingClientRect().height || 1;
+    const salto = event.clientY - this.toqueY;
+    this.posicionY.set(this.porcentaje(this.toquePosicion - (salto / alto) * 100));
+  }
+
+  cancelarArrastre(): void {
+    this.arrastrando = false;
+  }
+
+  onToqueFin(event: PointerEvent): void {
+    if (!this.arrastrando) return;
+
+    this.arrastrando = false;
+    this.portadaMovida = Math.abs(event.clientY - this.toqueY) > 4;
+    this.guardarPosicion();
+  }
+
+  private guardarPosicion(): void {
+    const valor = `50% ${this.posicionY()}%`;
+    if (valor === this.perfil.coverPosition) return;
+
+    const anterior = this.desdeValor(this.perfil.coverPosition);
+    this.actualizarPerfilSocial({ coverPosition: valor }, 'Portada acomodada', 'No se pudo guardar la posición',
+      () => this.posicionY.set(anterior));
+  }
+
+  private desdeValor(valor?: string): number {
+    const y = Number((valor ?? '').split(' ')[1]?.replace('%', ''));
+    return Number.isFinite(y) ? y : 50;
+  }
+
+  private porcentaje(valor: number): number {
+    return Math.round(Math.min(100, Math.max(0, valor)));
   }
 
   /**
    * Avatar y portada viven también en la galería; asegurar() devuelve esa fila
    * (creándola si es antigua) y es la que permite likear y comentar la foto.
    */
+  private urlAbierta = '';
+
   abrirVisor(tipo: 'avatar' | 'portada'): void {
     const url = tipo === 'avatar' ? this.perfil.avatarUrl : this.perfil.coverUrl;
     if (!url) return;
@@ -185,25 +281,39 @@ export class PerfilHeaderComponent implements OnChanges {
     }
 
     this.tipoAbierto = tipo;
-    this.fotosSvc.asegurar(this.perfil.id, url).subscribe({
-      next: (foto) => this.abrirConGaleria(foto),
-      error: () => this.toast.show('Esta foto todavía no admite comentarios'),
-    });
-  }
-
-  private abrirConGaleria(foto: FotoPerfil): void {
-    this.fotoDelHeader = foto;
-    this.fotoAbierta.set(foto);
+    this.urlAbierta = url;
+    this.fotoDelHeader = { id: 0, userId: this.perfil.id, url };
+    this.fotoAbierta.set(this.fotoDelHeader);
+    this.fotosGaleria.set([]);
 
     this.fotosSvc.listar(this.perfil.id).subscribe({
-      next: (lista) => this.fotosGaleria.set(this.conAbierta(lista ?? [], foto)),
-      error: () => this.fotosGaleria.set([foto]),
+      next: (lista) => this.conGaleria(lista ?? []),
+      error: () => {},
+    });
+
+    this.fotosSvc.asegurar(this.perfil.id, url).subscribe({
+      next: (foto) => this.encajar(foto),
+      error: () => {},
     });
   }
 
-  private conAbierta(lista: FotoPerfil[], foto: FotoPerfil): FotoPerfil[] {
-    const sinRepetida = lista.filter((f) => f.id !== foto.id);
-    return sinRepetida.length === lista.length ? [foto, ...sinRepetida] : lista;
+  private conGaleria(lista: FotoPerfil[]): void {
+    const abierta = this.fotoAbierta();
+    if (!abierta || abierta.url !== this.urlAbierta) return;
+
+    this.fotosGaleria.set(lista);
+    if (abierta.id !== 0) return;
+
+    const misma = lista.find((f) => f.url === this.urlAbierta);
+    if (misma) this.encajar(misma);
+  }
+
+  private encajar(foto: FotoPerfil): void {
+    const actual = this.fotoAbierta();
+    if (!actual || actual.url !== foto.url || actual.id === foto.id) return;
+
+    this.fotoDelHeader = foto;
+    this.fotoAbierta.set(foto);
   }
 
   /** Borrar desde el visor también despega la foto del perfil: el backend ya lo hace, aquí se refleja. */
@@ -229,6 +339,8 @@ export class PerfilHeaderComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['perfil'] && this.perfil) {
       this.verificarEstadoSeguimiento();
+      this.posicionY.set(this.desdeValor(this.perfil.coverPosition));
+      this.acomodando = false;
     }
   }
 

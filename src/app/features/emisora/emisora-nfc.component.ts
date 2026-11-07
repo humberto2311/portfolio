@@ -1,10 +1,9 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { AuthService } from '../../core/services/auth.service';
 import { VcardService } from '../../core/services/vcard.service';
 import { ToqueNfcService, ToqueDetalle, ContactoNfc } from '../../core/services/toque-nfc.service';
 import { EmisoraNfcService, InfoDispositivo, ToqueLeido } from '../../core/services/emisora-nfc.service';
@@ -12,16 +11,7 @@ import { VCardPayload } from '../../core/models/vcard.model';
 
 interface GrupoPermiso {
   etiqueta: string;
-  icono: string;
   claves: string[];
-}
-
-interface Emision {
-  enlace: string;
-  usuarioId?: string;
-  tarjeta?: string;
-  nombre?: string;
-  origen: 'EMISION';
 }
 
 @Component({
@@ -35,47 +25,45 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
   private readonly nfc = inject(EmisoraNfcService);
   private readonly toques = inject(ToqueNfcService);
   private readonly vcard = inject(VcardService);
-  private readonly auth = inject(AuthService);
 
   readonly esNativa = this.nfc.esNativa;
   readonly grupos: GrupoPermiso[] = [
-    { etiqueta: 'Cámara', icono: 'fa-solid fa-camera', claves: ['CAMERA'] },
-    { etiqueta: 'Contactos', icono: 'fa-solid fa-address-book', claves: ['READ_CONTACTS', 'WRITE_CONTACTS'] },
-    { etiqueta: 'Dispositivos cercanos', icono: 'fa-brands fa-bluetooth-b', claves: ['BLUETOOTH_SCAN', 'BLUETOOTH_CONNECT', 'BLUETOOTH'] },
-    { etiqueta: 'Fotos y videos', icono: 'fa-solid fa-images', claves: ['READ_MEDIA_IMAGES', 'READ_MEDIA_VIDEO', 'READ_EXTERNAL_STORAGE'] },
-    { etiqueta: 'Ubicación', icono: 'fa-solid fa-location-dot', claves: ['ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'] },
-    { etiqueta: 'Notificaciones', icono: 'fa-solid fa-bell', claves: ['POST_NOTIFICATIONS'] },
+    { etiqueta: 'Ubicación', claves: ['ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'] },
+    { etiqueta: 'Cámara', claves: ['CAMERA'] },
+    { etiqueta: 'Contactos', claves: ['READ_CONTACTS', 'WRITE_CONTACTS'] },
+    { etiqueta: 'Notificaciones', claves: ['POST_NOTIFICATIONS'] },
   ];
 
   readonly info = signal<InfoDispositivo | null>(null);
   readonly tarjetas = signal<VCardPayload[]>([]);
   readonly slug = signal('');
-  readonly emitiendo = signal(false);
-  readonly escuchando = signal(false);
-  readonly recibido = signal<ToqueLeido | null>(null);
-  readonly ocupado = signal(false);
   readonly listaToques = signal<ToqueDetalle[]>([]);
   readonly totalToques = signal(0);
   readonly sugerencias = signal<ContactoNfc[]>([]);
+  readonly ocupado = signal(false);
 
-  enlace = '';
+  readonly escuchando = computed(() => this.nfc.escuchando());
+  readonly recibido = computed(() => this.nfc.recibido());
+  readonly grabado = computed(() => this.nfc.grabado());
+
   aviso = '';
   error = '';
 
-  private detenerEscucha: (() => Promise<void>) | null = null;
+  constructor() {
+    effect(() => {
+      if (this.nfc.grabado()) void this.cargarToques();
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     if (!this.esNativa) return;
 
-    const lista = await new Promise<VCardPayload[]>((resolver) => {
-      this.vcard.listar().subscribe({
-        next: (t) => resolver(t ?? []),
-        error: () => resolver([]),
-      });
-    });
+    const lista = await firstValueFrom(this.vcard.listar()).catch(() => [] as VCardPayload[]);
+    const saneada = Array.isArray(lista) ? lista : [];
 
-    this.tarjetas.set(lista);
-    const primera = lista.find((t) => t.porDefecto) ?? lista[0];
+    this.tarjetas.set(saneada);
+
+    const primera = saneada.find((t) => t.porDefecto) ?? saneada[0];
 
     if (primera) {
       await this.seleccionarTarjeta(primera.slug ?? 'personal');
@@ -86,8 +74,54 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy(): Promise<void> {
-    if (this.emitiendo()) await this.dejarDeEmitir();
-    await this.pararEscucha();
+    if (this.escuchando()) await this.nfc.dejarDeEscuchar();
+  }
+
+  async seleccionarTarjeta(slug: string): Promise<void> {
+    this.slug.set(slug);
+    this.error = '';
+    this.aviso = '';
+    this.ocupado.set(true);
+
+    try {
+      const emitida = await this.nfc.preparar(this.tarjetas().find((t) => t.slug === slug) ?? null);
+
+      if (!emitida) {
+        this.error = 'No hay tarjeta que entregar.';
+      } else if (!emitida.enlace) {
+        this.aviso = 'No pude tomar el enlace de esta tarjeta, pero quien tenga la app abierta igual la recibe.';
+      } else if (!emitida.emulacionDisponible) {
+        this.aviso = 'Este teléfono no reporta emulación NFC: puede que el otro no lo lea.';
+      } else {
+        this.aviso = 'Tu tarjeta ya está lista para que se la acerquen.';
+      }
+
+      this.info.set(await this.nfc.informacion());
+    } catch (e) {
+      this.error = mensaje(e, 'No se pudo preparar la tarjeta.');
+    } finally {
+      this.ocupado.set(false);
+    }
+  }
+
+  async intercambiar(): Promise<void> {
+    this.error = '';
+    this.aviso = '';
+    this.ocupado.set(true);
+
+    try {
+      await this.nfc.empezarLectura();
+      this.aviso = 'Pega el dorso de tu teléfono contra el otro y espera el aviso.';
+    } catch (e) {
+      this.error = mensaje(e, 'No se pudo poner este teléfono a leer.');
+    } finally {
+      this.ocupado.set(false);
+    }
+  }
+
+  async cancelar(): Promise<void> {
+    await this.nfc.dejarDeEscuchar();
+    this.aviso = 'Se cerró la lectura.';
   }
 
   async leerTelefono(): Promise<void> {
@@ -106,10 +140,8 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
   }
 
   async activarPermisos(): Promise<void> {
-    this.aviso = '';
     await this.nfc.solicitarPermisos();
     await this.leerTelefono();
-    this.aviso = 'Revisa la lista: si algo quedó apagado puedes volver a pedirlo.';
   }
 
   concedido(grupo: GrupoPermiso): boolean {
@@ -119,138 +151,32 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
     return aplicables.length > 0 && aplicables.every((clave) => permisos[clave]);
   }
 
-  async seleccionarTarjeta(slug: string): Promise<void> {
-    this.slug.set(slug);
-    const userId = this.userIdTarjeta();
-    this.enlace = userId ? await this.toques.enlaceDe(userId, slug) : '';
-  }
-
-  private userIdTarjeta(): string {
-    const tarjeta = this.tarjetas().find((t) => t.slug === this.slug());
-    return tarjeta?.userProfileId ?? this.auth.currentUser()?.id ?? '';
-  }
-
-  async emitir(): Promise<void> {
-    this.error = '';
-    this.aviso = '';
-
-    if (!this.enlace.trim()) {
-      this.error = 'Pon el enlace que debe abrir el otro teléfono.';
-      return;
-    }
-
-    const tarjeta = this.tarjetas().find((t) => t.slug === this.slug());
-    const contenido: Emision = {
-      enlace: this.enlace.trim(),
-      usuarioId: this.userIdTarjeta(),
-      tarjeta: this.slug(),
-      nombre: tarjeta?.nombre,
-      origen: 'EMISION',
-    };
-
-    this.ocupado.set(true);
-
-    try {
-      const resultado = await this.nfc.emitir(this.enlace.trim(), JSON.stringify(contenido));
-      this.emitiendo.set(true);
-      this.info.set(await this.nfc.informacion());
-      this.aviso = resultado.emulacionDisponible
-        ? 'Emitiendo. Mantén la pantalla encendida y pega el dorso del teléfono al otro.'
-        : 'Emitiendo, pero este teléfono no reporta soporte de emulación NFC: puede que el otro no lo lea.';
-    } catch (e) {
-      this.error = mensaje(e, 'No se pudo empezar a emitir.');
-    } finally {
-      this.ocupado.set(false);
-    }
-  }
-
-  async dejarDeEmitir(): Promise<void> {
-    try {
-      await this.nfc.dejarDeEmitir();
-    } finally {
-      this.emitiendo.set(false);
-      this.info.set(await this.nfc.informacion());
-    }
-  }
-
-  async escuchar(): Promise<void> {
-    this.error = '';
-    this.recibido.set(null);
-    this.ocupado.set(true);
-
-    try {
-      this.detenerEscucha = await this.nfc.escuchar((toque) => void this.alRecibir(toque));
-      this.escuchando.set(true);
-      this.aviso = 'Acercando el otro teléfono: espera el aviso.';
-    } catch (e) {
-      this.error = mensaje(e, 'No se pudo activar la lectura.');
-    } finally {
-      this.ocupado.set(false);
-    }
-  }
-
-  async pararEscucha(): Promise<void> {
-    const detener = this.detenerEscucha;
-    this.detenerEscucha = null;
-
-    try {
-      await detener?.();
-    } catch {
-      await this.nfc.dejarDeEscuchar();
-    } finally {
-      this.escuchando.set(false);
-    }
-  }
-
-  private async alRecibir(toque: ToqueLeido): Promise<void> {
-    this.recibido.set(toque);
-
-    if (toque.error) {
-      this.error = toque.error;
-      return;
-    }
-
-    const emitida = this.parsear(toque.datos);
-    const userId = emitida?.usuarioId;
-
-    if (!userId) return;
-
+  get faltanPermisos(): boolean {
     const telefono = this.info();
 
-    const grabado = await this.toques.registrar({
-      usuarioId: userId,
-      tarjeta: emitida?.tarjeta,
-      enlace: toque.enlace ?? emitida?.enlace,
-      origen: 'EMISION',
-      dispositivoMarca: telefono?.marca,
-      dispositivoModelo: telefono?.modelo,
-      sistemaOperativo: telefono?.sistema,
-      versionSistema: telefono?.versionSistema,
-      tieneApp: true,
-    });
-
-    this.aviso = grabado
-      ? 'Toque registrado con la ubicación y el dispositivo.'
-      : 'Leí la tarjeta, pero no se pudo registrar el toque.';
+    return telefono !== null && this.grupos.some((grupo) => !this.concedido(grupo));
   }
 
-  private parsear(crudo?: string): Emision | null {
-    if (!crudo) return null;
-
-    try {
-      return JSON.parse(crudo) as Emision;
-    } catch {
-      return null;
-    }
+  get enlaceActual(): string {
+    return this.info()?.enlace ?? '';
   }
 
-  copiar(): void {
-    const valor = this.recibido()?.enlace ?? this.enlace;
+  get nfcApagado(): boolean {
+    const telefono = this.info();
 
-    navigator.clipboard?.writeText(valor).then(
-      () => this.aviso = 'Enlace copiado.',
-      () => this.error = 'No se pudo copiar.',
-    );
+    return telefono !== null && (!telefono.tieneNfc || !telefono.nfcActivado);
+  }
+
+  get elOtroRecibio(): boolean {
+    return this.recibido()?.entregada === true;
+  }
+
+  get fueMiTarjeta(): boolean {
+    return this.recibido()?.procedencia === 'TARJETA';
+  }
+
+  tieneContenido(toque: ToqueLeido): boolean {
+    return Boolean(toque.enlace || toque.datos || toque.texto);
   }
 
   origen(valor: string): string {
@@ -264,8 +190,8 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
     return mapa[valor] ?? valor;
   }
 
-  get puedeEmitir(): boolean {
-    return !this.ocupado() && !this.emitiendo();
+  get puedeIntercambiar(): boolean {
+    return !this.ocupado() && !this.escuchando();
   }
 }
 

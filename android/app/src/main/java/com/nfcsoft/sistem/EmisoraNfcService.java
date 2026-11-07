@@ -1,11 +1,14 @@
 package com.nfcsoft.sistem;
 
+import android.content.Intent;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
 
 import java.util.Arrays;
 
 public class EmisoraNfcService extends HostApduService {
+
+    public static final String ACCION_TOQUE = "com.nfcsoft.sistem.TOQUE_ENTRANTE";
 
     private static final String AID_T4T = "D2760000850101";
     private static final String AID_PROPIA = "A0000000BFC10101";
@@ -33,6 +36,8 @@ public class EmisoraNfcService extends HostApduService {
             return INS_INVALIDA;
         }
 
+        Emision.asegurar(this);
+
         int ins = apdu[1] & 0xFF;
 
         if (ins == 0xA4) {
@@ -40,7 +45,7 @@ public class EmisoraNfcService extends HostApduService {
         }
 
         if (ins == 0xD6) {
-            return OK;
+            return escribe(apdu);
         }
 
         if (ins != 0xB0) {
@@ -54,6 +59,53 @@ public class EmisoraNfcService extends HostApduService {
     public void onDeactivated(int motivo) {
         archivo = ARCHIVO_CAPACIDADES;
         emulaT4T = true;
+
+        entregaLoRecibido();
+    }
+
+    private byte[] escribe(byte[] apdu) {
+        if (emulaT4T) {
+            return OK;
+        }
+
+        int posicion = ((apdu[2] & 0xFF) << 8) | (apdu[3] & 0xFF);
+        int largo = apdu.length > 4 ? (apdu[4] & 0xFF) : 0;
+
+        if (largo > 0 && apdu.length >= 5 + largo) {
+            Emision.escribe(posicion, Arrays.copyOfRange(apdu, 5, 5 + largo));
+        }
+
+        return OK;
+    }
+
+    private void entregaLoRecibido() {
+        String contenido = Emision.cosecha();
+
+        if (contenido == null) {
+            return;
+        }
+
+        Intent aviso = new Intent(ACCION_TOQUE);
+        aviso.putExtra("datos", contenido);
+        aviso.putExtra("enlace", dentro(contenido, "\"enlace\":\""));
+
+        try {
+            sendBroadcast(aviso);
+        } catch (Exception nadieEscucha) {
+        }
+    }
+
+    private static String dentro(String texto, String clave) {
+        int inicio = texto.indexOf(clave);
+
+        if (inicio < 0) {
+            return null;
+        }
+
+        int desde = inicio + clave.length();
+        int hasta = texto.indexOf('"', desde);
+
+        return hasta > desde ? texto.substring(desde, hasta) : null;
     }
 
     private byte[] seleccionar(byte[] apdu) {
@@ -75,6 +127,7 @@ public class EmisoraNfcService extends HostApduService {
             if (coincideAid(AID_PROPIA, nombre)) {
                 archivo = ARCHIVO_NINGUNO;
                 emulaT4T = false;
+                Emision.abrirSesion();
                 return OK;
             }
 

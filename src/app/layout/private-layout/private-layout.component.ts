@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import { PrimerIngresoComponent } from './primer-ingreso/primer-ingreso.componen
 import { RailStateService } from '../../core/services/rail-state.service';
 import { TemaService } from '../../core/services/tema.service';
 import { DisenoService } from '../../core/services/diseno.service';
+import { EmisoraNfcService } from '../../core/services/emisora-nfc.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -19,13 +20,14 @@ import { DisenoService } from '../../core/services/diseno.service';
   templateUrl: './private-layout.component.html',
   styleUrls: ['./private-layout.component.scss'],
 })
-export class PrivateLayoutComponent {
+export class PrivateLayoutComponent implements OnDestroy {
   readonly rail = inject(RailStateService);
   readonly anchoCompleto = signal(false);
 
   private readonly router = inject(Router);
   private readonly tema = inject(TemaService);
   private readonly diseno = inject(DisenoService);
+  private readonly emisora = inject(EmisoraNfcService);
 
   constructor() {
     this.leerRuta();
@@ -38,6 +40,11 @@ export class PrivateLayoutComponent {
 
     this.tema.pintar(this.tema.claro());
     this.diseno.cargarPropio().subscribe();
+    void this.emisora.despertar();
+  }
+
+  ngOnDestroy(): void {
+    void this.emisora.desarmar();
   }
 
   private leerRuta(): void {

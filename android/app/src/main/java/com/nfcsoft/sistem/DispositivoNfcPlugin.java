@@ -1,6 +1,10 @@
 package com.nfcsoft.sistem;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.nfc.NdefMessage;
@@ -29,7 +33,8 @@ import java.util.List;
 public class DispositivoNfcPlugin extends Plugin {
 
     private static final int SOLICITUD = 4711;
-    private static final int MAXIMO_DATOS = 4096;
+    private static final int MAXIMO_DATOS = Emision.MAXIMO_DATOS;
+    private static final int TROZO_ESCRITURA = 0xE0;
 
     private static final byte[] AID_PROPIA = {
             (byte) 0xA0, 0x00, 0x00, 0x00, (byte) 0xBF, (byte) 0xC1, 0x01, 0x01
@@ -39,15 +44,60 @@ public class DispositivoNfcPlugin extends Plugin {
 
     private NfcAdapter adaptador;
     private PluginCall esperaPermisos;
+    private BroadcastReceiver registroToque;
 
     @Override
     public void load() {
         instancia = this;
         adaptador = NfcAdapter.getDefaultAdapter(getActivity());
+        Emision.asegurar(getContext());
+
+        registroToque = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context contexto, Intent intento) {
+                entregaToque(intento);
+            }
+        };
+
+        ContextCompat.registerReceiver(
+                getContext(), registroToque, new IntentFilter(EmisoraNfcService.ACCION_TOQUE),
+                ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        if (registroToque != null) {
+            try {
+                getContext().unregisterReceiver(registroToque);
+            } catch (Exception yaFuera) {
+            }
+
+            registroToque = null;
+        }
+
+        super.handleOnDestroy();
+    }
+
+    private void entregaToque(Intent intento) {
+        String datos = intento.getStringExtra("datos");
+
+        if (datos == null || datos.isBlank()) {
+            return;
+        }
+
+        JSObject toque = new JSObject();
+        toque.put("datos", datos);
+        toque.put("enlace", intento.getStringExtra("enlace"));
+        toque.put("origen", "EMISION");
+        toque.put("procedencia", "TARJETA");
+
+        notifyListeners("toque", toque);
     }
 
     @PluginMethod
     public void informacion(PluginCall call) {
+        Emision.asegurar(getContext());
+
         JSObject datos = new JSObject();
         datos.put("marca", Build.BRAND);
         datos.put("fabricante", Build.MANUFACTURER);
@@ -58,7 +108,8 @@ public class DispositivoNfcPlugin extends Plugin {
         datos.put("tieneNfc", adaptador != null);
         datos.put("nfcActivado", adaptador != null && adaptador.isEnabled());
         datos.put("emulacionDisponible", emulacionDisponible());
-        datos.put("emitiendo", Emision.ndef != null || Emision.datos != null);
+        datos.put("emitiendo", Emision.hayTarjeta());
+        datos.put("enlace", Emision.enlace == null ? "" : Emision.enlace);
         datos.put("permisos", permisos());
 
         call.resolve(datos);
@@ -79,41 +130,43 @@ public class DispositivoNfcPlugin extends Plugin {
 
     @PluginMethod
     public void empezarEmision(PluginCall call) {
+        Emision.asegurar(getContext());
+
         String enlace = call.getString("enlace");
         String datos = call.getString("datos");
 
         if (enlace == null || enlace.isBlank()) {
-            call.reject("La tarjeta no tiene enlace que emitir.");
-            return;
+            enlace = Emision.enlace;
         }
 
-        byte[] mensaje = ConstruirNdef.mensajeUri(enlace);
-
-        if (mensaje == null) {
-            call.reject("El enlace es demasiado largo para emitirlo por NFC.");
-            return;
-        }
-
-        byte[] archivo = ConstruirNdef.conLongitudDelante(mensaje);
+        String url = enlace == null || enlace.isBlank() ? null : enlace.trim();
+        byte[] mensaje = url == null ? null : ConstruirNdef.mensajeUri(url);
+        byte[] archivo = mensaje == null ? null : ConstruirNdef.conLongitudDelante(mensaje);
         byte[] contenido = (datos == null ? "" : datos).getBytes(StandardCharsets.UTF_8);
 
-        Emision.datos = contenido.length > MAXIMO_DATOS
-                ? Arrays.copyOf(contenido, MAXIMO_DATOS)
-                : contenido;
-        Emision.ndef = archivo;
+        if (url == null && contenido.length == 0) {
+            call.reject("No hay tarjeta que emitir: crea o selecciona una tarjeta primero.");
+            return;
+        }
+
+        if (contenido.length > MAXIMO_DATOS) {
+            contenido = Arrays.copyOf(contenido, MAXIMO_DATOS);
+        }
+
+        Emision.guardar(getContext(), url, archivo, contenido);
 
         JSObject resultado = new JSObject();
-        resultado.put("enlace", enlace);
-        resultado.put("bytes", archivo.length);
+        resultado.put("enlace", url == null ? "" : url);
+        resultado.put("bytes", archivo == null ? 0 : archivo.length);
         resultado.put("emulacionDisponible", emulacionDisponible());
+        resultado.put("sinEnlace", url == null);
 
         call.resolve(resultado);
     }
 
     @PluginMethod
     public void detenerEmision(PluginCall call) {
-        Emision.ndef = null;
-        Emision.datos = null;
+        Emision.guardar(getContext(), null, null, null);
         call.resolve();
     }
 
@@ -132,12 +185,13 @@ public class DispositivoNfcPlugin extends Plugin {
         int banderas = NfcAdapter.FLAG_READER_NFC_A
                 | NfcAdapter.FLAG_READER_NFC_B
                 | NfcAdapter.FLAG_READER_NFC_F
-                | NfcAdapter.FLAG_READER_NFC_V;
+                | NfcAdapter.FLAG_READER_NFC_V
+                | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
 
         try {
             adaptador.enableReaderMode(getActivity(), alDescubrir, banderas, null);
         } catch (IllegalStateException error) {
-            call.reject("Deja la pantalla de emisión abierta y vuelve a intentar.");
+            call.reject("Este teléfono no pudo ponerse a leer.");
             return;
         }
 
@@ -164,23 +218,12 @@ public class DispositivoNfcPlugin extends Plugin {
         JSObject toque = new JSObject();
 
         try {
-            Ndef ndef = Ndef.get(tag);
-
-            if (ndef != null) {
-                ndef.connect();
-                NdefMessage mensaje = ndef.getCachedNdefMessage();
-
-                if (mensaje == null) {
-                    mensaje = ndef.getNdefMessage();
-                }
-
-                if (mensaje != null) {
-                    rellenaRegistros(toque, mensaje);
-                }
+            if (IsoDep.get(tag) != null) {
+                leeIsoDep(toque, tag);
             }
 
-            if (!toque.has("enlace") && IsoDep.get(tag) != null) {
-                leeIsoDep(toque, tag);
+            if (!toque.has("enlace") && Ndef.get(tag) != null) {
+                leeNdef(toque, tag);
             }
         } catch (Exception error) {
             toque.put("error", error.getMessage() == null ? "No se pudo leer." : error.getMessage());
@@ -189,6 +232,22 @@ public class DispositivoNfcPlugin extends Plugin {
         toque.put("origen", toque.has("enlace") || toque.has("datos") ? "EMISION" : "DESCONOCIDO");
         notifyListeners("toque", toque);
     };
+
+    private void leeNdef(JSObject toque, android.nfc.Tag tag) throws Exception {
+        Ndef ndef = Ndef.get(tag);
+        ndef.connect();
+        NdefMessage mensaje = ndef.getCachedNdefMessage();
+
+        if (mensaje == null) {
+            mensaje = ndef.getNdefMessage();
+        }
+
+        if (mensaje != null) {
+            rellenaRegistros(toque, mensaje);
+        }
+
+        ndef.close();
+    }
 
     private void rellenaRegistros(JSObject toque, NdefMessage mensaje) {
         for (NdefRecord registro : mensaje.getRecords()) {
@@ -267,6 +326,7 @@ public class DispositivoNfcPlugin extends Plugin {
             posicion += trozo.length - 2;
         }
 
+        toque.put("entregada", dejaLaMia(iso));
         iso.close();
 
         if (!acumulado.isEmpty()) {
@@ -289,6 +349,38 @@ public class DispositivoNfcPlugin extends Plugin {
                     toque.put("enlace", contenido.substring(desde, hasta));
                 }
             }
+        }
+    }
+
+    private boolean dejaLaMia(IsoDep iso) {
+        Emision.asegurar(getContext());
+
+        byte[] propio = Emision.datos;
+
+        if (propio == null || propio.length == 0) {
+            return false;
+        }
+
+        try {
+            for (int posicion = 0; posicion < propio.length; posicion += TROZO_ESCRITURA) {
+                int largo = Math.min(TROZO_ESCRITURA, propio.length - posicion);
+
+                byte[] pedido = new byte[5 + largo];
+                pedido[0] = 0x00;
+                pedido[1] = (byte) 0xD6;
+                pedido[2] = (byte) ((posicion >> 8) & 0xFF);
+                pedido[3] = (byte) (posicion & 0xFF);
+                pedido[4] = (byte) largo;
+                System.arraycopy(propio, posicion, pedido, 5, largo);
+
+                if (!terminaEnExito(iso.transceive(pedido))) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (Exception elOtroNoAcepta) {
+            return false;
         }
     }
 

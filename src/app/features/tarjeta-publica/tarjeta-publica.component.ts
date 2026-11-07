@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { VcardService } from '../../core/services/vcard.service';
 import { ArchivoService } from '../../core/services/archivo.service';
 import { DisenoService } from '../../core/services/diseno.service';
+import { TemaService } from '../../core/services/tema.service';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 
 @Component({
@@ -20,6 +21,7 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   private vcardService = inject(VcardService);
   private archivos = inject(ArchivoService);
   private diseno = inject(DisenoService);
+  readonly tema = inject(TemaService);
 
   private userId = '';
   private slug = '';
@@ -36,6 +38,8 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   modoNfc = signal(false);
 
   ngOnInit(): void {
+    this.tema.pintar(this.tema.claro());
+
     this.userId = this.route.snapshot.paramMap.get('userId') ?? '';
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
     this.modoNfc.set(this.route.snapshot.queryParamMap.get('auto') === '1');
@@ -94,6 +98,10 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   );
 
   // ====== ACCIONES ======
+
+  alternarTema(): void {
+    this.tema.guardar(!this.tema.claro());
+  }
 
   guardarContacto(): void {
     const t = this.tarjeta();

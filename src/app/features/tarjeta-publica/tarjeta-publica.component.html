@@ -1,3 +1,10 @@
+<button type="button" class="tema" (click)="alternarTema()"
+        [attr.aria-label]="tema.claro() ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'"
+        [title]="tema.claro() ? 'Modo oscuro' : 'Modo claro'">
+  <i class="fa-solid" [class.fa-moon]="!tema.claro()" [class.fa-sun]="tema.claro()"></i>
+  <span>{{ tema.claro() ? 'Modo oscuro' : 'Modo claro' }}</span>
+</button>
+
 <div class="tarjeta-page" [class.diseno-visita]="disenoAjeno()">
 
   @if (cargando()) {

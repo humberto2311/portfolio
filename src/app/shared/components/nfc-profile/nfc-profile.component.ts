@@ -20,6 +20,9 @@ export interface DeveloperProfile {
 export class NfcProfileComponent {
   private modalSvc = inject(ModalService);
 
+  readonly cardUrl =
+    'https://portfolio-sigma-sand-z207rxcppz.vercel.app/tarjeta/d983156f-93d8-472d-b861-f9bcafd5760b/profesional?auto=1';
+
   cardTransform = 'rotateX(0deg) rotateY(0deg)';
   isScanning = false;
   scanSuccess = false;
@@ -76,6 +79,10 @@ export class NfcProfileComponent {
     setTimeout(() => {
       this.isScanning = false;
       this.scanSuccess = true;
+
+      setTimeout(() => {
+        window.location.href = this.cardUrl;
+      }, 550);
     }, 1200);
   }
 }

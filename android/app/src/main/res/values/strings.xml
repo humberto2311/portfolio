@@ -4,5 +4,5 @@
     <string name="title_activity_main">sistem</string>
     <string name="package_name">com.nfcsoft.sistem</string>
     <string name="custom_url_scheme">com.nfcsoft.sistem</string>
-    <string name="emisora_nfc_descripcion">Emitir mi tarjeta NFC-Soft</string>
+    <string name="emisora_nfc_descripcion">Emitir mi tarjeta N-soft</string>
 </resources>

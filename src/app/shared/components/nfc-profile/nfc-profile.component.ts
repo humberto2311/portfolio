@@ -1,62 +1,35 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-// 1. IMPORTAMOS EL SERVICIO (Esta es la ruta correcta)
-import { ModalService } from '../../../core/services/modal.service'; 
-import { ProyectosService } from '../../../core/services/proyectos.service'; 
-import { ToastService } from '../../../core/services/toast.service';
-import { ArchivoService } from '../../../core/services/archivo.service';
-import { Proyecto } from '../../../core/models/proyecto';
+import { RouterLink } from '@angular/router';
+import { ModalService } from '../../../core/services/modal.service';
 
 export interface DeveloperProfile {
   name: string;
-  nickname: string;
   role: string;
-  bio: string;
-  phone: string;
-  email: string;
+  username: string;
   github: string;
-  linkedin: string;
 }
 
 @Component({
   selector: 'app-nfc-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './nfc-profile.component.html',
   styleUrl: './nfc-profile.component.scss'
 })
-export class NfcProfileComponent implements OnInit {
-  private proyectosService = inject(ProyectosService);
-  
-  // 2. INYECTAMOS EL SERVICIO (Igual que en el Navbar)
+export class NfcProfileComponent {
   private modalSvc = inject(ModalService);
-  private archivos = inject(ArchivoService);
-  private toast = inject(ToastService);
 
   cardTransform = 'rotateX(0deg) rotateY(0deg)';
   isScanning = false;
   scanSuccess = false;
 
-  loadingRepos = true;
-  reposError = false;
-  gitRepos: Proyecto[] = [];
-
-  profile: DeveloperProfile = {
+  readonly profile: DeveloperProfile = {
     name: 'Humberto Lozano Verbel',
-    nickname: 'Beto',
-    role: 'Backend & Mobile Developer',
-    bio: 'Especialista en desarrollo Java/Spring Boot, arquitecturas limpias y aplicaciones móviles Flutter. Creador del proyecto NFC-Soft.',
-    phone: '+57 300 000 0000',
-    email: 'beto@nfc-soft.dev',
-    github: 'github.com/beto-dev',
-    linkedin: 'linkedin.com/in/beto-dev'
+    role: 'Desarrollador full stack',
+    username: 'humberto2311',
+    github: 'https://github.com/humberto2311'
   };
-
-  ngOnInit(): void {
-    this.loadRecentRepos();
-  }
 
   abrirLogin(tab: 'login' | 'register' = 'register') {
     this.modalSvc.openLogin(tab);
@@ -67,22 +40,6 @@ export class NfcProfileComponent implements OnInit {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  }
-  loadRecentRepos(): void {
-    this.loadingRepos = true;
-    this.reposError = false;
-
-    this.proyectosService.getProyectos().subscribe({
-      next: (repos) => {
-        this.gitRepos = repos.slice(0, 4);
-        this.loadingRepos = false;
-      },
-      error: (err) => {
-        console.error('Error cargando repos recientes:', err);
-        this.reposError = true;
-        this.loadingRepos = false;
-      }
-    });
   }
 
   onCardTilt(event: MouseEvent): void {
@@ -103,7 +60,7 @@ export class NfcProfileComponent implements OnInit {
     this.scanSuccess = false;
 
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new AudioContext();
       const oscillator = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       oscillator.type = 'sine';
@@ -120,16 +77,5 @@ export class NfcProfileComponent implements OnInit {
       this.isScanning = false;
       this.scanSuccess = true;
     }, 1200);
-  }
-
-  async exportVCard(): Promise<void> {
-    const p = this.profile;
-    const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${p.name}\nTITLE:${p.role}\nTEL:${p.phone}\nEMAIL:${p.email}\nNOTE:NFC-Soft V1 Contact\nEND:VCARD`;
-    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
-    try {
-      await this.archivos.guardar(blob, `${p.nickname}_nfc_contact.vcf`, p.name);
-    } catch {
-      this.toast.show('No se pudo guardar el contacto en este dispositivo.');
-    }
   }
 }

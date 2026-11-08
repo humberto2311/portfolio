@@ -3,6 +3,7 @@ package com.nfcsoft.sistem;
 import android.content.Intent;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.Arrays;
 
@@ -10,8 +11,13 @@ public class EmisoraNfcService extends HostApduService {
 
     public static final String ACCION_TOQUE = "com.nfcsoft.sistem.TOQUE_ENTRANTE";
 
+    private static final String ETIQUETA = "sistemNfc";
+
     private static final String AID_T4T = "D2760000850101";
-    private static final String AID_PROPIA = "A0000000BFC10101";
+    static final String AID_PROPIA = "A0000000BFC10101";
+
+    private static final String LEE_PROPIA = "propia";
+    private static final String LEE_ETIQUETA = "etiqueta";
 
     private static final byte[] OK = {(byte) 0x90, 0x00};
     private static final byte[] NO_EXISTE = {0x6A, (byte) 0x82};
@@ -19,8 +25,15 @@ public class EmisoraNfcService extends HostApduService {
     private static final byte[] FUERA_RANGO = {0x6B, 0x00};
 
     private static final byte[] CONTENEDOR_CAPACIDADES = {
-            (byte) 0xE1, 0x10, 0x40, 0x00, 0x03, 0x00, 0x00, (byte) 0xFE,
-            0x11, 0x00, 0x01, 0x40, 0x00, 0x00, 0x00
+            0x00, 0x0F,
+            0x20,
+            0x00, (byte) 0xF7,
+            0x00, (byte) 0xF7,
+            0x01,
+            (byte) 0xE1, 0x05,
+            (byte) 0xE1, 0x04,
+            0x7F, (byte) 0xF6,
+            0x00
     };
 
     private static final int ARCHIVO_NINGUNO = 0;
@@ -29,9 +42,23 @@ public class EmisoraNfcService extends HostApduService {
 
     private int archivo = ARCHIVO_CAPACIDADES;
     private boolean emulaT4T = true;
+    private boolean sesion = false;
+    private boolean entregado = false;
+    private int enviados = 0;
+    private int total = 0;
+    private String rol = "";
 
     @Override
     public byte[] processCommandApdu(byte[] apdu, Bundle extras) {
+        byte[] respuesta = responde(apdu);
+
+        Log.i(ETIQUETA, "entra " + hexadecimal(apdu) + " sale " + hexadecimal(respuesta)
+                + " rol=" + rol + " enviados=" + enviados + "/" + total);
+
+        return respuesta;
+    }
+
+    private byte[] responde(byte[] apdu) {
         if (apdu == null || apdu.length < 4) {
             return INS_INVALIDA;
         }
@@ -57,8 +84,22 @@ public class EmisoraNfcService extends HostApduService {
 
     @Override
     public void onDeactivated(int motivo) {
+        Log.i(ETIQUETA, "desactivado motivo=" + motivo + " rol=" + rol
+                + " enviados=" + enviados + "/" + total + " recibido=" + Emision.recibido());
+
+        if (sesion && !entregado && (enviados > 0 || Emision.recibido() > 0)) {
+            entrega();
+        } else if (sesion && !entregado) {
+            avisa("salio");
+        }
+
         archivo = ARCHIVO_CAPACIDADES;
         emulaT4T = true;
+        sesion = false;
+        entregado = false;
+        enviados = 0;
+        total = 0;
+        rol = "";
 
         entregaLoRecibido();
     }
@@ -80,6 +121,8 @@ public class EmisoraNfcService extends HostApduService {
 
     private void entregaLoRecibido() {
         String contenido = Emision.cosecha();
+
+        Log.i(ETIQUETA, "cosecha=" + (contenido == null ? "nada" : contenido.length() + " caracteres"));
 
         if (contenido == null) {
             return;
@@ -122,12 +165,13 @@ public class EmisoraNfcService extends HostApduService {
             if (coincideAid(AID_T4T, nombre)) {
                 archivo = ARCHIVO_CAPACIDADES;
                 emulaT4T = true;
+                abreSesion(LEE_ETIQUETA);
                 return OK;
             }
             if (coincideAid(AID_PROPIA, nombre)) {
                 archivo = ARCHIVO_NINGUNO;
                 emulaT4T = false;
-                Emision.abrirSesion();
+                abreSesion(LEE_PROPIA);
                 return OK;
             }
 
@@ -137,11 +181,12 @@ public class EmisoraNfcService extends HostApduService {
         if (p1 == 0x00 && emulaT4T && largo == 2) {
             int identificador = ((nombre[0] & 0xFF) << 8) | (nombre[1] & 0xFF);
 
-            if (identificador == 0xE110) {
+            if (identificador == 0xE103 || identificador == 0xE110 || identificador == 0x0000) {
                 archivo = ARCHIVO_CAPACIDADES;
                 return OK;
             }
-            if (identificador == 0xE111) {
+            if (identificador == 0xE104 || identificador == 0xE111
+                    || identificador == 0x0001 || identificador == 0x0002 || identificador == 0x0003) {
                 archivo = ARCHIVO_MENSAJE;
                 return OK;
             }
@@ -172,7 +217,56 @@ public class EmisoraNfcService extends HostApduService {
         respuesta[disponible] = OK[0];
         respuesta[disponible + 1] = OK[1];
 
+        if (!emulaT4T || archivo == ARCHIVO_MENSAJE) {
+            progreso(inicio + disponible, contenido.length);
+        }
+
         return respuesta;
+    }
+
+    private void progreso(int hasta, int largoTotal) {
+        total = largoTotal;
+        enviados = Math.max(enviados, hasta);
+
+        if (enviados >= total) {
+            entrega();
+            return;
+        }
+
+        avisa("enviando");
+    }
+
+    private void entrega() {
+        if (entregado) {
+            return;
+        }
+
+        entregado = true;
+        total = Math.max(total, 1);
+        enviados = total;
+
+        avisa("enviado");
+    }
+
+    private void abreSesion(String origen) {
+        rol = origen;
+
+        if (sesion) {
+            return;
+        }
+
+        sesion = true;
+        entregado = false;
+        enviados = 0;
+        total = 0;
+
+        Emision.abrirSesion();
+
+        avisa("conectado");
+    }
+
+    private void avisa(String fase) {
+        DispositivoNfcPlugin.enviaTransmision(rol, fase, enviados, total);
     }
 
     private byte[] contenido() {
@@ -192,6 +286,14 @@ public class EmisoraNfcService extends HostApduService {
         String registradoHex = registrado.toUpperCase();
 
         return pedidoHex.startsWith(registradoHex) || registradoHex.startsWith(pedidoHex);
+    }
+
+    private static String hexadecimal(byte[] bytes) {
+        if (bytes == null) {
+            return "null";
+        }
+
+        return getHexadecimal(bytes);
     }
 
     private static String getHexadecimal(byte[] bytes) {

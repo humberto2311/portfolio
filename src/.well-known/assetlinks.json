@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.nfcsoft.sistem",
+      "sha256_cert_fingerprints": [
+        "D0:9D:10:BD:71:8A:24:6D:58:42:1B:29:59:E7:90:31:1D:AA:8E:9B:24:D0:33:C5:C2:6B:7D:F5:43:AB:8F:91"
+      ]
+    }
+  }
+]

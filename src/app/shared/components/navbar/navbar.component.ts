@@ -30,7 +30,7 @@ export class NavbarComponent {
   readonly usuarioCreador = 'humberto2311';
 
   readonly secciones: SeccionLanding[] = [
-    { id: 'que-es', etiqueta: 'Qué es', detalle: 'La idea detrás de NFC-Soft', icono: 'fa-solid fa-circle-info' },
+    { id: 'que-es', etiqueta: 'Qué es', detalle: 'La idea detrás de N-soft', icono: 'fa-solid fa-circle-info' },
     { id: 'como-funciona', etiqueta: 'Cómo funciona', detalle: 'Del perfil a los contactos', icono: 'fa-solid fa-list-check' },
     { id: 'versiones', etiqueta: 'Versiones', detalle: 'Qué corre hoy y qué viene', icono: 'fa-solid fa-layer-group' }
   ];

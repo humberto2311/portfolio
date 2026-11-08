@@ -3,7 +3,7 @@
     android:description="@string/emisora_nfc_descripcion"
     android:requireDeviceUnlock="false">
     <aid-group android:category="other">
-        <aid-set>D2760000850101</aid-set>
-        <aid-set>A0000000BFC10101</aid-set>
+        <aid-filter android:name="D2760000850101" />
+        <aid-filter android:name="A0000000BFC10101" />
     </aid-group>
 </host-apdu-service>

@@ -8,7 +8,7 @@
   <section class="card" *ngIf="!esNativa">
     <h2><i class="fa-solid fa-mobile-screen"></i> Disponible solo en la app</h2>
     <p class="parrafo">
-      Entregar y recibir tarjetas por NFC necesita el hardware del teléfono. Instala la app de NFC-Soft en tu
+      Entregar y recibir tarjetas por NFC necesita el hardware del teléfono. Instala la app de N-soft en tu
       celular y abre esta pantalla desde el menú de usuario.
     </p>
     <div class="actions">
@@ -34,15 +34,14 @@
 
       <p class="parrafo enlace" *ngIf="enlaceActual">{{ enlaceActual }}</p>
 
-      <dl class="datos" *ngIf="info() as telefono">
+      <dl class="datos" *ngIf="estado() as telefono">
         <div><dt>NFC</dt><dd>{{ telefono.tieneNfc ? (telefono.nfcActivado ? 'Activado' : 'Apagado') : 'Sin NFC' }}</dd></div>
-        <div><dt>Tarjeta lista</dt><dd>{{ telefono.emitiendo ? 'Sí' : 'Aún no' }}</dd></div>
-        <div><dt>Emulación</dt><dd>{{ telefono.emulacionDisponible ? 'Soportada' : 'No reportada' }}</dd></div>
+        <div><dt>Tarjeta lista para entregar</dt><dd>{{ telefono.tarjetaCargada ? 'Sí' : 'Aún no' }}</dd></div>
+        <div><dt>Emisión</dt><dd>{{ telefono.emisionPropia ? 'Registrada en Android' : 'No registrada' }}</dd></div>
+        <div><dt>Lectura</dt><dd>{{ telefono.leyendo ? 'Abierta ahora' : 'Cerrada' }}</dd></div>
       </dl>
 
-      <p class="parrafo" *ngIf="nfcApagado">
-        Enciende el NFC en los ajustes del teléfono: sin NFC no se puede entregar ni recibir nada.
-      </p>
+      <p class="parrafo" *ngIf="bloqueo">{{ bloqueo }}</p>
 
       <div class="actions" *ngIf="faltanPermisos">
         <button type="button" class="btn-ghost" (click)="activarPermisos()">Activar permisos</button>
@@ -50,23 +49,43 @@
     </section>
 
     <section class="card">
-      <h2><i class="fa-solid fa-right-left"></i> Intercambiar</h2>
+      <h2><i class="fa-solid fa-tower-broadcast"></i> Entregar mi tarjeta</h2>
       <p class="parrafo">
-        Pega el dorso de tu teléfono contra el de la otra persona. Si los dos tienen la app abierta, ese mismo
-        toque entrega las dos tarjetas y queda registrado en los dos lados. Si el otro no tiene la app abierta,
-        su navegador abre tu enlace. Si está apagado no hay NFC posible: la pantalla necesita estar encendida.
+        Al pulsar Transmitir, tu teléfono pasa a ser la tarjeta que los demás leen. El otro lado no tiene que
+        abrir nada: solo pegar el dorso de su teléfono contra el tuyo, con la pantalla encendida y el NFC
+        activo. Si tiene sistem instalado, tu tarjeta se le abre en la app; si no, en su navegador.
       </p>
 
       <div class="actions">
-        <button type="button" class="btn-primary" *ngIf="!escuchando()" (click)="intercambiar()" [disabled]="!puedeIntercambiar">
-          {{ ocupado() ? 'Preparando…' : 'Acerca el teléfono' }}
+        <button type="button" class="btn-primary" (click)="transmitir()" [disabled]="!puedeTransmitir">
+          {{ ocupado() ? 'Preparando…' : 'Transmitir' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><i class="fa-solid fa-inbox"></i> Recibir la del otro</h2>
+      <p class="parrafo">
+        Usa esto cuando la otra persona sea la que pulse Transmitir: tu teléfono lee, recibe su tarjeta y le deja
+        la tuya escrita. Mientras estás aquí no puedes entregar: quien tenga que recibir tu tarjeta tiene que
+        acercarlo sin abrir esta pantalla.
+      </p>
+
+      <div class="actions">
+        <button type="button" class="btn-ghost" *ngIf="!escuchando()" (click)="intercambiar()" [disabled]="!puedeIntercambiar">
+          {{ ocupado() ? 'Preparando…' : 'Recibir' }}
         </button>
         <button type="button" class="btn-ghost" *ngIf="escuchando()" (click)="cancelar()">Cancelar</button>
       </div>
 
       <p class="parrafo emitiendo" *ngIf="escuchando()">
         <span class="pulso"></span>
-        Esperando el toque. Se cierra solo cuando llega la tarjeta.
+        Esperando el toque. Se cierra cuando llega la tarjeta, o sola en {{ ventana() }} segundos.
+      </p>
+
+      <p class="parrafo" *ngIf="cerroPorTiempo">
+        Pasaron {{ ventana() }} segundos sin que nadie acercara su teléfono, así que se cerró la lectura. Tu
+        teléfono ya vuelve a estar listo para que le acerquen el suyo.
       </p>
 
       <div class="recibido" *ngIf="recibido() as toque">
@@ -136,4 +155,27 @@
     </section>
 
   </ng-container>
+</div>
+
+<div class="envio" *ngIf="envio() as pantalla">
+  <div class="envio-caja">
+    <i class="marca" [class.latir]="pantalla.latiendo" [ngClass]="pantalla.marca"></i>
+
+    <h2>{{ pantalla.titulo }}</h2>
+    <p>{{ pantalla.detalle }}</p>
+
+    <div class="barra" *ngIf="pantalla.latiendo || pantalla.progreso === 100">
+      <span [style.width.%]="pantalla.progreso"></span>
+    </div>
+
+    <small *ngIf="transmision()?.fase === 'enviando'">{{ pantalla.progreso }}%</small>
+
+    <div class="tarjeta">{{ tarjetaElegida }}</div>
+
+    <p class="ruta" *ngIf="enlaceActual">{{ enlaceActual }}</p>
+
+    <small *ngIf="porDonde() as donde">{{ donde }}</small>
+
+    <button type="button" class="btn-ghost salir" (click)="cerrarEnvio()">Salir</button>
+  </div>
 </div>

@@ -72,6 +72,10 @@ public final class Emision {
         }
     }
 
+    public static synchronized int recibido() {
+        return llenado;
+    }
+
     public static synchronized String cosecha() {
         if (entrante == null || llenado == 0) {
             return null;

@@ -1,23 +1,30 @@
 <main class="main-container">
-  
-  <!-- 1. HERO SECTION -->
+
   <section id="inicio" class="hero-section">
     <div class="hero-grid">
-      <!-- Texto izquierda -->
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
           Red social de identidad profesional
         </div>
+
         <h1 class="hero-title">
-          NFC-Soft: la red social donde cada persona publica su <span class="gradient-text">identidad profesional</span>
+          N-soft: una nueva forma de hacer <span class="gradient-text">networking</span>
         </h1>
+
         <p class="hero-subtitle">
-          No es solo mi tarjeta: es un espacio abierto para la comunidad. Cada persona crea su perfil, publica lo que hace y guarda sus contactos. Hoy se comparte con un enlace; el toque con tarjeta NFC todavía no está activo y está planeado para una próxima etapa.
+          Tu perfil, tu trabajo y tus contactos, listos para compartir en un toque.
         </p>
+
+        <ul class="hero-puntos">
+          <li><i class="fa-solid fa-id-card-clip"></i> Tu perfil y tus proyectos</li>
+          <li><i class="fa-solid fa-lock-open"></i> Tú decides qué enlaces son públicos</li>
+          <li><i class="fa-solid fa-tower-broadcast"></i> Enlace, QR o toque NFC</li>
+        </ul>
+
         <div class="hero-actions">
           <button type="button" (click)="abrirLogin('register')" class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <i class="fa-solid fa-bolt"></i>
             Crear mi perfil
           </button>
 
@@ -28,11 +35,10 @@
         </div>
       </div>
 
-      <!-- Tarjeta 3D derecha -->
       <div class="hero-card-wrapper">
-        <div 
-          class="nfc-card" 
-          (mousemove)="onCardTilt($event)" 
+        <div
+          class="nfc-card"
+          (mousemove)="onCardTilt($event)"
           (mouseleave)="resetCardTilt()"
           (click)="triggerTapScan()"
           [style.transform]="cardTransform"
@@ -40,177 +46,156 @@
           <div class="card-header">
             <div class="card-brand-wrap">
               <div class="chip-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2v2H7v2h2v2H7v2h2v2H7v2h2v2h2v2h2v-2h2v2h2v-2h2v2h2V8h-2V6h-2V4h-2V2h-2zm0 6h2v2H9zm4 0h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2v2H7v2h2v2H7v2h2v2H7v2h2v2h2v-2h2v2h2v-2h2v2h2V8h-2V6h-2V4h-2V2h-2zm0 6h2v2H9zm4 0h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg>
               </div>
-              <span class="card-label">NFC-SOFT</span>
+              <span class="card-label">N-SOFT</span>
             </div>
             <svg class="wifi-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21c-1.5 0-2.7-1.2-2.7-2.7S10.5 15.6 12 15.6s2.7 1.2 2.7 2.7S13.5 21 12 21zM6.3 12.9l1.9 1.9c1-1 2.3-1.5 3.8-1.5s2.8.5 3.8 1.5l1.9-1.9C16.5 11.7 14.4 11 12 11s-4.5.7-5.7 1.9zM2.5 9.1l1.9 1.9C6.6 8.8 9.2 7.6 12 7.6s5.4 1.2 7.6 3.4l1.9-1.9C18.7 6.3 15.5 5 12 5S5.3 6.3 2.5 9.1z"/></svg>
           </div>
 
           <div class="card-body">
             <h3 class="card-name">HUMBERTO "BETO"</h3>
-            <p class="card-role">DESARROLLADOR BACKEND</p>
+            <p class="card-role">DESARROLLADOR FULL STACK</p>
           </div>
 
           <div class="card-footer">
             <div>
               <p class="card-footer-label">MI MARCA</p>
-              <p class="card-footer-value">NFC-SOFT</p>
+              <p class="card-footer-value">N-SOFT</p>
             </div>
             <div class="card-status" [class.active]="isScanning || scanSuccess">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-              {{ isScanning ? 'SIMULANDO...' : scanSuccess ? 'COMPARTIDO' : 'Vista previa' }}
+              {{ isScanning ? 'LEYENDO...' : scanSuccess ? 'COMPARTIDO' : 'Vista previa' }}
             </div>
           </div>
         </div>
-        <p class="card-hint">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6a1 1 0 0 0-2 0v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>
-          Diseño de la tarjeta (demostración) • Haz clic para ver la animación
-        </p>
+        <p class="card-hint">Toca la tarjeta para ver la animación</p>
       </div>
     </div>
   </section>
 
-  <!-- 2. PROYECTO + PRESENTACIÓN -->
   <section id="que-es" class="git-section">
     <div class="section-header">
       <div>
-        <span class="section-eyebrow">Qué es NFC-Soft</span>
-        <h2 class="section-title">Mi marca y una red social para toda la comunidad</h2>
+        <span class="section-eyebrow">Qué es N-soft</span>
+        <h2 class="section-title">Mi marca y una red para toda la comunidad</h2>
         <p class="section-subtitle">
-          NFC-Soft es el nombre con el que firmo mi trabajo, y también el de la aplicación: una red social donde cualquier persona o empresa puede publicar su identidad profesional.
+          El nombre con el que firmo mi trabajo también es el de la app.
         </p>
       </div>
-      
+
       <button type="button" (click)="abrirLogin('login')" class="github-link">
         <i class="fa-solid fa-right-to-bracket"></i>
-        Probar la versión 1
+        Entrar
       </button>
     </div>
 
-    <div class="git-grid">
-      <!-- Bio card del proyecto -->
-      <div class="bio-card glass-panel">
-        <div class="bio-header">
-          <div class="bio-avatar">NS</div>
-          <div>
-            <h3>NFC-Soft · Versión 1</h3>
-            <p>Red social de identidad profesional</p>
-          </div>
-        </div>
-        <p class="bio-text">
-          NFC-Soft no es solo mi perfil: es una red social donde cada persona crea el suyo, publica lo que está haciendo y se conecta con los demás. Un desarrollador, un diseñador o una empresa pueden mostrar su trabajo en el mismo lugar.
-          <br><br>
-          La diferencia con otras redes es que aquí la identidad va primero: tu perfil, tus proyectos, tu hoja de vida y tus enlaces están juntos y se comparten en segundos con un enlace propio. Y tú decides qué se ve: tu perfil puede ser público o privado.
+    <div class="doble-grid">
+      <article class="panel glass-panel">
+        <h3 class="panel-title"><i class="fa-solid fa-globe"></i> La red</h3>
+        <p class="panel-text">
+          Cualquier persona o empresa crea su perfil y reúne en un solo lugar lo que está haciendo.
         </p>
-        <div class="bio-tags">
-          <div><span class="dot"></span> Perfil público o privado</div>
-          <div><span class="dot"></span> Publicaciones y comentarios</div>
-          <div><span class="dot"></span> Compartir con otros perfiles</div>
-          <div><span class="dot"></span> Proyectos importados de GitHub</div>
-          <div><span class="dot"></span> Hoja de vida armada con IA</div>
-          <div><span class="dot"></span> Contactos y buscador de personas</div>
-          <div><span class="dot"></span> NFC: planeado, aún no activo</div>
-        </div>
-      </div>
+        <ul class="pills">
+          <li>Publicaciones y comentarios</li>
+          <li>Compartir con otros perfiles</li>
+          <li>Buscador de personas</li>
+          <li>Enlaces públicos o privados</li>
+        </ul>
+      </article>
 
-      <!-- Panel explicativo: cómo funciona la app V1 -->
-      <div id="como-funciona" class="how-it-works glass-panel">
-        <h3 class="how-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-          </svg>
-          Qué se puede hacer hoy
-        </h3>
-        <p class="how-intro">
-          Esto ya está funcionando en la versión 1, tanto para mí como para cualquier persona que se registre:
-        </p>
-        <div class="how-steps">
-          <div class="how-step">
-            <span class="step-num">01</span>
-            <div>
-              <h4>Creas tu perfil</h4>
-              <p>Foto, portada, tu rol y si estás disponible para trabajar o no. Puedes entrar con correo o con GitHub, Google o Microsoft.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <span class="step-num">02</span>
-            <div>
-              <h4>Publicas lo que haces</h4>
-              <p>Escribes una publicación (con foto o video) y los demás pueden darle me gusta y comentarla.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <span class="step-num">03</span>
-            <div>
-              <h4>Compartes con la comunidad</h4>
-              <p>Puedes compartir una publicación en tu perfil o en el de otra persona. La otra persona acepta o rechaza, y le llega una notificación.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <span class="step-num">04</span>
-            <div>
-              <h4>Sumas tu hoja de vida y tus proyectos</h4>
-              <p>Subes tu hoja de vida en PDF y queda ordenada sola. Tus proyectos de GitHub entran con su imagen, lenguaje y último cambio.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <span class="step-num">05</span>
-            <div>
-              <h4>Guardas tus contactos</h4>
-              <p>Buscas personas por nombre o por &#64;usuario y las agregas a tu red, así no pierdes a quién conociste.</p>
-            </div>
+      <article class="panel glass-panel">
+        <h3 class="panel-title"><i class="fa-solid fa-code"></i> El desarrollador</h3>
+
+        <div class="dev">
+          <span class="dev-avatar">HL</span>
+          <div>
+            <p class="dev-name">{{ profile.name }}</p>
+            <p class="dev-role">{{ profile.role }}</p>
           </div>
         </div>
-        <p class="how-note">
-          En resumen: la <strong>versión 1 es una red social completa para la identidad profesional</strong>. Cada persona tiene su espacio, su público y sus contactos; la versión 2 lleva lo mismo al mundo de las empresas.
+
+        <p class="panel-text">
+          Escribo el backend y también el front: la web y la app.
         </p>
+
+        <ul class="pills">
+          <li>Java &middot; Spring Boot</li>
+          <li>Angular</li>
+          <li>PostgreSQL</li>
+          <li>Capacitor</li>
+        </ul>
+
+        <div class="dev-links">
+          <a class="dev-perfil" [routerLink]="['/perfil', profile.username]">
+            <i class="fa-solid fa-id-card-clip"></i> Ver mi perfil en la app
+          </a>
+          <a [href]="profile.github" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github"></i> GitHub
+          </a>
+        </div>
+      </article>
+    </div>
+
+    <div id="como-funciona" class="pasos">
+      <div class="paso">
+        <span class="step-num">01</span>
+        <h4>Creas tu perfil</h4>
+        <p>Foto, portada, rol y disponibilidad.</p>
+      </div>
+      <div class="paso">
+        <span class="step-num">02</span>
+        <h4>Publicas lo que haces</h4>
+        <p>Post, me gusta y comentarios.</p>
+      </div>
+      <div class="paso">
+        <span class="step-num">03</span>
+        <h4>Compartes tu tarjeta</h4>
+        <p>Enlace propio, QR o toque NFC.</p>
       </div>
     </div>
   </section>
 
-  <!-- 3. ROADMAP -->
   <section id="versiones" class="roadmap-section">
     <div class="section-header centered">
       <span class="section-eyebrow">Hacia dónde va</span>
-      <h2 class="section-title">NFC-Soft: versión 1 y versión 2</h2>
-      <p class="section-subtitle">Lo que ya está funcionando para la comunidad y lo que viene para las empresas.</p>
+      <h2 class="section-title">Versión 1 y versión 2</h2>
     </div>
 
     <div class="roadmap-grid">
       <div class="roadmap-card active glass-panel">
-        <div class="phase-tag active-tag">Versión 1 · Ya funciona</div>
+        <div class="phase-tag active-tag">Versión 1 &middot; Ya funciona</div>
         <div class="phase-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
         </div>
-        <h3>La red social, para personas</h3>
-        <p>Cualquiera puede registrarse y publicar su identidad profesional. Tú decides si tu perfil y tu hoja de vida son públicos o privados.</p>
+        <h3>Para personas</h3>
         <ul>
-          <li><span class="check">✓</span> Perfil, portada y estado de disponibilidad</li>
-          <li><span class="check">✓</span> Publicaciones, me gusta y comentarios</li>
-          <li><span class="check">✓</span> Compartir publicaciones con otros perfiles</li>
-          <li><span class="check">✓</span> Proyectos desde GitHub y hoja de vida desde PDF</li>
-          <li><span class="check">✓</span> Contactos, buscador de personas y notificaciones</li>
-          <li><span class="check">✓</span> Enlace propio para compartir tu perfil</li>
+          <li><span class="check">&#10003;</span> Perfil, portada y disponibilidad</li>
+          <li><span class="check">&#10003;</span> Publicaciones y comentarios</li>
+          <li><span class="check">&#10003;</span> Proyectos de GitHub y hoja de vida</li>
+          <li><span class="check">&#10003;</span> Contactos y buscador de personas</li>
+          <li><span class="check">&#10003;</span> Enlace propio para compartir</li>
         </ul>
-        <p class="how-note">
-          El toque con tarjeta NFC <strong>todavía no está en la versión 1</strong>: está planeado para una próxima etapa.
+        <p class="nota">
+          El toque NFC ya funciona entre dos teléfonos Android con la app instalada.
         </p>
       </div>
 
       <div class="roadmap-card glass-panel">
-        <div class="phase-tag">Versión 2 · En camino</div>
+        <div class="phase-tag">Versión 2 &middot; En camino</div>
         <div class="phase-icon muted">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
         </div>
-        <h3>La misma red, para empresas</h3>
-        <p>Equipos completos con una sola cuenta: la empresa administra los perfiles de sus empleados, usa tarjetas con su logo y ve cuántas veces se comparte cada perfil.</p>
+        <h3>Para empresas</h3>
         <ul>
-          <li><span class="dash">○</span> Varias personas bajo una cuenta de empresa</li>
-          <li><span class="dash">○</span> Tarjetas físicas con el logo de la empresa</li>
-          <li><span class="dash">○</span> Toque NFC para compartir el perfil</li>
-          <li><span class="dash">○</span> Panel con cuántas veces se comparte cada perfil</li>
+          <li><span class="dash">&#9675;</span> Varias personas en una cuenta</li>
+          <li><span class="dash">&#9675;</span> Tarjetas con el logo de la empresa</li>
+          <li><span class="dash">&#9675;</span> Toque NFC para compartir el perfil</li>
+          <li><span class="dash">&#9675;</span> Métricas por tarjeta y por toque</li>
         </ul>
+        <p class="nota">
+          Lo mismo de la versión 1, con equipo y marca propios.
+        </p>
       </div>
     </div>
   </section>

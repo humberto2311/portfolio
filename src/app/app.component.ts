@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { CarruselComponent } from './shared/components/carrusel/carrusel.component';
 import { LoginModalComponent } from '../app/shared/components/login-modal/login-modal.component';
+import { EmisoraNfcService } from './core/services/emisora-nfc.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,6 +12,11 @@ import { LoginModalComponent } from '../app/shared/components/login-modal/login-
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private readonly emisora = inject(EmisoraNfcService);
   title = 'portafolio';
+
+  ngOnInit(): void {
+    void this.emisora.sigueEnlaces();
+  }
 }

@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
       class="logo__marca"
       viewBox="0 0 32 32"
       role="img"
-      [attr.aria-label]="nombre ? null : 'NFC-Soft'"
+      [attr.aria-label]="nombre ? null : 'N-soft'"
       [style.height.px]="alto"
       focusable="false"
     >
@@ -19,7 +19,7 @@ import { Component, Input } from '@angular/core';
       </g>
     </svg>
     @if (nombre) {
-      <span class="logo__texto">NFC-Soft</span>
+      <span class="logo__texto">N-soft</span>
     }
   `,
   styles: `

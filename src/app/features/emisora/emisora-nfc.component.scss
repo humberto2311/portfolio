@@ -230,6 +230,82 @@
   }
 }
 
+.envio {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem 1.5rem calc(1.5rem + var(--safe-bottom, 0px));
+  background: var(--bg-main);
+}
+
+.envio-caja {
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: .75rem;
+  text-align: center;
+
+  .marca {
+    font-size: 3rem;
+    color: var(--accent-cyan);
+  }
+
+  .latir { animation: latir 1.4s ease-in-out infinite; }
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    max-width: 34ch;
+  }
+
+  small { font-size: .75rem; color: var(--text-secondary); }
+}
+
+.barra {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--bg-elevated);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--accent-cyan);
+    transition: width .2s ease-out;
+  }
+}
+
+.tarjeta {
+  padding: .35rem .7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: .75rem;
+}
+
+.ruta {
+  max-width: 46ch;
+  font-size: .72rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  word-break: break-all;
+}
+
+.salir { margin-top: .35rem; }
+
 @media (max-width: 520px) {
   .actions { flex-direction: column; }
 

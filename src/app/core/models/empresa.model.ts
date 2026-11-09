@@ -68,6 +68,8 @@ export interface Empresa {
   publicadaEn?: string | null;
   creadaPor?: MiniUsuario | null;
   rolPropio?: RolEmpresa | null;
+  membresiaPuesto?: string | null;
+  miembroDesde?: string | null;
   rolEtiqueta?: string | null;
   documentosFaltantes: string[];
 }

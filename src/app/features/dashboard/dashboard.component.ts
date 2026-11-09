@@ -57,6 +57,10 @@ export class DashboardComponent implements OnInit {
 
   readonly empresasDisponibles = computed(() => this.empresas.listado());
 
+  get misEmpresas() {
+    return this.empresas.listado();
+  }
+
   get empresaActiva() {
     return this.empresas.empresaActual();
   }

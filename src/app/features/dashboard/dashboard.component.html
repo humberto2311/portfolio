@@ -51,6 +51,34 @@
     </nav>
   </header>
 
+  @if (misEmpresas.length) {
+    <section class="membresias">
+      <h2><i class="fa-solid fa-people-group"></i> Empresas a las que perteneces</h2>
+      <ul>
+        @for (empresa of misEmpresas; track empresa.id) {
+          <li class="membresia" [class.membresia--activa]="empresa.id === empresaActiva?.id">
+            <span class="membresia__logo">
+              @if (empresa.logoUrl) {
+                <img [src]="empresa.logoUrl" [alt]="empresa.nombre" />
+              } @else {
+                <span>{{ iniciales(empresa.nombre) }}</span>
+              }
+            </span>
+            <span class="membresia__datos">
+              <strong>{{ empresa.nombre }}</strong>
+              <small>{{ empresa.membresiaPuesto || empresa.rolEtiqueta || empresa.rolPropio }}</small>
+            </span>
+            @if (empresa.id === empresaActiva?.id) {
+              <span class="membresia__sello">Activa</span>
+            } @else {
+              <button type="button" class="btn-mini" (click)="elegirEmpresa(empresa.id)">Entrar</button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
   <section class="titulo">
     <h1>{{ datos().titulo }}</h1>
     <p>{{ datos().subtitulo }}</p>

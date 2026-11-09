@@ -8,12 +8,16 @@ import { ArchivoService } from '../../core/services/archivo.service';
 import { ToqueNfcService } from '../../core/services/toque-nfc.service';
 import { DisenoService } from '../../core/services/diseno.service';
 import { TemaService } from '../../core/services/tema.service';
+import { AuthService } from '../../core/services/auth.service';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { PrivateNavbarComponent } from '../../layout/private-layout/navbar/navbar.component';
+import { LoginModalComponent } from '../../shared/components/login-modal/login-modal.component';
 import { CampoExtraVcard, VCardPayload } from '../../core/models/vcard.model';
 
 @Component({
   selector: 'app-tarjeta-publica',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NavbarComponent, PrivateNavbarComponent, LoginModalComponent],
   templateUrl: './tarjeta-publica.component.html',
   styleUrls: ['./tarjeta-publica.component.scss'],
 })
@@ -24,6 +28,7 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   private diseno = inject(DisenoService);
   private toques = inject(ToqueNfcService);
   readonly tema = inject(TemaService);
+  readonly auth = inject(AuthService);
 
   private userId = '';
   private slug = '';

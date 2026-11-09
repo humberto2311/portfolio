@@ -7,6 +7,8 @@ import {
   ChatMessageApi,
   ChatMessageUpdateApi,
   UsuarioBuscado,
+  ChatEmpresa,
+  MensajeEmpresa,
 } from '../models/chat.model';
 
 @Injectable({ providedIn: 'root' })
@@ -14,9 +16,39 @@ export class ChatService {
   private http = inject(HttpClient);
   
   private readonly baseChats = `${environment.apiUrl}/api/chats`;
+  private readonly baseEmpresas = `${environment.apiUrl}/api/empresas`;
   private readonly baseUsers = `${environment.apiUrl}/api/users`;
 
   
+  misChatsDeEmpresa(empresaId: string): Observable<ChatEmpresa[]> {
+    return this.http.get<ChatEmpresa[]>(`${this.baseEmpresas}/${empresaId}/chat/mis`);
+  }
+
+  bandejaEmpresa(empresaId: string): Observable<ChatEmpresa[]> {
+    return this.http.get<ChatEmpresa[]>(`${this.baseEmpresas}/${empresaId}/chat`);
+  }
+
+  abrirChatEmpresa(empresaId: string): Observable<ChatEmpresa> {
+    return this.http.post<ChatEmpresa>(`${this.baseEmpresas}/${empresaId}/chat/empresa`, {});
+  }
+
+  abrirGrupoEmpresa(empresaId: string): Observable<ChatEmpresa> {
+    return this.http.post<ChatEmpresa>(`${this.baseEmpresas}/${empresaId}/chat/grupo`, {});
+  }
+
+  mensajesEmpresa(empresaId: string, conversacionId: string): Observable<MensajeEmpresa[]> {
+    return this.http.get<MensajeEmpresa[]>(
+      `${this.baseEmpresas}/${empresaId}/chat/${conversacionId}/mensajes`,
+    );
+  }
+
+  enviarEmpresa(empresaId: string, conversacionId: string, contenido: string): Observable<MensajeEmpresa> {
+    return this.http.post<MensajeEmpresa>(
+      `${this.baseEmpresas}/${empresaId}/chat/${conversacionId}/mensajes`,
+      { contenido },
+    );
+  }
+
   listar(): Observable<Conversacion[]> {
     return this.http.get<Conversacion[]>(this.baseChats);
   }

@@ -20,4 +20,9 @@ export interface Contact {
   estado?: EstadoConversacion;
   esSolicitud?: boolean;
   soySolicitante?: boolean;
+  tipo?: 'PERSONAL' | 'EMPRESA_CLIENTE' | 'EMPRESA_GRUPO';
+  etiqueta?: 'Personal' | 'Empresarial' | 'Grupal';
+  empresaId?: string | null;
+  empresaNombre?: string | null;
+  empresaLogoUrl?: string | null;
 }

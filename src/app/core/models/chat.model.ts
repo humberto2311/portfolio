@@ -52,3 +52,33 @@ export interface Conversacion {
   motivoReporte?: string | null;
   mensajes?: ChatMessageApi[];
 }
+
+export interface ChatEmpresa {
+  id: string;
+  empresaId?: string | null;
+  tipo: 'PERSONAL' | 'EMPRESA_CLIENTE' | 'EMPRESA_GRUPO';
+  etiqueta: 'Personal' | 'Empresarial' | 'Grupal';
+  titulo: string;
+  subtitulo?: string | null;
+  usuarioId?: string | null;
+  usuarioNombre?: string | null;
+  usuarioAvatar?: string | null;
+  empresaNombre?: string | null;
+  empresaLogoUrl?: string | null;
+  ultimoMensaje?: string | null;
+  ultimoMensajeEn?: string | null;
+  mensajes?: number;
+  propio?: boolean;
+}
+
+export interface MensajeEmpresa {
+  id: string;
+  conversacionId: string;
+  autorId?: string | null;
+  autorNombre?: string | null;
+  autorAvatar?: string | null;
+  contenido: string;
+  creadoEn: string;
+  propio?: boolean;
+  deEmpresa?: boolean;
+}

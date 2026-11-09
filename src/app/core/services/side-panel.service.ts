@@ -5,6 +5,8 @@ import { take } from 'rxjs';
 import { Contact, ActiveView } from '../models/contact.model';
 import { ChatMessage, ChatMessageApi, Conversacion } from '../models/chat.model';
 import { ChatService } from './chat.service';
+import { EmpresaService } from './empresa.service';
+import { ChatEmpresa } from '../models/chat.model';
 import { AuthService } from './auth.service';
 
 /** Lo mínimo que hace falta para abrir un chat desde una tarjeta de persona. */
@@ -22,6 +24,7 @@ export class SidePanelService {
   private auth = inject(AuthService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private empresa = inject(EmpresaService);
 
   readonly isOpen = signal(false);
   readonly activeView = signal<ActiveView>('contacts');
@@ -34,6 +37,10 @@ export class SidePanelService {
   readonly cargandoContactos = signal(false);
   /** Aviso para el panel: sin sesión no hay /api/chats que consultar. */
   readonly avisoContactos = signal<string | null>(null);
+
+  empresaActivaId(): string | null {
+    return this.empresa.activaId();
+  }
 
   get miId(): string {
     const id = this.auth.currentUser()?.id;
@@ -143,14 +150,87 @@ export class SidePanelService {
 
     this.chatService.listar().pipe(take(1)).subscribe({
       next: (lista) => {
-        this.cargandoContactos.set(false);
         this.applyConversaciones(lista);
+        this.cargarChatsDeEmpresa();
       },
       error: () => {
         this.cargandoContactos.set(false);
         this.avisoContactos.set('No se pudieron cargar tus conversaciones');
       },
     });
+  }
+
+  cargarChatsDeEmpresa(): void {
+    const empresaId = this.empresa.activaId();
+    if (!empresaId) {
+      this.cargandoContactos.set(false);
+      return;
+    }
+
+    this.chatService.misChatsDeEmpresa(empresaId).pipe(take(1)).subscribe({
+      next: (chats) => {
+        this.cargandoContactos.set(false);
+        this.applyChatsEmpresa(chats, empresaId);
+      },
+      error: () => this.cargandoContactos.set(false),
+    });
+  }
+
+  abrirChatDeEmpresa(empresaId: string): void {
+    this.chatService.abrirChatEmpresa(empresaId).pipe(take(1)).subscribe({
+      next: (chat) => this.entrarChatEmpresa(chat),
+      error: () => this.avisoContactos.set('No se pudo abrir el chat con la empresa'),
+    });
+  }
+
+  abrirGrupoDeEmpresa(empresaId: string): void {
+    this.chatService.abrirGrupoEmpresa(empresaId).pipe(take(1)).subscribe({
+      next: (chat) => this.entrarChatEmpresa(chat),
+      error: () => this.avisoContactos.set('No se pudo abrir el chat del equipo'),
+    });
+  }
+
+  private entrarChatEmpresa(chat: ChatEmpresa): void {
+    const contacto = this.contactoDeEmpresa(chat);
+    this.upsertContact(contacto);
+    this.openChat(contacto);
+  }
+
+  private applyChatsEmpresa(chats: ChatEmpresa[], empresaId: string): void {
+    if (!chats.length) return;
+
+    const nuevos = chats.map((chat) => this.contactoDeEmpresa(chat, empresaId));
+    const ids = new Set(nuevos.map((chat) => chat.id));
+
+    this.contacts.set([
+      ...nuevos,
+      ...this.contacts().filter((contacto) => !ids.has(contacto.id)),
+    ]);
+  }
+
+  private contactoDeEmpresa(chat: ChatEmpresa, empresaId?: string): Contact {
+    return {
+      id: chat.id,
+      name: chat.titulo,
+      avatar: chat.tipo === 'EMPRESA_CLIENTE' ? (chat.empresaLogoUrl ?? chat.usuarioAvatar ?? '') : '',
+      statusText: chat.subtitulo ?? '',
+      lastMsg: chat.ultimoMensaje ?? '',
+      time: this.horaDe(chat.ultimoMensajeEn),
+      unread: 0,
+      conversationId: chat.id,
+      tipo: chat.tipo,
+      etiqueta: chat.etiqueta,
+      empresaId: chat.empresaId ?? empresaId ?? null,
+      empresaNombre: chat.empresaNombre ?? null,
+      empresaLogoUrl: chat.empresaLogoUrl ?? null,
+    };
+  }
+
+  private horaDe(valor: string | null | undefined): string {
+    if (!valor) return '';
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   }
 
   buscarContacto(id: string): Contact | undefined {

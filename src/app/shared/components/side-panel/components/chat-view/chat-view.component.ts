@@ -100,6 +100,25 @@ export class ChatViewComponent {
     this.error.set(null);
     this.sending.set(true);
 
+    if (contact.tipo && contact.tipo !== 'PERSONAL' && contact.empresaId && contact.conversationId) {
+      this.chatService.enviarEmpresa(contact.empresaId, contact.conversationId, text).pipe(take(1)).subscribe({
+        next: () => {
+          this.sending.set(false);
+          this.ultimaCarga = '';
+          this.cargarHistorial(contact);
+        },
+        error: (err) => {
+          this.sending.set(false);
+          this.svc.setHistorial(
+            contact.id,
+            this.messages.filter(m => !(m.sender === 'me' && m.text === text && !m.id))
+          );
+          this.error.set(this.mensajeError(err, 'No se pudo enviar el mensaje'));
+        },
+      });
+      return;
+    }
+
     // Sin conversación previa, la primera petición la crea.
     const peticion = contact.conversationId
       ? this.chatService.responder(contact.conversationId, text)
@@ -199,6 +218,36 @@ export class ChatViewComponent {
       return;
     }
 
+    if (contact.tipo && contact.tipo !== 'PERSONAL' && contact.empresaId) {
+      this.cargando.set(true);
+      this.error.set(null);
+
+      this.chatService.mensajesEmpresa(contact.empresaId, contact.conversationId).pipe(take(1)).subscribe({
+        next: (mensajes) => {
+          this.cargando.set(false);
+          this.svc.setHistorial(
+            contact.id,
+            mensajes.map((mensaje) => ({
+              id: mensaje.id,
+              sessionId: mensaje.conversacionId,
+              senderId: mensaje.autorId ?? '',
+              senderName: mensaje.autorNombre ?? '',
+              content: mensaje.contenido,
+              createdAt: mensaje.creadoEn,
+              sender: mensaje.propio ? 'me' : 'them',
+              text: mensaje.contenido,
+              time: this.hora(mensaje.creadoEn),
+            })) as any,
+          );
+        },
+        error: (err) => {
+          this.cargando.set(false);
+          this.error.set(this.mensajeError(err, 'No se pudo cargar la conversación'));
+        },
+      });
+      return;
+    }
+
     this.cargando.set(true);
     this.error.set(null);
 
@@ -214,6 +263,13 @@ export class ChatViewComponent {
           this.error.set(this.mensajeError(err, 'No se pudo cargar la conversación'));
         },
       });
+  }
+
+  private hora(valor: string): string {
+    if (!valor) return '';
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
   }
 
   private resolverSolicitud(accion: 'aceptar' | 'rechazar'): void {

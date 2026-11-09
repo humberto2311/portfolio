@@ -62,6 +62,32 @@ export class ContactsListComponent implements OnInit, OnDestroy {
     );
   }
 
+  get chatsPersonales(): Contact[] {
+    return this.conversaciones.filter((contacto) => !contacto.tipo || contacto.tipo === 'PERSONAL');
+  }
+
+  get chatsEmpresariales(): Contact[] {
+    return this.conversaciones.filter((contacto) => contacto.tipo === 'EMPRESA_CLIENTE');
+  }
+
+  get chatsGrupales(): Contact[] {
+    return this.conversaciones.filter((contacto) => contacto.tipo === 'EMPRESA_GRUPO');
+  }
+
+  get empresaId(): string | null {
+    return this.svc.empresaActivaId();
+  }
+
+  abrirChatEmpresa(): void {
+    const empresaId = this.empresaId;
+    if (empresaId) this.svc.abrirChatDeEmpresa(empresaId);
+  }
+
+  abrirGrupoEmpresa(): void {
+    const empresaId = this.empresaId;
+    if (empresaId) this.svc.abrirGrupoDeEmpresa(empresaId);
+  }
+
   /** Personas sin conversación abierta, devueltas por el buscador de perfiles. */
   get sugerencias(): UsuarioBuscado[] {
     const conChats = new Set(this.svc.contacts().map(c => c.id));

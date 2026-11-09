@@ -12,9 +12,9 @@
 }
 
 <div class="list">
-  @if (conversaciones.length > 0) {
-    <h5 class="section-title">Chats</h5>
-    @for (contact of conversaciones; track contact.id) {
+  @if (chatsPersonales.length > 0) {
+    <h5 class="section-title">Chats personales</h5>
+    @for (contact of chatsPersonales; track contact.id) {
       <div class="contact-item" (click)="select(contact)">
         <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
           @if (contact.avatar) {
@@ -31,12 +31,64 @@
           </div>
           <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
         </div>
-        @if (contact.esSolicitud) {
-          <span class="badge">1</span>
-        } @else if (contact.unread > 0) {
-          <span class="badge">{{ contact.unread }}</span>
-        }
+        <span class="tag tag--personal">Personal</span>
       </div>
+    }
+  }
+
+  @if (chatsEmpresariales.length > 0 || empresaId) {
+    <h5 class="section-title">Empresarial</h5>
+
+    @for (contact of chatsEmpresariales; track contact.id) {
+      <div class="contact-item" (click)="select(contact)">
+        <div class="avatar-wrap">
+          @if (contact.avatar) {
+            <img [src]="contact.avatar" [alt]="contact.name" />
+          } @else {
+            <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
+          }
+        </div>
+        <div class="info">
+          <div class="top-row">
+            <h4>{{ contact.name }}</h4>
+            <span class="time">{{ contact.time }}</span>
+          </div>
+          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
+        </div>
+        <span class="tag tag--empresa">Empresarial</span>
+      </div>
+    }
+
+    @if (chatsEmpresariales.length === 0 && empresaId) {
+      <button type="button" class="nuevo-chat" (click)="abrirChatEmpresa()">
+        <i class="fa-solid fa-building"></i> Escribir a la empresa
+      </button>
+    }
+  }
+
+  @if (chatsGrupales.length > 0 || empresaId) {
+    <h5 class="section-title">Grupal</h5>
+
+    @for (contact of chatsGrupales; track contact.id) {
+      <div class="contact-item" (click)="select(contact)">
+        <div class="avatar-wrap">
+          <span class="avatar-initials"><i class="fa-solid fa-users"></i></span>
+        </div>
+        <div class="info">
+          <div class="top-row">
+            <h4>{{ contact.name }}</h4>
+            <span class="time">{{ contact.time }}</span>
+          </div>
+          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
+        </div>
+        <span class="tag tag--grupo">Grupal</span>
+      </div>
+    }
+
+    @if (chatsGrupales.length === 0 && empresaId) {
+      <button type="button" class="nuevo-chat" (click)="abrirGrupoEmpresa()">
+        <i class="fa-solid fa-users"></i> Abrir chat del equipo
+      </button>
     }
   }
 

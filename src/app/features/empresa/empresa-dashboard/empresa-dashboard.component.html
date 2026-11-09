@@ -36,7 +36,7 @@
       <i class="fa-solid fa-building-circle-arrow-right"></i>
       <h1>Tu modo empresa empieza aquí</h1>
       <p>Crea una empresa desde ajustes y administra su perfil, su equipo, sus documentos y su entorno visual.</p>
-      <a class="btn-primary" routerLink="/app/ajustes/cuenta">
+      <a class="btn-primary" routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'empresas' }">
         <i class="fa-solid fa-plus"></i> Crear empresa
       </a>
     </div>

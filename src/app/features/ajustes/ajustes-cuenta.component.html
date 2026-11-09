@@ -2,523 +2,654 @@
 
   <header class="page-head">
     <h1>Ajustes de cuenta</h1>
-    <p>Lo que cualquier red social te deja cambiar: tus datos, tu contraseña y qué tan visible eres.</p>
+    <p>Tus datos, tu contraseña, tus empresas y cómo se ven tu perfil y tu tarjeta.</p>
   </header>
 
-  <p class="aviso" *ngIf="errorMessage">{{ errorMessage }}</p>
+  <nav class="tabs" role="tablist" #tabsNav>
+    @for (item of tabs; track item.id) {
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.activo]="tab() === item.id"
+        [class.tab--pendiente]="pendiente(item.id)"
+        [attr.aria-selected]="tab() === item.id"
+        (click)="cambiarTab(item.id)"
+      >
+        <i [class]="item.icono"></i>
+        <span>{{ item.titulo }}</span>
+        @if (pendiente(item.id)) {
+          <span class="tab__punto" title="Hay cambios sin guardar"></span>
+        }
+      </button>
+    }
+  </nav>
 
-  <div class="cargando" *ngIf="isLoading">Cargando tus datos…</div>
+  @if (error()) {
+    <p class="aviso aviso--error" role="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
+  }
 
-  <ng-container *ngIf="!isLoading">
+  @if (exito()) {
+    <p class="aviso aviso--ok" role="status"><i class="fa-solid fa-circle-check"></i> {{ exito() }}</p>
+  }
 
-    <section class="card">
-      <h2><i class="fas fa-building"></i> Mis empresas</h2>
+  @switch (tab()) {
 
-      <p class="helper">
-        Una persona puede administrar varias empresas y una empresa puede tener varias personas.
-        Al crear una, quedas como su administrador. La empresa tiene las mismas funciones que un perfil,
-        excepto hoja de vida y proyectos.
-      </p>
+    @case ('cuenta') {
+      <section class="card">
+        <h2><i class="fas fa-user"></i> Datos personales</h2>
 
-      @if (mostrarCrear()) {
-        <app-empresa-crear (creada)="empresaCreada($event)" (cancelar)="cerrarCrearEmpresa()" />
-      } @else {
-        <ul class="empresas" *ngIf="empresas.listado().length; else sinEmpresas">
-          @for (item of empresas.listado(); track item.id) {
-            <li class="empresa-item" [class.empresa-item--activa]="empresas.activaId() === item.id">
-              <span class="empresa-item__logo">
-                @if (item.logoUrl) {
-                  <img [src]="item.logoUrl" [alt]="item.nombre" />
-                } @else {
-                  <span>{{ item.nombre.slice(0, 1).toUpperCase() }}</span>
-                }
-              </span>
+        @if (cargandoCuenta()) {
+          <p class="cargando"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando tus datos…</p>
+        }
 
-              <span class="empresa-item__datos">
-                <strong>{{ item.nombre }}</strong>
-                <small>
-                  {{ item.tipo }}
-                  @if (item.rolEtiqueta) { · {{ item.rolEtiqueta }} }
-                  @if (item.publicada) { · Pública }
-                </small>
-              </span>
-
-              <span class="empresa-item__acciones">
-                <button type="button" class="btn-primary" (click)="entrarEmpresa(item)">
-                  <i class="fas fa-arrow-right"></i> Entrar
-                </button>
-                <a class="btn-ghost" routerLink="/app/empresa/ajustes">
-                  <i class="fas fa-gear"></i> Ajustes
-                </a>
-              </span>
-            </li>
-          }
-        </ul>
-
-        <ng-template #sinEmpresas>
-          <p class="helper">Todavía no tienes empresas. Crea la primera y empieza a construir su identidad.</p>
-        </ng-template>
-
-        <div class="actions">
-          <button type="button" class="btn-primary" (click)="abrirCrearEmpresa()">
-            <i class="fas fa-plus"></i> Crear empresa
-          </button>
-          @if (empresas.enModoEmpresa()) {
-            <button type="button" class="btn-ghost" (click)="salirModoEmpresa()">
-              <i class="fas fa-user"></i> Volver a mi perfil
-            </button>
-          }
-        </div>
-      }
-    </section>
-
-    <!-- DATOS PERSONALES -->
-    <section class="card">
-      <h2><i class="fas fa-user"></i> Datos personales</h2>
-
-      <div class="field">
-        <label for="nombre">Nombre visible</label>
-        <input id="nombre" type="text" [(ngModel)]="nombre" placeholder="Cómo quieres que aparezcas">
-      </div>
-
-      <div class="field">
-        <label for="email">Correo electrónico</label>
-        <input id="email" type="email" [value]="email" disabled>
-        <small>El correo no se cambia desde aquí: es tu identidad de acceso.</small>
-      </div>
-
-      <div class="field-grid">
         <div class="field">
-          <label for="telefono">Teléfono</label>
-          <input id="telefono" type="tel" [(ngModel)]="telefono" placeholder="+57 300 000 0000" maxlength="20">
+          <label for="nombre">Nombre visible</label>
+          <input id="nombre" type="text" [(ngModel)]="nombre" placeholder="Cómo quieres que aparezcas">
         </div>
 
         <div class="field">
-          <label for="genero">Género</label>
-          <select id="genero" [(ngModel)]="genero">
-            <option value="">Sin especificar</option>
-            <option *ngFor="let g of generos" [value]="g.valor">{{ g.texto }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="nacimiento">Fecha de nacimiento</label>
-        <input id="nacimiento" type="date" [(ngModel)]="nacimiento" [max]="maxDate">
-      </div>
-
-      <div class="actions">
-        <button type="button" class="btn-primary" (click)="guardarDatos()" [disabled]="guardandoDatos">
-          {{ guardandoDatos ? 'Guardando…' : 'Guardar cambios' }}
-        </button>
-        <a class="btn-ghost" routerLink="/app/perfil">Editar foto, bio y portada</a>
-      </div>
-    </section>
-
-    <!-- CONTRASEÑA -->
-    <section class="card">
-      <h2><i class="fas fa-key"></i> {{ tieneContrasena ? 'Cambiar contraseña' : 'Establecer contraseña' }}</h2>
-
-      <p class="helper" *ngIf="!tieneContrasena">
-        Entraste con un proveedor externo, así que tu cuenta todavía no tiene contraseña.
-        Al crear una podrás entrar también escribiendo tu correo.
-      </p>
-
-      <form (ngSubmit)="guardarClave()" class="clave-form">
-        <div class="field" *ngIf="tieneContrasena">
-          <label for="claveActual">Contraseña actual</label>
-          <input id="claveActual" type="password" [(ngModel)]="claveActual" name="claveActual"
-                 autocomplete="current-password" required>
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" [value]="email" disabled>
+          <small>El correo no se cambia desde aquí: es tu identidad de acceso.</small>
         </div>
 
         <div class="field-grid">
           <div class="field">
-            <label for="claveNueva">Contraseña nueva</label>
-            <input id="claveNueva" type="password" [(ngModel)]="claveNueva" name="claveNueva"
-                   autocomplete="new-password" minlength="8" required>
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" type="tel" [(ngModel)]="telefono" placeholder="+57 300 000 0000" maxlength="20">
           </div>
 
           <div class="field">
-            <label for="claveConfirmar">Confirmar contraseña</label>
-            <input id="claveConfirmar" type="password" [(ngModel)]="claveConfirmar" name="claveConfirmar"
-                   autocomplete="new-password" minlength="8" required>
+            <label for="genero">Género</label>
+            <select id="genero" [(ngModel)]="genero">
+              <option value="">Sin especificar</option>
+              <option *ngFor="let g of generos" [value]="g.valor">{{ g.texto }}</option>
+            </select>
           </div>
         </div>
 
-        <p class="error" *ngIf="errorClave">{{ errorClave }}</p>
+        <div class="field">
+          <label for="nacimiento">Fecha de nacimiento</label>
+          <input id="nacimiento" type="date" [(ngModel)]="nacimiento" [max]="maxDate">
+        </div>
 
-        <div class="actions">
-          <button type="submit" class="btn-primary" [disabled]="guardandoClave">
-            {{ guardandoClave ? 'Guardando…' : (tieneContrasena ? 'Actualizar contraseña' : 'Crear contraseña') }}
+        <footer class="panel__pie">
+          <span class="pie__estado" [class.pie__estado--pendiente]="datosSucios">
+            @if (guardandoDatos) {
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando…
+            } @else if (datosSucios) {
+              <i class="fa-solid fa-circle"></i> Cambios sin guardar
+            } @else {
+              <i class="fa-solid fa-check"></i> Todo guardado
+            }
+          </span>
+          @if (datosSucios && !guardandoDatos) {
+            <button type="button" class="btn-ghost" (click)="descartarDatos()">Descartar</button>
+          }
+          <button type="button" class="btn-primary" (click)="guardarDatos()"
+                  [disabled]="guardandoDatos || !datosSucios || !datosValidos">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar datos
           </button>
-        </div>
-      </form>
-    </section>
-
-    <!-- VISIBILIDAD -->
-    <section class="card">
-      <h2><i class="fas fa-eye"></i> Visibilidad de tu hoja de vida</h2>
-
-      <div class="visibilidad" *ngIf="cv; else sinCv">
-        <div>
-          <strong>{{ cvVisible ? 'Pública' : 'Privada' }}</strong>
-          <p class="helper" *ngIf="cvVisible">
-            Cualquiera con el enlace puede verla y descargar el PDF
-            <span *ngIf="cv.publicSlug">/u/{{ cv.publicSlug }}</span>.
-          </p>
-          <p class="helper" *ngIf="!cvVisible">Solo tú la ves. Los enlaces que apuntan a tu CV aparecen en gris.</p>
-        </div>
-
-        <button type="button" class="btn-ghost" (click)="alternarVisibilidadCv()" [disabled]="alternandoCv">
-          {{ alternandoCv ? 'Cambiando…' : (cvVisible ? 'Hacerla privada' : 'Hacerla pública') }}
-        </button>
-      </div>
-
-      <ng-template #sinCv>
-        <p class="helper">Todavía no tienes hoja de vida creada.</p>
-        <div class="actions">
-          <a class="btn-ghost" routerLink="/app/informacion-personal">Crear mi hoja de vida</a>
-        </div>
-      </ng-template>
-
-      <div class="actions">
-        <a class="btn-ghost" routerLink="/app/hub">Administrar mis enlaces</a>
-        <a class="btn-ghost" routerLink="/app/ajustes/seguridad">Seguridad de la cuenta</a>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2><i class="fas fa-palette"></i> Diseño de perfil</h2>
-
-      <p class="helper">
-        Escoge tus colores, tu fondo y tu propio CSS. Quien abra tu perfil verá este diseño;
-        tú lo ves en toda la app. La tarjeta de contacto tiene su propio espacio más abajo.
-      </p>
-
-      <div class="field">
-        <label for="diseno-acento">Color principal</label>
-        <div class="goteros">
-          <button
-            type="button"
-            class="gotero"
-            *ngFor="let color of paleta"
-            [class.activo]="acento === color"
-            [style.background]="color"
-            [attr.title]="color"
-            (click)="cambiarAcento(color)"
-          ></button>
-          <input
-            id="diseno-acento"
-            type="color"
-            [value]="acento"
-            (input)="cambiarAcento($any($event.target).value)"
-          >
-          <input
-            class="hex"
-            type="text"
-            [value]="acento"
-            (input)="cambiarAcento($any($event.target).value)"
-            placeholder="#4a9eff"
-            maxlength="7"
-            spellcheck="false"
-          >
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="diseno-secundario">Color de apoyo <small>(opcional)</small></label>
-        <div class="goteros">
-          <input
-            id="diseno-secundario"
-            type="color"
-            [value]="secundario || '#4a9eff'"
-            (input)="cambiarSecundario($any($event.target).value)"
-          >
-          <input
-            class="hex"
-            type="text"
-            [value]="secundario"
-            (input)="cambiarSecundario($any($event.target).value)"
-            placeholder="sin color de apoyo"
-            maxlength="7"
-            spellcheck="false"
-          >
-          <button type="button" class="btn-ghost" *ngIf="secundario" (click)="cambiarSecundario('')">Quitar</button>
-        </div>
-        <small>Da el matiz de las superficies y las zonas claras del perfil.</small>
-      </div>
-
-      <div class="field">
-        <label>Fondo del perfil</label>
-
-        <div class="fondos" *ngIf="galeria().length; else sinFondos">
-          <button
-            type="button"
-            class="fondo"
-            *ngFor="let foto of galeria()"
-            [class.activo]="fondoUrl === foto.url"
-            (click)="elegirFondo(foto.url)"
-          >
-            <img [src]="foto.url" [alt]="foto.textoAlternativo || 'Fondo del perfil'">
-          </button>
-        </div>
-        <ng-template #sinFondos>
-          <small>Aún no tienes fotos en tu galería. Puedes subir una imagen aquí mismo.</small>
-        </ng-template>
+        </footer>
 
         <div class="actions">
-          <label class="btn-ghost">
-            <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))">
-            Subir imagen
-          </label>
-          <button type="button" class="btn-ghost" *ngIf="fondoUrl" (click)="elegirFondo(null)">Sin fondo</button>
+          <a class="btn-ghost" routerLink="/app/perfil">Editar foto, bio y portada</a>
         </div>
-      </div>
+      </section>
 
-      <div class="field">
-        <label for="diseno-css">CSS del perfil</label>
-        <textarea
-          id="diseno-css"
-          rows="7"
-          class="codigo"
-          spellcheck="false"
-          [value]="css"
-          (input)="cambiarCss($any($event.target).value)"
-          placeholder=".header-card { border-radius: 24px; }"></textarea>
-        <small>
-          Solo estilos. Se rechazan importaciones, URLs externas, scripts y todo lo que pueda tapar la interfaz de otras personas.
-        </small>
-      </div>
+      <section class="card">
+        <h2><i class="fas fa-eye"></i> Visibilidad de tu hoja de vida</h2>
 
-      <div class="referencia">
-        <p class="referencia__titulo">Estos son los nombres que puedes usar. La miniatura de abajo solo muestra colores y fondo: para ver el CSS abre tu perfil.</p>
-        <ul>
-          <li><code>.perfil-container</code><span>Toda la página del perfil</span></li>
-          <li><code>.cover-banner</code><span>La portada</span></li>
-          <li><code>.header-card</code><span>El cuadro con tus datos</span></li>
-          <li><code>.avatar-wrapper</code><span>El círculo de la foto</span></li>
-          <li><code>.profile-img</code><span>Tu foto de perfil</span></li>
-          <li><code>.initials</code><span>Las letras cuando no hay foto</span></li>
-          <li><code>.user-info</code><span>Nombre, rol y estadísticas</span></li>
-          <li><code>.rol</code><span>El texto del rol</span></li>
-          <li><code>.btn-follow</code><span>El botón Seguir</span></li>
-          <li><code>.actions</code><span>Los botones del encabezado</span></li>
-          <li><code>.tab-content</code><span>Lo que hay dentro de las pestañas</span></li>
-        </ul>
-      </div>
-
-      <div class="vista-previa diseno-visita" *ngIf="acento || css || fondoUrl">
-        <div class="previa__portada"></div>
-        <div class="previa__cuerpo">
-          <span class="previa__avatar">{{ inicialesPrevias() }}</span>
-          <div class="previa__datos">
-            <strong>{{ nombre || 'Tu nombre' }}</strong>
-            <span>Tu rol profesional</span>
-          </div>
-          <button type="button" class="previa__btn" tabindex="-1">Seguir</button>
-        </div>
-        <div class="previa__chips">
-          <span>Angular</span><span>Java</span><span>PostgreSQL</span>
-        </div>
-      </div>
-
-      <p class="aviso" *ngIf="erroresDiseno.length">
-        <span *ngFor="let error of erroresDiseno">{{ error }}</span>
-      </p>
-
-      <div class="actions">
-        <button type="button" class="btn-primary" (click)="guardarDiseno()" [disabled]="guardandoDiseno">
-          {{ guardandoDiseno ? 'Guardando…' : 'Guardar diseño' }}
-        </button>
-        <button type="button" class="btn-ghost" *ngIf="css || fondoUrl || acento !== '#4a9eff' || secundario"
-                (click)="quitarDiseno()" [disabled]="guardandoDiseno">
-          Quitar mi diseño
-        </button>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2><i class="fas fa-id-card"></i> Diseño de la tarjeta</h2>
-
-      <p class="helper">
-        Esta es la página que se abre cuando alguien escanea tu tarjeta o toca tu QR.
-        Lo que dejes vacío aquí se toma del diseño de tu perfil, incluido el fondo.
-      </p>
-
-      <div class="field">
-        <label for="tarjeta-acento">Color principal de la tarjeta</label>
-        <div class="goteros">
-          <button
-            type="button"
-            class="gotero"
-            *ngFor="let color of paleta"
-            [class.activo]="acentoTarjeta === color"
-            [style.background]="color"
-            [attr.title]="color"
-            (click)="cambiarAcentoTarjeta(color)"
-          ></button>
-          <input
-            id="tarjeta-acento"
-            type="color"
-            [value]="acentoTarjeta || acento"
-            (input)="cambiarAcentoTarjeta($any($event.target).value)"
-          >
-          <input
-            class="hex"
-            type="text"
-            [value]="acentoTarjeta"
-            (input)="cambiarAcentoTarjeta($any($event.target).value)"
-            placeholder="el del perfil"
-            maxlength="7"
-            spellcheck="false"
-          >
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="tarjeta-secundario">Color de apoyo de la tarjeta <small>(opcional)</small></label>
-        <div class="goteros">
-          <input
-            id="tarjeta-secundario"
-            type="color"
-            [value]="secundarioTarjeta || secundario || '#4a9eff'"
-            (input)="cambiarSecundarioTarjeta($any($event.target).value)"
-          >
-          <input
-            class="hex"
-            type="text"
-            [value]="secundarioTarjeta"
-            (input)="cambiarSecundarioTarjeta($any($event.target).value)"
-            placeholder="el del perfil"
-            maxlength="7"
-            spellcheck="false"
-          >
-          <button type="button" class="btn-ghost" *ngIf="secundarioTarjeta" (click)="cambiarSecundarioTarjeta('')">Quitar</button>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="tarjeta-css">CSS de la tarjeta</label>
-        <textarea
-          id="tarjeta-css"
-          rows="7"
-          class="codigo"
-          spellcheck="false"
-          [value]="cssTarjeta"
-          (input)="cambiarCssTarjeta($any($event.target).value)"
-          placeholder=".tarjeta { border-radius: 28px; }&#10;.guardar { font-weight: 800; letter-spacing: .04em; }"></textarea>
-        <small>
-          Se aplica tal cual a la página de la tarjeta. Aquí abajo ves el resultado en vivo.
-        </small>
-      </div>
-
-      <div class="referencia">
-        <p class="referencia__titulo">Cada nombre y lo que toca dentro de la tarjeta:</p>
-        <ul>
-          <li><code>.tarjeta-page</code><span>Toda la pantalla, detrás de la tarjeta</span></li>
-          <li><code>.tarjeta</code><span>El cuadro de la tarjeta completo</span></li>
-          <li><code>.brillo</code><span>El halo de luz del rincón superior</span></li>
-          <li><code>.tarjeta-head</code><span>La fila de arriba: iniciales, nombre y puesto</span></li>
-          <li><code>.avatar</code><span>El círculo con tus iniciales</span></li>
-          <li><code>.identidad h1</code><span>Tu nombre</span></li>
-          <li><code>.rol</code><span>El puesto y la empresa</span></li>
-          <li><code>.acciones-rapidas</code><span>La fila de Llamar, Correo, Web y Compartir</span></li>
-          <li><code>.accion</code><span>Cada botón de esa fila</span></li>
-          <li><code>.filas</code><span>El bloque con todos tus datos</span></li>
-          <li><code>.fila</code><span>Cada dato: teléfono, correo, enlaces y campos extra</span></li>
-          <li><code>.fila i</code><span>El icono de cada dato</span></li>
-          <li><code>.notas</code><span>El recuadro de las notas</span></li>
-          <li><code>.guardar</code><span>El botón "Guardar en mis contactos"</span></li>
-          <li><code>.pie</code><span>La línea de abajo con N-SOFT y el tipo de tarjeta</span></li>
-          <li><code>.pista</code><span>El texto que queda bajo la tarjeta</span></li>
-        </ul>
-      </div>
-
-      <div class="tarjeta-previa diseno-previa">
-        <article class="tarjeta">
-          <div class="brillo"></div>
-
-          <header class="tarjeta-head">
-            <div class="avatar">{{ inicialesPrevias() }}</div>
-            <div class="identidad">
-              <h1>{{ nombre || 'Tu nombre' }}</h1>
-              <p class="rol">Tu puesto <span>· Tu empresa</span></p>
+        @if (cargandoCv()) {
+          <p class="cargando"><i class="fa-solid fa-circle-notch fa-spin"></i> Revisando tu hoja de vida…</p>
+        } @else {
+          <div class="visibilidad" *ngIf="cv; else sinCv">
+            <div>
+              <strong>{{ cvVisible ? 'Pública' : 'Privada' }}</strong>
+              <p class="helper" *ngIf="cvVisible">
+                Cualquiera con el enlace puede verla y descargar el PDF
+                <span *ngIf="cv.publicSlug">/u/{{ cv.publicSlug }}</span>.
+              </p>
+              <p class="helper" *ngIf="!cvVisible">Solo tú la ves. Los enlaces que apuntan a tu CV aparecen en gris.</p>
             </div>
-          </header>
 
-          <div class="acciones-rapidas">
-            <span class="accion"><i class="fa-solid fa-phone"></i> Llamar</span>
-            <span class="accion"><i class="fa-solid fa-envelope"></i> Correo</span>
-            <span class="accion"><i class="fa-solid fa-globe"></i> Web</span>
-            <span class="accion"><i class="fa-solid fa-share-nodes"></i> Compartir</span>
+            <button type="button" class="btn-ghost" (click)="alternarVisibilidadCv()" [disabled]="alternandoCv">
+              {{ alternandoCv ? 'Cambiando…' : (cvVisible ? 'Hacerla privada' : 'Hacerla pública') }}
+            </button>
           </div>
 
-          <div class="filas">
-            <div class="fila"><i class="fa-solid fa-phone"></i><span>{{ telefono || '+57 300 000 0000' }}</span></div>
-            <div class="fila"><i class="fa-solid fa-envelope"></i><span>{{ email }}</span></div>
+          <ng-template #sinCv>
+            <p class="helper">Todavía no tienes hoja de vida creada.</p>
+            <div class="actions">
+              <a class="btn-ghost" routerLink="/app/informacion-personal">Crear mi hoja de vida</a>
+            </div>
+          </ng-template>
+        }
+
+        <div class="actions">
+          <a class="btn-ghost" routerLink="/app/hub">Administrar mis enlaces</a>
+          <a class="btn-ghost" routerLink="/app/ajustes/seguridad">Seguridad de la cuenta</a>
+        </div>
+      </section>
+    }
+
+    @case ('clave') {
+      <section class="card">
+        <h2><i class="fas fa-key"></i> {{ tieneContrasena ? 'Cambiar contraseña' : 'Establecer contraseña' }}</h2>
+
+        <p class="helper" *ngIf="!tieneContrasena">
+          Entraste con un proveedor externo, así que tu cuenta todavía no tiene contraseña.
+          Al crear una podrás entrar también escribiendo tu correo.
+        </p>
+
+        <form (ngSubmit)="guardarClave()" class="clave-form">
+          <div class="field" *ngIf="tieneContrasena">
+            <label for="claveActual">Contraseña actual</label>
+            <input id="claveActual" type="password" [(ngModel)]="claveActual" name="claveActual"
+                   autocomplete="current-password" required>
           </div>
 
-          <div class="notas">
-            <span class="notas-label"><i class="fa-solid fa-note-sticky"></i> Notas</span>
-            <p>El texto que escribas en la tarjeta aparece aquí.</p>
+          <div class="field-grid">
+            <div class="field">
+              <label for="claveNueva">Contraseña nueva</label>
+              <input id="claveNueva" type="password" [(ngModel)]="claveNueva" name="claveNueva"
+                     autocomplete="new-password" minlength="8" required>
+            </div>
+
+            <div class="field">
+              <label for="claveConfirmar">Confirmar contraseña</label>
+              <input id="claveConfirmar" type="password" [(ngModel)]="claveConfirmar" name="claveConfirmar"
+                     autocomplete="new-password" minlength="8" required>
+            </div>
           </div>
 
-          <button type="button" class="guardar" tabindex="-1">
-            <i class="fa-solid fa-address-card"></i>
-            Guardar en mis contactos
-          </button>
+          <p class="helper">Mínimo 8 caracteres. Al cambiarla, las demás sesiones siguen abiertas hasta que las cierres.</p>
 
-          <footer class="pie">
-            <span class="marca">N-SOFT</span>
-            <span class="tipo">profesional</span>
+          <footer class="panel__pie">
+            <span class="pie__estado" [class.pie__estado--pendiente]="clavePendiente">
+              @if (guardandoClave) {
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando…
+              } @else if (clavePendiente && !claveLista) {
+                <i class="fa-solid fa-circle"></i> Falta completar los campos
+              } @else if (clavePendiente) {
+                <i class="fa-solid fa-circle"></i> Lista para guardar
+              } @else {
+                <i class="fa-solid fa-lock"></i> Sin cambios
+              }
+            </span>
+            @if (clavePendiente && !guardandoClave) {
+              <button type="button" class="btn-ghost" (click)="descartarClave()">Vaciar campos</button>
+            }
+            <button type="submit" class="btn-primary" [disabled]="guardandoClave || !claveLista">
+              <i class="fa-solid fa-floppy-disk"></i>
+              {{ tieneContrasena ? 'Actualizar contraseña' : 'Crear contraseña' }}
+            </button>
           </footer>
-        </article>
-      </div>
+        </form>
 
-      <p class="aviso" *ngIf="erroresDiseno.length">
-        <span *ngFor="let error of erroresDiseno">{{ error }}</span>
-      </p>
+        <div class="actions">
+          <a class="btn-ghost" routerLink="/app/ajustes/seguridad">Ver estado de la cuenta y sesiones</a>
+        </div>
+      </section>
+    }
 
-      <div class="actions">
-        <button type="button" class="btn-primary" (click)="guardarDiseno()" [disabled]="guardandoDiseno">
-          {{ guardandoDiseno ? 'Guardando…' : 'Guardar diseño de la tarjeta' }}
-        </button>
-        <button type="button" class="btn-ghost" *ngIf="acentoTarjeta || secundarioTarjeta || cssTarjeta"
-                (click)="quitarDisenoTarjeta()" [disabled]="guardandoDiseno">
-          Que use el diseño de mi perfil
-        </button>
-      </div>
-    </section>
+    @case ('empresas') {
+      <section class="card">
+        <h2><i class="fas fa-building"></i> Mis empresas</h2>
 
-    <section class="card">
-      <h2><i class="fas fa-circle-half-stroke"></i> Apariencia</h2>
+        <p class="helper">
+          Una persona puede administrar varias empresas y una empresa puede tener varias personas.
+          Al crear una, quedas como su administrador. La empresa tiene las mismas funciones que un perfil,
+          excepto hoja de vida y proyectos.
+        </p>
 
-      <p class="helper">
-        Se guarda en este dispositivo y aplica tanto a la app como a las páginas públicas.
-      </p>
-      <p class="helper" *ngIf="diseno.propio().activo">
-        Con tu diseño activo, el tema cambia las superficies de fondo y tu color de acento se ajusta para leerse bien en cada modo.
-      </p>
+        @if (mostrarCrear()) {
+          <app-empresa-crear (creada)="empresaCreada($event)" (cancelar)="cerrarCrearEmpresa()" />
+        } @else {
+          @if (empresas.cargandoMis() && !empresas.listado().length) {
+            <p class="cargando"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando tus empresas…</p>
+          }
 
-      <div class="tema-opciones">
-        <button
-          type="button"
-          class="tema-opcion"
-          [class.activa]="!tema.claro()"
-          (click)="ponerTema(false)"
-        >
-          <i class="fas fa-moon"></i> Oscuro
-        </button>
-        <button
-          type="button"
-          class="tema-opcion"
-          [class.activa]="tema.claro()"
-          (click)="ponerTema(true)"
-        >
-          <i class="fas fa-sun"></i> Claro
-        </button>
-      </div>
-    </section>
+          <ul class="empresas" *ngIf="empresas.listado().length; else sinEmpresas">
+            @for (item of empresas.listado(); track item.id) {
+              <li class="empresa-item" [class.empresa-item--activa]="empresas.activaId() === item.id">
+                <span class="empresa-item__logo">
+                  @if (item.logoUrl) {
+                    <img [src]="item.logoUrl" [alt]="item.nombre" />
+                  } @else {
+                    <span>{{ item.nombre.slice(0, 1).toUpperCase() }}</span>
+                  }
+                </span>
 
-  </ng-container>
+                <span class="empresa-item__datos">
+                  <strong>{{ item.nombre }}</strong>
+                  <small>
+                    {{ item.tipo }}
+                    @if (item.rolEtiqueta) { · {{ item.rolEtiqueta }} }
+                    @if (item.publicada) { · Pública }
+                  </small>
+                </span>
+
+                <span class="empresa-item__acciones">
+                  <button type="button" class="btn-primary" (click)="entrarEmpresa(item)">
+                    <i class="fas fa-arrow-right"></i> Entrar
+                  </button>
+                  <a class="btn-ghost" routerLink="/app/empresa/ajustes">
+                    <i class="fas fa-gear"></i> Ajustes
+                  </a>
+                </span>
+              </li>
+            }
+          </ul>
+
+          <ng-template #sinEmpresas>
+            <p class="helper">Todavía no tienes empresas. Crea la primera y empieza a construir su identidad.</p>
+          </ng-template>
+
+          <div class="actions">
+            <button type="button" class="btn-primary" (click)="abrirCrearEmpresa()">
+              <i class="fas fa-plus"></i> Crear empresa
+            </button>
+            @if (empresas.enModoEmpresa()) {
+              <button type="button" class="btn-ghost" (click)="salirModoEmpresa()">
+                <i class="fas fa-user"></i> Volver a mi perfil
+              </button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @case ('diseno') {
+      <section class="card">
+        <h2><i class="fas fa-palette"></i> Diseño de perfil</h2>
+
+        <p class="helper">
+          Escoge tus colores, tu fondo y tu propio CSS. Quien abra tu perfil verá este diseño;
+          tú lo ves en toda la app. La tarjeta de contacto tiene su propia pestaña.
+        </p>
+
+        <div class="field">
+          <label for="diseno-acento">Color principal</label>
+          <div class="goteros">
+            <button
+              type="button"
+              class="gotero"
+              *ngFor="let color of paleta"
+              [class.activo]="acento === color"
+              [style.background]="color"
+              [attr.title]="color"
+              (click)="cambiarAcento(color)"
+            ></button>
+            <input
+              id="diseno-acento"
+              type="color"
+              [value]="acento"
+              (input)="cambiarAcento($any($event.target).value)"
+            >
+            <input
+              class="hex"
+              type="text"
+              [value]="acento"
+              (input)="cambiarAcento($any($event.target).value)"
+              placeholder="#4a9eff"
+              maxlength="7"
+              spellcheck="false"
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="diseno-secundario">Color de apoyo <small>(opcional)</small></label>
+          <div class="goteros">
+            <input
+              id="diseno-secundario"
+              type="color"
+              [value]="secundario || '#4a9eff'"
+              (input)="cambiarSecundario($any($event.target).value)"
+            >
+            <input
+              class="hex"
+              type="text"
+              [value]="secundario"
+              (input)="cambiarSecundario($any($event.target).value)"
+              placeholder="sin color de apoyo"
+              maxlength="7"
+              spellcheck="false"
+            >
+            <button type="button" class="btn-ghost" *ngIf="secundario" (click)="cambiarSecundario('')">Quitar</button>
+          </div>
+          <small>Da el matiz de las superficies y las zonas claras del perfil.</small>
+        </div>
+
+        <div class="field">
+          <label>Fondo del perfil</label>
+
+          <div class="fondos" *ngIf="galeria().length; else sinFondos">
+            <button
+              type="button"
+              class="fondo"
+              *ngFor="let foto of galeria()"
+              [class.activo]="fondoUrl === foto.url"
+              (click)="elegirFondo(foto.url)"
+            >
+              <img [src]="foto.url" [alt]="foto.textoAlternativo || 'Fondo del perfil'">
+            </button>
+          </div>
+          <ng-template #sinFondos>
+            <small>Aún no tienes fotos en tu galería. Puedes subir una imagen aquí mismo.</small>
+          </ng-template>
+
+          <div class="actions">
+            <label class="btn-ghost">
+              <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))">
+              Subir imagen
+            </label>
+            <button type="button" class="btn-ghost" *ngIf="fondoUrl" (click)="elegirFondo(null)">Sin fondo</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="diseno-css">CSS del perfil</label>
+          <textarea
+            id="diseno-css"
+            rows="7"
+            class="codigo"
+            spellcheck="false"
+            [value]="css"
+            (input)="cambiarCss($any($event.target).value)"
+            placeholder=".header-card { border-radius: 24px; }"></textarea>
+          <small>
+            Solo estilos. Se rechazan importaciones, URLs externas, scripts y todo lo que pueda tapar la interfaz de otras personas.
+          </small>
+        </div>
+
+        <details class="referencia">
+          <summary>Nombres que puedes usar en el CSS</summary>
+          <p class="referencia__titulo">La miniatura de abajo solo muestra colores y fondo: para ver el CSS abre tu perfil.</p>
+          <ul>
+            <li><code>.perfil-container</code><span>Toda la página del perfil</span></li>
+            <li><code>.cover-banner</code><span>La portada</span></li>
+            <li><code>.header-card</code><span>El cuadro con tus datos</span></li>
+            <li><code>.avatar-wrapper</code><span>El círculo de la foto</span></li>
+            <li><code>.profile-img</code><span>Tu foto de perfil</span></li>
+            <li><code>.initials</code><span>Las letras cuando no hay foto</span></li>
+            <li><code>.user-info</code><span>Nombre, rol y estadísticas</span></li>
+            <li><code>.rol</code><span>El texto del rol</span></li>
+            <li><code>.btn-follow</code><span>El botón Seguir</span></li>
+            <li><code>.actions</code><span>Los botones del encabezado</span></li>
+            <li><code>.tab-content</code><span>Lo que hay dentro de las pestañas</span></li>
+          </ul>
+        </details>
+
+        <div class="vista-previa diseno-visita" *ngIf="acento || css || fondoUrl">
+          <div class="previa__portada"></div>
+          <div class="previa__cuerpo">
+            <span class="previa__avatar">{{ inicialesPrevias() }}</span>
+            <div class="previa__datos">
+              <strong>{{ nombre || 'Tu nombre' }}</strong>
+              <span>Tu rol profesional</span>
+            </div>
+            <button type="button" class="previa__btn" tabindex="-1">Seguir</button>
+          </div>
+          <div class="previa__chips">
+            <span>Angular</span><span>Java</span><span>PostgreSQL</span>
+          </div>
+        </div>
+
+        <p class="aviso aviso--error" *ngIf="erroresDiseno.length">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span><span *ngFor="let fallo of erroresDiseno">{{ fallo }}</span></span>
+        </p>
+
+        @if (tarjetaSucia) {
+          <p class="helper">La tarjeta también tiene cambios: al guardar se envían los dos diseños juntos.</p>
+        }
+
+        <footer class="panel__pie">
+          <span class="pie__estado" [class.pie__estado--pendiente]="disenoSucio || tarjetaSucia">
+            @if (guardandoDiseno) {
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando…
+            } @else if (disenoSucio || tarjetaSucia) {
+              <i class="fa-solid fa-circle"></i> Cambios en {{ pendientesDiseno }}
+            } @else {
+              <i class="fa-solid fa-check"></i> Todo guardado
+            }
+          </span>
+          @if (disenoSucio && !guardandoDiseno) {
+            <button type="button" class="btn-ghost" (click)="descartarDiseno()">Descartar</button>
+          }
+          <button type="button" class="btn-primary" (click)="guardarDiseno()"
+                  [disabled]="guardandoDiseno || (!disenoSucio && !tarjetaSucia)">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar diseño
+          </button>
+        </footer>
+
+        <div class="actions">
+          <button type="button" class="btn-ghost" *ngIf="css || fondoUrl || acento !== '#4a9eff' || secundario"
+                  (click)="quitarDiseno()" [disabled]="guardandoDiseno">
+            Quitar mi diseño
+          </button>
+          <button type="button" class="btn-ghost" (click)="cambiarTab('tarjeta')">
+            <i class="fas fa-id-card"></i> Diseño de la tarjeta
+          </button>
+        </div>
+      </section>
+    }
+
+    @case ('tarjeta') {
+      <section class="card">
+        <h2><i class="fas fa-id-card"></i> Diseño de la tarjeta</h2>
+
+        <p class="helper">
+          Esta es la página que se abre cuando alguien escanea tu tarjeta o toca tu QR.
+          Lo que dejes vacío aquí se toma del diseño de tu perfil, incluido el fondo.
+        </p>
+
+        <div class="field">
+          <label for="tarjeta-acento">Color principal de la tarjeta</label>
+          <div class="goteros">
+            <button
+              type="button"
+              class="gotero"
+              *ngFor="let color of paleta"
+              [class.activo]="acentoTarjeta === color"
+              [style.background]="color"
+              [attr.title]="color"
+              (click)="cambiarAcentoTarjeta(color)"
+            ></button>
+            <input
+              id="tarjeta-acento"
+              type="color"
+              [value]="acentoTarjeta || acento"
+              (input)="cambiarAcentoTarjeta($any($event.target).value)"
+            >
+            <input
+              class="hex"
+              type="text"
+              [value]="acentoTarjeta"
+              (input)="cambiarAcentoTarjeta($any($event.target).value)"
+              placeholder="el del perfil"
+              maxlength="7"
+              spellcheck="false"
+            >
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tarjeta-secundario">Color de apoyo de la tarjeta <small>(opcional)</small></label>
+          <div class="goteros">
+            <input
+              id="tarjeta-secundario"
+              type="color"
+              [value]="secundarioTarjeta || secundario || '#4a9eff'"
+              (input)="cambiarSecundarioTarjeta($any($event.target).value)"
+            >
+            <input
+              class="hex"
+              type="text"
+              [value]="secundarioTarjeta"
+              (input)="cambiarSecundarioTarjeta($any($event.target).value)"
+              placeholder="el del perfil"
+              maxlength="7"
+              spellcheck="false"
+            >
+            <button type="button" class="btn-ghost" *ngIf="secundarioTarjeta" (click)="cambiarSecundarioTarjeta('')">Quitar</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="tarjeta-css">CSS de la tarjeta</label>
+          <textarea
+            id="tarjeta-css"
+            rows="7"
+            class="codigo"
+            spellcheck="false"
+            [value]="cssTarjeta"
+            (input)="cambiarCssTarjeta($any($event.target).value)"
+            placeholder=".tarjeta { border-radius: 28px; }&#10;.guardar { font-weight: 800; letter-spacing: .04em; }"></textarea>
+          <small>
+            Se aplica tal cual a la página de la tarjeta. Aquí abajo ves el resultado en vivo.
+          </small>
+        </div>
+
+        <details class="referencia">
+          <summary>Nombres que puedes usar en el CSS</summary>
+          <p class="referencia__titulo">Cada nombre y lo que toca dentro de la tarjeta:</p>
+          <ul>
+            <li><code>.tarjeta-page</code><span>Toda la pantalla, detrás de la tarjeta</span></li>
+            <li><code>.tarjeta</code><span>El cuadro de la tarjeta completo</span></li>
+            <li><code>.brillo</code><span>El halo de luz del rincón superior</span></li>
+            <li><code>.tarjeta-head</code><span>La fila de arriba: iniciales, nombre y puesto</span></li>
+            <li><code>.avatar</code><span>El círculo con tus iniciales</span></li>
+            <li><code>.identidad h1</code><span>Tu nombre</span></li>
+            <li><code>.rol</code><span>El puesto y la empresa</span></li>
+            <li><code>.acciones-rapidas</code><span>La fila de Llamar, Correo, Web y Compartir</span></li>
+            <li><code>.accion</code><span>Cada botón de esa fila</span></li>
+            <li><code>.filas</code><span>El bloque con todos tus datos</span></li>
+            <li><code>.fila</code><span>Cada dato: teléfono, correo, enlaces y campos extra</span></li>
+            <li><code>.fila i</code><span>El icono de cada dato</span></li>
+            <li><code>.notas</code><span>El recuadro de las notas</span></li>
+            <li><code>.guardar</code><span>El botón "Guardar en mis contactos"</span></li>
+            <li><code>.pie</code><span>La línea de abajo con N-SOFT y el tipo de tarjeta</span></li>
+            <li><code>.pista</code><span>El texto que queda bajo la tarjeta</span></li>
+          </ul>
+        </details>
+
+        <div class="tarjeta-previa diseno-previa">
+          <article class="tarjeta">
+            <div class="brillo"></div>
+
+            <header class="tarjeta-head">
+              <div class="avatar">{{ inicialesPrevias() }}</div>
+              <div class="identidad">
+                <h1>{{ nombre || 'Tu nombre' }}</h1>
+                <p class="rol">Tu puesto <span>· Tu empresa</span></p>
+              </div>
+            </header>
+
+            <div class="acciones-rapidas">
+              <span class="accion"><i class="fa-solid fa-phone"></i> Llamar</span>
+              <span class="accion"><i class="fa-solid fa-envelope"></i> Correo</span>
+              <span class="accion"><i class="fa-solid fa-globe"></i> Web</span>
+              <span class="accion"><i class="fa-solid fa-share-nodes"></i> Compartir</span>
+            </div>
+
+            <div class="filas">
+              <div class="fila"><i class="fa-solid fa-phone"></i><span>{{ telefono || '+57 300 000 0000' }}</span></div>
+              <div class="fila"><i class="fa-solid fa-envelope"></i><span>{{ email }}</span></div>
+            </div>
+
+            <div class="notas">
+              <span class="notas-label"><i class="fa-solid fa-note-sticky"></i> Notas</span>
+              <p>El texto que escribas en la tarjeta aparece aquí.</p>
+            </div>
+
+            <button type="button" class="guardar" tabindex="-1">
+              <i class="fa-solid fa-address-card"></i>
+              Guardar en mis contactos
+            </button>
+
+            <footer class="pie">
+              <span class="marca">N-SOFT</span>
+              <span class="tipo">profesional</span>
+            </footer>
+          </article>
+        </div>
+
+        <p class="aviso aviso--error" *ngIf="erroresDiseno.length">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span><span *ngFor="let fallo of erroresDiseno">{{ fallo }}</span></span>
+        </p>
+
+        @if (disenoSucio) {
+          <p class="helper">El perfil también tiene cambios: al guardar se envían los dos diseños juntos.</p>
+        }
+
+        <footer class="panel__pie">
+          <span class="pie__estado" [class.pie__estado--pendiente]="disenoSucio || tarjetaSucia">
+            @if (guardandoDiseno) {
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando…
+            } @else if (disenoSucio || tarjetaSucia) {
+              <i class="fa-solid fa-circle"></i> Cambios en {{ pendientesDiseno }}
+            } @else {
+              <i class="fa-solid fa-check"></i> Todo guardado
+            }
+          </span>
+          @if (tarjetaSucia && !guardandoDiseno) {
+            <button type="button" class="btn-ghost" (click)="descartarTarjeta()">Descartar</button>
+          }
+          <button type="button" class="btn-primary" (click)="guardarDiseno()"
+                  [disabled]="guardandoDiseno || (!disenoSucio && !tarjetaSucia)">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar diseño
+          </button>
+        </footer>
+
+        <div class="actions">
+          <button type="button" class="btn-ghost" *ngIf="acentoTarjeta || secundarioTarjeta || cssTarjeta"
+                  (click)="quitarDisenoTarjeta()" [disabled]="guardandoDiseno">
+            Que use el diseño de mi perfil
+          </button>
+          <button type="button" class="btn-ghost" (click)="cambiarTab('diseno')">
+            <i class="fas fa-palette"></i> Diseño de perfil
+          </button>
+        </div>
+      </section>
+    }
+
+    @case ('apariencia') {
+      <section class="card">
+        <h2><i class="fas fa-circle-half-stroke"></i> Apariencia</h2>
+
+        <p class="helper">
+          Se guarda en este dispositivo y aplica tanto a la app como a las páginas públicas.
+        </p>
+        <p class="helper" *ngIf="diseno.propio().activo">
+          Con tu diseño activo, el tema cambia las superficies de fondo y tu color de acento se ajusta para leerse bien en cada modo.
+        </p>
+
+        <div class="tema-opciones">
+          <button
+            type="button"
+            class="tema-opcion"
+            [class.activa]="!tema.claro()"
+            (click)="ponerTema(false)"
+          >
+            <i class="fas fa-moon"></i> Oscuro
+          </button>
+          <button
+            type="button"
+            class="tema-opcion"
+            [class.activa]="tema.claro()"
+            (click)="ponerTema(true)"
+          >
+            <i class="fas fa-sun"></i> Claro
+          </button>
+        </div>
+
+        <p class="helper">El cambio se aplica al instante, no hace falta guardar.</p>
+      </section>
+    }
+  }
 </div>

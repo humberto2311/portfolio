@@ -85,7 +85,7 @@
     <div class="estado">
       <i class="fa-solid fa-building"></i>
       <p>Necesitas una empresa activa para diseñar su entorno visual.</p>
-      <a class="btn-primary" routerLink="/app/ajustes/cuenta">Crear o elegir empresa</a>
+      <a class="btn-primary" routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'empresas' }">Crear o elegir empresa</a>
     </div>
   } @else {
     <div class="taller">

@@ -1,5 +1,15 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, DestroyRef, OnDestroy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,6 +17,7 @@ import { finalize } from 'rxjs/operators';
 
 import {
   ActualizarMiembro,
+  DisenoEmpresa,
   DocumentoEmpresa,
   DocumentoEmpresaForm,
   Empresa,
@@ -17,7 +28,6 @@ import {
   TipoEmpresa,
 } from '../../../core/models/empresa.model';
 import { EmpresaService, mensajeDeError } from '../../../core/services/empresa.service';
-import { ToastService } from '../../../core/services/toast.service';
 import { DisenoService } from '../../../core/services/diseno.service';
 import {
   PALETA_MARCA,
@@ -39,6 +49,16 @@ const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
   { id: 'marca', titulo: 'Marca', icono: 'fa-solid fa-palette' },
 ];
 
+const DOCUMENTO_VACIO: DocumentoEmpresaForm = {
+  id: null,
+  tipo: '',
+  numero: '',
+  url: '',
+  descripcion: '',
+  expedidoEn: '',
+  venceEn: '',
+};
+
 @Component({
   selector: 'app-empresa-ajustes',
   standalone: true,
@@ -49,11 +69,12 @@ const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
 export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   private empresa = inject(EmpresaService);
   private diseno = inject(DisenoService);
-  private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
+
+  @ViewChild('tabsNav') tabsNav?: ElementRef<HTMLElement>;
 
   readonly panel = this.empresa.panel;
   readonly catalogo = this.empresa.catalogo;
@@ -61,9 +82,12 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
 
   readonly tab = signal<TabAjustes>('perfil');
   readonly cargando = signal(true);
-  readonly guardando = signal(false);
+  readonly guardandoPerfil = signal(false);
+  readonly guardandoMarca = signal(false);
+  readonly publicando = signal(false);
   readonly error = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
+  readonly confirmandoBorrado = signal(false);
 
   readonly paleta = PALETA_MARCA;
 
@@ -78,15 +102,7 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   invitando = false;
   confirmarMiembro: string | null = null;
 
-  documento: DocumentoEmpresaForm = {
-    id: null,
-    tipo: '',
-    numero: '',
-    url: '',
-    descripcion: '',
-    expedidoEn: '',
-    venceEn: '',
-  };
+  documento: DocumentoEmpresaForm = { ...DOCUMENTO_VACIO };
   subiendoDocumento = false;
   confirmarDocumento: string | null = null;
 
@@ -96,6 +112,13 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   disenoCss = '';
   erroresDiseno: string[] = [];
 
+  private perfilBase: EmpresaForm = {};
+  private slugBase = '';
+  private tipoBase: TipoEmpresa | null = null;
+  private slugAuto = '';
+  private perfilFotoBase = '';
+  private marcaBase: DisenoEmpresa | null = null;
+  private marcaFotoBase = '';
   private temporizador: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
@@ -115,6 +138,15 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
 
       const activa = this.empresa.activaId() ?? mias[0].id;
       if (!this.empresa.activaId()) this.empresa.entrar(activa);
+
+      const cache = this.panel();
+      if (cache?.empresa.id === activa) {
+        this.aplicarPanel(cache);
+        this.cargando.set(false);
+        this.sincronizar(activa);
+        return;
+      }
+
       this.cargar(activa);
     });
   }
@@ -177,6 +209,14 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     return Boolean(this.acceso?.editaLienzo);
   }
 
+  get perfilSucio(): boolean {
+    return this.fotoPerfil() !== this.perfilFotoBase;
+  }
+
+  get marcaSucia(): boolean {
+    return this.fotoMarca() !== this.marcaFotoBase;
+  }
+
   get tiposDocumento(): { valor: string; etiqueta: string; exigido: boolean }[] {
     const catalogo = this.catalogo()?.documentos ?? [];
     return catalogo.map((opcion) => ({
@@ -193,16 +233,32 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     }));
   }
 
+  pendiente(id: TabAjustes): boolean {
+    if (id === 'perfil') return this.perfilSucio;
+    if (id === 'marca') return this.marcaSucia;
+    return false;
+  }
+
   cambiarTab(tab: TabAjustes): void {
+    if (this.tab() === tab) return;
+
     this.tab.set(tab);
     this.error.set(null);
     this.aviso.set(null);
+    this.confirmarMiembro = null;
+    this.confirmarDocumento = null;
+    this.confirmandoBorrado.set(false);
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.tabsNav?.nativeElement.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   }
 
   rolDescripcion(rol: RolEmpresa): string {
@@ -231,13 +287,17 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
 
   cambiarNombre(valor: string): void {
     this.perfil.nombre = valor;
-    if (this.slugEstado !== 'ocupado' && this.perfilSlug === slugificar(this.actual?.nombre ?? '')) {
+
+    if (this.slugEstado !== 'ocupado' && this.perfilSlug === this.slugAuto) {
       this.perfilSlug = slugificar(valor);
+      this.slugAuto = this.perfilSlug;
+      this.programarSlug();
     }
   }
 
   cambiarSlug(valor: string): void {
     this.perfilSlug = slugificar(valor);
+    this.slugAuto = '';
     this.slugEstado = 'inactivo';
     this.programarSlug();
   }
@@ -271,9 +331,19 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     this.perfil.portadaUrl = null;
   }
 
+  descartarPerfil(): void {
+    this.perfil = { ...this.perfilBase };
+    this.perfilSlug = this.slugBase;
+    this.tipoSeleccionado = this.tipoBase;
+    this.slugAuto = this.slugBase;
+    this.slugEstado = 'inactivo';
+    this.error.set(null);
+    this.aviso.set(null);
+  }
+
   guardarPerfil(): void {
     const empresa = this.actual;
-    if (!empresa || !this.puedeEditarPerfil) return;
+    if (!empresa || !this.puedeEditarPerfil || !this.perfilSucio) return;
 
     if (!this.perfil.nombre || this.perfil.nombre.trim().length < 2) {
       this.error.set('El nombre de la empresa necesita al menos dos letras.');
@@ -291,16 +361,18 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       slug: this.perfilSlug.trim() || null,
     };
 
-    this.guardando.set(true);
+    this.guardandoPerfil.set(true);
     this.error.set(null);
+    this.aviso.set(null);
 
     this.empresa
       .actualizar(empresa.id, form)
-      .pipe(finalize(() => this.guardando.set(false)))
+      .pipe(finalize(() => this.guardandoPerfil.set(false)))
       .subscribe({
-        next: () => {
+        next: (actualizada) => {
+          this.empresa.parchearEmpresa(actualizada);
+          this.aplicarPerfil(actualizada);
           this.aviso.set('Perfil empresarial actualizado.');
-          this.refrescar();
         },
         error: (err) => this.error.set(mensajeDeError(err, 'No se pudo guardar el perfil.')),
       });
@@ -327,10 +399,10 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.invitando = false)))
       .subscribe({
         next: (miembro) => {
+          this.aplicarMiembro(miembro);
           this.aviso.set(`${miembro.nombre} ya hace parte del equipo.`);
           this.invitarCorreo = '';
           this.invitarPuesto = '';
-          this.recargarPanel();
         },
         error: (err) => this.error.set(mensajeDeError(err, 'No se pudo añadir a esa persona.')),
       });
@@ -338,11 +410,13 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
 
   cambiarRolMiembro(miembro: MiembroEmpresa, rol: string): void {
     const empresa = this.actual;
-    if (!empresa || !this.puedeGestionarEquipo) return;
+    if (!empresa || !this.puedeGestionarEquipo || miembro.rol === rol) return;
 
-    const datos: ActualizarMiembro = { rol };
-    this.empresa.cambiarRol(empresa.id, miembro.id, datos).subscribe({
-      next: () => this.recargarPanel(),
+    this.empresa.cambiarRol(empresa.id, miembro.id, { rol }).subscribe({
+      next: (actualizado) => {
+        this.aplicarMiembro(actualizado);
+        if (actualizado.propio) this.sincronizar(empresa.id);
+      },
       error: (err) => this.error.set(mensajeDeError(err, 'No se pudo cambiar el rol.')),
     });
   }
@@ -350,9 +424,10 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   cambiarPuesto(miembro: MiembroEmpresa, puesto: string): void {
     const empresa = this.actual;
     if (!empresa || !this.puedeGestionarEquipo) return;
+    if ((miembro.puesto ?? '') === puesto) return;
 
     this.empresa.cambiarRol(empresa.id, miembro.id, { puesto }).subscribe({
-      next: () => this.recargarPanel(),
+      next: (actualizado) => this.aplicarMiembro(actualizado),
       error: (err) => this.error.set(mensajeDeError(err, 'No se pudo cambiar el puesto.')),
     });
   }
@@ -364,7 +439,7 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     this.empresa
       .cambiarRol(empresa.id, miembro.id, { visibleEnEquipo: !miembro.visibleEnEquipo })
       .subscribe({
-        next: () => this.recargarPanel(),
+        next: (actualizado) => this.aplicarMiembro(actualizado),
         error: (err) => this.error.set(mensajeDeError(err, 'No se pudo cambiar la visibilidad.')),
       });
   }
@@ -384,16 +459,18 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     this.confirmarMiembro = null;
     this.empresa.quitar(empresa.id, miembro.id).subscribe({
       next: () => {
+        this.empresa.parchearPanel({
+          miembros: this.miembros.filter((item) => item.id !== miembro.id),
+        });
         this.aviso.set(`${miembro.nombre} ya no hace parte del equipo.`);
-        this.recargarPanel();
+        if (miembro.propio) this.empresa.salir();
       },
       error: (err) => this.error.set(mensajeDeError(err, 'No se pudo quitar a esa persona.')),
     });
   }
 
   cambiarTipoDocumento(tipo: string): void {
-    this.documento.tipo = tipo;
-    const existente = this.documentos.find((documento) => documento.tipo === tipo);
+    const existente = this.documentos.find((item) => item.tipo === tipo);
 
     if (existente) {
       this.documento = {
@@ -408,15 +485,7 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.documento = {
-      id: null,
-      tipo,
-      numero: '',
-      url: '',
-      descripcion: '',
-      expedidoEn: '',
-      venceEn: '',
-    };
+    this.documento = { ...DOCUMENTO_VACIO, tipo };
   }
 
   documentoDesdeArchivo(input: HTMLInputElement): void {
@@ -460,21 +529,21 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.subiendoDocumento = false)))
       .subscribe({
         next: (documento) => {
+          this.empresa.parchearPanel({
+            documentos: [
+              ...this.documentos.filter((item) => item.tipo !== documento.tipo),
+              documento,
+            ],
+          });
+
           if (documento.estado === 'VALIDADO') {
             this.aviso.set(`${this.etiquetaDocumento(documento.tipo)} validado.`);
           } else {
             this.error.set(documento.motivoRechazo || 'El documento fue rechazado.');
           }
-          this.documento = {
-            id: null,
-            tipo: '',
-            numero: '',
-            url: '',
-            descripcion: '',
-            expedidoEn: '',
-            venceEn: '',
-          };
-          this.refrescar();
+
+          this.documento = { ...DOCUMENTO_VACIO };
+          this.sincronizar(empresa.id);
         },
         error: (err) => this.error.set(mensajeDeError(err, 'No se pudo cargar el documento.')),
       });
@@ -495,8 +564,11 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     this.confirmarDocumento = null;
     this.empresa.borrarDocumento(empresa.id, documento.id).subscribe({
       next: () => {
+        this.empresa.parchearPanel({
+          documentos: this.documentos.filter((item) => item.id !== documento.id),
+        });
         this.aviso.set('Documento eliminado.');
-        this.refrescar();
+        this.sincronizar(empresa.id);
       },
       error: (err) => this.error.set(mensajeDeError(err, 'No se pudo eliminar el documento.')),
     });
@@ -507,16 +579,19 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     if (!empresa || !this.puedePublicar) return;
 
     const publicada = !empresa.publicada;
-    this.guardando.set(true);
+    this.publicando.set(true);
     this.error.set(null);
+    this.aviso.set(null);
 
     this.empresa
       .publicar(empresa.id, publicada)
-      .pipe(finalize(() => this.guardando.set(false)))
+      .pipe(finalize(() => this.publicando.set(false)))
       .subscribe({
-        next: () => {
-          this.aviso.set(publicada ? 'La empresa ya tiene su página pública.' : 'La página pública se ocultó.');
-          this.refrescar();
+        next: (actualizada) => {
+          this.empresa.parchearEmpresa(actualizada);
+          this.aviso.set(
+            publicada ? 'La empresa ya tiene su página pública.' : 'La página pública se ocultó.',
+          );
         },
         error: (err) => this.error.set(mensajeDeError(err, 'No se pudo cambiar la publicación.')),
       });
@@ -526,12 +601,12 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     const url = this.urlPublica;
     if (isPlatformBrowser(this.platformId) && navigator.clipboard) {
       navigator.clipboard.writeText(url).then(
-        () => this.toast.show('Enlace copiado'),
-        () => this.toast.show(url),
+        () => this.aviso.set('Enlace copiado.'),
+        () => this.aviso.set(url),
       );
       return;
     }
-    this.toast.show(url);
+    this.aviso.set(url);
   }
 
   abrirPublica(): void {
@@ -541,10 +616,17 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
 
   elegirAcento(color: string): void {
     this.disenoAcento = color;
+    this.previsualizarMarca();
   }
 
   elegirSecundario(color: string): void {
     this.disenoSecundario = color;
+    this.previsualizarMarca();
+  }
+
+  cambiarCssMarca(valor: string): void {
+    this.disenoCss = valor;
+    this.previsualizarMarca();
   }
 
   fondoDesdeArchivo(input: HTMLInputElement): void {
@@ -556,21 +638,32 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       (url) => {
         this.disenoFondo = url;
         this.erroresDiseno = [];
+        this.previsualizarMarca();
       },
-      (error: Error) => this.erroresDiseno = [error.message],
+      (error: Error) => (this.erroresDiseno = [error.message]),
     );
   }
 
   quitarFondo(): void {
     this.disenoFondo = '';
+    this.previsualizarMarca();
+  }
+
+  descartarMarca(): void {
+    if (!this.marcaBase) return;
+    this.aplicarMarca(this.marcaBase);
+    this.erroresDiseno = [];
+    this.error.set(null);
+    this.aviso.set(null);
   }
 
   guardarMarca(): void {
     const empresa = this.actual;
-    if (!empresa || !this.puedeEditarMarca) return;
+    if (!empresa || !this.puedeEditarMarca || !this.marcaSucia) return;
 
-    this.guardando.set(true);
+    this.guardandoMarca.set(true);
     this.erroresDiseno = [];
+    this.aviso.set(null);
 
     this.empresa
       .guardarDiseno(empresa.id, {
@@ -580,7 +673,7 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
         css: this.disenoCss || null,
         activo: true,
       })
-      .pipe(finalize(() => (this.guardando.set(false))))
+      .pipe(finalize(() => this.guardandoMarca.set(false)))
       .subscribe({
         next: (diseno) => {
           if (diseno.errores?.length) {
@@ -588,34 +681,34 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
             return;
           }
 
-          this.diseno.aplicarAjeno({
-            acento: diseno.acento ?? null,
-            secundario: diseno.secundario ?? null,
-            fondoUrl: diseno.fondoUrl ?? null,
-            css: diseno.css ?? null,
-            activo: diseno.activo,
-          });
+          this.empresa.parchearPanel({ diseno });
+          this.aplicarMarca(diseno);
           this.aviso.set('Identidad de marca guardada.');
-          this.refrescar();
         },
-        error: (err) => this.erroresDiseno = [mensajeDeError(err, 'No se pudo guardar la marca.')],
+        error: (err) => (this.erroresDiseno = [mensajeDeError(err, 'No se pudo guardar la marca.')]),
       });
+  }
+
+  pedirBorrarEmpresa(): void {
+    if (this.confirmandoBorrado()) {
+      this.borrarEmpresa();
+      return;
+    }
+    this.confirmandoBorrado.set(true);
+  }
+
+  cancelarBorrado(): void {
+    this.confirmandoBorrado.set(false);
   }
 
   borrarEmpresa(): void {
     const empresa = this.actual;
     if (!empresa || this.acceso?.rol !== 'ADMIN') return;
-    if (!isPlatformBrowser(this.platformId)) return;
 
-    const seguro = window.confirm(
-      `¿Borrar "${empresa.nombre}"? Se eliminarán su equipo, documentos y entorno visual.`,
-    );
-    if (!seguro) return;
-
+    this.confirmandoBorrado.set(false);
     this.empresa.borrar(empresa.id).subscribe({
       next: () => {
-        this.toast.show('Empresa eliminada.');
-        this.router.navigate(['/app/ajustes/cuenta']);
+        this.router.navigate(['/app/ajustes/cuenta'], { queryParams: { tab: 'empresas' } });
       },
       error: (err) => this.error.set(mensajeDeError(err, 'No se pudo borrar la empresa.')),
     });
@@ -637,9 +730,20 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     });
   }
 
-  private aplicarPanel(panel: PanelEmpresa): void {
-    const empresa = panel.empresa;
+  private sincronizar(id: string): void {
+    this.empresa.cargarPanel(id).subscribe((panel) => {
+      if (!panel) return;
+      if (!this.perfilSucio) this.aplicarPerfil(panel.empresa);
+      if (!this.marcaSucia) this.aplicarMarca(panel.diseno);
+    });
+  }
 
+  private aplicarPanel(panel: PanelEmpresa): void {
+    this.aplicarPerfil(panel.empresa);
+    this.aplicarMarca(panel.diseno);
+  }
+
+  private aplicarPerfil(empresa: Empresa): void {
     this.perfil = {
       nombre: empresa.nombre,
       razonSocial: empresa.razonSocial ?? '',
@@ -664,37 +768,75 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       portadaUrl: empresa.portadaUrl ?? null,
     };
 
+    this.perfilBase = { ...this.perfil };
     this.perfilSlug = empresa.slug;
-    this.slugEstado = 'inactivo';
+    this.slugBase = empresa.slug;
+    this.slugAuto = empresa.slug;
     this.tipoSeleccionado = empresa.tipo;
+    this.tipoBase = empresa.tipo;
+    this.slugEstado = 'inactivo';
+    this.perfilFotoBase = this.fotoPerfil();
+  }
 
-    this.disenoAcento = panel.diseno.acento ?? '#2563eb';
-    this.disenoSecundario = panel.diseno.secundario ?? '#0ea5e9';
-    this.disenoFondo = panel.diseno.fondoUrl ?? '';
-    this.disenoCss = panel.diseno.css ?? '';
+  private aplicarMarca(diseno: DisenoEmpresa): void {
+    this.marcaBase = diseno;
+    this.disenoAcento = diseno.acento ?? '#2563eb';
+    this.disenoSecundario = diseno.secundario ?? '#0ea5e9';
+    this.disenoFondo = diseno.fondoUrl ?? '';
+    this.disenoCss = diseno.css ?? '';
+    this.marcaFotoBase = this.fotoMarca();
 
     this.diseno.aplicarAjeno({
-      acento: panel.diseno.acento ?? null,
-      secundario: panel.diseno.secundario ?? null,
-      fondoUrl: panel.diseno.fondoUrl ?? null,
-      css: panel.diseno.css ?? null,
-      activo: panel.diseno.activo,
+      acento: diseno.acento ?? null,
+      secundario: diseno.secundario ?? null,
+      fondoUrl: diseno.fondoUrl ?? null,
+      css: diseno.css ?? null,
+      activo: diseno.activo,
     });
   }
 
-  private refrescar(): void {
-    this.empresa.refrescarListado();
-    this.empresa.cargarMis(true).subscribe();
-    this.recargarPanel();
+  private previsualizarMarca(): void {
+    if (!this.marcaSucia) return;
+
+    this.diseno.aplicarAjeno({
+      acento: this.disenoAcento || null,
+      secundario: this.disenoSecundario || null,
+      fondoUrl: this.disenoFondo || null,
+      css: this.disenoCss || null,
+      activo: true,
+    });
   }
 
-  private recargarPanel(): void {
-    const id = this.actual?.id;
-    if (!id) return;
-
-    this.empresa.cargarPanel(id).subscribe((panel) => {
-      if (panel) this.aplicarPanel(panel);
+  private aplicarMiembro(miembro: MiembroEmpresa): void {
+    const lista = this.miembros;
+    this.empresa.parchearPanel({
+      miembros: lista.some((item) => item.id === miembro.id)
+        ? lista.map((item) => (item.id === miembro.id ? miembro : item))
+        : [...lista, miembro],
     });
+  }
+
+  private fotoPerfil(): string {
+    const datos: Record<string, unknown> = {
+      ...this.perfil,
+      tipo: this.tipoSeleccionado,
+      slug: this.perfilSlug.trim(),
+    };
+
+    return JSON.stringify(
+      Object.keys(datos)
+        .sort()
+        .map((clave) => [clave, datos[clave] ?? null]),
+    );
+  }
+
+  private fotoMarca(): string {
+    return JSON.stringify([
+      this.disenoAcento,
+      this.disenoSecundario,
+      this.disenoFondo,
+      this.disenoCss,
+    ]);
   }
 
   private cargarImagen(input: HTMLInputElement, asignar: (url: string) => void): void {

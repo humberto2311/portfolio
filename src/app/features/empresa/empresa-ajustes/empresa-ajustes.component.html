@@ -10,12 +10,8 @@
     </a>
   </header>
 
-  @if (error()) {
-    <p class="aviso aviso--error"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
-  }
-
-  @if (aviso()) {
-    <p class="aviso aviso--ok"><i class="fa-solid fa-circle-check"></i> {{ aviso() }}</p>
+  @if (error() && !actual) {
+    <p class="aviso aviso--error" role="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
   }
 
   @if (cargando()) {
@@ -24,7 +20,7 @@
     <div class="estado">
       <i class="fa-solid fa-building"></i>
       <p>No tienes una empresa activa. Crea una o elige una desde ajustes de cuenta.</p>
-      <a class="btn-primary" routerLink="/app/ajustes/cuenta">Ir a ajustes de cuenta</a>
+      <a class="btn-primary" routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'empresas' }">Ir a ajustes de cuenta</a>
     </div>
   } @else {
     <div class="empresa-resumen">
@@ -49,21 +45,33 @@
       </span>
     </div>
 
-    <nav class="tabs" role="tablist">
+    <nav class="tabs" role="tablist" #tabsNav>
       @for (item of tabs; track item.id) {
         <button
           type="button"
           role="tab"
           class="tab"
           [class.activo]="tab() === item.id"
+          [class.tab--pendiente]="pendiente(item.id)"
           [attr.aria-selected]="tab() === item.id"
           (click)="cambiarTab(item.id)"
         >
           <i [class]="item.icono"></i>
           <span>{{ item.titulo }}</span>
+          @if (pendiente(item.id)) {
+            <span class="tab__punto" title="Hay cambios sin guardar"></span>
+          }
         </button>
       }
     </nav>
+
+    @if (error()) {
+      <p class="aviso aviso--error" role="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
+    }
+
+    @if (aviso()) {
+      <p class="aviso aviso--ok" role="status"><i class="fa-solid fa-circle-check"></i> {{ aviso() }}</p>
+    }
 
     @switch (tab()) {
       @case ('perfil') {
@@ -77,7 +85,7 @@
             <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol solo permite consultar el perfil empresarial.</p>
           }
 
-          <fieldset class="campos" [disabled]="!puedeEditarPerfil">
+          <fieldset class="campos" [disabled]="!puedeEditarPerfil || guardandoPerfil()">
             <div class="campos__fila">
               <label class="campo">
                 <span>Nombre de la empresa</span>
@@ -232,9 +240,16 @@
 
           @if (puedeEditarPerfil) {
             <footer class="panel__pie">
-              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardarPerfil()">
-                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
-                @else { <i class="fa-solid fa-floppy-disk"></i> Guardar perfil }
+              <span class="pie__estado" [class.pie__estado--pendiente]="perfilSucio">
+                @if (guardandoPerfil()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
+                @else if (perfilSucio) { <i class="fa-solid fa-circle"></i> Cambios sin guardar }
+                @else { <i class="fa-solid fa-check"></i> Todo guardado }
+              </span>
+              @if (perfilSucio && !guardandoPerfil()) {
+                <button type="button" class="btn-ghost" (click)="descartarPerfil()">Descartar</button>
+              }
+              <button type="button" class="btn-primary" [disabled]="guardandoPerfil() || !perfilSucio" (click)="guardarPerfil()">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar perfil
               </button>
             </footer>
           }
@@ -510,8 +525,8 @@
             </div>
 
             @if (puedePublicar) {
-              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="alternarPublicacion()">
-                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
+              <button type="button" class="btn-primary" [disabled]="publicando()" (click)="alternarPublicacion()">
+                @if (publicando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
                 @else { <i class="fa-solid" [class.fa-upload]="!actual.publicada" [class.fa-eye-slash]="actual.publicada"></i> }
                 {{ actual.publicada ? 'Despublicar empresa' : 'Publicar empresa' }}
               </button>
@@ -549,12 +564,12 @@
             <div class="campo">
               <span>Color principal</span>
               <div class="color-fila">
-                <input type="color" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" [disabled]="!puedeEditarMarca" />
-                <input type="text" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" maxlength="9" [disabled]="!puedeEditarMarca" />
+                <input type="color" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" [disabled]="!puedeEditarMarca || guardandoMarca()" />
+                <input type="text" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" maxlength="9" [disabled]="!puedeEditarMarca || guardandoMarca()" />
               </div>
               <div class="paleta">
                 @for (color of paleta; track color) {
-                  <button type="button" class="color" [style.background]="color" (click)="elegirAcento(color)" [disabled]="!puedeEditarMarca" [title]="color"></button>
+                  <button type="button" class="color" [style.background]="color" (click)="elegirAcento(color)" [disabled]="!puedeEditarMarca || guardandoMarca()" [title]="color"></button>
                 }
               </div>
             </div>
@@ -562,12 +577,12 @@
             <div class="campo">
               <span>Color secundario</span>
               <div class="color-fila">
-                <input type="color" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" [disabled]="!puedeEditarMarca" />
-                <input type="text" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" maxlength="9" [disabled]="!puedeEditarMarca" />
+                <input type="color" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" [disabled]="!puedeEditarMarca || guardandoMarca()" />
+                <input type="text" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" maxlength="9" [disabled]="!puedeEditarMarca || guardandoMarca()" />
               </div>
               <div class="paleta">
                 @for (color of paleta; track color) {
-                  <button type="button" class="color" [style.background]="color" (click)="elegirSecundario(color)" [disabled]="!puedeEditarMarca" [title]="color"></button>
+                  <button type="button" class="color" [style.background]="color" (click)="elegirSecundario(color)" [disabled]="!puedeEditarMarca || guardandoMarca()" [title]="color"></button>
                 }
               </div>
             </div>
@@ -582,27 +597,34 @@
             </div>
             <div class="fondo__acciones">
               <label class="btn-mini">
-                <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))" [disabled]="!puedeEditarMarca" />
+                <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))" [disabled]="!puedeEditarMarca || guardandoMarca()" />
                 <i class="fa-solid fa-upload"></i> Subir fondo
               </label>
               @if (disenoFondo) {
-                <button type="button" class="btn-mini" (click)="quitarFondo()" [disabled]="!puedeEditarMarca">Quitar</button>
+                <button type="button" class="btn-mini" (click)="quitarFondo()" [disabled]="!puedeEditarMarca || guardandoMarca()">Quitar</button>
               }
             </div>
           </div>
 
           <label class="campo">
             <span>Estilos propios (CSS)</span>
-            <textarea rows="6" [(ngModel)]="disenoCss" [disabled]="!puedeEditarMarca" placeholder="Ej. .mi-clase { color: var(--acento); }"></textarea>
+            <textarea rows="6" [ngModel]="disenoCss" (ngModelChange)="cambiarCssMarca($event)" [disabled]="!puedeEditarMarca || guardandoMarca()" placeholder="Ej. .mi-clase { color: var(--acento); }"></textarea>
             <small>Se aplican solo dentro de las páginas de la empresa. No se permiten scripts ni recursos externos.</small>
           </label>
 
           @if (puedeEditarMarca) {
             <footer class="panel__pie">
+              <span class="pie__estado" [class.pie__estado--pendiente]="marcaSucia">
+                @if (guardandoMarca()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
+                @else if (marcaSucia) { <i class="fa-solid fa-circle"></i> Cambios sin guardar }
+                @else { <i class="fa-solid fa-check"></i> Todo guardado }
+              </span>
               <a class="btn-ghost" routerLink="/app/empresa/lienzo"><i class="fa-solid fa-wand-magic-sparkles"></i> Ir al diseñador</a>
-              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardarMarca()">
-                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
-                @else { <i class="fa-solid fa-floppy-disk"></i> Guardar marca }
+              @if (marcaSucia && !guardandoMarca()) {
+                <button type="button" class="btn-ghost" (click)="descartarMarca()">Descartar</button>
+              }
+              <button type="button" class="btn-primary" [disabled]="guardandoMarca() || !marcaSucia" (click)="guardarMarca()">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar marca
               </button>
             </footer>
           }
@@ -616,9 +638,19 @@
           <h3><i class="fa-solid fa-triangle-exclamation"></i> Zona sensible</h3>
           <p>Borrar la empresa elimina su equipo, documentos y entorno visual. Esta acción no se deshace.</p>
         </div>
-        <button type="button" class="btn-peligro" (click)="borrarEmpresa()">
-          <i class="fa-solid fa-trash"></i> Borrar empresa
-        </button>
+        <div class="peligro__acciones">
+          @if (confirmandoBorrado()) {
+            <span class="peligro__aviso">Se borrará «{{ actual.nombre }}» con su equipo, sus documentos y su entorno visual.</span>
+            <button type="button" class="btn-ghost" (click)="cancelarBorrado()">Cancelar</button>
+            <button type="button" class="btn-peligro" (click)="pedirBorrarEmpresa()">
+              <i class="fa-solid fa-trash"></i> Sí, borrar empresa
+            </button>
+          } @else {
+            <button type="button" class="btn-peligro" (click)="pedirBorrarEmpresa()">
+              <i class="fa-solid fa-trash"></i> Borrar empresa
+            </button>
+          }
+        </div>
       </section>
     }
   }

@@ -184,6 +184,19 @@ export class EmpresaService {
     if (hayAlmacenamiento()) localStorage.removeItem(CLAVE);
   }
 
+  parchearEmpresa(empresa: Empresa): void {
+    this.listado.update((lista) =>
+      lista.map((item) => (item.id === empresa.id ? { ...item, ...empresa } : item)),
+    );
+    this.panel.update((panel) =>
+      panel && panel.empresa.id === empresa.id ? { ...panel, empresa } : panel,
+    );
+  }
+
+  parchearPanel(cambio: Partial<PanelEmpresa>): void {
+    this.panel.update((panel) => (panel ? { ...panel, ...cambio } : panel));
+  }
+
   refrescarListado(): void {
     this.peticionMis = null;
   }

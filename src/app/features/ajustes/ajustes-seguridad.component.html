@@ -87,7 +87,7 @@
       </p>
 
       <div class="actions">
-        <a class="btn-primary" routerLink="/app/ajustes/cuenta">Cambiar contraseña</a>
+        <a class="btn-primary" routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'clave' }">Cambiar contraseña</a>
       </div>
     </section>
 
@@ -133,7 +133,7 @@
 
       <p class="helper">
         La hoja de vida se hace pública o privada desde
-        <a routerLink="/app/ajustes/cuenta">Ajustes de cuenta</a>, y los enlaces desde
+        <a routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'cuenta' }">Ajustes de cuenta</a>, y los enlaces desde
         <a routerLink="/app/hub">mi Hub</a>.
       </p>
     </section>

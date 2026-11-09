@@ -25,4 +25,5 @@ export interface Contact {
   empresaId?: string | null;
   empresaNombre?: string | null;
   empresaLogoUrl?: string | null;
+  ultimoMensajeEn?: string | null;
 }

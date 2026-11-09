@@ -150,7 +150,7 @@ export class SidePanelService {
 
     this.chatService.listar().pipe(take(1)).subscribe({
       next: (lista) => {
-        this.applyConversaciones(lista);
+        this.applyConversaciones(this.unicosPorPersona(lista));
         this.cargarChatsDeEmpresa();
       },
       error: () => {
@@ -197,20 +197,63 @@ export class SidePanelService {
   }
 
   private applyChatsEmpresa(chats: ChatEmpresa[], empresaId: string): void {
-    if (!chats.length) return;
+    const nuevos = chats
+      .filter((chat) => chat.tipo !== 'PERSONAL')
+      .map((chat) => this.contactoDeEmpresa(chat, empresaId));
 
-    const nuevos = chats.map((chat) => this.contactoDeEmpresa(chat, empresaId));
-    const ids = new Set(nuevos.map((chat) => chat.id));
+    const personales = this.contacts().filter(
+      (contacto) => !contacto.tipo || contacto.tipo === 'PERSONAL',
+    );
 
-    this.contacts.set([
-      ...nuevos,
-      ...this.contacts().filter((contacto) => !ids.has(contacto.id)),
-    ]);
+    this.contacts.set([...this.sinDuplicados([...personales, ...nuevos])]);
+  }
+
+  private unicosPorPersona(lista: Conversacion[]): Conversacion[] {
+    const porPersona = new Map<string, Conversacion>();
+
+    for (const conversacion of lista) {
+      const actual = porPersona.get(conversacion.contraparteId);
+      if (!actual || this.masReciente(conversacion, actual)) {
+        porPersona.set(conversacion.contraparteId, conversacion);
+      }
+    }
+
+    return [...porPersona.values()].sort((a, b) => (this.fecha(b.ultimoMensajeEn) - this.fecha(a.ultimoMensajeEn)));
+  }
+
+  private masReciente(candidata: Conversacion, actual: Conversacion): boolean {
+    const fechaCandidata = this.fecha(candidata.ultimoMensajeEn);
+    const fechaActual = this.fecha(actual.ultimoMensajeEn);
+
+    if (fechaCandidata !== fechaActual) return fechaCandidata > fechaActual;
+    if (candidata.estado !== actual.estado) return candidata.estado === 'ACEPTADA';
+    return false;
+  }
+
+  private fecha(valor: string | null | undefined): number {
+    if (!valor) return 0;
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? 0 : fecha.getTime();
+  }
+
+  private sinDuplicados(lista: Contact[]): Contact[] {
+    const porClave = new Map<string, Contact>();
+
+    for (const contacto of lista) {
+      const clave = `${contacto.tipo ?? 'PERSONAL'}|${(contacto.tipo ?? 'PERSONAL') === 'PERSONAL' ? contacto.id : contacto.conversationId ?? contacto.id}`;
+      const previo = porClave.get(clave);
+
+      porClave.set(clave, previo ? this.mezclarContacto(previo, contacto) : contacto);
+    }
+
+    return [...porClave.values()];
   }
 
   private contactoDeEmpresa(chat: ChatEmpresa, empresaId?: string): Contact {
+    const clave = chat.usuarioId ?? chat.id;
+
     return {
-      id: chat.id,
+      id: clave,
       name: chat.titulo,
       avatar: chat.tipo === 'EMPRESA_CLIENTE' ? (chat.empresaLogoUrl ?? chat.usuarioAvatar ?? '') : '',
       statusText: chat.subtitulo ?? '',
@@ -223,6 +266,7 @@ export class SidePanelService {
       empresaId: chat.empresaId ?? empresaId ?? null,
       empresaNombre: chat.empresaNombre ?? null,
       empresaLogoUrl: chat.empresaLogoUrl ?? null,
+      ultimoMensajeEn: chat.ultimoMensajeEn ?? null,
     };
   }
 
@@ -346,6 +390,7 @@ export class SidePanelService {
       estado: c.estado as Contact['estado'],
       esSolicitud: c.esSolicitud,
       soySolicitante: c.soySolicitante,
+      ultimoMensajeEn: c.ultimoMensajeEn,
     };
   }
 

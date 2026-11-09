@@ -63,7 +63,30 @@ export class ContactsListComponent implements OnInit, OnDestroy {
   }
 
   get chatsPersonales(): Contact[] {
-    return this.conversaciones.filter((contacto) => !contacto.tipo || contacto.tipo === 'PERSONAL');
+    return this.unicosPorPersona(
+      this.conversaciones.filter((contacto) => !contacto.tipo || contacto.tipo === 'PERSONAL'),
+    );
+  }
+
+  private unicosPorPersona(lista: Contact[]): Contact[] {
+    const porPersona = new Map<string, Contact>();
+
+    for (const contacto of lista) {
+      const clave = contacto.id;
+      const previo = porPersona.get(clave);
+
+      if (!previo) {
+        porPersona.set(clave, contacto);
+        continue;
+      }
+
+      const fechaNueva = contacto.ultimoMensajeEn ? new Date(contacto.ultimoMensajeEn).getTime() : 0;
+      const fechaPrevia = previo.ultimoMensajeEn ? new Date(previo.ultimoMensajeEn).getTime() : 0;
+
+      if (fechaNueva >= fechaPrevia) porPersona.set(clave, contacto);
+    }
+
+    return [...porPersona.values()];
   }
 
   get chatsEmpresariales(): Contact[] {

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
-import { CIUDADES_DEMO, TOQUES_DEMO, ToqueUbicacion } from './ubicacion.model';
+import { CIUDADES_DEMO, TOQUES_DEMO, TipoConexion, ToqueUbicacion } from './ubicacion.model';
 
 type Medio = 'TODOS' | 'NFC' | 'QR';
 
@@ -27,6 +27,7 @@ export class UbicacionComponent {
   readonly filtroDesde = signal('');
   readonly filtroHasta = signal('');
   readonly filtroMedio = signal<Medio>('TODOS');
+  readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
 
   readonly ciudades = CIUDADES_DEMO;
@@ -41,8 +42,9 @@ export class UbicacionComponent {
       const desde = this.filtroDesde() ? toque.fecha >= this.filtroDesde() : true;
       const hasta = this.filtroHasta() ? toque.fecha <= this.filtroHasta() : true;
       const medio = this.filtroMedio() === 'TODOS' ? true : toque.medio === this.filtroMedio();
+      const tipo = this.filtroTipo() === 'TODOS' ? true : toque.tipo === this.filtroTipo();
 
-      return nombre && desde && hasta && medio;
+      return nombre && desde && hasta && medio && tipo;
     }),
   );
 
@@ -52,11 +54,17 @@ export class UbicacionComponent {
     () => new Set(this.visibles().map((toque) => toque.ciudad)).size,
   );
 
+  readonly conexionesPersonales = computed(() => this.toques().filter((toque) => toque.tipo === 'PERSONAL').length);
+  readonly conexionesEmpresariales = computed(
+    () => this.toques().filter((toque) => toque.tipo === 'EMPRESARIAL').length,
+  );
+
   limpiar(): void {
     this.filtroNombre.set('');
     this.filtroDesde.set('');
     this.filtroHasta.set('');
     this.filtroMedio.set('TODOS');
+    this.filtroTipo.set('TODOS');
   }
 
   seleccionar(toque: ToqueUbicacion): void {
@@ -64,15 +72,15 @@ export class UbicacionComponent {
   }
 
   posicionX(longitud: number): number {
-    const minimo = -77;
-    const maximo = -73.5;
-    return Math.min(96, Math.max(4, ((longitud - minimo) / (maximo - minimo)) * 100));
+    const minimo = -79.2;
+    const maximo = -66.7;
+    return Math.min(97, Math.max(3, ((longitud - minimo) / (maximo - minimo)) * 100));
   }
 
   posicionY(latitud: number): number {
-    const minimo = 2.5;
-    const maximo = 8;
-    return Math.min(94, Math.max(6, ((maximo - latitud) / (maximo - minimo)) * 100));
+    const minimo = -4.5;
+    const maximo = 12.7;
+    return Math.min(97, Math.max(3, ((maximo - latitud) / (maximo - minimo)) * 100));
   }
 
   burbuja(toques: number): number {

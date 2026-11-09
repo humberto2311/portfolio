@@ -32,26 +32,59 @@
       <span class="metrica__icono"><i class="fa-solid fa-city"></i></span>
       <div><small>Ciudades</small><strong>{{ ciudadesDistintas() }}</strong></div>
     </article>
+    <article class="metrica metrica--personal">
+      <span class="metrica__icono"><i class="fa-solid fa-user"></i></span>
+      <div><small>Conexiones personales</small><strong>{{ conexionesPersonales() }}</strong></div>
+    </article>
+    <article class="metrica metrica--empresarial">
+      <span class="metrica__icono"><i class="fa-solid fa-building"></i></span>
+      <div><small>Conexiones empresariales</small><strong>{{ conexionesEmpresariales() }}</strong></div>
+    </article>
   </section>
 
   <section class="mapa">
     <div class="mapa__lienzo">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="mapa__fondo" aria-hidden="true">
+      <svg viewBox="0 0 100 100" class="mapa__fondo" aria-label="Mapa de Colombia">
         <defs>
-          <pattern id="rejilla" width="8" height="8" patternUnits="userSpaceOnUse">
-            <path d="M8 0 L0 0 0 8" fill="none" stroke="rgba(148,163,184,.18)" stroke-width="0.3" />
+          <pattern id="rejilla" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M6 0 L0 0 0 6" fill="none" stroke="rgba(148,163,184,.16)" stroke-width="0.25" />
           </pattern>
+          <linearGradient id="tierra" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#16324a" />
+            <stop offset="100%" stop-color="#0f2537" />
+          </linearGradient>
         </defs>
+
         <rect width="100" height="100" fill="url(#rejilla)" />
-        <path d="M12,26 C26,18 38,30 52,22 C66,14 78,26 90,20" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.8" />
-        <path d="M10,58 C24,50 40,64 54,56 C68,48 82,60 92,52" fill="none" stroke="rgba(56,189,248,.16)" stroke-width="0.8" />
+
+        <path
+          d="M33,4 L40,3 L46,6 L52,5 L57,8 L60,13 L63,15 L70,13 L76,15 L80,20 L82,26
+             L86,28 L89,33 L88,39 L85,43 L86,48 L84,53 L80,56 L77,61 L74,66 L70,70
+             L66,76 L62,82 L57,87 L52,91 L47,93 L43,90 L40,84 L36,78 L32,72 L28,66
+             L24,60 L21,54 L19,47 L20,41 L23,36 L26,31 L25,25 L28,19 L27,13 L30,8 Z"
+          fill="url(#tierra)"
+          stroke="rgba(56,189,248,.55)"
+          stroke-width="0.7"
+          stroke-linejoin="round"
+        />
+
+        <path d="M60,13 L64,20 L68,26 L66,33 L70,40" fill="none" stroke="rgba(56,189,248,.28)" stroke-width="0.4" />
+        <path d="M28,66 L38,62 L48,66 L58,62 L66,66" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.4" />
+        <path d="M36,78 L44,74 L52,78 L60,74" fill="none" stroke="rgba(56,189,248,.18)" stroke-width="0.4" />
       </svg>
+
+      <div class="leyenda">
+        <span><i class="punto punto--personal"></i> Personal</span>
+        <span><i class="punto punto--empresarial"></i> Empresarial</span>
+        <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
+      </div>
 
       @for (toque of visibles(); track toque.id) {
         <button
           type="button"
           class="pin"
           [class.pin--activo]="seleccionado()?.id === toque.id"
+          [class.pin--empresarial]="toque.tipo === 'EMPRESARIAL'"
           [style.left.%]="posicionX(toque.longitud)"
           [style.top.%]="posicionY(toque.latitud)"
           [style.width.px]="burbuja(toque.toques)"
@@ -75,6 +108,10 @@
             <li>
               <i class="fa-solid" [class.fa-wifi]="elegido.medio === 'NFC'" [class.fa-qrcode]="elegido.medio === 'QR'"></i>
               {{ elegido.toques }} toques por {{ elegido.medio }}
+            </li>
+            <li>
+              <i class="fa-solid" [class.fa-user]="elegido.tipo === 'PERSONAL'" [class.fa-building]="elegido.tipo === 'EMPRESARIAL'"></i>
+              Conexión {{ elegido.tipo === 'PERSONAL' ? 'personal' : 'empresarial' }}
             </li>
           </ul>
         </div>
@@ -108,11 +145,22 @@
           <option value="NFC">Solo NFC</option>
           <option value="QR">Solo QR</option>
         </select>
+        <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+          <option value="TODOS">Personales y empresariales</option>
+          <option value="PERSONAL">Solo personales</option>
+          <option value="EMPRESARIAL">Solo empresariales</option>
+        </select>
         <button type="button" class="btn-mini" (click)="limpiar()">Limpiar</button>
       </div>
     </header>
 
     <ul class="toques">
+      <div class="leyenda">
+        <span><i class="punto punto--personal"></i> Personal</span>
+        <span><i class="punto punto--empresarial"></i> Empresarial</span>
+        <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
+      </div>
+
       @for (toque of visibles(); track toque.id) {
         <li class="toque" [class.toque--activo]="seleccionado()?.id === toque.id" (click)="seleccionar(toque)">
           <span class="toque__avatar">{{ toque.iniciales }}</span>
@@ -121,6 +169,10 @@
             <small>{{ toque.empresa }} · {{ toque.lugar }}</small>
           </span>
           <span class="toque__fecha">{{ fecha(toque.fecha) }}</span>
+          <span class="tipo tipo--{{ toque.tipo.toLowerCase() }}">
+            <i class="fa-solid" [class.fa-user]="toque.tipo === 'PERSONAL'" [class.fa-building]="toque.tipo === 'EMPRESARIAL'"></i>
+            {{ toque.tipo === 'PERSONAL' ? 'Personal' : 'Empresarial' }}
+          </span>
           <span class="medio medio--{{ toque.medio.toLowerCase() }}">
             <i class="fa-solid" [class.fa-wifi]="toque.medio === 'NFC'" [class.fa-qrcode]="toque.medio === 'QR'"></i>
             {{ toque.toques }}

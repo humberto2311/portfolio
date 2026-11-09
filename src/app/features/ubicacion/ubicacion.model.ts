@@ -1,4 +1,7 @@
+export type TipoConexion = 'PERSONAL' | 'EMPRESARIAL';
+
 export interface ToqueUbicacion {
+  tipo: TipoConexion;
   id: string;
   persona: string;
   empresa: string;
@@ -25,6 +28,7 @@ export const TOQUES_DEMO: ToqueUbicacion[] = [
     fecha: '2026-11-06',
     toques: 7,
     medio: 'NFC',
+    tipo: 'PERSONAL',
   },
   {
     id: 'u2',
@@ -38,6 +42,7 @@ export const TOQUES_DEMO: ToqueUbicacion[] = [
     fecha: '2026-11-04',
     toques: 3,
     medio: 'QR',
+    tipo: 'EMPRESARIAL',
   },
   {
     id: 'u3',
@@ -51,6 +56,7 @@ export const TOQUES_DEMO: ToqueUbicacion[] = [
     fecha: '2026-10-28',
     toques: 11,
     medio: 'NFC',
+    tipo: 'EMPRESARIAL',
   },
   {
     id: 'u4',
@@ -64,6 +70,63 @@ export const TOQUES_DEMO: ToqueUbicacion[] = [
     fecha: '2026-10-19',
     toques: 2,
     medio: 'QR',
+    tipo: 'PERSONAL',
+  },
+  {
+    id: 'u5',
+    persona: 'Daniela Arango',
+    empresa: 'Grupo Andino',
+    iniciales: 'DA',
+    ciudad: 'Barranquilla',
+    lugar: 'Rueda de negocios · Puerta de Oro',
+    latitud: 10.9685,
+    longitud: -74.7813,
+    fecha: '2026-10-12',
+    toques: 5,
+    medio: 'NFC',
+    tipo: 'EMPRESARIAL',
+  },
+  {
+    id: 'u6',
+    persona: 'Santiago Mejía',
+    empresa: 'Café del Sur',
+    iniciales: 'SM',
+    ciudad: 'Bucaramanga',
+    lugar: 'Cámara de comercio · evento sectorial',
+    latitud: 7.1193,
+    longitud: -73.1227,
+    fecha: '2026-09-30',
+    toques: 4,
+    medio: 'QR',
+    tipo: 'PERSONAL',
+  },
+  {
+    id: 'u7',
+    persona: 'Valentina Ríos',
+    empresa: 'Aluna Café',
+    iniciales: 'VR',
+    ciudad: 'Cartagena',
+    lugar: 'Hotel boutique · desayuno de trabajo',
+    latitud: 10.3910,
+    longitud: -75.4794,
+    fecha: '2026-09-22',
+    toques: 6,
+    medio: 'NFC',
+    tipo: 'PERSONAL',
+  },
+  {
+    id: 'u8',
+    persona: 'Felipe Cárdenas',
+    empresa: 'Nsoft',
+    iniciales: 'FC',
+    ciudad: 'Pereira',
+    lugar: 'Coworking Eje Cafetero',
+    latitud: 4.8133,
+    longitud: -75.6961,
+    fecha: '2026-09-08',
+    toques: 3,
+    medio: 'QR',
+    tipo: 'EMPRESARIAL',
   },
 ];
 

@@ -1,0 +1,625 @@
+<div class="ajustes-empresa diseno-visita">
+  <header class="cabecera">
+    <div>
+      <a class="volver" routerLink="/app/empresa"><i class="fa-solid fa-arrow-left"></i> Volver al modo empresa</a>
+      <h1><i class="fa-solid fa-gears"></i> Ajustes de la empresa</h1>
+      <p *ngIf="actual as empresa">Configura {{ empresa.nombre }}: su perfil, su equipo, sus documentos, su publicación y su marca.</p>
+    </div>
+    <a class="btn-ghost" routerLink="/app/empresa/lienzo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Diseñador
+    </a>
+  </header>
+
+  @if (error()) {
+    <p class="aviso aviso--error"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
+  }
+
+  @if (aviso()) {
+    <p class="aviso aviso--ok"><i class="fa-solid fa-circle-check"></i> {{ aviso() }}</p>
+  }
+
+  @if (cargando()) {
+    <div class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando ajustes…</div>
+  } @else if (!actual) {
+    <div class="estado">
+      <i class="fa-solid fa-building"></i>
+      <p>No tienes una empresa activa. Crea una o elige una desde ajustes de cuenta.</p>
+      <a class="btn-primary" routerLink="/app/ajustes/cuenta">Ir a ajustes de cuenta</a>
+    </div>
+  } @else {
+    <div class="empresa-resumen">
+      <div class="empresa-resumen__logo">
+        @if (actual.logoUrl) {
+          <img [src]="actual.logoUrl" [alt]="actual.nombre" />
+        } @else {
+          <span>{{ actual.nombre.slice(0, 2).toUpperCase() }}</span>
+        }
+      </div>
+      <div class="empresa-resumen__datos">
+        <strong>{{ actual.nombre }}</strong>
+        <small>
+          {{ tipoDe(actual.tipo) }}
+          @if (actual.sector) { · {{ sectorDe(actual.sector) }} }
+          @if (acceso) { · {{ acceso.rolEtiqueta }} }
+        </small>
+      </div>
+      <span class="sello" [class.sello--ok]="actual.certificada" [class.sello--pendiente]="!actual.certificada && !esPersonal">
+        <i class="fa-solid" [class.fa-circle-check]="actual.certificada" [class.fa-hourglass-half]="!actual.certificada && !esPersonal" [class.fa-user]="esPersonal"></i>
+        {{ esPersonal ? 'Marca personal' : (actual.certificada ? 'Certificada' : 'Sin certificar') }}
+      </span>
+    </div>
+
+    <nav class="tabs" role="tablist">
+      @for (item of tabs; track item.id) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [class.activo]="tab() === item.id"
+          [attr.aria-selected]="tab() === item.id"
+          (click)="cambiarTab(item.id)"
+        >
+          <i [class]="item.icono"></i>
+          <span>{{ item.titulo }}</span>
+        </button>
+      }
+    </nav>
+
+    @switch (tab()) {
+      @case ('perfil') {
+        <section class="panel">
+          <header class="panel__head">
+            <h2>Perfil empresarial</h2>
+            <p>Así te ven en la página pública y en el equipo. La hoja de vida y los proyectos personales no aplican a una empresa.</p>
+          </header>
+
+          @if (!puedeEditarPerfil) {
+            <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol solo permite consultar el perfil empresarial.</p>
+          }
+
+          <fieldset class="campos" [disabled]="!puedeEditarPerfil">
+            <div class="campos__fila">
+              <label class="campo">
+                <span>Nombre de la empresa</span>
+                <input type="text" [ngModel]="perfil.nombre" (ngModelChange)="cambiarNombre($event)" maxlength="160" />
+              </label>
+              <label class="campo">
+                <span>Tipo</span>
+                <select [ngModel]="tipoSeleccionado" (ngModelChange)="tipoSeleccionado = $event">
+                  @for (opcion of catalogo()?.tipos ?? []; track opcion.valor) {
+                    <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                  }
+                </select>
+              </label>
+              <label class="campo">
+                <span>Sector</span>
+                <select [(ngModel)]="perfil.sector">
+                  <option [ngValue]="null">Sin sector</option>
+                  @for (opcion of catalogo()?.sectores ?? []; track opcion.valor) {
+                    <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <label class="campo">
+              <span>Eslogan</span>
+              <input type="text" [(ngModel)]="perfil.eslogan" maxlength="255" placeholder="Una frase que resuma la empresa" />
+            </label>
+
+            <label class="campo">
+              <span>Descripción</span>
+              <textarea rows="4" [(ngModel)]="perfil.descripcion" maxlength="4000" placeholder="Qué hace la empresa, a quién atiende y qué la hace distinta."></textarea>
+            </label>
+
+            <div class="campos__fila">
+              <label class="campo">
+                <span>Razón social</span>
+                <input type="text" [(ngModel)]="perfil.razonSocial" maxlength="160" />
+              </label>
+              <label class="campo">
+                <span>NIT</span>
+                <input type="text" [(ngModel)]="perfil.nit" maxlength="20" placeholder="811000000-1" />
+              </label>
+              <label class="campo">
+                <span>Horario</span>
+                <input type="text" [(ngModel)]="perfil.horario" maxlength="255" />
+              </label>
+            </div>
+
+            <div class="campos__fila">
+              <label class="campo">
+                <span>Enlace público</span>
+                <div class="slug">
+                  <span class="slug__prefijo">/empresa/</span>
+                  <input type="text" [ngModel]="perfilSlug" (ngModelChange)="cambiarSlug($event)" (blur)="revisarSlug()" maxlength="60" />
+                </div>
+                @if (slugEstado === 'revisando') { <small>Revisando…</small> }
+                @if (slugEstado === 'libre') { <small class="bien"><i class="fa-solid fa-check"></i> Está libre.</small> }
+                @if (slugEstado === 'ocupado') { <small class="mal"><i class="fa-solid fa-triangle-exclamation"></i> Ya está ocupado.</small> }
+              </label>
+              <label class="campo">
+                <span>Ciudad</span>
+                <input type="text" [(ngModel)]="perfil.ciudad" maxlength="120" />
+              </label>
+              <label class="campo">
+                <span>Departamento</span>
+                <input type="text" [(ngModel)]="perfil.departamento" maxlength="120" />
+              </label>
+            </div>
+
+            <div class="campos__fila">
+              <label class="campo">
+                <span>Teléfono</span>
+                <input type="tel" [(ngModel)]="perfil.telefono" maxlength="30" />
+              </label>
+              <label class="campo">
+                <span>WhatsApp</span>
+                <input type="tel" [(ngModel)]="perfil.whatsapp" maxlength="30" />
+              </label>
+              <label class="campo">
+                <span>Correo</span>
+                <input type="email" [(ngModel)]="perfil.correo" maxlength="160" />
+              </label>
+            </div>
+
+            <label class="campo">
+              <span>Dirección</span>
+              <input type="text" [(ngModel)]="perfil.direccion" maxlength="255" />
+            </label>
+
+            <div class="campos__fila">
+              <label class="campo">
+                <span>Sitio web</span>
+                <input type="url" [(ngModel)]="perfil.sitioWeb" maxlength="255" placeholder="https://" />
+              </label>
+              <label class="campo">
+                <span>Instagram</span>
+                <input type="url" [(ngModel)]="perfil.instagramUrl" maxlength="255" placeholder="https://" />
+              </label>
+              <label class="campo">
+                <span>Facebook</span>
+                <input type="url" [(ngModel)]="perfil.facebookUrl" maxlength="255" placeholder="https://" />
+              </label>
+              <label class="campo">
+                <span>TikTok</span>
+                <input type="url" [(ngModel)]="perfil.tiktokUrl" maxlength="255" placeholder="https://" />
+              </label>
+            </div>
+
+            <div class="marcas">
+              <div class="marca">
+                <span class="marca__titulo">Logo</span>
+                <div class="marca__caja marca__caja--logo">
+                  @if (perfil.logoUrl) {
+                    <img [src]="perfil.logoUrl" alt="Logo" />
+                  } @else {
+                    <span><i class="fa-solid fa-image"></i></span>
+                  }
+                </div>
+                <div class="marca__acciones">
+                  <label class="btn-mini">
+                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="logoDesdeArchivo($any($event.target))" />
+                    <i class="fa-solid fa-upload"></i> Subir
+                  </label>
+                  @if (perfil.logoUrl) {
+                    <button type="button" class="btn-mini" (click)="quitarLogo()">Quitar</button>
+                  }
+                </div>
+              </div>
+
+              <div class="marca marca--ancha">
+                <span class="marca__titulo">Portada</span>
+                <div class="marca__caja marca__caja--portada">
+                  @if (perfil.portadaUrl) {
+                    <img [src]="perfil.portadaUrl" alt="Portada" />
+                  } @else {
+                    <span><i class="fa-solid fa-panorama"></i> Foto amplia de la empresa</span>
+                  }
+                </div>
+                <div class="marca__acciones">
+                  <label class="btn-mini">
+                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="portadaDesdeArchivo($any($event.target))" />
+                    <i class="fa-solid fa-upload"></i> Subir
+                  </label>
+                  @if (perfil.portadaUrl) {
+                    <button type="button" class="btn-mini" (click)="quitarPortada()">Quitar</button>
+                  }
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          @if (puedeEditarPerfil) {
+            <footer class="panel__pie">
+              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardarPerfil()">
+                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
+                @else { <i class="fa-solid fa-floppy-disk"></i> Guardar perfil }
+              </button>
+            </footer>
+          }
+        </section>
+      }
+
+      @case ('equipo') {
+        <section class="panel">
+          <header class="panel__head">
+            <h2>Equipo y roles</h2>
+            <p>Una empresa puede tener varias personas y una persona puede estar en varias empresas. El administrador reparte los roles.</p>
+          </header>
+
+          @if (!puedeGestionarEquipo) {
+            <p class="bloqueo"><i class="fa-solid fa-lock"></i> Solo un administrador puede gestionar el equipo.</p>
+          }
+
+          <ul class="roles-info">
+            @for (opcion of catalogo()?.roles ?? []; track opcion.valor) {
+              <li>
+                <strong>{{ opcion.etiqueta }}</strong>
+                <span>{{ descripcionRol(opcion.valor) }}</span>
+              </li>
+            }
+          </ul>
+
+          @if (puedeGestionarEquipo) {
+            <div class="invitar">
+              <h3><i class="fa-solid fa-user-plus"></i> Añadir persona</h3>
+              <div class="invitar__fila">
+                <label class="campo">
+                  <span>Correo de la cuenta</span>
+                  <input type="email" [(ngModel)]="invitarCorreo" placeholder="persona@correo.com" />
+                </label>
+                <label class="campo">
+                  <span>Rol</span>
+                  <select [(ngModel)]="invitarRol">
+                    @for (opcion of rolOpciones; track opcion.valor) {
+                      <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="campo">
+                  <span>Puesto</span>
+                  <input type="text" [(ngModel)]="invitarPuesto" maxlength="80" placeholder="Ej. Chef" />
+                </label>
+                <button type="button" class="btn-primary" [disabled]="invitando" (click)="invitar()">
+                  @if (invitando) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
+                  @else { <i class="fa-solid fa-plus"></i> }
+                  Añadir
+                </button>
+              </div>
+              <p class="pista">La persona debe tener ya una cuenta en N-soft. Si no existe, pídele que se registre primero.</p>
+            </div>
+          }
+
+          <ul class="miembros">
+            @for (miembro of miembros; track miembro.id) {
+              <li class="miembro">
+                <span class="miembro__avatar">
+                  @if (miembro.avatarUrl) {
+                    <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+                  } @else {
+                    <span>{{ miembro.nombre.slice(0, 1) }}</span>
+                  }
+                </span>
+
+                <div class="miembro__datos">
+                  <strong>{{ miembro.nombre }} @if (miembro.propio) { <em>(tú)</em> }</strong>
+                  <small>{{ miembro.correo || 'Correo privado' }}</small>
+                </div>
+
+                @if (puedeGestionarEquipo) {
+                  <label class="miembro__campo">
+                    <span>Rol</span>
+                    <select [ngModel]="miembro.rol" (ngModelChange)="cambiarRolMiembro(miembro, $event)">
+                      @for (opcion of rolOpciones; track opcion.valor) {
+                        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+                      }
+                    </select>
+                  </label>
+
+                  <label class="miembro__campo">
+                    <span>Puesto</span>
+                    <input
+                      type="text"
+                      [value]="miembro.puesto ?? ''"
+                      maxlength="80"
+                      (change)="cambiarPuesto(miembro, $any($event.target).value)"
+                    />
+                  </label>
+
+                  <div class="miembro__acciones">
+                    <button
+                      type="button"
+                      class="btn-mini"
+                      [class.activo]="miembro.visibleEnEquipo"
+                      (click)="alternarVisible(miembro)"
+                      [title]="miembro.visibleEnEquipo ? 'Ocultar del equipo público' : 'Mostrar en el equipo público'"
+                    >
+                      <i class="fa-solid" [class.fa-eye]="miembro.visibleEnEquipo" [class.fa-eye-slash]="!miembro.visibleEnEquipo"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-mini btn-mini--peligro"
+                      (click)="pedirQuitar(miembro)"
+                    >
+                      @if (confirmarMiembro === miembro.id) { Confirmar }
+                      @else { <i class="fa-solid fa-user-minus"></i> }
+                    </button>
+                  </div>
+                } @else {
+                  <span class="miembro__rol">{{ miembro.rolEtiqueta }}</span>
+                }
+              </li>
+            } @empty {
+              <li class="vacio">Todavía no hay personas visibles en el equipo.</li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('documentos') {
+        <section class="panel">
+          <header class="panel__head">
+            <h2>Documentos y certificación</h2>
+            <p>
+              @if (esPersonal) {
+                Las empresas personales no piden documentos del Estado y no reciben certificación.
+              } @else {
+                Los documentos se validan automáticamente cuando la imagen es legible y el número tiene el formato correcto.
+              }
+            </p>
+          </header>
+
+          @if (!esPersonal) {
+            <div class="requisitos">
+              <div class="requisitos__titulo"><i class="fa-solid fa-list-check"></i> Documentos obligatorios</div>
+              @if (faltantes.length) {
+                <div class="chips">
+                  @for (documento of faltantes; track documento) {
+                    <span class="chip chip--pendiente"><i class="fa-solid fa-circle-exclamation"></i> {{ documento }}</span>
+                  }
+                </div>
+              } @else {
+                <p class="bien"><i class="fa-solid fa-circle-check"></i> No falta ningún documento obligatorio.</p>
+              }
+            </div>
+          }
+
+          @if (!puedeGestionarDocumentos) {
+            <p class="bloqueo"><i class="fa-solid fa-lock"></i> Solo un administrador puede cargar o eliminar documentos.</p>
+          } @else if (!esPersonal) {
+            <div class="subir">
+              <h3><i class="fa-solid fa-cloud-arrow-up"></i> Cargar o actualizar un documento</h3>
+
+              <div class="subir__fila">
+                <label class="campo">
+                  <span>Tipo de documento</span>
+                  <select [ngModel]="documento.tipo" (ngModelChange)="cambiarTipoDocumento($event)">
+                    <option value="">Elige el documento</option>
+                    @for (opcion of tiposDocumento; track opcion.valor) {
+                      <option [value]="opcion.valor">{{ opcion.etiqueta }}{{ opcion.exigido ? ' *' : '' }}</option>
+                    }
+                  </select>
+                </label>
+
+                <label class="campo">
+                  <span>Número</span>
+                  <input type="text" [(ngModel)]="documento.numero" maxlength="40" placeholder="Según el documento" />
+                </label>
+
+                <label class="campo">
+                  <span>Expedido el</span>
+                  <input type="date" [(ngModel)]="documento.expedidoEn" />
+                </label>
+
+                <label class="campo">
+                  <span>Vence el</span>
+                  <input type="date" [(ngModel)]="documento.venceEn" />
+                </label>
+              </div>
+
+              <label class="campo">
+                <span>Descripción</span>
+                <input type="text" [(ngModel)]="documento.descripcion" maxlength="255" placeholder="Opcional" />
+              </label>
+
+              <div class="archivo">
+                <label class="btn-ghost">
+                  <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="documentoDesdeArchivo($any($event.target))" />
+                  <i class="fa-solid fa-file-image"></i> Elegir imagen
+                </label>
+                @if (documento.url) {
+                  <span class="archivo__ok"><i class="fa-solid fa-circle-check"></i> Imagen lista</span>
+                } @else {
+                  <span class="archivo__pista">PNG, JPG o WEBP de hasta 1,9 MB.</span>
+                }
+              </div>
+
+              <footer class="panel__pie">
+                <button type="button" class="btn-primary" [disabled]="subiendoDocumento" (click)="enviarDocumento()">
+                  @if (subiendoDocumento) { <i class="fa-solid fa-circle-notch fa-spin"></i> Enviando… }
+                  @else { <i class="fa-solid fa-upload"></i> Enviar documento }
+                </button>
+              </footer>
+            </div>
+          }
+
+          @if (documentos.length) {
+            <ul class="documentos">
+              @for (documento of documentos; track documento.id) {
+                <li class="documento" [class.documento--rechazado]="documento.estado === 'RECHAZADO'">
+                  <span class="documento__icono">
+                    <i class="fa-solid fa-file-lines"></i>
+                  </span>
+                  <div class="documento__datos">
+                    <strong>{{ etiquetaDocumento(documento.tipo) }}</strong>
+                    <small>
+                      @if (documento.numero) { N.º {{ documento.numero }} · }
+                      @if (documento.venceEn) { Vence {{ documento.venceEn }} · }
+                      {{ documento.estado }}
+                    </small>
+                    @if (documento.motivoRechazo) {
+                      <small class="mal">{{ documento.motivoRechazo }}</small>
+                    }
+                  </div>
+                  @if (puedeGestionarDocumentos) {
+                    <button type="button" class="btn-mini btn-mini--peligro" (click)="pedirBorrarDocumento(documento)">
+                      @if (confirmarDocumento === documento.id) { Confirmar }
+                      @else { <i class="fa-solid fa-trash"></i> }
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          } @else if (!esPersonal) {
+            <p class="vacio">Todavía no has cargado documentos.</p>
+          }
+        </section>
+      }
+
+      @case ('publicacion') {
+        <section class="panel">
+          <header class="panel__head">
+            <h2>Publicación</h2>
+            <p>Publicar abre la página de la empresa para cualquier persona con el enlace. Despublicar la oculta sin borrar nada.</p>
+          </header>
+
+          <div class="publicacion">
+            <div class="publicacion__estado">
+              <span class="publicacion__icono" [class.publicacion__icono--ok]="actual.publicada">
+                <i class="fa-solid" [class.fa-globe]="actual.publicada" [class.fa-lock]="!actual.publicada"></i>
+              </span>
+              <div>
+                <strong>{{ actual.publicada ? 'La empresa es pública' : 'La empresa es privada' }}</strong>
+                <small>
+                  @if (actual.publicada) {
+                    Cualquier persona con el enlace puede ver el perfil, el equipo y el entorno visual publicado.
+                  } @else {
+                    Solo el equipo puede entrar. La página pública responderá que aún no está publicada.
+                  }
+                </small>
+              </div>
+            </div>
+
+            <div class="publicacion__url">
+              <code>{{ urlPublica }}</code>
+              <button type="button" class="btn-mini" (click)="copiarEnlace()"><i class="fa-solid fa-copy"></i></button>
+              @if (actual.publicada) {
+                <button type="button" class="btn-mini" (click)="abrirPublica()"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+              }
+            </div>
+
+            @if (puedePublicar) {
+              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="alternarPublicacion()">
+                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
+                @else { <i class="fa-solid" [class.fa-upload]="!actual.publicada" [class.fa-eye-slash]="actual.publicada"></i> }
+                {{ actual.publicada ? 'Despublicar empresa' : 'Publicar empresa' }}
+              </button>
+            } @else {
+              <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol no puede publicar la empresa.</p>
+            }
+          </div>
+
+          @if (actual.publicadaEn) {
+            <p class="pista">Última publicación: {{ actual.publicadaEn }}</p>
+          }
+        </section>
+      }
+
+      @case ('marca') {
+        <section class="panel">
+          <header class="panel__head">
+            <h2>Identidad de marca</h2>
+            <p>Colores, fondo y estilos que envuelven la página de la empresa. Para componer libremente el lienzo, usa el diseñador.</p>
+          </header>
+
+          @if (!puedeEditarMarca) {
+            <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol no permite editar la identidad de marca.</p>
+          }
+
+          @if (erroresDiseno.length) {
+            <div class="aviso aviso--error">
+              @for (error of erroresDiseno; track $index) {
+                <span>{{ error }}</span>
+              }
+            </div>
+          }
+
+          <div class="marca-panel">
+            <div class="campo">
+              <span>Color principal</span>
+              <div class="color-fila">
+                <input type="color" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" [disabled]="!puedeEditarMarca" />
+                <input type="text" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" maxlength="9" [disabled]="!puedeEditarMarca" />
+              </div>
+              <div class="paleta">
+                @for (color of paleta; track color) {
+                  <button type="button" class="color" [style.background]="color" (click)="elegirAcento(color)" [disabled]="!puedeEditarMarca" [title]="color"></button>
+                }
+              </div>
+            </div>
+
+            <div class="campo">
+              <span>Color secundario</span>
+              <div class="color-fila">
+                <input type="color" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" [disabled]="!puedeEditarMarca" />
+                <input type="text" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" maxlength="9" [disabled]="!puedeEditarMarca" />
+              </div>
+              <div class="paleta">
+                @for (color of paleta; track color) {
+                  <button type="button" class="color" [style.background]="color" (click)="elegirSecundario(color)" [disabled]="!puedeEditarMarca" [title]="color"></button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="fondo">
+            <span class="campo__titulo">Imagen de fondo</span>
+            <div class="fondo__caja" [style.background-image]="disenoFondo ? 'url(' + disenoFondo + ')' : null">
+              @if (!disenoFondo) {
+                <span><i class="fa-solid fa-image"></i> Sin imagen de fondo</span>
+              }
+            </div>
+            <div class="fondo__acciones">
+              <label class="btn-mini">
+                <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))" [disabled]="!puedeEditarMarca" />
+                <i class="fa-solid fa-upload"></i> Subir fondo
+              </label>
+              @if (disenoFondo) {
+                <button type="button" class="btn-mini" (click)="quitarFondo()" [disabled]="!puedeEditarMarca">Quitar</button>
+              }
+            </div>
+          </div>
+
+          <label class="campo">
+            <span>Estilos propios (CSS)</span>
+            <textarea rows="6" [(ngModel)]="disenoCss" [disabled]="!puedeEditarMarca" placeholder="Ej. .mi-clase { color: var(--acento); }"></textarea>
+            <small>Se aplican solo dentro de las páginas de la empresa. No se permiten scripts ni recursos externos.</small>
+          </label>
+
+          @if (puedeEditarMarca) {
+            <footer class="panel__pie">
+              <a class="btn-ghost" routerLink="/app/empresa/lienzo"><i class="fa-solid fa-wand-magic-sparkles"></i> Ir al diseñador</a>
+              <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardarMarca()">
+                @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
+                @else { <i class="fa-solid fa-floppy-disk"></i> Guardar marca }
+              </button>
+            </footer>
+          }
+        </section>
+      }
+    }
+
+    @if (acceso?.rol === 'ADMIN') {
+      <section class="peligro">
+        <div>
+          <h3><i class="fa-solid fa-triangle-exclamation"></i> Zona sensible</h3>
+          <p>Borrar la empresa elimina su equipo, documentos y entorno visual. Esta acción no se deshace.</p>
+        </div>
+        <button type="button" class="btn-peligro" (click)="borrarEmpresa()">
+          <i class="fa-solid fa-trash"></i> Borrar empresa
+        </button>
+      </section>
+    }
+  }
+</div>

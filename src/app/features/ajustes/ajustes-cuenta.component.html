@@ -11,6 +11,67 @@
 
   <ng-container *ngIf="!isLoading">
 
+    <section class="card">
+      <h2><i class="fas fa-building"></i> Mis empresas</h2>
+
+      <p class="helper">
+        Una persona puede administrar varias empresas y una empresa puede tener varias personas.
+        Al crear una, quedas como su administrador. La empresa tiene las mismas funciones que un perfil,
+        excepto hoja de vida y proyectos.
+      </p>
+
+      @if (mostrarCrear()) {
+        <app-empresa-crear (creada)="empresaCreada($event)" (cancelar)="cerrarCrearEmpresa()" />
+      } @else {
+        <ul class="empresas" *ngIf="empresas.listado().length; else sinEmpresas">
+          @for (item of empresas.listado(); track item.id) {
+            <li class="empresa-item" [class.empresa-item--activa]="empresas.activaId() === item.id">
+              <span class="empresa-item__logo">
+                @if (item.logoUrl) {
+                  <img [src]="item.logoUrl" [alt]="item.nombre" />
+                } @else {
+                  <span>{{ item.nombre.slice(0, 1).toUpperCase() }}</span>
+                }
+              </span>
+
+              <span class="empresa-item__datos">
+                <strong>{{ item.nombre }}</strong>
+                <small>
+                  {{ item.tipo }}
+                  @if (item.rolEtiqueta) { · {{ item.rolEtiqueta }} }
+                  @if (item.publicada) { · Pública }
+                </small>
+              </span>
+
+              <span class="empresa-item__acciones">
+                <button type="button" class="btn-primary" (click)="entrarEmpresa(item)">
+                  <i class="fas fa-arrow-right"></i> Entrar
+                </button>
+                <a class="btn-ghost" routerLink="/app/empresa/ajustes">
+                  <i class="fas fa-gear"></i> Ajustes
+                </a>
+              </span>
+            </li>
+          }
+        </ul>
+
+        <ng-template #sinEmpresas>
+          <p class="helper">Todavía no tienes empresas. Crea la primera y empieza a construir su identidad.</p>
+        </ng-template>
+
+        <div class="actions">
+          <button type="button" class="btn-primary" (click)="abrirCrearEmpresa()">
+            <i class="fas fa-plus"></i> Crear empresa
+          </button>
+          @if (empresas.enModoEmpresa()) {
+            <button type="button" class="btn-ghost" (click)="salirModoEmpresa()">
+              <i class="fas fa-user"></i> Volver a mi perfil
+            </button>
+          }
+        </div>
+      }
+    </section>
+
     <!-- DATOS PERSONALES -->
     <section class="card">
       <h2><i class="fas fa-user"></i> Datos personales</h2>

@@ -17,6 +17,10 @@ import { TarjetaPublicaComponent } from './features/tarjeta-publica/tarjeta-publ
 import { PoliticasComponent } from './features/politicas/politicas.component';
 import { AjustesCuentaComponent } from './features/ajustes/ajustes-cuenta.component';
 import { AjustesSeguridadComponent } from './features/ajustes/ajustes-seguridad.component';
+import { EmpresaDashboardComponent } from './features/empresa/empresa-dashboard/empresa-dashboard.component';
+import { EmpresaAjustesComponent } from './features/empresa/empresa-ajustes/empresa-ajustes.component';
+import { EmpresaLienzoComponent } from './features/empresa/empresa-lienzo/empresa-lienzo.component';
+import { EmpresaPublicaComponent } from './features/empresa/empresa-publica/empresa-publica.component';
 import { AccesoNativoComponent } from './features/auth/acceso-nativo/acceso-nativo.component';
 import { accesoNativoGuard } from './core/guards/acceso-nativo.guard';
 
@@ -51,6 +55,8 @@ export const routes: Routes = [
 
   { path: 'acceso', component: AccesoNativoComponent, canActivate: [publicGuard] },
 
+  { path: 'empresa/:slug', component: EmpresaPublicaComponent },
+
   {
     path: 'app',
     component: PrivateLayoutComponent,
@@ -66,6 +72,9 @@ export const routes: Routes = [
       { path: 'talento', component: TalentoComponent },
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
       { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
+      { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
+      { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
+      { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
       {
         path: 'emisora',
         loadComponent: () => import('./features/emisora/emisora-nfc.component').then((m) => m.EmisoraNfcComponent)

@@ -1,0 +1,252 @@
+<div class="crear">
+  <header class="crear__head">
+    <div>
+      <h2><i class="fa-solid fa-building"></i> Crear empresa</h2>
+      <p>Tu cuenta puede administrar varias empresas. Quien la crea queda como administrador.</p>
+    </div>
+    <button type="button" class="cerrar" (click)="cerrar()" title="Cerrar">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </header>
+
+  @if (errores.length) {
+    <div class="aviso">
+      @for (error of errores; track $index) {
+        <span>{{ error }}</span>
+      }
+    </div>
+  }
+
+  <section class="bloque">
+    <h3>1. Identidad</h3>
+
+    <div class="tipos">
+      @for (opcion of tipos; track opcion.valor) {
+        <button
+          type="button"
+          class="tipo"
+          [class.activo]="tipo === opcion.valor"
+          (click)="elegirTipo(opcion.valor)"
+        >
+          <i [class]="opcion.icono"></i>
+          <strong>{{ opcion.titulo }}</strong>
+          <span>{{ opcion.descripcion }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="campos campos--dos">
+      <label class="campo">
+        <span>Nombre de la empresa *</span>
+        <input
+          type="text"
+          [ngModel]="nombre"
+          (ngModelChange)="cambiarNombre($event)"
+          placeholder="Ej. Hotel La Montaña"
+          maxlength="160"
+        />
+      </label>
+
+      <label class="campo">
+        <span>Sector</span>
+        <select [(ngModel)]="sector">
+          <option value="">Elige el sector</option>
+          @for (opcion of catalogo()?.sectores ?? []; track opcion.valor) {
+            <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label class="campo">
+      <span>Eslogan</span>
+      <input type="text" [(ngModel)]="eslogan" placeholder="Una frase corta que la identifique" maxlength="255" />
+    </label>
+
+    <label class="campo">
+      <span>Descripción</span>
+      <textarea
+        rows="4"
+        [(ngModel)]="descripcion"
+        placeholder="Cuenta qué hace la empresa, a quién atiende y qué la hace distinta."
+        maxlength="4000"
+      ></textarea>
+    </label>
+  </section>
+
+  <section class="bloque">
+    <h3>2. Imagen de marca</h3>
+
+    <div class="marcas">
+      <div class="marca">
+        <span class="marca__titulo">Logo</span>
+        <div class="marca__caja marca__caja--logo">
+          @if (logoUrl) {
+            <img [src]="logoUrl" alt="Logo de la empresa" />
+          } @else {
+            <span class="iniciales">{{ iniciales() }}</span>
+          }
+        </div>
+        <div class="marca__acciones">
+          <label class="btn-ghost">
+            <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="logoDesdeArchivo($any($event.target))" />
+            <i class="fa-solid fa-upload"></i> Subir
+          </label>
+          @if (logoUrl) {
+            <button type="button" class="btn-ghost" (click)="quitarLogo()">Quitar</button>
+          }
+        </div>
+      </div>
+
+      <div class="marca marca--ancha">
+        <span class="marca__titulo">Portada</span>
+        <div class="marca__caja marca__caja--portada">
+          @if (portadaUrl) {
+            <img [src]="portadaUrl" alt="Portada de la empresa" />
+          } @else {
+            <span><i class="fa-solid fa-panorama"></i> Una foto amplia de la empresa</span>
+          }
+        </div>
+        <div class="marca__acciones">
+          <label class="btn-ghost">
+            <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="portadaDesdeArchivo($any($event.target))" />
+            <i class="fa-solid fa-upload"></i> Subir
+          </label>
+          @if (portadaUrl) {
+            <button type="button" class="btn-ghost" (click)="quitarPortada()">Quitar</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <p class="pista">PNG, JPG o WEBP de hasta 1,4 MB. Las imágenes se guardan dentro de tu cuenta.</p>
+  </section>
+
+  <section class="bloque">
+    <h3>3. Enlace público y datos legales</h3>
+
+    <div class="campos campos--dos">
+      <label class="campo">
+        <span>Enlace de la empresa</span>
+        <div class="slug">
+          <span class="slug__prefijo">/empresa/</span>
+          <input
+            type="text"
+            [ngModel]="slug"
+            (ngModelChange)="cambiarSlug($event)"
+            (blur)="revisarSlug()"
+            placeholder="hotel-la-montana"
+            maxlength="60"
+          />
+        </div>
+        @if (slugEstado === 'revisando') {
+          <small>Revisando si está libre…</small>
+        }
+        @if (slugEstado === 'libre') {
+          <small class="bien"><i class="fa-solid fa-check"></i> Está libre.</small>
+        }
+        @if (slugEstado === 'ocupado') {
+          <small class="mal"><i class="fa-solid fa-triangle-exclamation"></i> Ya lo usa otra empresa; el sistema añadirá un número.</small>
+        }
+      </label>
+
+      <label class="campo">
+        <span>NIT</span>
+        <input type="text" [(ngModel)]="nit" placeholder="811000000-1" maxlength="20" />
+        <small>Opcional. Si lo escribes debe llevar el dígito de verificación.</small>
+      </label>
+    </div>
+
+    <div class="campos campos--dos">
+      <label class="campo">
+        <span>Razón social</span>
+        <input type="text" [(ngModel)]="razonSocial" placeholder="Nombre legal de la empresa" maxlength="160" />
+      </label>
+
+      <label class="campo">
+        <span>Horario</span>
+        <input type="text" [(ngModel)]="horario" placeholder="Lunes a viernes, 9:00 a. m. - 6:00 p. m." maxlength="255" />
+      </label>
+    </div>
+
+    <div class="documentos">
+      <div class="documentos__titulo">
+        <i class="fa-solid fa-file-shield"></i>
+        <strong>Documentos para certificarse</strong>
+      </div>
+      @if (tipo === 'PERSONAL') {
+        <p>Las empresas personales no piden documentos y no reciben certificación.</p>
+      } @else if (tipo) {
+        <p>Después de crearla podrás subir estos documentos desde los ajustes de la empresa:</p>
+        <div class="chips">
+          @for (documento of documentos; track documento) {
+            <span class="chip"><i class="fa-solid fa-file-lines"></i> {{ documento }}</span>
+          }
+        </div>
+      } @else {
+        <p>Elige el tipo de empresa para saber qué documentos necesita.</p>
+      }
+    </div>
+  </section>
+
+  <section class="bloque">
+    <h3>4. Contacto</h3>
+
+    <div class="campos campos--dos">
+      <label class="campo">
+        <span>Teléfono</span>
+        <input type="tel" [(ngModel)]="telefono" placeholder="+57 300 000 0000" maxlength="30" />
+      </label>
+      <label class="campo">
+        <span>WhatsApp</span>
+        <input type="tel" [(ngModel)]="whatsapp" placeholder="+57 300 000 0000" maxlength="30" />
+      </label>
+      <label class="campo">
+        <span>Correo</span>
+        <input type="email" [(ngModel)]="correo" placeholder="hola@empresa.com" maxlength="160" />
+      </label>
+      <label class="campo">
+        <span>Sitio web</span>
+        <input type="url" [(ngModel)]="sitioWeb" placeholder="https://empresa.com" maxlength="255" />
+      </label>
+      <label class="campo">
+        <span>Dirección</span>
+        <input type="text" [(ngModel)]="direccion" placeholder="Calle 00 #00-00" maxlength="255" />
+      </label>
+      <label class="campo">
+        <span>Ciudad</span>
+        <input type="text" [(ngModel)]="ciudad" placeholder="Ciudad" maxlength="120" />
+      </label>
+      <label class="campo">
+        <span>Departamento</span>
+        <input type="text" [(ngModel)]="departamento" placeholder="Departamento" maxlength="120" />
+      </label>
+    </div>
+
+    <div class="campos campos--tres">
+      <label class="campo">
+        <span>Instagram</span>
+        <input type="url" [(ngModel)]="instagramUrl" placeholder="https://instagram.com/..." maxlength="255" />
+      </label>
+      <label class="campo">
+        <span>Facebook</span>
+        <input type="url" [(ngModel)]="facebookUrl" placeholder="https://facebook.com/..." maxlength="255" />
+      </label>
+      <label class="campo">
+        <span>TikTok</span>
+        <input type="url" [(ngModel)]="tiktokUrl" placeholder="https://tiktok.com/@..." maxlength="255" />
+      </label>
+    </div>
+  </section>
+
+  <footer class="crear__pie">
+    <button type="button" class="btn-ghost" (click)="cerrar()" [disabled]="guardando">Cancelar</button>
+    <button type="button" class="btn-primary" (click)="crear()" [disabled]="!puedeCrear">
+      @if (guardando) {
+        <i class="fa-solid fa-circle-notch fa-spin"></i> Creando…
+      } @else {
+        <i class="fa-solid fa-plus"></i> Crear empresa
+      }
+    </button>
+  </footer>
+</div>

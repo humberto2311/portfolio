@@ -31,10 +31,17 @@
   <ul class="rail__lista rail__lista--pie">
     @for (item of salida; track item.label) {
       <li>
-        <a class="rail__item" [title]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
-          <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
-          <span class="rail__etiqueta">{{ item.label }}</span>
-        </a>
+        @if (item.accion === 'salir') {
+          <button type="button" class="rail__item" [title]="item.label" (click)="salirEmpresa()">
+            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+            <span class="rail__etiqueta">{{ item.label }}</span>
+          </button>
+        } @else {
+          <a class="rail__item" [title]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
+            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+            <span class="rail__etiqueta">{{ item.label }}</span>
+          </a>
+        }
       </li>
     }
   </ul>
@@ -52,17 +59,25 @@
     <span>Colapsar</span>
   </button>
 
-  <a class="rail__yo" routerLink="/app/perfil" routerLinkActive="activo" [title]="user()?.fullName ?? 'Mi perfil'">
+  <a
+    class="rail__yo"
+    [routerLink]="empresa.enModoEmpresa() ? '/app/empresa' : '/app/perfil'"
+    routerLinkActive="activo"
+    [title]="tituloCuenta">
     <span class="rail__avatar">
-      @if (avatar()) {
+      @if (logotipoEmpresa) {
+        <img [src]="logotipoEmpresa" [alt]="tituloCuenta" />
+      } @else if (empresa.enModoEmpresa()) {
+        <span>{{ tituloCuenta.slice(0, 2).toUpperCase() }}</span>
+      } @else if (avatar()) {
         <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
       } @else {
         <span>{{ iniciales() }}</span>
       }
     </span>
     <span class="rail__datos">
-      <strong>{{ user()?.fullName }}</strong>
-      <small>{{ subtitulo() }}</small>
+      <strong>{{ tituloCuenta }}</strong>
+      <small>{{ subtituloCuenta }}</small>
     </span>
   </a>
 </nav>

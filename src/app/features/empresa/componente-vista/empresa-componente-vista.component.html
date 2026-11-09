@@ -1,0 +1,171 @@
+<div class="cv" [class.cv--media]="esMedia" [ngStyle]="marcoEstilo">
+  @switch (componente.tipo) {
+    @case ('TEXTO') {
+      <p class="texto" [ngStyle]="textEstilo">{{ texto.texto || 'Texto' }}</p>
+    }
+
+    @case ('IMAGEN') {
+      @if (enlaceImagen(imagen.url)) {
+        <img class="media" [src]="enlaceImagen(imagen.url)" [alt]="imagen.alter || 'Imagen de la empresa'" />
+      } @else {
+        <div class="vacio"><i class="fa-solid fa-image"></i><span>Imagen</span></div>
+      }
+    }
+
+    @case ('BOTON') {
+      <div class="boton-caja">
+        <a class="boton" [href]="enlace(boton.enlace)" [ngStyle]="botonEstilo">{{ boton.texto || 'Botón' }}</a>
+      </div>
+    }
+
+    @case ('LISTA') {
+      <div class="bloque" [ngStyle]="cuerpoEstilo">
+        @if (lista.titulo) {
+          <h3 [ngStyle]="tituloEstilo">{{ lista.titulo }}</h3>
+        }
+        <ul class="lista">
+          @for (item of lista.items; track $index) {
+            @if (item) {
+              <li><i class="fa-solid fa-check"></i><span>{{ item }}</span></li>
+            }
+          }
+        </ul>
+      </div>
+    }
+
+    @case ('MENU') {
+      <div class="bloque menu" [ngStyle]="cuerpoEstilo">
+        @if (menu.titulo) {
+          <h3 [ngStyle]="tituloEstilo">{{ menu.titulo }}</h3>
+        }
+
+        @if (menu.grupos.length) {
+          <div class="menu__tabs" role="tablist">
+            @for (grupo of menu.grupos; track $index) {
+              <button
+                type="button"
+                class="menu__tab"
+                [class.activo]="grupoActivo() === $index"
+                (click)="elegirGrupo($index)"
+              >
+                {{ grupo.titulo || 'Sección' }}
+              </button>
+            }
+          </div>
+
+          @if (grupoActivoDatos; as grupo) {
+            <ul class="menu__items">
+              @for (item of grupo.items; track $index) {
+                <li class="menu__item" [class.destacado]="item.destacado">
+                  <div class="menu__linea">
+                    <strong>{{ item.nombre }}</strong>
+                    @if (item.precio) {
+                      <span class="menu__precio">{{ item.precio }}</span>
+                    }
+                  </div>
+                  @if (item.descripcion) {
+                    <p>{{ item.descripcion }}</p>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <p class="nota">Añade secciones y platos desde el panel del diseñador.</p>
+        }
+      </div>
+    }
+
+    @case ('PRODUCTO') {
+      <div class="producto" [ngStyle]="cuerpoEstilo">
+        <div class="producto__media">
+          @if (enlaceImagen(producto.imagen)) {
+            <img [src]="enlaceImagen(producto.imagen)" [alt]="producto.nombre || 'Producto'" />
+          } @else {
+            <div class="vacio"><i class="fa-solid fa-bag-shopping"></i><span>Producto</span></div>
+          }
+        </div>
+        <div class="producto__datos">
+          <h3 [ngStyle]="tituloEstilo">{{ producto.nombre || 'Producto' }}</h3>
+          @if (producto.precio) {
+            <span class="producto__precio">{{ producto.precio }}</span>
+          }
+          @if (producto.descripcion) {
+            <p>{{ producto.descripcion }}</p>
+          }
+          @if (enlace(producto.enlace) !== '#') {
+            <a class="producto__enlace" [href]="enlace(producto.enlace)">Ver más <i class="fa-solid fa-arrow-right"></i></a>
+          }
+        </div>
+      </div>
+    }
+
+    @case ('GALERIA') {
+      <div class="bloque" [ngStyle]="cuerpoEstilo">
+        @if (galeria.titulo) {
+          <h3 [ngStyle]="tituloEstilo">{{ galeria.titulo }}</h3>
+        }
+        @if (imagenesValidas(galeria.imagenes).length) {
+          <div class="galeria">
+            @for (foto of imagenesValidas(galeria.imagenes); track $index) {
+              <img [src]="foto" alt="Foto de la galería" />
+            }
+          </div>
+        } @else {
+          <div class="vacio"><i class="fa-solid fa-images"></i><span>Galería</span></div>
+        }
+      </div>
+    }
+
+    @case ('CONTACTO') {
+      <div class="bloque" [ngStyle]="cuerpoEstilo">
+        <ul class="contacto">
+          @if (textoContacto(contacto.telefono)) {
+            <li>
+              <i class="fa-solid fa-phone"></i>
+              <a [href]="enlaceTelefono(contacto.telefono)">{{ contacto.telefono }}</a>
+            </li>
+          }
+          @if (textoContacto(contacto.whatsapp)) {
+            <li>
+              <i class="fa-brands fa-whatsapp"></i>
+              <a [href]="enlaceWhatsapp(contacto.whatsapp)" target="_blank" rel="noopener">{{ contacto.whatsapp }}</a>
+            </li>
+          }
+          @if (textoContacto(contacto.correo)) {
+            <li>
+              <i class="fa-solid fa-envelope"></i>
+              <a [href]="enlaceCorreo(contacto.correo)">{{ contacto.correo }}</a>
+            </li>
+          }
+          @if (textoContacto(contacto.direccion)) {
+            <li>
+              <i class="fa-solid fa-location-dot"></i>
+              <span>{{ contacto.direccion }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @case ('HORARIO') {
+      <div class="bloque" [ngStyle]="cuerpoEstilo">
+        @if (horario.titulo) {
+          <h3 [ngStyle]="tituloEstilo">{{ horario.titulo }}</h3>
+        }
+        <ul class="horario">
+          @for (fila of horario.filas; track $index) {
+            <li>
+              <span>{{ fila.dias }}</span>
+              <strong>{{ fila.hora }}</strong>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @case ('SEPARADOR') {
+      <span class="linea" [ngStyle]="{ background: estilo.color || '#94a3b8' }"></span>
+    }
+  }
+</div>

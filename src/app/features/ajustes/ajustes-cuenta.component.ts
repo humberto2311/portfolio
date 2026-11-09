@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService, EstadoCuenta } from '../../core/services/auth.service';
@@ -12,11 +12,14 @@ import { UserPhotoService, FotoPerfil } from '../../core/services/user-photo.ser
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { ResumeProfile } from '../../core/models/resume.model';
+import { Empresa } from '../../core/models/empresa.model';
+import { EmpresaService } from '../../core/services/empresa.service';
+import { EmpresaCrearComponent } from '../empresa/empresa-crear/empresa-crear.component';
 
 @Component({
   selector: 'app-ajustes-cuenta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent],
   templateUrl: './ajustes-cuenta.component.html',
   styleUrls: ['./ajustes-cuenta.component.scss']
 })
@@ -25,9 +28,13 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   private toast = inject(ToastService);
   private resume = inject(ResumeService);
   private resumeSave = inject(ResumeSaveService);
+  private router = inject(Router);
   readonly tema = inject(TemaService);
   readonly diseno = inject(DisenoService);
+  readonly empresas = inject(EmpresaService);
   private fotos = inject(UserPhotoService);
+
+  readonly mostrarCrear = signal(false);
 
 
   readonly generos = [
@@ -82,6 +89,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.cargarEstado();
     this.cargarCv();
     this.cargarDiseno();
+    this.empresas.cargarMis().subscribe();
   }
 
   private cargarEstado() {
@@ -192,6 +200,32 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
 
   get cvVisible(): boolean {
     return this.cv?.isPublic === true;
+  }
+
+  abrirCrearEmpresa(): void {
+    this.mostrarCrear.set(true);
+  }
+
+  cerrarCrearEmpresa(): void {
+    this.mostrarCrear.set(false);
+  }
+
+  empresaCreada(empresa: Empresa): void {
+    this.mostrarCrear.set(false);
+    this.empresas.refrescarListado();
+    this.empresas.cargarMis(true).subscribe();
+    this.empresas.entrar(empresa.id);
+    this.router.navigate(['/app/empresa']);
+  }
+
+  entrarEmpresa(empresa: Empresa): void {
+    this.empresas.entrar(empresa.id);
+    this.router.navigate(['/app/empresa']);
+  }
+
+  salirModoEmpresa(): void {
+    this.empresas.salir();
+    this.router.navigate(['/app']);
   }
 
   ponerTema(claro: boolean): void {

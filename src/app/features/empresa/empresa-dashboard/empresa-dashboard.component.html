@@ -1,0 +1,321 @@
+<div class="empresa-page diseno-visita" [style.--marca]="acento">
+  <div class="barra">
+    <div class="barra__modo">
+      <i class="fa-solid fa-building"></i>
+      <span>Modo empresa</span>
+    </div>
+
+    <div class="barra__acciones">
+      @if (empresa.listado().length > 1) {
+        <label class="selector">
+          <i class="fa-solid fa-repeat"></i>
+          <select [value]="actual?.id ?? ''" (change)="entrarPorId($event)">
+            @for (item of empresa.listado(); track item.id) {
+              <option [value]="item.id">{{ item.nombre }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <button type="button" class="btn-ghost" (click)="salir()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Volver a mi perfil
+      </button>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando empresa…</div>
+  } @else if (error()) {
+    <div class="estado estado--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>{{ error() }}</span>
+      <a class="btn-ghost" routerLink="/app/ajustes/cuenta">Volver a ajustes</a>
+    </div>
+  } @else if (!actual) {
+    <div class="vacio-empresa">
+      <i class="fa-solid fa-building-circle-arrow-right"></i>
+      <h1>Tu modo empresa empieza aquí</h1>
+      <p>Crea una empresa desde ajustes y administra su perfil, su equipo, sus documentos y su entorno visual.</p>
+      <a class="btn-primary" routerLink="/app/ajustes/cuenta">
+        <i class="fa-solid fa-plus"></i> Crear empresa
+      </a>
+    </div>
+  } @else {
+    <header class="cabecera">
+      <div class="cabecera__portada" [ngStyle]="portada">
+        <div class="cabecera__velo"></div>
+      </div>
+
+      <div class="cabecera__contenido">
+        <div class="cabecera__logo">
+          @if (actual.logoUrl) {
+            <img [src]="actual.logoUrl" [alt]="actual.nombre" />
+          } @else {
+            <span>{{ iniciales() }}</span>
+          }
+        </div>
+
+        <div class="cabecera__datos">
+          <div class="cabecera__titulo">
+            <h1>{{ actual.nombre }}</h1>
+            @if (actual.certificada) {
+              <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Certificada</span>
+            } @else if (!esPersonal) {
+              <span class="sello sello--pendiente"><i class="fa-solid fa-hourglass-half"></i> Sin certificar</span>
+            } @else {
+              <span class="sello"><i class="fa-solid fa-user"></i> Marca personal</span>
+            }
+            @if (actual.publicada) {
+              <span class="sello sello--publica"><i class="fa-solid fa-globe"></i> Pública</span>
+            } @else {
+              <span class="sello"><i class="fa-solid fa-lock"></i> Privada</span>
+            }
+          </div>
+
+          @if (actual.eslogan) {
+            <p class="cabecera__eslogan">{{ actual.eslogan }}</p>
+          }
+
+          <div class="cabecera__meta">
+            <span><i class="fa-solid fa-tag"></i> {{ tipoEtiqueta() }}</span>
+            @if (nombreSector) {
+              <span><i class="fa-solid fa-layer-group"></i> {{ nombreSector }}</span>
+            }
+            @if (actual.ciudad) {
+              <span><i class="fa-solid fa-location-dot"></i> {{ actual.ciudad }}</span>
+            }
+            @if (acceso) {
+              <span class="rol"><i class="fa-solid fa-shield-halved"></i> {{ acceso.rolEtiqueta }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="cabecera__botones">
+          <a class="btn-primary" routerLink="/app/empresa/ajustes">
+            <i class="fa-solid fa-pen-to-square"></i> {{ acceso?.editaPerfil ? 'Editar empresa' : 'Ajustes' }}
+          </a>
+
+          @if (autorizadoDiseno) {
+            <a class="btn-ghost" routerLink="/app/empresa/lienzo">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Diseñar
+            </a>
+          }
+
+          @if (actual.publicada) {
+            <button type="button" class="btn-ghost" (click)="abrirPublica()">
+              <i class="fa-solid fa-globe"></i> Ver página
+            </button>
+          } @else {
+            <a class="btn-ghost" [routerLink]="['/app/empresa/ajustes']" [queryParams]="{ tab: 'publicacion' }">
+              <i class="fa-solid fa-upload"></i> Publicar
+            </a>
+          }
+
+          <button type="button" class="btn-ghost" (click)="copiarEnlace()">
+            <i class="fa-solid fa-link"></i> Copiar enlace
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <section class="metricas">
+      <article class="metrica">
+        <span class="metrica__icono"><i class="fa-solid fa-users"></i></span>
+        <div>
+          <strong>{{ equipo.length }}</strong>
+          <span>personas en el equipo</span>
+        </div>
+      </article>
+
+      <article class="metrica">
+        <span class="metrica__icono"><i class="fa-solid fa-shapes"></i></span>
+        <div>
+          <strong>{{ publicados }}</strong>
+          <span>componentes visibles</span>
+        </div>
+      </article>
+
+      <article class="metrica">
+        <span class="metrica__icono"><i class="fa-solid fa-file-shield"></i></span>
+        <div>
+          @if (esPersonal) {
+            <strong>No aplica</strong>
+            <span>sin documentos</span>
+          } @else {
+            <strong>{{ documentosCargados }}</strong>
+            <span>documentos validados</span>
+          }
+        </div>
+      </article>
+
+      <article class="metrica">
+        <span class="metrica__icono"><i class="fa-solid fa-circle-check"></i></span>
+        <div>
+          <strong>{{ esPersonal ? 'No aplica' : (actual.certificada ? 'Certificada' : 'Pendiente') }}</strong>
+          <span>certificación</span>
+        </div>
+      </article>
+    </section>
+
+    <div class="rejilla">
+      <section class="card">
+        <header class="card__head">
+          <h2><i class="fa-solid fa-address-card"></i> Perfil empresarial</h2>
+          @if (acceso?.editaPerfil) {
+            <a class="enlace" routerLink="/app/empresa/ajustes">Editar</a>
+          }
+        </header>
+
+        @if (actual.descripcion) {
+          <p class="descripcion">{{ actual.descripcion }}</p>
+        } @else {
+          <p class="descripcion descripcion--vacia">Todavía no hay una descripción. Cuenta qué hace la empresa.</p>
+        }
+
+        <ul class="datos">
+          @if (actual.telefono) {
+            <li><i class="fa-solid fa-phone"></i><a [href]="'tel:' + actual.telefono">{{ actual.telefono }}</a></li>
+          }
+          @if (actual.whatsapp) {
+            <li><i class="fa-brands fa-whatsapp"></i><a [href]="whatsapp(actual.whatsapp)" target="_blank" rel="noopener">{{ actual.whatsapp }}</a></li>
+          }
+          @if (actual.correo) {
+            <li><i class="fa-solid fa-envelope"></i><a [href]="correo(actual.correo)">{{ actual.correo }}</a></li>
+          }
+          @if (actual.direccion) {
+            <li><i class="fa-solid fa-location-dot"></i><span>{{ actual.direccion }}</span></li>
+          }
+          @if (actual.sitioWeb) {
+            <li><i class="fa-solid fa-globe"></i><a [href]="actual.sitioWeb" target="_blank" rel="noopener">{{ actual.sitioWeb }}</a></li>
+          }
+          @if (actual.horario) {
+            <li><i class="fa-solid fa-clock"></i><span>{{ actual.horario }}</span></li>
+          }
+        </ul>
+
+        @if (actual.instagramUrl || actual.facebookUrl || actual.tiktokUrl) {
+          <div class="sociales">
+            @if (actual.instagramUrl) {
+              <a [href]="actual.instagramUrl" target="_blank" rel="noopener" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            }
+            @if (actual.facebookUrl) {
+              <a [href]="actual.facebookUrl" target="_blank" rel="noopener" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+            }
+            @if (actual.tiktokUrl) {
+              <a [href]="actual.tiktokUrl" target="_blank" rel="noopener" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <header class="card__head">
+          <h2><i class="fa-solid fa-users"></i> Equipo</h2>
+          @if (acceso?.gestionaEquipo) {
+            <a class="enlace" [routerLink]="['/app/empresa/ajustes']" [queryParams]="{ tab: 'equipo' }">Gestionar</a>
+          }
+        </header>
+
+        @if (equipo.length) {
+          <ul class="equipo">
+            @for (miembro of equipo.slice(0, 6); track miembro.id) {
+              <li>
+                <span class="equipo__avatar">
+                  @if (miembro.avatarUrl) {
+                    <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+                  } @else {
+                    <span>{{ miembro.nombre.slice(0, 1) }}</span>
+                  }
+                </span>
+                <span class="equipo__datos">
+                  <strong>{{ miembro.nombre }}</strong>
+                  <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+                </span>
+                <span class="equipo__rol">{{ miembro.rolEtiqueta }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="descripcion descripcion--vacia">Todavía no hay personas visibles en el equipo.</p>
+        }
+      </section>
+    </div>
+
+    @if (!esPersonal) {
+      <section class="card">
+        <header class="card__head">
+          <h2><i class="fa-solid fa-file-shield"></i> Documentos y certificación</h2>
+          <a class="enlace" [routerLink]="['/app/empresa/ajustes']" [queryParams]="{ tab: 'documentos' }">Ver documentos</a>
+        </header>
+
+        <div class="progreso">
+          <div class="progreso__barra"><span [style.width.%]="progresoDocumentos"></span></div>
+          <small>{{ progresoDocumentos }}% de los documentos obligatorios están validados.</small>
+        </div>
+
+        @if (documentosPendientes.length) {
+          <p class="descripcion">Faltan estos documentos para certificar la empresa:</p>
+          <div class="chips">
+            @for (documento of documentosPendientes; track documento) {
+              <span class="chip chip--pendiente"><i class="fa-solid fa-circle-exclamation"></i> {{ documento }}</span>
+            }
+          </div>
+        } @else if (actual.certificada) {
+          <p class="descripcion bien"><i class="fa-solid fa-circle-check"></i> La empresa ya está certificada.</p>
+        } @else {
+          <p class="descripcion">Los documentos están validados; la certificación se actualiza sola.</p>
+        }
+      </section>
+    }
+
+    <section class="card">
+      <header class="card__head">
+        <h2><i class="fa-solid fa-tv"></i> Entorno visual</h2>
+        <div class="card__acciones">
+          @if (autorizadoDiseno) {
+            <a class="enlace" routerLink="/app/empresa/lienzo">Abrir diseñador</a>
+          }
+          @if (actual.publicada) {
+            <a class="enlace" (click)="abrirPublica()">Ver publicado</a>
+          }
+        </div>
+      </header>
+
+      @if (componentes.length) {
+        <div class="mini-lienzo">
+          <div
+            class="mini-lienzo__stage"
+            [style.width.px]="ancho"
+            [style.height.px]="alto"
+            [style.transform]="'scale(' + escala() + ')'"
+          >
+            @for (componente of componentesOrdenados; track componente.id ?? $index) {
+              <div
+                class="capa"
+                [class.capa--borrador]="!componente.visible"
+                [style.left.px]="componente.x"
+                [style.top.px]="componente.y"
+                [style.width.px]="componente.ancho"
+                [style.height.px]="componente.alto"
+                [style.z-index]="zIndex(componente)"
+              >
+                <app-empresa-componente-vista [componente]="componente" modo="publico" />
+              </div>
+            }
+          </div>
+        </div>
+        <p class="pista">
+          {{ componentes.length }} componentes. Los borradores se marcan con línea punteada hasta que un editor los publique.
+        </p>
+      } @else {
+        <div class="lienzo-vacio">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <p>El entorno visual está en blanco. Abre el diseñador para añadir textos, fotos, menús y más.</p>
+          @if (autorizadoDiseno) {
+            <a class="btn-primary" routerLink="/app/empresa/lienzo">Empezar a diseñar</a>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

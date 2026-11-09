@@ -12,6 +12,7 @@ import { RailStateService } from '../../core/services/rail-state.service';
 import { TemaService } from '../../core/services/tema.service';
 import { DisenoService } from '../../core/services/diseno.service';
 import { EmisoraNfcService } from '../../core/services/emisora-nfc.service';
+import { EmpresaService } from '../../core/services/empresa.service';
 
 @Component({
   selector: 'app-private-layout',
@@ -28,6 +29,7 @@ export class PrivateLayoutComponent implements OnDestroy {
   private readonly tema = inject(TemaService);
   private readonly diseno = inject(DisenoService);
   private readonly emisora = inject(EmisoraNfcService);
+  private readonly empresa = inject(EmpresaService);
 
   constructor() {
     this.leerRuta();
@@ -40,6 +42,7 @@ export class PrivateLayoutComponent implements OnDestroy {
 
     this.tema.pintar(this.tema.claro());
     this.diseno.cargarPropio().subscribe();
+    this.empresa.cargarMis().subscribe();
     void this.emisora.despertar();
   }
 

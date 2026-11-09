@@ -41,21 +41,48 @@
         <button type="button" class="icono" (click)="duplicar()" title="Duplicar (Ctrl+D)"><i class="fa-regular fa-clone"></i></button>
         <button type="button" class="icono icono--peligro" (click)="eliminarSeleccionado()" title="Eliminar (Supr)"><i class="fa-solid fa-trash"></i></button>
       }
+
+      <span class="separador"></span>
+
+      <button type="button" class="icono" [class.activo]="!lateralPlegado()" (click)="alternarLateral()" [title]="lateralPlegado() ? 'Mostrar panel de componentes' : 'Ocultar panel de componentes'">
+        <i class="fa-solid fa-table-columns"></i>
+      </button>
+      <button type="button" class="icono" [class.activo]="!inspectorPlegado()" (click)="alternarInspector()" [title]="inspectorPlegado() ? 'Mostrar propiedades' : 'Ocultar propiedades'">
+        <i class="fa-solid fa-sliders"></i>
+      </button>
+      <button type="button" class="icono" [class.activo]="vistaLimpia" (click)="alternarVistaLimpia()" title="Ver solo el lienzo">
+        <i class="fa-solid fa-expand"></i>
+      </button>
     </div>
 
     <div class="barra__der">
+      @if (pendientes() > 0) {
+        <span class="estado-guardado" title="Hay cambios sin guardar">
+          <i class="fa-solid fa-circle-notch fa-spin"></i> Sin guardar
+        </span>
+      } @else {
+        <span class="estado-guardado estado-guardado--ok" title="Todo está guardado">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Guardado
+        </span>
+      }
+      <a class="btn-ghost" [routerLink]="urlCarpeta">
+        <i class="fa-solid fa-folder-open"></i> Componentes
+      </a>
+      <a class="btn-ghost" [routerLink]="urlVistaPrevia" target="_blank" rel="noopener" title="Vista previa: cómo se verá publicado">
+        <i class="fa-solid fa-eye"></i> Vista previa
+      </a>
       @if (actual?.publicada) {
         <a class="btn-ghost" [routerLink]="urlPublica" target="_blank" rel="noopener">
-          <i class="fa-solid fa-eye"></i> Vista pública
+          <i class="fa-solid fa-globe"></i> Perfil
         </a>
       }
-      @if (puedePublicar) {
-        <button type="button" class="btn-ghost" [disabled]="guardando()" (click)="guardarYPublicar()">
+      @if (puedePublicarLienzo) {
+        <button type="button" class="btn-ghost" [disabled]="guardando()" (click)="publicarLienzo()" title="Hace visibles las piezas y publica el lienzo y la empresa">
           <i class="fa-solid fa-globe"></i> Publicar
         </button>
       }
       @if (puedeCrear) {
-        <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardar()">
+        <button type="button" class="btn-primary" [disabled]="guardando()" (click)="guardarAhora()">
           @if (guardando()) { <i class="fa-solid fa-circle-notch fa-spin"></i> Guardando… }
           @else { <i class="fa-solid fa-floppy-disk"></i> Guardar }
         </button>
@@ -88,217 +115,146 @@
       <a class="btn-primary" routerLink="/app/ajustes/cuenta" [queryParams]="{ tab: 'empresas' }">Crear o elegir empresa</a>
     </div>
   } @else {
-    <div class="taller">
-      <aside class="lateral">
-        <nav class="lateral__tabs" aria-label="Herramientas del diseñador">
-          <button type="button" [class.activo]="panelLateral() === 'componentes'" (click)="cambiarPanel('componentes')" title="Componentes">
-            <i class="fa-solid fa-shapes"></i>
-          </button>
-          <button type="button" [class.activo]="panelLateral() === 'imagenes'" (click)="cambiarPanel('imagenes')" title="Imágenes">
-            <i class="fa-solid fa-image"></i>
-          </button>
-          <button type="button" [class.activo]="panelLateral() === 'fuentes'" (click)="cambiarPanel('fuentes')" title="Tipografías">
-            <i class="fa-solid fa-font"></i>
-          </button>
-          <button type="button" [class.activo]="panelLateral() === 'marca'" (click)="cambiarPanel('marca')" title="Identidad de marca">
-            <i class="fa-solid fa-palette"></i>
-          </button>
-          <button type="button" [class.activo]="panelLateral() === 'capas'" (click)="cambiarPanel('capas')" title="Capas">
-            <i class="fa-solid fa-layer-group"></i>
-          </button>
-        </nav>
-
-        <div class="lateral__cuerpo">
-          @switch (panelLateral()) {
-            @case ('componentes') {
-              <div class="seccion">
-                <h3><i class="fa-solid fa-plus"></i> Añadir al lienzo</h3>
-                <p class="pista">Hoja en blanco de {{ ancho }} × {{ alto }}. Arrastra los componentes libremente.</p>
-
-                <div class="paleta-componentes">
-                  @for (item of catalogo; track item.tipo) {
-                    <button type="button" class="pieza" [disabled]="!puedeCrear" (click)="agregar(item.tipo)">
-                      <i [class]="icono(item.tipo)"></i>
-                      <span>{{ item.etiqueta }}</span>
-                    </button>
-                  }
-                </div>
-
-                @if (!puedeCrear) {
-                  <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol solo permite consultar el lienzo.</p>
-                }
-              </div>
-            }
-
-            @case ('imagenes') {
-              <div class="seccion">
-                <h3><i class="fa-solid fa-image"></i> Imágenes</h3>
-                <p class="pista">Sube una foto y se añadirá como componente. También puedes reutilizar las que ya están en el lienzo.</p>
-
-                <label class="btn-subir">
-                  <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="imagenLienzoDesdeArchivo($any($event.target))" [disabled]="!puedeCrear" />
-                  <i class="fa-solid fa-cloud-arrow-up"></i> Subir imagen
-                </label>
-
-                @if (imagenesLienzo.length) {
-                  <div class="galeria-lateral">
-                    @for (url of imagenesLienzo; track $index) {
-                      <button type="button" class="miniatura" (click)="agregarImagen(url)" [disabled]="!puedeCrear" title="Añadir al lienzo">
-                        <img [src]="url" alt="Imagen del lienzo" />
-                      </button>
-                    }
-                  </div>
-                } @else {
-                  <p class="vacio-lateral">Todavía no hay imágenes en el lienzo.</p>
-                }
-              </div>
-            }
-
-            @case ('fuentes') {
-              <div class="seccion">
-                <h3><i class="fa-solid fa-font"></i> Tipografías</h3>
-                <p class="pista">
-                  @if (seleccionado) {
-                    Aplica una tipografía al componente seleccionado.
-                  } @else {
-                    Elige la tipografía para los próximos componentes.
-                  }
-                </p>
-
-                <div class="fuentes">
-                  @for (fuente of fuentes; track fuente.nombre) {
-                    <button
-                      type="button"
-                      class="fuente"
-                      [class.activo]="seleccionado ? borradorEstilo.fuente === fuente.valor : fuenteNueva === fuente.valor"
-                      [style.font-family]="fuente.valor"
-                      (click)="aplicarFuente(fuente.valor)"
-                    >
-                      <strong>{{ fuente.nombre }}</strong>
-                      <span>Aa Bb Cc 123</span>
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-
-            @case ('marca') {
-              <div class="seccion">
-                <h3><i class="fa-solid fa-palette"></i> Identidad de marca</h3>
-                <p class="pista">Los colores y el fondo envuelven la página pública y el panel de la empresa.</p>
-
-                @if (erroresDiseno.length) {
-                  <div class="aviso-mini">
-                    @for (fallo of erroresDiseno; track $index) {
-                      <span>{{ fallo }}</span>
-                    }
-                  </div>
-                }
-
-                <div class="campo">
-                  <span>Color principal</span>
-                  <div class="color-fila">
-                    <input type="color" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" [disabled]="!puedeEditar" />
-                    <input type="text" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" maxlength="9" [disabled]="!puedeEditar" />
-                  </div>
-                  <div class="paleta-colores">
-                    @for (color of paleta; track color) {
-                      <button type="button" class="color" [style.background]="color" (click)="elegirAcento(color)" [disabled]="!puedeEditar" [title]="color"></button>
-                    }
-                  </div>
-                </div>
-
-                <div class="campo">
-                  <span>Color secundario</span>
-                  <div class="color-fila">
-                    <input type="color" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" [disabled]="!puedeEditar" />
-                    <input type="text" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" maxlength="9" [disabled]="!puedeEditar" />
-                  </div>
-                  <div class="paleta-colores">
-                    @for (color of paleta; track color) {
-                      <button type="button" class="color" [style.background]="color" (click)="elegirSecundario(color)" [disabled]="!puedeEditar" [title]="color"></button>
-                    }
-                  </div>
-                </div>
-
-                <div class="campo">
-                  <span>Fondo</span>
-                  <div class="fondo-caja" [style.background-image]="disenoFondo ? 'url(' + disenoFondo + ')' : null">
-                    @if (!disenoFondo) { <span class="vacio-lateral">Sin imagen</span> }
-                  </div>
-                  <div class="fila-acciones">
-                    <label class="btn-mini">
-                      <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))" [disabled]="!puedeEditar" />
-                      <i class="fa-solid fa-upload"></i> Subir
-                    </label>
-                    @if (disenoFondo) {
-                      <button type="button" class="btn-mini" (click)="quitarFondo()" [disabled]="!puedeEditar">Quitar</button>
-                    }
-                  </div>
-                </div>
-
-                <label class="campo">
-                  <span>Estilos propios (CSS)</span>
-                  <textarea rows="5" [(ngModel)]="disenoCss" [disabled]="!puedeEditar" placeholder=".mi-clase { color: var(--acento); }"></textarea>
-                </label>
-
-                @if (puedeEditar) {
-                  <button type="button" class="btn-primary ancho" [disabled]="guardandoMarca" (click)="guardarMarca()">
-                    @if (guardandoMarca) { <i class="fa-solid fa-circle-notch fa-spin"></i> }
-                    @else { <i class="fa-solid fa-floppy-disk"></i> }
-                    Guardar marca
-                  </button>
-                }
-              </div>
-            }
-
-            @case ('capas') {
-              <div class="seccion">
-                <h3><i class="fa-solid fa-layer-group"></i> Capas</h3>
-                <p class="pista">Ordena el lienzo. Lo que está arriba se dibuja encima.</p>
-
-                @if (puedeCrear && !puedeEditar) {
-                  <p class="pista"><i class="fa-solid fa-lock"></i> Los componentes de otras personas solo se pueden consultar.</p>
-                }
-
-                <ul class="lista-capas">
-                  @for (capa of capasOrdenadas; track capa.clave) {
-                    <li class="capa-item" [class.activo]="seleccionClave() === capa.clave">
-                      <button type="button" class="capa-item__nombre" (click)="seleccionarPorClave(capa.clave)">
-                        <i [class]="icono(capa.tipo)"></i>
-                        <span>{{ capa.nombre || capa.tipo }}</span>
-                        @if (capa.detras) { <em>fondo</em> }
-                        @if (!capa.visible) { <em class="borrador">borrador</em> }
-                      </button>
-                      <div class="capa-item__acciones">
-                        <button type="button" (click)="subirCapa(capa)" [disabled]="!puedeTocar(capa)" title="Subir capa"><i class="fa-solid fa-chevron-up"></i></button>
-                        <button type="button" (click)="bajarCapa(capa)" [disabled]="!puedeTocar(capa)" title="Bajar capa"><i class="fa-solid fa-chevron-down"></i></button>
-                        <button type="button" [class.activo]="capa.detras" [disabled]="!puedeTocar(capa)" (click)="alternarDetras(capa)" title="Enviar al fondo como background"><i class="fa-solid fa-arrow-down-wide-short"></i></button>
-                        @if (puedeEditar) {
-                          <button type="button" [class.activo]="capa.visible" (click)="alternarVisible(capa)" title="Visible u oculto">
-                            <i class="fa-solid" [class.fa-eye]="capa.visible" [class.fa-eye-slash]="!capa.visible"></i>
-                          </button>
-                        }
-                      </div>
-                    </li>
-                  } @empty {
-                    <li class="vacio-lateral">El lienzo todavía está vacío.</li>
-                  }
-                </ul>
-              </div>
-            }
-          }
-        </div>
-      </aside>
-
+    <div class="taller" [class.taller--sin-lateral]="lateralPlegado()" [class.taller--sin-inspector]="inspectorPlegado()">
       <main class="area">
-        <div class="marco" #marco>
-          <div class="hoja" [style.width.px]="ancho * escala()" [style.height.px]="alto * escala()">
+        <div class="marco" #marco (wheel)="alRodar($event)">
+          <!-- Menú flotante encima del lienzo: se colapsa para ver solo la hoja -->
+          @if (!lateralPlegado()) {
+            <aside class="flotante" aria-label="Herramientas del diseñador">
+              <header class="flotante__cabecera">
+                <strong><i class="fa-solid fa-shapes"></i> Añadir</strong>
+                <button type="button" class="flotante__cerrar" (click)="alternarLateral()" title="Ocultar menú">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </header>
+
+              <nav class="flotante__tabs">
+                <button type="button" [class.activo]="panelLateral() === 'componentes'" (click)="cambiarPanel('componentes')" title="Componentes"><i class="fa-solid fa-shapes"></i></button>
+                <button type="button" [class.activo]="panelLateral() === 'imagenes'" (click)="cambiarPanel('imagenes')" title="Imágenes"><i class="fa-solid fa-image"></i></button>
+                <button type="button" [class.activo]="panelLateral() === 'fuentes'" (click)="cambiarPanel('fuentes')" title="Tipografías"><i class="fa-solid fa-font"></i></button>
+                <button type="button" [class.activo]="panelLateral() === 'marca'" (click)="cambiarPanel('marca')" title="Marca"><i class="fa-solid fa-palette"></i></button>
+                <button type="button" [class.activo]="panelLateral() === 'capas'" (click)="cambiarPanel('capas')" title="Capas"><i class="fa-solid fa-layer-group"></i></button>
+              </nav>
+
+              <div class="flotante__cuerpo">
+                @switch (panelLateral()) {
+                  @case ('componentes') {
+                    <p class="pista">Hoja de {{ ancho }} × {{ alto }}. Arrastra lo que quieras.</p>
+                    <div class="paleta-componentes">
+                      @for (item of catalogo; track item.tipo) {
+                        <button type="button" class="pieza" [disabled]="!puedeCrear" (click)="agregar(item.tipo)">
+                          <i [class]="icono(item.tipo)"></i>
+                          <span>{{ item.etiqueta }}</span>
+                        </button>
+                      }
+                    </div>
+                    @if (!puedeCrear) {
+                      <p class="bloqueo"><i class="fa-solid fa-lock"></i> Tu rol solo permite consultar.</p>
+                    }
+                  }
+
+                  @case ('imagenes') {
+                    <label class="btn-subir">
+                      <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="imagenLienzoDesdeArchivo($any($event.target))" [disabled]="!puedeCrear" />
+                      <i class="fa-solid fa-upload"></i> Subir imagen
+                    </label>
+                    <ul class="miniaturas">
+                      @for (url of imagenesLienzo; track url) {
+                        <li>
+                          <button type="button" class="miniatura" (click)="agregarImagen(url)" [disabled]="!puedeCrear" title="Añadir al lienzo">
+                            <img [src]="url" alt="Imagen del lienzo" />
+                          </button>
+                        </li>
+                      } @empty {
+                        <li class="vacio-lateral">Aún no hay imágenes.</li>
+                      }
+                    </ul>
+                  }
+
+                  @case ('fuentes') {
+                    <p class="pista">Aplica una tipografía al componente seleccionado.</p>
+                    <div class="lista-fuentes">
+                      @for (fuente of fuentes; track fuente.nombre) {
+                        <button type="button" class="fuente" [style.font-family]="fuente.valor" (click)="aplicarFuente(fuente.valor)" [disabled]="!puedeTocar(seleccionado)">
+                          {{ fuente.nombre }}
+                        </button>
+                      }
+                    </div>
+                  }
+
+                  @case ('marca') {
+                    <p class="pista">Colores y fondo de la empresa.</p>
+                    @if (erroresDiseno.length) {
+                      <div class="aviso-mini">
+                        @for (fallo of erroresDiseno; track $index) { <span>{{ fallo }}</span> }
+                      </div>
+                    }
+                    <label class="campo">
+                      <span>Color principal</span>
+                      <input type="color" [ngModel]="disenoAcento" (ngModelChange)="elegirAcento($event)" [disabled]="!puedeEditar" />
+                    </label>
+                    <label class="campo">
+                      <span>Color secundario</span>
+                      <input type="color" [ngModel]="disenoSecundario" (ngModelChange)="elegirSecundario($event)" [disabled]="!puedeEditar" />
+                    </label>
+                    <div class="fila-acciones">
+                      <label class="btn-mini">
+                        <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoDesdeArchivo($any($event.target))" [disabled]="!puedeEditar" />
+                        <i class="fa-solid fa-upload"></i> Fondo
+                      </label>
+                      @if (disenoFondo) {
+                        <button type="button" class="btn-mini" (click)="quitarFondo()" [disabled]="!puedeEditar">Quitar</button>
+                      }
+                    </div>
+                    <label class="campo">
+                      <span>Estilos propios (CSS)</span>
+                      <textarea rows="4" [(ngModel)]="disenoCss" [disabled]="!puedeEditar" placeholder=".mi-clase { color: var(--acento); }"></textarea>
+                    </label>
+                    @if (puedeEditar) {
+                      <button type="button" class="btn-primary ancho" [disabled]="guardandoMarca" (click)="guardarMarca()">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar marca
+                      </button>
+                    }
+                  }
+
+                  @case ('capas') {
+                    <ul class="lista-capas">
+                      @for (capa of capasOrdenadas; track capa.clave) {
+                        <li class="capa-item" [class.activo]="seleccionClave() === capa.clave">
+                          <button type="button" class="capa-item__nombre" (click)="seleccionarPorClave(capa.clave)">
+                            <i [class]="icono(capa.tipo)"></i>
+                            <span>{{ capa.nombre || capa.tipo }}</span>
+                          </button>
+                          <div class="capa-item__acciones">
+                            <button type="button" (click)="subirCapa(capa)" [disabled]="!puedeTocar(capa)" title="Subir"><i class="fa-solid fa-chevron-up"></i></button>
+                            <button type="button" (click)="bajarCapa(capa)" [disabled]="!puedeTocar(capa)" title="Bajar"><i class="fa-solid fa-chevron-down"></i></button>
+                            <button type="button" class="icono--peligro" (click)="eliminarSeleccionado()" [disabled]="!puedeTocar(capa)" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                          </div>
+                        </li>
+                      } @empty {
+                        <li class="vacio-lateral">El lienzo está vacío.</li>
+                      }
+                    </ul>
+                  }
+                }
+              </div>
+            </aside>
+          }
+
+          @if (lateralPlegado()) {
+            <button type="button" class="flotante__abrir" (click)="alternarLateral()" title="Mostrar menú de añadir">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          }
+
+          <!-- Grupo que se centra: la hoja a escala y el inspector flotante encima de ella -->
+          <div class="escena">
+          <div class="hoja" [style.width.px]="ancho * escala()" [style.height.px]="altoHoja * escala()">
           <div
             class="escenario"
             [class.escenario--cuadricula]="mostrarCuadricula()"
             [style.width.px]="ancho"
-            [style.height.px]="alto"
+            [style.height.px]="altoHoja"
             [style.transform]="'scale(' + escala() + ')'"
             (pointerdown)="deseleccionar()"
           >
@@ -317,7 +273,11 @@
                 (pointerdown)="empezarMover($event, componente)"
               >
                 <div class="capa__vista">
-                  <app-empresa-componente-vista [componente]="componente" modo="editor" />
+                  <app-empresa-componente-vista [componente]="vistaDe(componente)" modo="editor" />
+                  @if (seleccionClave() === componente.clave) {
+                    <!-- Encima del HTML/iframe para que se pueda arrastrar desde cualquier punto -->
+                    <span class="capa__velo"></span>
+                  }
                 </div>
 
                 @if (seleccionClave() === componente.clave) {
@@ -353,6 +313,192 @@
             }
           </div>
           </div>
+          </div>
+
+          <div class="tirador" (pointerdown)="empezarAlto($event)" title="Arrastra para agrandar o achicar la hoja">
+            <span class="tirador__linea"></span>
+          </div>
+
+          @if (altoHojaAjustado) {
+            <button type="button" class="alto-reset" (click)="restablecerAlto()" title="Volver al alto que cabe en pantalla">
+              <i class="fa-solid fa-arrows-up-down"></i> Ajustar alto
+            </button>
+          }
+
+          @if (seleccionado && !inspectorPlegado()) {
+            <aside
+              class="ventana"
+              [class.ventana--min]="inspectorMinimizado()"
+              [class.ventana--max]="inspectorMaximizado()"
+              [style]="estiloInspector"
+            >
+              @if (seleccionado; as componente) {
+                <div class="ventana__barra" (pointerdown)="moverInspector($event)">
+                  <span class="ventana__icono"><i [class]="icono(componente.tipo)"></i></span>
+                  <span class="ventana__titulo">{{ componente.nombre || 'Propiedades' }}</span>
+                  <button type="button" class="ventana__boton" (click)="minimizarInspector()" [title]="inspectorMinimizado() ? 'Restaurar' : 'Minimizar'">
+                    <i class="fa-solid" [class.fa-window-minimize]="!inspectorMinimizado()" [class.fa-window-restore]="inspectorMinimizado()"></i>
+                  </button>
+                  <button type="button" class="ventana__boton" (click)="maximizarInspector()" [title]="inspectorMaximizado() ? 'Restaurar' : 'Maximizar'">
+                    <i class="fa-solid" [class.fa-expand]="!inspectorMaximizado()" [class.fa-compress]="inspectorMaximizado()"></i>
+                  </button>
+                  <button type="button" class="ventana__boton ventana__boton--cerrar" (click)="cerrarInspector()" title="Cerrar">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+
+                <div class="ventana__nombre">
+                  <input
+                    type="text"
+                    [ngModel]="componente.nombre ?? ''"
+                    (ngModelChange)="cambiarNombreComponente($event)"
+                    maxlength="80"
+                    placeholder="Nombre del componente"
+                  />
+                </div>
+
+                @if (!inspectorMinimizado()) {
+                <div class="ventana__cuerpo">
+                  @if (puedeCompartir(componente)) {
+                    <div class="enlace-caja">
+                      <code>{{ enlaceDe(componente) }}</code>
+                      <button type="button" class="icono" (click)="copiarEnlaceComponente(componente)" title="Copiar enlace"><i class="fa-solid fa-copy"></i></button>
+                      <a class="icono" [routerLink]="enlaceDe(componente)" target="_blank" rel="noopener" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                  }
+                  <div class="rejilla-dos">
+                    <label class="campo"><span>X</span><input type="number" [value]="componente.x" (change)="cambiarGeometria('x', $any($event.target).value)" /></label>
+                    <label class="campo"><span>Y</span><input type="number" [value]="componente.y" (change)="cambiarGeometria('y', $any($event.target).value)" /></label>
+                    <label class="campo"><span>Ancho</span><input type="number" [value]="componente.ancho" (change)="cambiarGeometria('ancho', $any($event.target).value)" /></label>
+                    <label class="campo"><span>Alto</span><input type="number" [value]="componente.alto" (change)="cambiarGeometria('alto', $any($event.target).value)" /></label>
+                  </div>
+                  <div class="rejilla-dos">
+                    <label class="campo"><span>Color</span><input type="text" [ngModel]="borradorEstilo.color" (ngModelChange)="asignarEstilo('color', $event)" placeholder="#111827" /></label>
+                    <label class="campo"><span>Fondo</span><input type="text" [ngModel]="borradorEstilo.fondo" (ngModelChange)="asignarEstilo('fondo', $event)" placeholder="transparente" /></label>
+                  </div>
+                  @if (componente.tipo === 'HTML') {
+                    <section class="bloque-html">
+                      <h4><i class="fa-solid fa-code"></i> HTML de esta pieza</h4>
+
+                      <div class="chip-estado">
+                        <span class="chip-estado__texto">
+                          <i class="fa-solid fa-circle-info"></i>
+                          {{ resumenContenidoHtml }}
+                        </span>
+                        @if (componente.id) {
+                          <span class="chip-estado__id" title="Id de la pieza en la base">#{{ componente.id.slice(0, 6) }}</span>
+                        } @else {
+                          <span class="chip-estado__id chip-estado__id--nuevo">nueva, sin guardar</span>
+                        }
+                      </div>
+
+                      <label class="check check--destacado">
+                        <input type="checkbox" [checked]="soloDisenoHtml" (change)="alternarSoloDiseno($any($event.target).checked)" />
+                        <span>Solo diseño (sin scripts)</span>
+                      </label>
+
+                      <div class="dos-ajustes">
+                        <button type="button" class="chip-ajuste" [class.chip-ajuste--on]="ajusteHtml === 'cubrir'" (click)="elegirAjusteHtml('cubrir')">
+                          <i class="fa-solid fa-expand"></i> Cubrir pieza
+                        </button>
+                        <button type="button" class="chip-ajuste" [class.chip-ajuste--on]="ajusteHtml === 'seccion'" (click)="elegirAjusteHtml('seccion')">
+                          <i class="fa-solid fa-align-left"></i> Solo sección
+                        </button>
+                      </div>
+                      <p class="pista">
+                        «Cubrir pieza» hace que el HTML llene el componente completo;
+                        «Solo sección» lo deja ocupar únicamente su propio alto.
+                      </p>
+                      <div class="fila-acciones">
+                        <button type="button" class="btn-mini" (click)="ajustarAltaHtml()" [disabled]="!puedeTocar(componente)">
+                          <i class="fa-solid fa-arrows-up-down"></i> Alto al lienzo
+                        </button>
+                        <button type="button" class="btn-mini" (click)="alternarCodigoHtml()">
+                          <i class="fa-solid fa-magnifying-glass"></i>
+                          {{ mostrarCodigoHtml() ? 'Ocultar' : 'Ver guardado' }}
+                        </button>
+                      </div>
+
+                      @if (mostrarCodigoHtml()) {
+                        <pre class="html-guardado">{{ codigoHtmlGuardado.slice(0, 4000) }}</pre>
+                        <small class="pista">{{ codigoHtmlGuardado.length }} caracteres guardados</small>
+                        <button type="button" class="btn-mini ancho" (click)="desescaparHtmlGuardado()">
+                          <i class="fa-solid fa-broom"></i> Reparar saltos de línea (\n)
+                        </button>
+                      }
+
+                      <p class="pista">
+                        Escribe tu diseño a mano: se conserva el HTML y el CSS, y se quitan scripts,
+                        botones, acordeones y selects.
+                      </p>
+
+                      <div class="fila-acciones">
+                        <label class="btn-mini">
+                          <input type="file" accept=".html,.htm,text/html" hidden (change)="htmlDesdeArchivo($any($event.target))" [disabled]="!puedeTocar(componente)" />
+                          <i class="fa-solid fa-upload"></i> Cargar .html
+                        </label>
+                        <button type="button" class="btn-mini" (click)="pegarHtmlDelPortapapeles()" [disabled]="!puedeTocar(componente)">
+                          <i class="fa-solid fa-paste"></i> Pegar
+                        </button>
+                        <button type="button" class="btn-mini" (click)="cargarPlantillaDiseno()" [disabled]="!puedeTocar(componente)">
+                          <i class="fa-solid fa-pen-nib"></i> Plantilla
+                        </button>
+                      </div>
+
+                      <textarea
+                        class="html-codigo"
+                        rows="18"
+                        spellcheck="false"
+                        [ngModel]="borradorContenido.html"
+                        (ngModelChange)="cambiarHtml($event)"
+                        placeholder="<!doctype html> ..."
+                      ></textarea>
+                      <small class="pista">{{ largoHtml }} / {{ maxHtml }} caracteres</small>
+                    </section>
+                  }
+
+                  <div class="fila-checks">
+                    <label class="check"><input type="checkbox" [checked]="componente.detras" (change)="alternarDetras(componente)" /><span>Al fondo</span></label>
+                    @if (puedeEditar) {
+                      <label class="check"><input type="checkbox" [checked]="componente.visible" (change)="alternarVisible(componente)" /><span>Visible</span></label>
+                    }
+                  </div>
+                  <button type="button" class="btn-mini ancho" (click)="cerrarInspector()">Cerrar propiedades</button>
+                </div>
+                }
+
+                @if (!inspectorMinimizado() && !inspectorMaximizado()) {
+                  <span class="ventana__asa" (pointerdown)="redimensionarInspector($event)" title="Cambiar tamaño"></span>
+                }
+              }
+            </aside>
+          } @else if (seleccionado && inspectorPlegado()) {
+            <button type="button" class="inspector__abrir" (click)="alternarInspector()" title="Mostrar propiedades">
+              <i class="fa-solid fa-sliders"></i>
+            </button>
+          }
+        </div>
+
+        <div class="ayuda">
+          <button type="button" class="ayuda__cabecera" (click)="alternarAyuda()">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Qué puedo hacer aquí</span>
+            <i class="fa-solid" [class.fa-chevron-up]="!ayudaAbierta()" [class.fa-chevron-down]="ayudaAbierta()"></i>
+          </button>
+
+          @if (ayudaAbierta()) {
+            <div class="ayuda__cuerpo">
+              <p>Haz clic en cualquier elemento para cambiar su contenido, colores, tipografía o posición. Arrastra el borde inferior de la hoja para tener más espacio abajo.</p>
+              <ul class="ayuda__atajos">
+                <li><kbd>Ctrl</kbd><kbd>Z</kbd><span>deshacer</span></li>
+                <li><kbd>Ctrl</kbd><kbd>D</kbd><span>duplicar</span></li>
+                <li><kbd>Supr</kbd><span>eliminar</span></li>
+                <li><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd><span>mover</span></li>
+                <li><kbd>Ctrl</kbd><kbd>rueda</kbd><span>zoom</span></li>
+                <li><kbd>borde inferior</kbd><span>más espacio abajo</span></li>
+              </ul>
+            </div>
+          }
         </div>
 
         <footer class="pie">
@@ -376,335 +522,6 @@
         </footer>
       </main>
 
-      <aside class="inspector">
-        @if (seleccionado; as componente) {
-          <div class="inspector__cabecera">
-            <span class="inspector__icono"><i [class]="icono(componente.tipo)"></i></span>
-            <input
-              type="text"
-              class="inspector__nombre"
-              [ngModel]="componente.nombre ?? ''"
-              (ngModelChange)="cambiarNombreComponente($event)"
-              maxlength="80"
-              placeholder="Nombre del componente"
-            />
-            <button type="button" class="icono" (click)="deseleccionar()" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-
-          <div class="inspector__cuerpo">
-            <section class="bloque">
-              <h4><i class="fa-solid fa-arrows-up-down-left-right"></i> Posición y tamaño</h4>
-              <div class="rejilla-dos">
-                <label class="campo"><span>X</span><input type="number" [value]="componente.x" (change)="cambiarGeometria('x', $any($event.target).value)" /></label>
-                <label class="campo"><span>Y</span><input type="number" [value]="componente.y" (change)="cambiarGeometria('y', $any($event.target).value)" /></label>
-                <label class="campo"><span>Ancho</span><input type="number" [value]="componente.ancho" (change)="cambiarGeometria('ancho', $any($event.target).value)" /></label>
-                <label class="campo"><span>Alto</span><input type="number" [value]="componente.alto" (change)="cambiarGeometria('alto', $any($event.target).value)" /></label>
-                <label class="campo"><span>Capa</span><input type="number" [value]="componente.capa" (change)="cambiarGeometria('capa', $any($event.target).value)" /></label>
-              </div>
-              <div class="fila-checks">
-                <label class="check">
-                  <input type="checkbox" [checked]="componente.detras" (change)="alternarDetras(componente)" />
-                  <span>Al fondo (background)</span>
-                </label>
-                @if (puedeEditar) {
-                  <label class="check">
-                    <input type="checkbox" [checked]="componente.visible" (change)="alternarVisible(componente)" />
-                    <span>Visible</span>
-                  </label>
-                }
-              </div>
-            </section>
-
-            <section class="bloque">
-              <h4><i class="fa-solid fa-pen"></i> Contenido</h4>
-
-              @switch (componente.tipo) {
-                @case ('TEXTO') {
-                  <label class="campo">
-                    <span>Texto</span>
-                    <textarea rows="4" [ngModel]="borradorContenido.texto" (ngModelChange)="asignar('texto', $event)"></textarea>
-                  </label>
-                  <div class="rejilla-dos">
-                    <label class="campo">
-                      <span>Tamaño</span>
-                      <input type="number" min="8" max="160" [ngModel]="borradorContenido.tamano" (ngModelChange)="asignar('tamano', $event === '' ? null : +$event)" />
-                    </label>
-                    <label class="campo">
-                      <span>Peso</span>
-                      <select [ngModel]="borradorContenido.peso" (ngModelChange)="asignar('peso', +$event)">
-                        <option [ngValue]="400">Normal</option>
-                        <option [ngValue]="500">Medio</option>
-                        <option [ngValue]="600">Seminegrita</option>
-                        <option [ngValue]="700">Negrita</option>
-                        <option [ngValue]="800">Extra</option>
-                        <option [ngValue]="900">Máxima</option>
-                      </select>
-                    </label>
-                  </div>
-                }
-
-                @case ('IMAGEN') {
-                  <label class="campo">
-                    <span>Dirección o imagen</span>
-                    <input type="text" [ngModel]="borradorContenido.url" (ngModelChange)="asignar('url', $event)" placeholder="https:// o sube un archivo" />
-                  </label>
-                  <label class="btn-mini">
-                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="imagenComponenteDesdeArchivo($any($event.target))" />
-                    <i class="fa-solid fa-upload"></i> Subir imagen
-                  </label>
-                  <label class="campo">
-                    <span>Texto alternativo</span>
-                    <input type="text" [ngModel]="borradorContenido.alter" (ngModelChange)="asignar('alter', $event)" maxlength="120" />
-                  </label>
-                  <label class="campo">
-                    <span>Radio</span>
-                    <input type="number" min="0" max="120" [ngModel]="borradorContenido.radio" (ngModelChange)="asignar('radio', +$event)" />
-                  </label>
-                }
-
-                @case ('BOTON') {
-                  <label class="campo">
-                    <span>Texto del botón</span>
-                    <input type="text" [ngModel]="borradorContenido.texto" (ngModelChange)="asignar('texto', $event)" maxlength="80" />
-                  </label>
-                  <label class="campo">
-                    <span>Enlace</span>
-                    <input type="text" [ngModel]="borradorContenido.enlace" (ngModelChange)="asignar('enlace', $event)" placeholder="https://, tel:, mailto:" />
-                  </label>
-                  <label class="campo">
-                    <span>Color de fondo</span>
-                    <input type="text" [ngModel]="borradorContenido.color" (ngModelChange)="asignar('color', $event)" placeholder="#2563eb" />
-                  </label>
-                }
-
-                @case ('LISTA') {
-                  <label class="campo">
-                    <span>Título</span>
-                    <input type="text" [ngModel]="borradorContenido.titulo" (ngModelChange)="asignar('titulo', $event)" maxlength="120" />
-                  </label>
-                  <label class="campo">
-                    <span>Elementos (uno por línea)</span>
-                    <textarea rows="6" [ngModel]="textoLista" (ngModelChange)="cambiarLista($event)"></textarea>
-                  </label>
-                }
-
-                @case ('MENU') {
-                  <label class="campo">
-                    <span>Título</span>
-                    <input type="text" [ngModel]="borradorContenido.titulo" (ngModelChange)="asignar('titulo', $event)" maxlength="120" />
-                  </label>
-
-                  @for (grupo of menu.grupos; track $index) {
-                    <div class="subbloque">
-                      <div class="subbloque__cabecera">
-                        <input type="text" [ngModel]="grupo.titulo" (ngModelChange)="asignarEn(grupo, 'titulo', $event)" placeholder="Sección" maxlength="80" />
-                        <button type="button" class="icono icono--peligro" (click)="quitarGrupoMenu($index)" title="Quitar sección"><i class="fa-solid fa-trash"></i></button>
-                      </div>
-
-                      @for (plato of grupo.items; track $index) {
-                        <div class="plato">
-                          <div class="rejilla-dos">
-                            <input type="text" [ngModel]="plato.nombre" (ngModelChange)="asignarEn(plato, 'nombre', $event)" placeholder="Nombre" />
-                            <input type="text" [ngModel]="plato.precio" (ngModelChange)="asignarEn(plato, 'precio', $event)" placeholder="Precio" />
-                          </div>
-                          <input type="text" [ngModel]="plato.descripcion" (ngModelChange)="asignarEn(plato, 'descripcion', $event)" placeholder="Descripción" />
-                          <div class="plato__acciones">
-                            <label class="check">
-                              <input type="checkbox" [checked]="plato.destacado" (change)="alternarDestacado(plato)" />
-                              <span>Destacado</span>
-                            </label>
-                            <button type="button" class="btn-mini" (click)="quitarPlato(grupo, $index)">Quitar</button>
-                          </div>
-                        </div>
-                      }
-
-                      <button type="button" class="btn-mini ancho" (click)="agregarPlato(grupo)"><i class="fa-solid fa-plus"></i> Añadir plato</button>
-                    </div>
-                  }
-
-                  <button type="button" class="btn-mini ancho" (click)="agregarGrupoMenu()"><i class="fa-solid fa-plus"></i> Añadir sección</button>
-                }
-
-                @case ('PRODUCTO') {
-                  <label class="campo">
-                    <span>Nombre</span>
-                    <input type="text" [ngModel]="borradorContenido.nombre" (ngModelChange)="asignar('nombre', $event)" maxlength="120" />
-                  </label>
-                  <div class="rejilla-dos">
-                    <label class="campo">
-                      <span>Precio</span>
-                      <input type="text" [ngModel]="borradorContenido.precio" (ngModelChange)="asignar('precio', $event)" />
-                    </label>
-                    <label class="campo">
-                      <span>Enlace</span>
-                      <input type="text" [ngModel]="borradorContenido.enlace" (ngModelChange)="asignar('enlace', $event)" />
-                    </label>
-                  </div>
-                  <label class="campo">
-                    <span>Descripción</span>
-                    <textarea rows="3" [ngModel]="borradorContenido.descripcion" (ngModelChange)="asignar('descripcion', $event)"></textarea>
-                  </label>
-                  <label class="campo">
-                    <span>Imagen</span>
-                    <input type="text" [ngModel]="borradorContenido.imagen" (ngModelChange)="asignar('imagen', $event)" />
-                  </label>
-                  <label class="btn-mini">
-                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="imagenProductoDesdeArchivo($any($event.target))" />
-                    <i class="fa-solid fa-upload"></i> Subir imagen
-                  </label>
-                }
-
-                @case ('GALERIA') {
-                  <label class="campo">
-                    <span>Título</span>
-                    <input type="text" [ngModel]="borradorContenido.titulo" (ngModelChange)="asignar('titulo', $event)" maxlength="120" />
-                  </label>
-                  <label class="btn-mini">
-                    <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="imagenGaleriaDesdeArchivo($any($event.target))" />
-                    <i class="fa-solid fa-plus"></i> Añadir foto
-                  </label>
-                  @if (galeria.imagenes.length) {
-                    <div class="galeria-mini">
-                      @for (foto of galeria.imagenes; track $index) {
-                        <span class="galeria-mini__foto">
-                          <img [src]="foto" alt="Foto de la galería" />
-                          <button type="button" (click)="quitarImagenGaleria($index)"><i class="fa-solid fa-xmark"></i></button>
-                        </span>
-                      }
-                    </div>
-                  }
-                }
-
-                @case ('CONTACTO') {
-                  <label class="campo">
-                    <span>Teléfono</span>
-                    <input type="text" [ngModel]="borradorContenido.telefono" (ngModelChange)="asignar('telefono', $event)" />
-                  </label>
-                  <label class="campo">
-                    <span>WhatsApp</span>
-                    <input type="text" [ngModel]="borradorContenido.whatsapp" (ngModelChange)="asignar('whatsapp', $event)" />
-                  </label>
-                  <label class="campo">
-                    <span>Correo</span>
-                    <input type="email" [ngModel]="borradorContenido.correo" (ngModelChange)="asignar('correo', $event)" />
-                  </label>
-                  <label class="campo">
-                    <span>Dirección</span>
-                    <input type="text" [ngModel]="borradorContenido.direccion" (ngModelChange)="asignar('direccion', $event)" />
-                  </label>
-                }
-
-                @case ('HORARIO') {
-                  <label class="campo">
-                    <span>Título</span>
-                    <input type="text" [ngModel]="borradorContenido.titulo" (ngModelChange)="asignar('titulo', $event)" maxlength="120" />
-                  </label>
-                  @for (fila of borradorContenido.filas ?? []; track $index) {
-                    <div class="fila-horario">
-                      <input type="text" [ngModel]="fila.dias" (ngModelChange)="asignarEn(fila, 'dias', $event)" placeholder="Días" />
-                      <input type="text" [ngModel]="fila.hora" (ngModelChange)="asignarEn(fila, 'hora', $event)" placeholder="Horario" />
-                      <button type="button" class="icono icono--peligro" (click)="quitarFilaHorario($index)"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                  }
-                  <button type="button" class="btn-mini ancho" (click)="agregarFilaHorario()"><i class="fa-solid fa-plus"></i> Añadir fila</button>
-                }
-
-                @case ('SEPARADOR') {
-                  <p class="pista">El separador solo usa estilos: color, grosor visual y opacidad.</p>
-                }
-              }
-            </section>
-
-            <section class="bloque">
-              <h4><i class="fa-solid fa-brush"></i> Estilo</h4>
-
-              <label class="campo">
-                <span>Tipografía</span>
-                <select [ngModel]="borradorEstilo.fuente" (ngModelChange)="asignarEstilo('fuente', $event)">
-                  @for (fuente of fuentes; track fuente.nombre) {
-                    <option [value]="fuente.valor">{{ fuente.nombre }}</option>
-                  }
-                </select>
-              </label>
-
-              <div class="rejilla-dos">
-                <label class="campo">
-                  <span>Color</span>
-                  <input type="text" [ngModel]="borradorEstilo.color" (ngModelChange)="asignarEstilo('color', $event)" placeholder="#111827" />
-                </label>
-                <label class="campo">
-                  <span>Fondo</span>
-                  <input type="text" [ngModel]="borradorEstilo.fondo" (ngModelChange)="asignarEstilo('fondo', $event)" placeholder="transparente" />
-                </label>
-                <label class="campo">
-                  <span>Tamaño base</span>
-                  <input type="number" [ngModel]="borradorEstilo.tamano" (ngModelChange)="asignarEstilo('tamano', $event === '' ? null : +$event)" />
-                </label>
-                <label class="campo">
-                  <span>Peso base</span>
-                  <select [ngModel]="borradorEstilo.peso" (ngModelChange)="asignarEstilo('peso', +$event)">
-                    <option [ngValue]="400">Normal</option>
-                    <option [ngValue]="500">Medio</option>
-                    <option [ngValue]="600">Seminegrita</option>
-                    <option [ngValue]="700">Negrita</option>
-                    <option [ngValue]="800">Extra</option>
-                  </select>
-                </label>
-                <label class="campo">
-                  <span>Radio</span>
-                  <input type="number" [ngModel]="borradorEstilo.radio" (ngModelChange)="asignarNumero('radio', $event, 0)" />
-                </label>
-                <label class="campo">
-                  <span>Opacidad</span>
-                  <input type="number" min="0" max="1" step="0.05" [ngModel]="borradorEstilo.opacidad" (ngModelChange)="asignarNumero('opacidad', $event, 1)" />
-                </label>
-                <label class="campo">
-                  <span>Espaciado</span>
-                  <input type="number" [ngModel]="borradorEstilo.espaciado" (ngModelChange)="asignarNumero('espaciado', $event, 0)" />
-                </label>
-                <label class="campo">
-                  <span>Alineación</span>
-                  <select [ngModel]="borradorEstilo.alineacion" (ngModelChange)="asignarEstilo('alineacion', $event)">
-                    <option value="left">Izquierda</option>
-                    <option value="center">Centro</option>
-                    <option value="right">Derecha</option>
-                  </select>
-                </label>
-              </div>
-
-              <label class="campo">
-                <span>Borde</span>
-                <input type="text" [ngModel]="borradorEstilo.borde" (ngModelChange)="asignarEstilo('borde', $event)" placeholder="1px solid #e2e8f0" />
-              </label>
-
-              <div class="fila-checks">
-                <label class="check">
-                  <input type="checkbox" [checked]="!!borradorEstilo.sombra" (change)="asignarEstilo('sombra', $any($event.target).checked)" />
-                  <span>Sombra</span>
-                </label>
-              </div>
-
-              <div class="paleta-colores">
-                @for (color of paleta; track color) {
-                  <button type="button" class="color" [style.background]="color" (click)="asignarEstilo('color', color)" [title]="color"></button>
-                }
-              </div>
-            </section>
-          </div>
-        } @else {
-          <div class="inspector__vacio">
-            <i class="fa-solid fa-hand-pointer"></i>
-            <h3>Selecciona un componente</h3>
-            <p>Haz clic en cualquier elemento del lienzo para cambiar su contenido, sus colores, su tipografía o su posición.</p>
-            <div class="atajos">
-              <span><kbd>Ctrl</kbd> + <kbd>Z</kbd> deshacer</span>
-              <span><kbd>Ctrl</kbd> + <kbd>D</kbd> duplicar</span>
-              <span><kbd>Supr</kbd> eliminar</span>
-              <span><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> mover</span>
-            </div>
-          </div>
-        }
-      </aside>
     </div>
   }
 </div>

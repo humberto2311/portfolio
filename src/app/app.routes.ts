@@ -21,6 +21,9 @@ import { EmpresaDashboardComponent } from './features/empresa/empresa-dashboard/
 import { EmpresaAjustesComponent } from './features/empresa/empresa-ajustes/empresa-ajustes.component';
 import { EmpresaLienzoComponent } from './features/empresa/empresa-lienzo/empresa-lienzo.component';
 import { EmpresaPublicaComponent } from './features/empresa/empresa-publica/empresa-publica.component';
+import { EmpresaComponenteComponent } from './features/empresa/empresa-componente/empresa-componente.component';
+import { EmpresaComponentesComponent } from './features/empresa/empresa-componentes/empresa-componentes.component';
+import { DisenoPublicoComponent } from './features/empresa/diseno-publico/diseno-publico.component';
 import { AccesoNativoComponent } from './features/auth/acceso-nativo/acceso-nativo.component';
 import { accesoNativoGuard } from './core/guards/acceso-nativo.guard';
 
@@ -55,7 +58,13 @@ export const routes: Routes = [
 
   { path: 'acceso', component: AccesoNativoComponent, canActivate: [publicGuard] },
 
+  // Página propia de un diseño público (menú, tarjeta, catálogo…)
+  { path: 'diseno/:slug', component: DisenoPublicoComponent },
   { path: 'empresa/:slug', component: EmpresaPublicaComponent },
+  // Carpeta pública de componentes de la empresa (menús, tarjetas, información...)
+  { path: 'empresa/:slug/componentes', component: EmpresaComponentesComponent },
+  // Enlace propio de cada componente creado en el lienzo
+  { path: 'empresa/:slug/c/:componenteId', component: EmpresaComponenteComponent },
 
   {
     path: 'app',
@@ -75,6 +84,8 @@ export const routes: Routes = [
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
+      { path: 'empresa/componentes', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
+      { path: 'empresa/disenos', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
       {
         path: 'emisora',
         loadComponent: () => import('./features/emisora/emisora-nfc.component').then((m) => m.EmisoraNfcComponent)

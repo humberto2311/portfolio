@@ -28,6 +28,7 @@ const NAVEGACION_PERSONAL: RailItem[] = [
 const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Mi empresa', icon: 'fa-solid fa-building', ruta: '/app/empresa', exacto: true },
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo' },
+  { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
 ];

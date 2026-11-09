@@ -9,6 +9,8 @@ import {
   CatalogoEmpresa,
   ComponenteLienzo,
   DisenoEmpresa,
+  DisenoGuardadoCarpeta,
+  DisenoLienzo,
   DocumentoEmpresa,
   DocumentoEmpresaForm,
   Empresa,
@@ -102,6 +104,81 @@ export class EmpresaService {
     );
   }
 
+  // Diseños del lienzo (menú, tarjeta, catálogo...), cada uno con su estado público.
+  listarDisenos(empresaId: string): Observable<DisenoLienzo[]> {
+    return this.http
+      .get<DisenoLienzo[]>(`${this.raiz}/${empresaId}/disenos`)
+      .pipe(catchError(() => of([])));
+  }
+
+  crearDiseno(empresaId: string, datos: Partial<DisenoLienzo>): Observable<DisenoLienzo> {
+    return this.http.post<DisenoLienzo>(`${this.raiz}/${empresaId}/disenos`, datos);
+  }
+
+  actualizarDiseno(empresaId: string, disenoId: string, datos: Partial<DisenoLienzo>): Observable<DisenoLienzo> {
+    return this.http.put<DisenoLienzo>(`${this.raiz}/${empresaId}/disenos/${disenoId}`, datos);
+  }
+
+  publicarDiseno(empresaId: string, disenoId: string, publico: boolean): Observable<DisenoLienzo> {
+    return this.http.patch<DisenoLienzo>(
+      `${this.raiz}/${empresaId}/disenos/${disenoId}/publicar?publico=${publico}`,
+      {},
+    );
+  }
+
+  borrarDiseno(empresaId: string, disenoId: string): Observable<void> {
+    return this.http.delete<void>(`${this.raiz}/${empresaId}/disenos/${disenoId}`);
+  }
+
+  piezasDiseno(empresaId: string, disenoId: string): Observable<ComponenteLienzo[]> {
+    return this.http
+      .get<ComponenteLienzo[]>(`${this.raiz}/${empresaId}/disenos/${disenoId}/componentes`)
+      .pipe(catchError(() => of([])));
+  }
+
+  // Alto del lienzo general de la empresa (sin diseño con nombre).
+  altoLienzo(empresaId: string): Observable<number> {
+    return this.http
+      .get<number>(`${this.raiz}/${empresaId}/disenos/alto`)
+      .pipe(catchError(() => of(900)));
+  }
+
+  guardarAltoLienzo(empresaId: string, alto: number): Observable<number> {
+    return this.http.put<number>(`${this.raiz}/${empresaId}/disenos/alto`, alto);
+  }
+
+  /** Vista previa con sesión: funciona aunque el diseño siga privado. */
+  disenoPrivado(slug: string): Observable<DisenoLienzo | null> {
+    return this.http
+      .get<DisenoLienzo>(`${this.raiz}/disenos/slug/${slug}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  disenoPublico(slug: string): Observable<DisenoLienzo | null> {
+    return this.http
+      .get<DisenoLienzo>(`${this.raiz}/public/diseno/${slug}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  /** Carpeta personal: todos los componentes que creé, con su enlace. */
+  misDisenos(): Observable<DisenoGuardadoCarpeta[]> {
+    return this.http
+      .get<DisenoGuardadoCarpeta[]>(`${this.raiz}/mis-disenos`)
+      .pipe(catchError(() => of([])));
+  }
+
+  miDiseno(componenteId: string): Observable<DisenoGuardadoCarpeta | null> {
+    return this.http
+      .get<DisenoGuardadoCarpeta>(`${this.raiz}/mis-disenos/${componenteId}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  cargarPiezaPublica(slug: string, componenteId: string): Observable<ComponenteLienzo | null> {
+    return this.http
+      .get<ComponenteLienzo>(`${this.raiz}/public/${slug}/componentes/${componenteId}`)
+      .pipe(catchError(() => of(null)));
+  }
+
   crear(form: EmpresaForm): Observable<Empresa> {
     return this.http.post<Empresa>(this.raiz, form);
   }
@@ -147,12 +224,26 @@ export class EmpresaService {
     return this.http.delete<void>(`${this.raiz}/${empresaId}/documentos/${documentoId}`);
   }
 
-  guardarLienzo(empresaId: string, componentes: ComponenteLienzo[]): Observable<ComponenteLienzo[]> {
-    return this.http.put<ComponenteLienzo[]>(`${this.raiz}/${empresaId}/componentes`, { componentes });
+  guardarLienzo(
+    empresaId: string,
+    componentes: ComponenteLienzo[],
+    disenoId?: string | null,
+  ): Observable<ComponenteLienzo[]> {
+    return this.http.put<ComponenteLienzo[]>(`${this.raiz}/${empresaId}/componentes`, {
+      componentes,
+      disenoId: disenoId ?? null,
+    });
   }
 
-  crearComponente(empresaId: string, componente: ComponenteLienzo): Observable<ComponenteLienzo> {
-    return this.http.post<ComponenteLienzo>(`${this.raiz}/${empresaId}/componentes`, componente);
+  crearComponente(
+    empresaId: string,
+    componente: ComponenteLienzo,
+    disenoId?: string | null,
+  ): Observable<ComponenteLienzo> {
+    return this.http.post<ComponenteLienzo>(`${this.raiz}/${empresaId}/componentes`, {
+      ...componente,
+      disenoId: disenoId ?? componente.disenoId ?? null,
+    });
   }
 
   moverComponente(empresaId: string, componente: ComponenteLienzo): Observable<ComponenteLienzo> {

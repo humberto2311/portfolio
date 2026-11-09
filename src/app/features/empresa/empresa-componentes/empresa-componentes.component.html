@@ -1,0 +1,153 @@
+<div class="carpeta">
+  <header class="carpeta__barra">
+    <a class="carpeta__volver" [routerLink]="urlPerfil">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>{{ modoPublico() ? 'Perfil de la empresa' : 'Mi empresa' }}</span>
+    </a>
+
+    <h1><i class="fa-solid fa-folder-open"></i> {{ tituloPagina }}</h1>
+
+    @if (modoPublico()) {
+      <a class="btn" [routerLink]="urlPerfil">
+        <i class="fa-solid fa-building"></i> Perfil
+      </a>
+    } @else {
+      <button type="button" class="btn btn--prim" (click)="empezarDiseno()">
+        <i class="fa-solid fa-plus"></i> Nuevo diseño
+      </button>
+    }
+  </header>
+
+  @if (!modoPublico() && creando()) {
+    <div class="nuevo">
+      <input
+        type="text"
+        maxlength="80"
+        placeholder="Nombre del diseño (Menú del día, Tarjeta, Catálogo…)"
+        [value]="nombreNuevo()"
+        (input)="escribirNombre($any($event.target).value)"
+        (keyup.enter)="crearDiseno()"
+        autofocus
+      />
+      <button type="button" class="btn btn--prim" [disabled]="ocupado() === 'nuevo'" (click)="crearDiseno()">
+        <i class="fa-solid fa-check"></i> Crear y abrir lienzo
+      </button>
+      <button type="button" class="btn" (click)="cancelarDiseno()">Cancelar</button>
+    </div>
+  }
+
+  @if (!modoPublico() && lienzos().length) {
+    <section class="lienzos">
+      <h2><i class="fa-solid fa-pen-ruler"></i> Tus lienzos</h2>
+      <ul>
+        @for (diseno of lienzos(); track diseno.id) {
+          <li class="lienzo-tarjeta" [class.lienzo-tarjeta--publico]="diseno.publico">
+            <header class="lienzo-tarjeta__cabecera">
+              <span class="lienzo-tarjeta__icono"><i class="fa-solid fa-window-maximize"></i></span>
+              <div class="lienzo-tarjeta__datos">
+                <strong>{{ diseno.nombre }}</strong>
+                <small>{{ diseno.componentes ?? 0 }} piezas · {{ diseno.publico ? 'público' : 'privado' }}</small>
+              </div>
+
+              <button
+                type="button"
+                class="switch"
+                [class.switch--on]="diseno.publico"
+                [disabled]="ocupado() === diseno.id"
+                (click)="alternarPublico(diseno)"
+                [title]="diseno.publico ? 'Público: cualquiera con el enlace lo ve' : 'Privado: solo tú'"
+              >
+                <span class="switch__bola"></span>
+                <span class="switch__texto">{{ diseno.publico ? 'Público' : 'Privado' }}</span>
+              </button>
+            </header>
+
+            <p class="lienzo-tarjeta__piezas">
+              @if ((diseno.componentes ?? 0) > 0) {
+                Este lienzo tiene {{ diseno.componentes }} pieza(s). Todo lo que esté dentro se edita, comparte y borra desde aquí.
+              } @else {
+                Lienzo vacío: ábrelo y añade tus componentes.
+              }
+            </p>
+
+            <div class="lienzo-tarjeta__acciones">
+              <button type="button" class="btn btn--mini btn--prim" (click)="editarLienzo(diseno)">
+                <i class="fa-solid fa-pen-to-square"></i> Editar
+              </button>
+              @if (diseno.publico) {
+                <a class="btn btn--mini" [routerLink]="diseno.enlace" target="_blank" rel="noopener">
+                  <i class="fa-solid fa-eye"></i> Abrir
+                </a>
+                <button type="button" class="btn btn--mini" (click)="copiarDiseno(diseno)">
+                  <i class="fa-solid fa-link"></i> Enlace
+                </button>
+              } @else {
+                <span class="btn btn--mini btn--mini-off" title="Ponlo público para compartirlo">
+                  <i class="fa-solid fa-link-slash"></i> Enlace
+                </span>
+              }
+              <button type="button" class="btn btn--mini btn--peligro" [disabled]="ocupado() === diseno.id" (click)="borrarDiseno(diseno)">
+                <i class="fa-solid fa-trash"></i> Borrar
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <p class="carpeta__pista">{{ subtitulo }}</p>
+
+  @if (aviso()) {
+    <p class="carpeta__aviso"><i class="fa-solid fa-link"></i> {{ aviso() }}</p>
+  }
+
+  @if (cargando()) {
+    <div class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando lienzos…</div>
+  } @else if (error()) {
+    <div class="estado">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <p>{{ error() }}</p>
+      <a class="btn" [routerLink]="urlPerfil">Volver</a>
+    </div>
+  } @else if (modoPublico()) {
+    <ul class="rejilla">
+      @for (diseno of publicos; track diseno.id) {
+        <li class="tarjeta">
+          <div class="tarjeta__barra">
+            <span class="tarjeta__empresa">
+              <span>{{ diseno.nombre.charAt(0) }}</span>
+              <strong>{{ diseno.nombre }}</strong>
+            </span>
+            <span class="tarjeta__tipo">{{ diseno.componentes ?? 0 }} piezas</span>
+          </div>
+          <div class="tarjeta__datos">
+            <strong>{{ diseno.nombre }}</strong>
+            @if (diseno.descripcion) { <small>{{ diseno.descripcion }}</small> }
+          </div>
+          <div class="tarjeta__acciones">
+            <a class="btn btn--mini" [routerLink]="diseno.enlace">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir
+            </a>
+          </div>
+        </li>
+      } @empty {
+        <li class="vacio">
+          <i class="fa-solid fa-box-open"></i>
+          <p>Esta empresa todavía no publicó ningún lienzo.</p>
+        </li>
+      }
+    </ul>
+  } @else {
+    @if (!lienzos().length) {
+      <div class="vacio">
+        <i class="fa-solid fa-window-maximize"></i>
+        <p>Todavía no tienes lienzos.</p>
+        <p class="vacio__pista">Crea uno para empezar: un menú, una tarjeta de presentación, un catálogo…</p>
+        <button type="button" class="btn btn--prim" (click)="empezarDiseno()">
+          <i class="fa-solid fa-plus"></i> Crear el primero
+        </button>
+      </div>
+    }
+  }
+</div>

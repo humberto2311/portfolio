@@ -12,11 +12,12 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize, tap } from 'rxjs/operators';
 
 import {
   ComponenteLienzo,
+  DisenoLienzo,
   ContenidoGaleria,
   ContenidoMenu,
   DisenoEmpresa,
@@ -32,6 +33,8 @@ import {
   LIENZO_ALTO,
   LIENZO_ANCHO,
   PALETA_MARCA,
+  PLANTILLA_HTML,
+  PLANTILLA_HTML_ESTATICA,
   contenidoInicial,
   estiloInicial,
   iconoComponente,
@@ -57,6 +60,10 @@ interface Arrastre {
   alto: number;
 }
 
+function marcoAlto(marco?: ElementRef<HTMLElement>): number {
+  return marco?.nativeElement?.clientHeight ?? 0;
+}
+
 type PanelLateral = 'componentes' | 'imagenes' | 'fuentes' | 'marca' | 'capas';
 
 @Component({
@@ -70,6 +77,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   private empresaSvc = inject(EmpresaService);
   private disenoSvc = inject(DisenoService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private platformId = inject(PLATFORM_ID);
 
   @ViewChild('marco') marco?: ElementRef<HTMLElement>;
@@ -79,6 +87,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   readonly alto = LIENZO_ALTO;
   readonly fuentes = FUENTES;
   readonly paleta = PALETA_MARCA;
+  readonly maxHtml = 380_000;
 
   readonly componentes = signal<ComponenteEditor[]>([]);
   readonly seleccionClave = signal<string | null>(null);
@@ -91,6 +100,26 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   readonly zoom = signal(1);
   readonly ajustarCuadricula = signal(true);
   readonly mostrarCuadricula = signal(true);
+  /** Cuántos cambios hay sin guardar: se usa para avisar antes de salir y para el autoguardado. */
+  readonly pendientes = signal(0);
+  /** Diseño en el que se está trabajando (null = lienzo general de la empresa). */
+  readonly disenoActivo = signal<DisenoLienzo | null>(null);
+  /** Paneles laterales plegados para ver el lienzo completo. */
+  readonly lateralPlegado = signal(false);
+  readonly inspectorPlegado = signal(false);
+  /** La ventana de propiedades se mueve, se achica y se agranda como cualquier ventana. */
+  readonly inspectorPos = signal({ x: 28, y: 28 });
+  readonly inspectorTam = signal({ ancho: 340, alto: 460 });
+  readonly inspectorMinimizado = signal(false);
+  readonly inspectorMaximizado = signal(false);
+  /** La guía de atajos arranca plegada para no tapar el lienzo. */
+  readonly ayudaAbierta = signal(false);
+  /** Ver el HTML de la pieza en grande, sin iframe de por medio. */
+  readonly mostrarCodigoHtml = signal(false);
+  /** Alto del lienzo en píxeles reales: se alarga hacia abajo y se guarda con el diseño. */
+  readonly altoVista = signal(LIENZO_ALTO);
+  /** Último alto guardado del lienzo general (evita guardar dos veces lo mismo). */
+  private altoExtraGuardado = 0;
 
   readonly escala = computed(() => Math.min(1.6, Math.max(0.16, this.escalaBase() * this.zoom())));
 
@@ -104,6 +133,8 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   disenoCss = '';
   erroresDiseno: string[] = [];
   guardandoMarca = false;
+  creandoDiseno = false;
+  private disenoGuardado: DisenoEmpresa | null = null;
 
   private arrastre: Arrastre | null = null;
   private modificados = new Set<string>();
@@ -112,6 +143,12 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   private posicionHistorial = -1;
   private contadorTemporal = 0;
   private ajustar = (): void => this.calcularEscala();
+  private temporizadorAutoguardado: any = null;
+  private temporizadorHtml: any = null;
+  private htmlPendiente: string | null = null;
+  private saliendo = (evento: BeforeUnloadEvent): void => {
+    if (this.pendientes() > 0) evento.preventDefault();
+  };
   private tecla = (evento: KeyboardEvent): void => this.alTeclado(evento);
 
   private readonly moverListener = (evento: PointerEvent): void => this.mover(evento);
@@ -138,6 +175,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.calcularEscala();
     window.addEventListener('resize', this.ajustar);
     window.addEventListener('keydown', this.tecla);
+    window.addEventListener('beforeunload', this.saliendo);
     setTimeout(() => this.calcularEscala(), 60);
   }
 
@@ -145,6 +183,15 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     if (isPlatformBrowser(this.platformId)) {
       window.removeEventListener('resize', this.ajustar);
       window.removeEventListener('keydown', this.tecla);
+      window.removeEventListener('beforeunload', this.saliendo);
+      clearTimeout(this.temporizadorAutoguardado);
+      clearTimeout(this.temporizadorHtml);
+
+      if (this.htmlPendiente !== null) {
+        const pendiente = this.htmlPendiente;
+        this.htmlPendiente = null;
+        this.asignar('html', pendiente);
+      }
       window.removeEventListener('pointermove', this.moverListener);
       window.removeEventListener('pointerup', this.soltarListener);
     }
@@ -169,6 +216,11 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
 
   get puedePublicar(): boolean {
     return Boolean(this.acceso?.publica);
+  }
+
+  /** Cualquiera que pueda crear piezas puede dejar su lienzo compartible. */
+  get puedePublicarLienzo(): boolean {
+    return this.puedeCrear || this.puedeEditar;
   }
 
   get mensajeBloqueo(): string {
@@ -231,6 +283,43 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     return slug ? `/empresa/${slug}` : '/empresa';
   }
 
+  /** Misma página pública, abierta con sesión: sirve de vista previa antes de publicar. */
+  get urlVistaPrevia(): string {
+    const slug = this.disenoActivo()?.slug;
+    return slug ? `/diseno/${slug}` : this.urlPublica;
+  }
+
+  /** Carpeta de componentes: menús, tarjetas y piezas con enlace propio. */
+  get urlCarpeta(): string {
+    return '/app/empresa/disenos';
+  }
+
+  /** Enlace público de una pieza concreta del lienzo. */
+  enlaceDe(componente: ComponenteEditor): string {
+    if (componente.enlace) return componente.enlace;
+    const slug = this.actual?.slug;
+    if (slug && componente.id) return `/empresa/${slug}/c/${componente.id}`;
+    return this.urlCarpeta;
+  }
+
+  /** Solo tiene enlace propio lo que está guardado y visible. */
+  puedeCompartir(componente: ComponenteEditor | null | undefined): boolean {
+    return Boolean(componente?.id && componente.visible);
+  }
+
+  copiarEnlaceComponente(componente: ComponenteEditor): void {
+    if (typeof window === 'undefined' || !navigator.clipboard?.writeText) {
+      this.error.set('Tu navegador no deja copiar el enlace. Cópialo desde la barra de direcciones.');
+      return;
+    }
+
+    const url = `${window.location.origin}${this.enlaceDe(componente)}`;
+    void navigator.clipboard
+      .writeText(url)
+      .then(() => this.aviso.set('Enlace del componente copiado.'))
+      .catch(() => this.error.set('No se pudo copiar el enlace.'));
+  }
+
   get textoLista(): string {
     return Array.isArray(this.borradorContenido?.items) ? this.borradorContenido.items.join('\n') : '';
   }
@@ -245,6 +334,287 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
 
   cambiarPanel(panel: PanelLateral): void {
     this.panelLateral.set(panel);
+    if (this.lateralPlegado()) this.lateralPlegado.set(false);
+  }
+
+  /**
+   * En el lienzo NO se crean diseños: se edita el diseño abierto (o el lienzo general).
+   * Si no hay diseño en la URL, se sigue trabajando sobre el lienzo general de la empresa.
+   */
+  nuevoDiseno(): void {
+    const empresa = this.actual;
+    if (!empresa) return;
+
+    if (this.disenoActivo()) {
+      this.recargar();
+      this.aviso.set(`Editando «${this.disenoActivo()?.nombre}».`);
+      return;
+    }
+
+    this.recargar();
+    this.aviso.set('Editando el lienzo general de la empresa.');
+  }
+
+  alternarLateral(): void {
+    this.lateralPlegado.update((valor) => !valor);
+    setTimeout(() => this.calcularEscala(), 80);
+  }
+
+  alternarInspector(): void {
+    this.inspectorPlegado.update((valor) => !valor);
+    setTimeout(() => this.calcularEscala(), 80);
+  }
+
+  /** Vista limpia: esconde los dos paneles para trabajar solo con la hoja. */
+  /** Rueda del ratón sobre el lienzo: Ctrl o Shift hace zoom, normal desplaza. */
+  alRodar(evento: WheelEvent): void {
+    if (!(evento.ctrlKey || evento.metaKey || evento.shiftKey)) return;
+
+    evento.preventDefault();
+
+    if (evento.deltaY < 0) this.acercar();
+    else this.alejar();
+  }
+
+  /** Arrastra la ventana de propiedades desde su cabecera. */
+  moverInspector(evento: PointerEvent): void {
+    if (typeof window === 'undefined') return;
+    if (this.inspectorMaximizado()) return;
+
+    const objetivo = evento.target as HTMLElement | null;
+    if (objetivo?.closest('button, input, a, textarea, select')) return;
+
+    evento.preventDefault();
+
+    const inicioX = evento.clientX;
+    const inicioY = evento.clientY;
+    const base = this.inspectorPos();
+
+    const mover = (movimiento: PointerEvent): void => {
+      const x = Math.max(0, Math.min(2400, base.x + movimiento.clientX - inicioX));
+      const y = Math.max(0, Math.min(2400, base.y + movimiento.clientY - inicioY));
+      this.inspectorPos.set({ x: Math.round(x), y: Math.round(y) });
+    };
+
+    const soltar = (): void => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+    };
+
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+  }
+
+  /** Redimensiona la ventana desde su esquina inferior derecha. */
+  redimensionarInspector(evento: PointerEvent): void {
+    if (typeof window === 'undefined' || this.inspectorMaximizado()) return;
+
+    evento.preventDefault();
+    evento.stopPropagation();
+
+    const inicioX = evento.clientX;
+    const inicioY = evento.clientY;
+    const base = this.inspectorTam();
+
+    const mover = (movimiento: PointerEvent): void => {
+      const ancho = Math.max(240, Math.min(720, base.ancho + movimiento.clientX - inicioX));
+      const alto = Math.max(180, Math.min(1200, base.alto + movimiento.clientY - inicioY));
+      this.inspectorTam.set({ ancho: Math.round(ancho), alto: Math.round(alto) });
+    };
+
+    const soltar = (): void => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+    };
+
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+  }
+
+  minimizarInspector(): void {
+    this.inspectorMinimizado.update((valor) => !valor);
+    if (this.inspectorMaximizado()) this.inspectorMaximizado.set(false);
+  }
+
+  maximizarInspector(): void {
+    this.inspectorMaximizado.update((valor) => !valor);
+    if (this.inspectorMaximizado()) this.inspectorMinimizado.set(false);
+  }
+
+  cerrarInspector(): void {
+    this.inspectorPlegado.set(true);
+  }
+
+  /** Estilo de la ventana: posición, tamaño y estado. */
+  get estiloInspector(): Record<string, string> {
+    if (this.inspectorMaximizado()) {
+      return { left: '8px', top: '8px', right: '8px', bottom: '8px', width: 'auto', height: 'auto' };
+    }
+
+    return {
+      left: `${this.inspectorPos().x}px`,
+      top: `${this.inspectorPos().y}px`,
+      width: `${this.inspectorTam().ancho}px`,
+      height: this.inspectorMinimizado() ? 'auto' : `${this.inspectorTam().alto}px`,
+    };
+  }
+
+  /**
+   * Deja el lienzo compartible: marca sus piezas como visibles, lo pone público
+   * y publica la empresa (sin empresa publicada el enlace no carga).
+   */
+  publicarLienzo(): void {
+    const empresa = this.actual;
+    if (!empresa) return;
+
+    this.guardando.set(true);
+
+    const visibles = this.componentes().map((item) => {
+      if (!item.visible) this.modificados.add(item.clave);
+      return { ...item, visible: true };
+    });
+
+    this.componentes.set(visibles);
+
+    const publicarEmpresa = (): void => {
+      this.empresaSvc.publicar(empresa.id, true).subscribe({
+        next: () => {
+          this.guardando.set(false);
+          this.aviso.set('Lienzo publicado: sus piezas ya se ven en el enlace público.');
+          this.pendientes.set(0);
+        },
+        error: (err) => {
+          this.guardando.set(false);
+          this.error.set(mensajeDeError(err, 'No se pudo publicar la empresa.'));
+        },
+      });
+    };
+
+    const diseno = this.disenoActivo();
+
+    // 1) Si hay diseño con nombre: primero se pone público (así las piezas nacen visibles).
+    const conDiseno = (despues: () => void): void => {
+      if (!diseno) {
+        despues();
+        return;
+      }
+
+      this.empresaSvc.publicarDiseno(empresa.id, diseno.id, true).subscribe({
+        next: (actualizado) => {
+          this.disenoActivo.set(actualizado);
+          despues();
+        },
+        error: () => despues(),
+      });
+    };
+
+    // 2) Se guarda el lienzo con todas las piezas visibles y se adopta la respuesta del servidor.
+    const guardar = (): void => {
+      this.empresaSvc
+        .guardarLienzo(empresa.id, visibles.map((item) => this.aComponente(item)), diseno?.id ?? null)
+        .subscribe({
+          next: (guardados) => {
+            this.modificados.clear();
+            this.eliminados.clear();
+            this.pendientes.set(0);
+
+            if (guardados?.length) {
+              this.componentes.set(
+                guardados.map((fila) => ({ ...fila, clave: fila.id ?? `tmp-${++this.contadorTemporal}` })),
+              );
+            }
+
+            publicarEmpresa();
+          },
+          error: (err) => {
+            this.guardando.set(false);
+            this.error.set(mensajeDeError(err, 'No se pudo guardar el lienzo antes de publicar.'));
+          },
+        });
+    };
+
+    conDiseno(guardar);
+  }
+
+  alternarAyuda(): void {
+    this.ayudaAbierta.update((valor) => !valor);
+  }
+
+  /** Arranca el arrastre del borde inferior de la hoja para cambiar su alto. */
+  empezarAlto(evento: PointerEvent): void {
+    if (typeof window === 'undefined') return;
+
+    evento.preventDefault();
+    evento.stopPropagation();
+
+    const inicioY = evento.clientY;
+    const altoInicial = this.altoVista();
+    const escala = this.escala() || 1;
+
+    const mover = (movimiento: PointerEvent): void => {
+      const delta = (movimiento.clientY - inicioY) / escala;
+      const alto = Math.max(LIENZO_ALTO, Math.min(6000, altoInicial + delta));
+      this.altoVista.set(Math.round(alto));
+    };
+
+    const soltar = (): void => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('pointerup', soltar);
+      // El alto se guarda con el diseño para que la página pública use el mismo espacio.
+      this.guardarAlto();
+    };
+
+    window.addEventListener('pointermove', mover);
+    window.addEventListener('pointerup', soltar);
+  }
+
+  /** Vuelve a la hoja clásica 1200 × 900 (útil si se alargó demasiado). */
+  restablecerAlto(): void {
+    this.altoVista.set(LIENZO_ALTO);
+    this.guardarAlto();
+  }
+
+  get altoHoja(): number {
+    return this.altoVista();
+  }
+
+  get altoHojaAjustado(): boolean {
+    return this.altoVista() > LIENZO_ALTO;
+  }
+
+  /** Guarda el alto del lienzo en el diseño activo (o en la empresa si no hay diseño). */
+  private guardarAlto(): void {
+    const alto = this.altoVista();
+    const diseno = this.disenoActivo();
+    const empresa = this.actual;
+
+    if (!empresa) return;
+
+    if (diseno) {
+      this.disenoActivo.set({ ...diseno, altoLienzo: alto });
+      this.empresaSvc.actualizarDiseno(empresa.id, diseno.id, { altoLienzo: alto }).subscribe({
+        error: () => this.error.set('No se pudo guardar el alto del lienzo.'),
+      });
+      return;
+    }
+
+    if (this.altoExtraGuardado === alto) return;
+    this.altoExtraGuardado = alto;
+
+    this.empresaSvc.guardarAltoLienzo(empresa.id, alto).subscribe({
+      error: () => this.error.set('No se pudo guardar el alto del lienzo.'),
+    });
+  }
+
+  alternarVistaLimpia(): void {
+    const limpio = this.lateralPlegado() && this.inspectorPlegado();
+    this.lateralPlegado.set(!limpio);
+    this.inspectorPlegado.set(!limpio);
+    setTimeout(() => this.calcularEscala(), 80);
+  }
+
+  get vistaLimpia(): boolean {
+    return this.lateralPlegado() && this.inspectorPlegado();
   }
 
   icono(tipo: TipoComponente | string): string {
@@ -263,6 +633,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.seleccionClave.set(componente.clave);
     this.borradorContenido = leerJson<any>(componente.contenido, {});
     this.borradorEstilo = leerJson<any>(componente.estilo, {});
+    if (this.inspectorPlegado()) this.inspectorPlegado.set(false);
   }
 
   deseleccionar(): void {
@@ -310,6 +681,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.componentes.update((lista) => [...lista, componente]);
     this.seleccionar(componente);
+    this.sentarComponente(componente);
     this.empujarHistorial();
     this.error.set(null);
   }
@@ -322,6 +694,17 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
 
     this.borradorContenido = { ...this.borradorContenido, url };
     this.aplicarContenido();
+  }
+
+  /** Deja el componente listo para trabajar: agranda la hoja hacia abajo si no cabe. */
+  private sentarComponente(componente: ComponenteEditor): void {
+    const altoNecesario = componente.y + componente.alto + 140;
+
+    if (altoNecesario > this.altoVista()) {
+      this.altoVista.set(Math.min(6000, Math.round(altoNecesario)));
+      this.guardarAlto();
+      setTimeout(() => this.calcularEscala(), 30);
+    }
   }
 
   duplicar(): void {
@@ -548,6 +931,180 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.cargarImagenEn(input, (url) => this.agregarImagen(url));
   }
 
+  get largoHtml(): number {
+    return (this.borradorContenido?.html ?? '').length;
+  }
+
+  /** El HTML se guarda tal cual: el backend lo limpia y la vista lo publica en un iframe aislado. */
+  cambiarHtml(valor: string): void {
+    const componente = this.seleccionado;
+    if (!componente || !this.puedeTocar(componente)) return;
+
+    if ((valor ?? '').length > this.maxHtml) {
+      this.error.set('El HTML es muy grande. Divídelo en varias piezas o carga imágenes por URL.');
+    }
+
+    this.htmlPendiente = valor ?? '';
+
+    clearTimeout(this.temporizadorHtml);
+    this.temporizadorHtml = setTimeout(() => {
+      if (this.htmlPendiente === null) return;
+      const pendiente = this.htmlPendiente;
+      this.htmlPendiente = null;
+      this.asignar('html', pendiente);
+      this.refrescar();
+    }, 250);
+  }
+
+  htmlDesdeArchivo(input: HTMLInputElement): void {
+    const archivo = input.files?.[0];
+    input.value = '';
+    if (!archivo) return;
+
+    if (!/\.html?$/i.test(archivo.name)) {
+      this.error.set('El archivo debe ser .html');
+      return;
+    }
+
+    if (archivo.size > this.maxHtml) {
+      this.error.set('El archivo es muy grande. Divídelo en varias piezas.');
+      return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      this.error.set(null);
+      this.cambiarHtml(String(lector.result ?? ''));
+    };
+    lector.onerror = () => this.error.set('No se pudo leer el archivo.');
+    lector.readAsText(archivo);
+  }
+
+  async pegarHtmlDelPortapapeles(): Promise<void> {
+    if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
+      this.error.set('Tu navegador no deja leer el portapapeles. Pega dentro del cuadro de código.');
+      return;
+    }
+
+    try {
+      const texto = await navigator.clipboard.readText();
+      if (!texto.trim()) {
+        this.error.set('El portapapeles está vacío.');
+        return;
+      }
+      this.error.set(null);
+      this.cambiarHtml(texto);
+    } catch {
+      this.error.set('No se pudo leer el portapapeles. Pega dentro del cuadro de código.');
+    }
+  }
+
+  usarPlantillaHtml(): void {
+    this.cambiarHtml(this.soloDisenoHtml ? PLANTILLA_HTML_ESTATICA : PLANTILLA_HTML);
+  }
+
+  /** true cuando la pieza se limita a HTML + CSS, sin scripts ni controles. */
+  get soloDisenoHtml(): boolean {
+    return this.borradorContenido?.sinScripts === true;
+  }
+
+  /** Cambia el modo de la pieza sin tocar lo que ya está escrito en el cuadro. */
+  alternarSoloDiseno(valor: boolean): void {
+    const componente = this.seleccionado;
+    if (!componente || !this.puedeTocar(componente)) return;
+
+    this.borradorContenido = { ...(this.borradorContenido ?? {}), sinScripts: valor };
+    this.asignar('sinScripts', valor);
+
+    this.aviso.set(
+      valor
+        ? 'Modo solo diseño: al guardar se quitarán scripts y controles (botones, acordeones).'
+        : 'Modo interactivo: el HTML puede traer sus propios scripts.',
+    );
+  }
+
+  /** Pieza lista para pintar: el seleccionado se pinta desde el borrador para verlo al escribir. */
+  vistaDe(componente: ComponenteEditor): ComponenteLienzo {
+    if (this.seleccionClave() !== componente.clave) return componente;
+
+    return { ...componente, contenido: JSON.stringify(this.borradorContenido ?? {}) };
+  }
+
+  alternarCodigoHtml(): void {
+    this.mostrarCodigoHtml.update((valor) => !valor);
+  }
+
+  /** Texto del HTML guardado en la pieza seleccionada (para revisarlo sin el iframe). */
+  get codigoHtmlGuardado(): string {
+    const componente = this.seleccionado;
+    if (!componente) return '';
+    return String(this.borradorContenido?.html ?? '').trim() || leerJson<any>(componente.contenido, {}).html || '';
+  }
+
+  /**
+   * Repara el HTML que llegó escapado (\n y \" literales) y lo deja limpio en el cuadro.
+   * Sirve para piezas viejas que se guardaron doblemente codificadas.
+   */
+  desescaparHtmlGuardado(): void {
+    const texto = this.codigoHtmlGuardado;
+    if (!texto) return;
+
+    const limpio = texto
+      .replace(/\\r\\n/g, '\n')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'");
+
+    this.cambiarHtml(limpio);
+    this.aviso.set('Saltos de línea reparados. Guarda para aplicarlo.');
+  }
+
+  /** Estira la pieza HTML hasta el alto del lienzo: evita que el contenido quede fuera. */
+  ajustarAltaHtml(): void {
+    const componente = this.seleccionado;
+    if (!componente || !this.puedeTocar(componente)) return;
+
+    const alto = Math.max(320, this.altoHoja - componente.y - 24);
+    this.cambiarGeometria('alto', alto);
+    this.refrescar();
+  }
+
+  /** Estado legible de la pieza HTML: cuánto mide y en qué modo está. */
+  get resumenContenidoHtml(): string {
+    const largo = (this.borradorContenido?.html ?? '').length;
+    const modo = this.soloDisenoHtml ? 'solo diseño' : 'interactivo';
+    const ajuste = this.ajusteHtml === 'seccion' ? 'solo sección' : 'cubre la pieza';
+    const guardado = this.seleccionado?.id ? 'guardada' : 'sin guardar';
+
+    return largo
+      ? `${largo} caracteres · ${modo} · ${ajuste} · ${guardado}`
+      : `HTML vacío · ${modo} · ${ajuste} · ${guardado}`;
+  }
+
+  /** 'cubrir' = el HTML llena toda la pieza; 'seccion' = ocupa solo su contenido. */
+  elegirAjusteHtml(valor: 'cubrir' | 'seccion'): void {
+    const componente = this.seleccionado;
+    if (!componente || !this.puedeTocar(componente)) return;
+
+    this.asignar('ajuste', valor);
+    this.aviso.set(
+      valor === 'cubrir'
+        ? 'El HTML llenará toda la pieza.'
+        : 'El HTML ocupará solo su contenido; el resto de la pieza queda libre.',
+    );
+  }
+
+  get ajusteHtml(): 'cubrir' | 'seccion' {
+    return this.borradorContenido?.ajuste === 'seccion' ? 'seccion' : 'cubrir';
+  }
+
+  /** Deja en el cuadro la plantilla de solo diseño, sin scripts. */
+  cargarPlantillaDiseno(): void {
+    this.cambiarHtml(PLANTILLA_HTML_ESTATICA);
+    if (!this.soloDisenoHtml) this.asignar('sinScripts', true);
+  }
+
   aplicarFuente(valor: string): void {
     if (!this.seleccionado) {
       this.fuenteNueva = valor;
@@ -564,6 +1121,30 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.disenoSecundario = color;
   }
 
+  /**
+   * Los componentes los guarda el autoguardado del lienzo, pero la marca (colores, fondo y CSS)
+   * se guarda en otra llamada. Sin esto el diseño se perdía al recargar.
+   */
+  guardarMarcaSiCambio(): void {
+    const empresa = this.actual;
+    if (!empresa || !this.puedeEditar || this.guardandoMarca) return;
+
+    const acento = this.disenoAcento || null;
+    const secundario = this.disenoSecundario || null;
+    const fondo = this.disenoFondo || null;
+    const css = this.disenoCss || null;
+
+    const guardado = this.disenoGuardado;
+    const igual =
+      (guardado?.acento ?? null) === acento &&
+      (guardado?.secundario ?? null) === secundario &&
+      (guardado?.fondoUrl ?? null) === fondo &&
+      (guardado?.css ?? null) === css;
+
+    if (igual) return;
+    this.guardarMarca(true);
+  }
+
   fondoDesdeArchivo(input: HTMLInputElement): void {
     this.cargarImagenEn(input, (url) => (this.disenoFondo = url), 1_900_000);
   }
@@ -572,21 +1153,23 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.disenoFondo = '';
   }
 
-  guardarMarca(): void {
+  guardarMarca(automatico = false): void {
     const empresa = this.actual;
-    if (!empresa || !this.puedeEditar) return;
+    if (!empresa || !this.puedeEditar || this.guardandoMarca) return;
 
     this.guardandoMarca = true;
     this.erroresDiseno = [];
 
+    const enviado: DisenoEmpresa = {
+      acento: this.disenoAcento || null,
+      secundario: this.disenoSecundario || null,
+      fondoUrl: this.disenoFondo || null,
+      css: this.disenoCss || null,
+      activo: true,
+    };
+
     this.empresaSvc
-      .guardarDiseno(empresa.id, {
-        acento: this.disenoAcento || null,
-        secundario: this.disenoSecundario || null,
-        fondoUrl: this.disenoFondo || null,
-        css: this.disenoCss || null,
-        activo: true,
-      })
+      .guardarDiseno(empresa.id, enviado)
       .pipe(finalize(() => (this.guardandoMarca = false)))
       .subscribe({
         next: (diseno) => {
@@ -594,10 +1177,19 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
             this.erroresDiseno = diseno.errores;
             return;
           }
-          this.disenoSvc.aplicarAjeno(this.aDiseno(diseno));
-          this.aviso.set('Identidad de marca guardada.');
+
+          this.disenoGuardado = {
+            acento: diseno.acento ?? enviado.acento,
+            secundario: diseno.secundario ?? enviado.secundario,
+            fondoUrl: diseno.fondoUrl ?? enviado.fondoUrl,
+            css: diseno.css ?? enviado.css,
+            activo: diseno.activo,
+          };
+
+          this.disenoSvc.aplicarAjeno(this.aDiseno(this.disenoGuardado));
+          this.aviso.set(automatico ? 'Marca guardada automáticamente.' : 'Identidad de marca guardada.');
         },
-        error: (err) => this.erroresDiseno = [mensajeDeError(err, 'No se pudo guardar la marca.')],
+        error: (err) => (this.erroresDiseno = [mensajeDeError(err, 'No se pudo guardar la marca.')]),
       });
   }
 
@@ -630,6 +1222,8 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     const empresa = this.actual;
     if (!empresa || !this.puedeCrear) return;
 
+    this.guardarMarcaSiCambio();
+
     if (this.puedeEditar) {
       this.guardarTodo(empresa);
       return;
@@ -642,6 +1236,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     const empresa = this.actual;
     if (!empresa || !this.puedePublicar) return;
 
+    this.guardarMarcaSiCambio();
     this.guardando.set(true);
     this.error.set(null);
 
@@ -661,7 +1256,7 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     };
 
     if (guardado) {
-      this.empresaSvc.guardarLienzo(empresa.id, guardado).subscribe({
+      this.empresaSvc.guardarLienzo(empresa.id, guardado, this.disenoActivo()?.id ?? null).subscribe({
         next: () => finalizar(),
         error: (err) => {
           this.guardando.set(false);
@@ -860,12 +1455,58 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.error.set(null);
 
     this.empresaSvc.cargarPanel(id).subscribe((panel) => {
-      this.cargando.set(false);
       if (!panel) {
+        this.cargando.set(false);
         this.error.set('No se pudo cargar el lienzo. Revisa tu conexión o tus permisos.');
         return;
       }
+
       this.aplicarPanel(panel);
+      this.cargarDisenoDeLaRuta(id);
+    });
+  }
+
+  /** Si la URL trae ?diseno=, se trabaja sobre ese diseño; si no, sobre el lienzo general. */
+  private cargarDisenoDeLaRuta(empresaId: string): void {
+    const disenoId = this.route.snapshot.queryParamMap.get('diseno');
+
+    if (!disenoId) {
+      this.empresaSvc.altoLienzo(empresaId).subscribe((alto) => {
+        this.altoExtraGuardado = alto;
+        this.altoVista.set(alto > 0 ? alto : LIENZO_ALTO);
+        this.cargando.set(false);
+        setTimeout(() => this.calcularEscala(), 60);
+      });
+      return;
+    }
+
+    this.empresaSvc.listarDisenos(empresaId).subscribe((lista) => {
+      const diseno = lista.find((item) => item.id === disenoId) ?? null;
+      this.disenoActivo.set(diseno);
+
+      if (!diseno) {
+        this.cargando.set(false);
+        this.error.set('Ese diseño ya no existe. Vuelve a Mis diseños.');
+        return;
+      }
+
+      this.altoVista.set(diseno.altoLienzo && diseno.altoLienzo > 0 ? diseno.altoLienzo : LIENZO_ALTO);
+
+      this.empresaSvc.piezasDiseno(empresaId, disenoId).subscribe((piezas) => {
+        this.componentes.set(
+          piezas.map((componente, indice) => ({
+            ...componente,
+            clave: componente.id ?? `tmp-${++this.contadorTemporal}-${indice}`,
+            visible: componente.visible ?? true,
+            detras: componente.detras ?? false,
+          })),
+        );
+        this.modificados.clear();
+        this.eliminados.clear();
+        this.deseleccionar();
+        this.iniciarHistorial();
+        this.cargando.set(false);
+      });
     });
   }
 
@@ -888,6 +1529,13 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.disenoSecundario = panel.diseno.secundario ?? '#0ea5e9';
     this.disenoFondo = panel.diseno.fondoUrl ?? '';
     this.disenoCss = panel.diseno.css ?? '';
+    this.disenoGuardado = {
+      acento: panel.diseno.acento ?? null,
+      secundario: panel.diseno.secundario ?? null,
+      fondoUrl: panel.diseno.fondoUrl ?? null,
+      css: panel.diseno.css ?? null,
+      activo: panel.diseno.activo,
+    };
 
     this.disenoSvc.aplicarAjeno(this.aDiseno(panel.diseno));
     setTimeout(() => this.calcularEscala(), 60);
@@ -902,23 +1550,29 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  private guardarTodo(empresa: Empresa): void {
+  private guardarTodo(empresa: Empresa, automatico = false): void {
     this.guardando.set(true);
     this.error.set(null);
 
     this.empresaSvc
-      .guardarLienzo(empresa.id, this.componentes().map((item) => this.aComponente(item)))
+      .guardarLienzo(
+        empresa.id,
+        this.componentes().map((item) => this.aComponente(item)),
+        this.disenoActivo()?.id ?? null,
+      )
       .pipe(finalize(() => (this.guardando.set(false))))
       .subscribe({
-        next: () => {
-          this.aviso.set('Lienzo guardado.');
-          this.recargar();
+        next: (guardados) => {
+          this.adoptarIdentidades(guardados);
+          this.aviso.set(automatico ? 'Guardado automático.' : 'Lienzo guardado.');
+          // No se recarga el panel: si llega mientras escribes, borraría lo que estás editando.
+          this.marcarGuardado();
         },
-        error: (err) => this.error.set(mensajeDeError(err, 'No se pudo guardar el lienzo.')),
+        error: (err) => this.fallar(err, automatico),
       });
   }
 
-  private guardarParcial(empresa: Empresa, despues?: () => void): void {
+  private guardarParcial(empresa: Empresa, despues?: () => void, automatico = false): void {
     if (!this.puedeCrear) return;
 
     const nuevos = this.componentes().filter((item) => !item.id);
@@ -933,21 +1587,33 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.guardando.set(true);
     this.error.set(null);
 
-    const pendientes = [
-      ...nuevos.map((item) => () => this.empresaSvc.crearComponente(empresa.id, this.aComponente(item))),
+    // Los nuevos primero: el servidor devuelve su id y así los siguientes pasos ya lo conocen.
+    const tareas: (() => any)[] = [
+      ...nuevos.map((item) => () =>
+        this.empresaSvc
+          .crearComponente(empresa.id, this.aComponente(item), this.disenoActivo()?.id ?? null)
+          .pipe(
+          tap((creado) => this.asignarId(item.clave, creado)),
+        ),
+      ),
       ...modificados.map((item) => () => this.empresaSvc.moverComponente(empresa.id, this.aComponente(item))),
       ...eliminados.map((id) => () => this.empresaSvc.borrarComponente(empresa.id, id)),
     ];
 
-    this.ejecutarSecuencia(pendientes, () => {
+    this.ejecutarSecuencia(tareas, () => {
       this.guardando.set(false);
-      this.aviso.set('Cambios guardados como borrador. Un editor los publicará.');
+      this.marcarGuardado();
+      this.aviso.set(
+        automatico
+          ? 'Borrador guardado automáticamente.'
+          : 'Cambios guardados como borrador. Un editor los publicará.',
+      );
       if (despues) despues();
-      else this.recargar();
-    });
+      else if (!automatico) this.recargar();
+    }, automatico);
   }
 
-  private ejecutarSecuencia(tareas: (() => any)[], fin: () => void): void {
+  private ejecutarSecuencia(tareas: (() => any)[], fin: () => void, automatico = false): void {
     let indice = 0;
 
     const siguiente = (): void => {
@@ -959,14 +1625,51 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
       const tarea = tareas[indice++];
       tarea().subscribe({
         next: () => siguiente(),
-        error: (err: any) => {
-          this.guardando.set(false);
-          this.error.set(mensajeDeError(err, 'No se pudieron guardar todos los cambios.'));
-        },
+        error: (err: any) => this.fallar(err, automatico),
       });
     };
 
     siguiente();
+  }
+
+  /** Tras guardar no se recarga el panel: se limpia la marca de cambios y se sigue editando. */
+  private marcarGuardado(): void {
+    this.modificados.clear();
+    this.eliminados.clear();
+    this.pendientes.set(0);
+    clearTimeout(this.temporizadorAutoguardado);
+  }
+
+  private fallar(err: any, automatico: boolean): void {
+    this.guardando.set(false);
+    this.error.set(mensajeDeError(err, 'No se pudo guardar el lienzo. Revisa tu sesión y vuelve a intentar.'));
+    if (!automatico) this.pendientes.update((valor) => Math.max(valor, 1));
+  }
+
+  private asignarId(clave: string, creado: ComponenteLienzo): void {
+    if (!creado?.id) return;
+
+    this.componentes.update((lista) =>
+      lista.map((item) => (item.clave === clave ? { ...item, id: creado.id } : item)),
+    );
+  }
+
+  /** Después del guardado completo el servidor devuelve los ids: se enlazan por posición de envío. */
+  private adoptarIdentidades(guardados: ComponenteLienzo[]): void {
+    if (!guardados?.length) return;
+
+    this.componentes.update((lista) =>
+      lista.map((item) => {
+        if (item.id) return item;
+        const coincidencia = guardados.find(
+          (guardado) =>
+            guardado.tipo === item.tipo &&
+            guardado.x === Math.round(item.x) &&
+            guardado.y === Math.round(item.y),
+        );
+        return coincidencia?.id ? { ...item, id: coincidencia.id } : item;
+      }),
+    );
   }
 
   private aComponente(componente: ComponenteEditor): ComponenteLienzo {
@@ -1008,6 +1711,39 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private modificado(clave: string): void {
     this.modificados.add(clave);
+    this.pendientes.update((valor) => valor + 1);
+    this.programarAutoguardado();
+  }
+
+  /**
+   * Guarda solo, dos segundos después del último cambio. Es lo que evita perder el diseño
+   * cuando se recarga, se cierra la pestaña o el editor se queda sin sesión.
+   */
+  private programarAutoguardado(): void {
+    clearTimeout(this.temporizadorAutoguardado);
+
+    this.temporizadorAutoguardado = setTimeout(() => {
+      const empresa = this.actual;
+
+      if (!empresa || this.guardando() || !this.puedeCrear) return;
+      if (!this.modificados.size && !this.eliminados.size && !this.hayNuevos()) return;
+
+      this.aviso.set(null);
+
+      this.guardarMarcaSiCambio();
+
+      // Se guarda por partes (crear, mover, borrar) para que un fallo no arrastre todo el lienzo.
+      this.guardarParcial(empresa, undefined, true);
+    }, 2000);
+  }
+
+  private hayNuevos(): boolean {
+    return this.componentes().some((item) => !item.id);
+  }
+
+  /** Reintento manual: guarda todo lo pendiente con el botón Guardar. */
+  guardarAhora(): void {
+    this.guardar();
   }
 
   private siguienteCapa(): number {
@@ -1053,9 +1789,15 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     const marco = this.marco?.nativeElement;
     if (!marco) return;
 
-    const disponible = marco.clientWidth - 24;
+    const disponible = marco.clientWidth - 32;
+    const altoHoja = this.altoHoja;
+
     if (disponible <= 0) return;
-    this.escalaBase.set(Math.max(0.18, Math.min(1, disponible / LIENZO_ANCHO)));
+
+    // El ancho manda: la hoja usa todo el ancho y el alto se recorre con desplazamiento.
+    const escala = disponible / LIENZO_ANCHO;
+
+    this.escalaBase.set(Math.max(0.12, Math.min(1.6, escala)));
   }
 
   private cargarImagenEn(input: HTMLInputElement, asignar: (url: string) => void, maximo = 1_400_000): void {

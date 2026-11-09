@@ -4,6 +4,7 @@ import {
   ContenidoContacto,
   ContenidoGaleria,
   ContenidoHorario,
+  ContenidoHtml,
   ContenidoImagen,
   ContenidoLista,
   ContenidoMenu,
@@ -14,6 +15,152 @@ import {
   RolEmpresa,
   TipoComponente,
 } from '../../core/models/empresa.model';
+
+/**
+ * Plantilla que se carga al añadir un componente HTML interactivo.
+ * Es un documento completo: se publica dentro de un iframe aislado, así que
+ * puede traer sus propios <style> y <script> sin tocar el resto del sitio.
+ */
+export const PLANTILLA_HTML = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #f8fafc;
+      padding: 24px;
+    }
+    .tarjeta {
+      max-width: 520px;
+      padding: 28px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .18);
+      backdrop-filter: blur(14px);
+      text-align: center;
+    }
+    h1 { font-size: 24px; margin: 0 0 10px; }
+    p { margin: 0 0 18px; line-height: 1.55; color: #cbd5f5; }
+    button {
+      border: 0;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #38bdf8;
+      color: #06202e;
+    }
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Pega aquí tu HTML interactivo</h1>
+    <p>Reemplaza este contenido por el que te dio la IA. Puedes usar tus propios estilos y scripts.</p>
+    <button type="button" id="saludo">Probar interacción</button>
+  </div>
+  <script>
+    const boton = document.getElementById('saludo');
+    if (boton) {
+      boton.addEventListener('click', () => {
+        boton.textContent = '¡Funciona!';
+      });
+    }
+  </script>
+</body>
+</html>`;
+
+
+/**
+ * Plantilla para diseños hechos a mano: solo HTML y CSS, cero JavaScript.
+ * Es la que se carga al activar «Solo diseño (sin scripts)».
+ */
+export const PLANTILLA_HTML_ESTATICA = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 28px;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .marco {
+      max-width: 760px;
+      margin: 0 auto;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #111c31;
+      border: 1px solid #22304a;
+    }
+    .portada {
+      padding: 32px 26px;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+      color: #fff;
+    }
+    .portada h1 { margin: 0 0 6px; font-size: 28px; }
+    .portada p { margin: 0; opacity: .92; font-size: 14px; }
+    .cuerpo { padding: 22px 26px; }
+    .fila {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid #22304a;
+      font-size: 14px;
+    }
+    .fila:last-child { border-bottom: 0; }
+    .fila b { display: block; margin-bottom: 3px; }
+    .fila small { color: #94a3b8; }
+    .precio { color: #38bdf8; font-weight: 700; white-space: nowrap; }
+    .pie {
+      padding: 14px 26px;
+      background: #0b1424;
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="marco">
+    <div class="portada">
+      <h1>Nombre de tu empresa</h1>
+      <p>Escribe aquí el título y el subtítulo de tu diseño</p>
+    </div>
+    <div class="cuerpo">
+      <div class="fila">
+        <span><b>Primer ítem</b><small>Descripción corta</small></span>
+        <span class="precio">$00.000</span>
+      </div>
+      <div class="fila">
+        <span><b>Segundo ítem</b><small>Descripción corta</small></span>
+        <span class="precio">$00.000</span>
+      </div>
+      <div class="fila">
+        <span><b>Tercer ítem</b><small>Descripción corta</small></span>
+        <span class="precio">$00.000</span>
+      </div>
+    </div>
+    <div class="pie">
+      <span>Horario de atención</span>
+      <span>Teléfono / WhatsApp</span>
+    </div>
+  </div>
+</body>
+</html>`;
 
 export const LIENZO_ANCHO = 1200;
 export const LIENZO_ALTO = 900;
@@ -161,6 +308,14 @@ export function contenidoInicial(tipo: TipoComponente): string | null {
     }
     case 'SEPARADOR':
       return null;
+    case 'HTML': {
+      const contenido: ContenidoHtml = {
+        html: PLANTILLA_HTML,
+        alto: 420,
+        titulo: 'HTML interactivo',
+      };
+      return jsonDe(contenido);
+    }
   }
 }
 
@@ -202,6 +357,8 @@ export function tamanoInicial(tipo: TipoComponente): { ancho: number; alto: numb
       return { ancho: 360, alto: 220 };
     case 'SEPARADOR':
       return { ancho: 460, alto: 40 };
+    case 'HTML':
+      return { ancho: 560, alto: 420 };
   }
 }
 
@@ -227,6 +384,8 @@ export function iconoComponente(tipo: TipoComponente | string): string {
       return 'fa-solid fa-clock';
     case 'SEPARADOR':
       return 'fa-solid fa-minus';
+    case 'HTML':
+      return 'fa-solid fa-code';
     default:
       return 'fa-solid fa-shapes';
   }

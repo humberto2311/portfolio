@@ -14,7 +14,8 @@ export type TipoComponente =
   | 'GALERIA'
   | 'CONTACTO'
   | 'HORARIO'
-  | 'SEPARADOR';
+  | 'SEPARADOR'
+  | 'HTML';
 
 export interface OpcionEmpresa {
   valor: string;
@@ -177,6 +178,10 @@ export interface ComponenteLienzo {
   detras: boolean;
   visible: boolean;
   propio?: boolean | null;
+  /** Ruta pública del componente: /empresa/{slug}/c/{id}. */
+  enlace?: string | null;
+  /** Diseño al que pertenece la pieza. */
+  disenoId?: string | null;
 }
 
 export interface ContenidoTexto {
@@ -242,6 +247,17 @@ export interface ContenidoContacto {
   direccion?: string;
 }
 
+export interface ContenidoHtml {
+  /** Documento HTML completo (normalmente generado por una IA) que se publica aislado. */
+  html: string;
+  alto?: number;
+  titulo?: string;
+  /** Solo diseño: HTML + CSS sin JavaScript ni controles (acordeones, botones, selects). */
+  sinScripts?: boolean;
+  /** cubrir = el HTML llena toda la pieza; seccion = ocupa solo su contenido y el resto queda libre. */
+  ajuste?: 'cubrir' | 'seccion';
+}
+
 export interface ContenidoHorario {
   titulo?: string;
   filas: { dias: string; hora: string }[];
@@ -270,6 +286,50 @@ export interface DisenoEmpresa {
   errores?: string[];
 }
 
+/** Un diseño del lienzo: agrupa piezas y decide si se publica. */
+export interface DisenoLienzo {
+  id: string;
+  empresaId: string;
+  empresaNombre: string;
+  empresaSlug: string;
+  empresaLogoUrl?: string | null;
+  nombre: string;
+  tipo?: string | null;
+  slug: string;
+  descripcion?: string | null;
+  publico: boolean;
+  enlace: string;
+  componentes?: number;
+  /** Alto del lienzo en píxeles (el usuario lo alarga hacia abajo). */
+  altoLienzo?: number | null;
+  actualizadoEn?: string | null;
+  piezas?: ComponenteLienzo[];
+  errores?: string[];
+}
+
+/** Un diseño propio guardado en la carpeta, con el contexto de su empresa. */
+export interface DisenoGuardadoCarpeta {
+  id: string;
+  empresaId: string;
+  empresaNombre: string;
+  empresaSlug: string;
+  empresaLogoUrl?: string | null;
+  tipo: TipoComponente;
+  nombre?: string | null;
+  contenido: string | null;
+  estilo: string | null;
+  ancho: number;
+  alto: number;
+  visible: boolean;
+  detras: boolean;
+  /** Código de la pieza para previsualizarla en la carpeta sin abrir otra página. */
+  vista: ComponenteLienzo;
+  /** Diseño al que pertenece (si lo tiene), para abrir su lienzo al editar. */
+  disenoId?: string | null;
+  enlace: string;
+  actualizadaEn?: string | null;
+}
+
 export interface PanelEmpresa {
   empresa: Empresa;
   acceso: AccesoEmpresa;
@@ -285,4 +345,8 @@ export interface EmpresaPublica {
   diseno: DisenoEmpresa;
   componentes: ComponenteLienzo[];
   equipo: MiembroEmpresa[];
+  /** Piezas publicadas que tienen su propio enlace (menús, tarjetas, HTML...). */
+  piezas?: ComponenteLienzo[];
+  /** Diseños públicos de la empresa. */
+  disenos?: DisenoLienzo[];
 }

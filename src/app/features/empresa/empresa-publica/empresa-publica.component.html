@@ -65,6 +65,10 @@
               </div>
 
               <div class="hero__acciones">
+                <a class="btn btn--primary" [routerLink]="urlComponentes">
+                  <i class="fa-solid fa-folder-open"></i> Componentes
+                  @if (piezas.length) { <b>({{ piezas.length }})</b> }
+                </a>
                 @if (whatsappUrl) {
                   <a class="btn btn--primary" [href]="whatsappUrl" target="_blank" rel="noopener">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
@@ -135,6 +139,52 @@
                 </div>
               </div>
             </div>
+          </section>
+        }
+
+        @if (disenos.length) {
+          <section class="carpeta" aria-label="Diseños de la empresa">
+            <header class="seccion__head">
+              <h2><i class="fa-solid fa-pen-ruler"></i> Diseños</h2>
+              <p>Menús, tarjetas y catálogos, cada uno con su propio enlace.</p>
+            </header>
+
+            <ul class="carpeta__lista">
+              @for (diseno of disenos; track diseno.id) {
+                <li>
+                  <a class="pieza-enlace" [routerLink]="diseno.enlace">
+                    <span class="pieza-enlace__tipo">{{ diseno.tipo || 'Diseño' }}</span>
+                    <strong>{{ diseno.nombre }}</strong>
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (piezas.length) {
+          <section class="carpeta" aria-label="Componentes de la empresa">
+            <header class="seccion__head">
+              <h2><i class="fa-solid fa-folder-open"></i> Componentes</h2>
+              <p>Menús, tarjetas e información, cada uno con su propio enlace.</p>
+            </header>
+
+            <ul class="carpeta__lista">
+              @for (pieza of piezas; track pieza.id) {
+                <li>
+                  <a class="pieza-enlace" [routerLink]="enlacePieza(pieza)">
+                    <span class="pieza-enlace__tipo">{{ etiquetaPieza(pieza.tipo) }}</span>
+                    <strong>{{ nombrePieza(pieza) }}</strong>
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </li>
+              }
+            </ul>
+
+            <a class="carpeta__todas" [routerLink]="urlComponentes">
+              Ver la carpeta completa <i class="fa-solid fa-arrow-right"></i>
+            </a>
           </section>
         }
 

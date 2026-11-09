@@ -1,0 +1,67 @@
+<div class="diseno">
+  <header class="diseno__barra">
+    <a class="diseno__empresa" [routerLink]="urlPerfil()">
+      @if (diseno()?.empresaLogoUrl) {
+        <img [src]="diseno()?.empresaLogoUrl" [alt]="diseno()?.empresaNombre ?? 'Empresa'" />
+      } @else {
+        <span class="diseno__logo">{{ iniciales(diseno()?.empresaNombre) }}</span>
+      }
+      <span class="diseno__datos">
+        <strong>{{ diseno()?.empresaNombre || 'Empresa' }}</strong>
+        <small><i class="fa-solid fa-arrow-left"></i> Volver al perfil</small>
+      </span>
+    </a>
+
+    @if (esAutor()) {
+      <span class="sello sello--previa"><i class="fa-solid fa-eye"></i> Vista previa</span>
+      <button type="button" class="btn btn--mini" (click)="verDiagnostico.set(!verDiagnostico())">
+        <i class="fa-solid fa-bug"></i> Detalles
+      </button>
+    } @else if (diseno()?.publico) {
+      <span class="sello"><i class="fa-solid fa-globe"></i> Público</span>
+    }
+  </header>
+
+  @if (cargando()) {
+    <div class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Cargando el diseño…</p></div>
+  } @else if (error()) {
+    <div class="estado">
+      <i class="fa-solid fa-lock"></i>
+      <p>{{ error() }}</p>
+      <a class="btn" [routerLink]="urlPerfil()">Volver</a>
+    </div>
+  } @else {
+    <main class="diseno__cuerpo">
+      <h1>{{ diseno()?.nombre }}</h1>
+      @if (diseno()?.descripcion) {
+        <p class="diseno__bajada">{{ diseno()?.descripcion }}</p>
+      }
+
+      @if (esAutor() && verDiagnostico()) {
+        <p class="diseno__diagnostico">{{ totalPiezas }} pieza(s): {{ diagnostico }}</p>
+      }
+
+      @for (pieza of piezas(); track pieza.id) {
+        <section class="bloque" [class.bloque--seccion]="ajuste(pieza) === 'seccion'" [style.min-height.px]="ajuste(pieza) === 'seccion' ? null : alto(pieza)">
+          <app-empresa-componente-vista [componente]="pieza" modo="publico" />
+          @if (pieza.tipo === 'HTML' && esAutor() && verDiagnostico()) {
+            <button type="button" class="bloque__ver" (click)="alternarVerHtml(pieza)">
+              {{ verHtml() === pieza.id ? 'Ocultar HTML' : 'Ver HTML' }}
+            </button>
+            @if (verHtml() === pieza.id) {
+              <pre class="bloque__codigo">{{ htmlDe(pieza) }}</pre>
+            }
+          }
+        </section>
+      } @empty {
+        <p class="estado">Este diseño todavía no tiene piezas publicadas.</p>
+      }
+
+      <footer class="diseno__pie">
+        <a class="btn" [routerLink]="urlPerfil()">
+          <i class="fa-solid fa-building"></i> Ver el perfil de {{ diseno()?.empresaNombre }}
+        </a>
+      </footer>
+    </main>
+  }
+</div>

@@ -167,5 +167,26 @@
     @case ('SEPARADOR') {
       <span class="linea" [ngStyle]="{ background: estilo.color || '#94a3b8' }"></span>
     }
+
+    @case ('HTML') {
+      @if (modo === 'editor') {
+        <span class="html-aviso">{{ resumenHtml }}</span>
+      }
+      @if (usarRespaldo()) {
+        <div class="html-sombra" #anfitrion></div>
+      } @else {
+      <iframe
+        class="html-marco"
+        [class.html-marco--seccion]="ajusteHtml === 'seccion'"
+        [ngStyle]="marcoEstilosHtml"
+        #marcoHtml
+        [src]="htmlSrc"
+        [attr.title]="htmlContenido.titulo || 'HTML interactivo'"
+        (load)="alCargarMarco($event)"
+        referrerpolicy="no-referrer"
+        [attr.sandbox]="modo === 'editor' ? arenaEditor : arenaPublica"
+      ></iframe>
+      }
+    }
   }
 </div>

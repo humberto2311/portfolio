@@ -13,6 +13,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import {
   ComponenteLienzo,
+  DisenoLienzo,
   Empresa,
   EmpresaPublica,
   MiembroEmpresa,
@@ -24,6 +25,7 @@ import {
   LIENZO_ANCHO,
   etiquetaOpcion,
   etiquetaTipoEmpresa,
+  leerJson,
 } from '../empresa-ui';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
 
@@ -104,6 +106,55 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
         if (a.detras !== b.detras) return a.detras ? -1 : 1;
         return a.capa - b.capa;
       });
+  }
+
+  /** Piezas con enlace propio que la empresa publicó (sin los fondos decorativos). */
+  get piezas(): ComponenteLienzo[] {
+    const datos = this.datos();
+    if (!datos) return [];
+    return (datos.piezas ?? datos.componentes ?? []).filter((componente) => componente.visible);
+  }
+
+  /** Diseños públicos de la empresa, cada uno con su enlace propio. */
+  get disenos(): DisenoLienzo[] {
+    return this.datos()?.disenos ?? [];
+  }
+
+  get urlComponentes(): string {
+    const slug = this.empresa?.slug;
+    return slug ? `/empresa/${slug}/componentes` : '/empresa';
+  }
+
+  enlacePieza(componente: ComponenteLienzo): string {
+    return componente.enlace ?? this.urlComponentes;
+  }
+
+  nombrePieza(componente: ComponenteLienzo): string {
+    const contenido = leerJson<any>(componente.contenido, {});
+    return String(contenido?.titulo ?? contenido?.nombre ?? componente.nombre ?? this.etiquetaPieza(componente.tipo));
+  }
+
+  etiquetaPieza(tipo: string): string {
+    switch (tipo) {
+      case 'MENU':
+        return 'Menú';
+      case 'BOTON':
+      case 'CONTACTO':
+      case 'PRODUCTO':
+        return 'Tarjeta';
+      case 'HTML':
+        return 'Interactiva';
+      case 'TEXTO':
+        return 'Información';
+      case 'LISTA':
+        return 'Lista';
+      case 'GALERIA':
+        return 'Galería';
+      case 'HORARIO':
+        return 'Horario';
+      default:
+        return 'Pieza';
+    }
   }
 
   get equipo(): MiembroEmpresa[] {

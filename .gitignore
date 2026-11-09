@@ -43,3 +43,5 @@ Thumbs.db
 
 # Archivo de entorno generado en build (Vercel)
 src/environments/environment.prod.ts
+# revisiones locales
+_revision/

@@ -1,0 +1,76 @@
+<div class="pieza diseno-visita">
+  <header class="pieza__barra">
+    <a class="pieza__empresa" [routerLink]="urlPerfil">
+      @if (empresaActiva?.logoUrl) {
+        <img class="pieza__logo" [src]="empresaActiva?.logoUrl" [alt]="empresaActiva?.nombre ?? 'Empresa'" />
+      } @else {
+        <span class="pieza__logo pieza__logo--texto">{{ iniciales(empresaActiva?.nombre) }}</span>
+      }
+
+      <span class="pieza__datos">
+        <strong>{{ empresaActiva?.nombre || 'Empresa' }}</strong>
+        <small><i class="fa-solid fa-arrow-left"></i> Volver al perfil</small>
+      </span>
+    </a>
+
+    <div class="pieza__acciones">
+      <button type="button" class="btn" (click)="copiarEnlace()">
+        <i class="fa-solid" [class.fa-copy]="!copiado()" [class.fa-check]="copiado()"></i>
+        {{ copiado() ? 'Copiado' : 'Copiar enlace' }}
+      </button>
+      <a class="btn" [href]="whatsapp()" target="_blank" rel="noopener">
+        <i class="fa-brands fa-whatsapp"></i> Compartir
+      </a>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <div class="estado">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <p>Cargando el componente…</p>
+    </div>
+  } @else if (error() && !pieza()) {
+    <div class="estado">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <p>{{ error() }}</p>
+      <a class="btn" [routerLink]="urlPerfil">Ir al perfil de la empresa</a>
+    </div>
+  } @else {
+    @if (pieza(); as componente) {
+    <main class="pieza__contenido">
+      <div class="pieza__sello">{{ etiqueta(componente.tipo) }}</div>
+      <h1>{{ titulo }}</h1>
+      @if (descripcion) {
+        <p class="pieza__bajada">{{ descripcion }}</p>
+      }
+
+      <section class="pieza__hoja" [style.min-height.px]="alto">
+        <app-empresa-componente-vista [componente]="componente" modo="publico" />
+      </section>
+
+      @if (hermanas().length) {
+        <section class="pieza__otras">
+          <h2>Más de {{ empresaActiva?.nombre }}</h2>
+          <ul>
+            @for (otra of hermanas(); track otra.id) {
+              <li>
+                <a [routerLink]="enlaceHermana(otra)">
+                  <span class="pieza__otra-tipo">{{ etiqueta(otra.tipo) }}</span>
+                  <strong>{{ nombreHermana(otra) }}</strong>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <footer class="pieza__pie">
+        <a class="btn btn--primary" [routerLink]="urlPerfil">
+          <i class="fa-solid fa-building"></i> Ver el perfil de {{ empresaActiva?.nombre || 'la empresa' }}
+        </a>
+      </footer>
+    </main>
+    }
+  }
+</div>

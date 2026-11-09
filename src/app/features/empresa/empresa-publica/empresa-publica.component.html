@@ -65,10 +65,13 @@
               </div>
 
               <div class="hero__acciones">
-                <a class="btn btn--primary" [routerLink]="urlComponentes">
-                  <i class="fa-solid fa-folder-open"></i> Componentes
-                  @if (piezas.length) { <b>({{ piezas.length }})</b> }
-                </a>
+                <button type="button" class="btn btn--primary" (click)="seguirEmpresa()" [class.btn--siguiendo]="siguiendo()">
+                  <i class="fa-solid" [class.fa-user-plus]="!siguiendo()" [class.fa-check]="siguiendo()"></i>
+                  {{ siguiendo() ? 'Siguiendo' : 'Seguir' }}
+                </button>
+                <button type="button" class="btn" (click)="abrirChat()">
+                  <i class="fa-solid fa-comment-dots"></i> Chatear
+                </button>
                 @if (whatsappUrl) {
                   <a class="btn btn--primary" [href]="whatsappUrl" target="_blank" rel="noopener">
                     <i class="fa-brands fa-whatsapp"></i> WhatsApp
@@ -142,51 +145,84 @@
           </section>
         }
 
-        @if (disenos.length) {
-          <section class="carpeta" aria-label="Diseños de la empresa">
-            <header class="seccion__head">
-              <h2><i class="fa-solid fa-pen-ruler"></i> Diseños</h2>
-              <p>Menús, tarjetas y catálogos, cada uno con su propio enlace.</p>
-            </header>
+        <section class="publicidad" aria-label="Publicidad de la empresa">
+          <header class="seccion__head">
+            <h2><i class="fa-solid fa-rectangle-ad"></i> Publicidad</h2>
+            <p>Lo que la empresa quiere que veas primero.</p>
+          </header>
 
-            <ul class="carpeta__lista">
-              @for (diseno of disenos; track diseno.id) {
-                <li>
-                  <a class="pieza-enlace" [routerLink]="diseno.enlace">
-                    <span class="pieza-enlace__tipo">{{ diseno.tipo || 'Diseño' }}</span>
-                    <strong>{{ diseno.nombre }}</strong>
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </a>
+          <div class="publicidad__rejilla">
+            <article class="anuncio anuncio--grande">
+              <span class="anuncio__sello">Destacado</span>
+              <h3>{{ publica.empresa.nombre }}</h3>
+              <p>{{ publica.empresa.eslogan || publica.empresa.descripcion || 'Espacio publicitario de la empresa.' }}</p>
+              @if (publica.empresa.sitioWeb) {
+                <a class="anuncio__cta" [href]="publica.empresa.sitioWeb" target="_blank" rel="noopener">
+                  Ver más <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              }
+            </article>
+
+            <article class="anuncio">
+              <span class="anuncio__sello anuncio__sello--suave">Promoción</span>
+              <h3>Conoce la empresa</h3>
+              <p>Este espacio lo administra el equipo de {{ publica.empresa.nombre }}.</p>
+            </article>
+
+            <article class="anuncio anuncio--contacto">
+              <h3>¿Hablamos?</h3>
+              <p>Escríbenos y te contamos cómo trabajamos.</p>
+              <div class="anuncio__acciones">
+                @if (correoUrl) {
+                  <a class="btn btn--mini" [href]="correoUrl"><i class="fa-solid fa-envelope"></i> Correo</a>
+                }
+                @if (whatsappUrl) {
+                  <a class="btn btn--mini" [href]="whatsappUrl" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                }
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="muro" aria-label="Publicaciones de la empresa">
+          <header class="seccion__head">
+            <h2><i class="fa-solid fa-newspaper"></i> Publicaciones</h2>
+            <p>Lo que publica {{ handleCreador || 'la cuenta de la empresa' }} como empresa.</p>
+          </header>
+
+          @if (cargandoPublicaciones()) {
+            <p class="estado-mini"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando publicaciones…</p>
+          } @else {
+            <ul class="muro__lista">
+              @for (publicacion of publicacionesEquipo(); track publicacion.id) {
+                <li class="entrada">
+                  <header class="entrada__cabecera">
+                    <span class="entrada__avatar">
+                      @if (publica.empresa.logoUrl) {
+                        <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
+                      } @else {
+                        <span>{{ iniciales() }}</span>
+                      }
+                    </span>
+                    <span class="entrada__datos">
+                      <strong>{{ publica.empresa.nombre }}</strong>
+                      <small>{{ handleCreador || 'cuenta de la empresa' }}</small>
+                    </span>
+                  </header>
+
+                  <p class="entrada__texto">{{ publicacion.content }}</p>
+
+                  <footer class="entrada__pie">
+                    <span><i class="fa-regular fa-heart"></i> {{ publicacion.likesCount ?? 0 }}</span>
+                    <span><i class="fa-regular fa-comment"></i> {{ publicacion.commentsCount ?? 0 }}</span>
+                  </footer>
                 </li>
+              } @empty {
+                <li class="estado-mini">La empresa todavía no ha publicado nada.</li>
               }
             </ul>
-          </section>
-        }
-
-        @if (piezas.length) {
-          <section class="carpeta" aria-label="Componentes de la empresa">
-            <header class="seccion__head">
-              <h2><i class="fa-solid fa-folder-open"></i> Componentes</h2>
-              <p>Menús, tarjetas e información, cada uno con su propio enlace.</p>
-            </header>
-
-            <ul class="carpeta__lista">
-              @for (pieza of piezas; track pieza.id) {
-                <li>
-                  <a class="pieza-enlace" [routerLink]="enlacePieza(pieza)">
-                    <span class="pieza-enlace__tipo">{{ etiquetaPieza(pieza.tipo) }}</span>
-                    <strong>{{ nombrePieza(pieza) }}</strong>
-                    <i class="fa-solid fa-arrow-right"></i>
-                  </a>
-                </li>
-              }
-            </ul>
-
-            <a class="carpeta__todas" [routerLink]="urlComponentes">
-              Ver la carpeta completa <i class="fa-solid fa-arrow-right"></i>
-            </a>
-          </section>
-        }
+          }
+        </section>
 
         @if (equipo.length) {
           <section class="equipo">

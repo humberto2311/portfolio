@@ -62,7 +62,7 @@ export const routes: Routes = [
 
   // Página propia de un diseño público (menú, tarjeta, catálogo…)
   { path: 'diseno/:slug', component: DisenoPublicoComponent },
-  { path: 'empresa/:slug', component: EmpresaPublicaComponent },
+  { path: 'empresa/:slug', component: EmpresaPublicaComponent, canActivate: [authGuard] },
   // Carpeta pública de componentes de la empresa (menús, tarjetas, información...)
   { path: 'empresa/:slug/componentes', component: EmpresaComponentesComponent },
   // Enlace propio de cada componente creado en el lienzo

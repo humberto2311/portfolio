@@ -17,6 +17,8 @@ interface RailItem {
 
 const NAVEGACION_PERSONAL: RailItem[] = [
   { label: 'Inicio', icon: 'fa-solid fa-house', ruta: '/app', exacto: true },
+  { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
+  { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
   { label: 'Talento', icon: 'fa-solid fa-magnifying-glass', ruta: '/app/talento' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
   { label: 'Portafolio', icon: 'fa-solid fa-briefcase', ruta: '/app/portafolio' },
@@ -27,6 +29,9 @@ const NAVEGACION_PERSONAL: RailItem[] = [
 
 const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Mi empresa', icon: 'fa-solid fa-building', ruta: '/app/empresa', exacto: true },
+  { label: 'Panel de control', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+  { label: 'Mi actividad', icon: 'fa-solid fa-user-tie', ruta: '/app/dashboard/empresa/mi-actividad' },
+  { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },

@@ -1,0 +1,165 @@
+<div class="tablero">
+  <header class="cabecera">
+    <div class="cabecera__perfil">
+      <span class="avatar">{{ iniciales(nombrePersona) }}</span>
+      <div>
+        <strong>{{ nombrePersona }}</strong>
+
+        @if (esAmbitoEmpresa) {
+          <button type="button" class="selector" (click)="alternarSelector()">
+            <i class="fa-solid fa-building"></i>
+            {{ empresaActiva?.nombre || 'Elige empresa' }}
+            <i class="fa-solid" [class.fa-chevron-down]="!selectorAbierto()" [class.fa-chevron-up]="selectorAbierto()"></i>
+          </button>
+
+          @if (selectorAbierto()) {
+            <ul class="selector__lista">
+              @for (empresa of empresasDisponibles(); track empresa.id) {
+                <li>
+                  <button type="button" [class.activa]="empresa.id === empresaActiva?.id" (click)="elegirEmpresa(empresa.id)">
+                    <span class="selector__inicial">{{ iniciales(empresa.nombre) }}</span>
+                    <span class="selector__datos">
+                      <strong>{{ empresa.nombre }}</strong>
+                      <small>{{ empresa.rolEtiqueta || empresa.rolPropio }}</small>
+                    </span>
+                    @if (empresa.id === empresaActiva?.id) {
+                      <i class="fa-solid fa-check"></i>
+                    }
+                  </button>
+                </li>
+              } @empty {
+                <li class="selector__vacio">No tienes empresas todavía.</li>
+              }
+            </ul>
+          }
+        } @else {
+          <small>Panel personal</small>
+        }
+      </div>
+    </div>
+
+    <nav class="pestanas" aria-label="Ámbito del panel">
+      <a class="pestana" routerLink="/app/dashboard" routerLinkActive="pestana--activa" [routerLinkActiveOptions]="{ exact: true }">
+        <i class="fa-solid fa-user"></i> Mi panel
+      </a>
+      <a class="pestana" routerLink="/app/dashboard/empresa" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-building"></i> Empresa
+      </a>
+      <a class="pestana" routerLink="/app/dashboard/empresa/mi-actividad" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-user-tie"></i> Mi actividad
+      </a>
+    </nav>
+  </header>
+
+  <section class="titulo">
+    <h1>{{ datos().titulo }}</h1>
+    <p>{{ datos().subtitulo }}</p>
+  </section>
+
+  <section class="metricas">
+    @for (metrica of datos().metricas; track metrica.clave) {
+      <article class="metrica">
+        <span class="metrica__icono"><i [class]="metrica.icono"></i></span>
+        <div class="metrica__datos">
+          <small>{{ metrica.etiqueta }}</small>
+          <strong>{{ metrica.valor }}</strong>
+          @if (metrica.variacion !== undefined) {
+            <span class="metrica__variacion" [class.metrica__variacion--baja]="metrica.variacion < 0">
+              <i class="fa-solid" [class.fa-arrow-trend-up]="metrica.variacion >= 0" [class.fa-arrow-trend-down]="metrica.variacion < 0"></i>
+              {{ metrica.variacion }}%
+            </span>
+          }
+        </div>
+      </article>
+    }
+  </section>
+
+  <section class="graficos">
+    @for (tarjeta of datos().tarjetas; track tarjeta.id) {
+      <article class="panel">
+        <header class="panel__cabecera">
+          <div>
+            <strong>{{ tarjeta.titulo }}</strong>
+            <small>{{ tarjeta.descripcion }}</small>
+          </div>
+        </header>
+
+        <app-dashboard-grafico [series]="tarjeta.series" [tipo]="tarjeta.tipoGrafico" [permitidos]="tarjeta.permitidos" />
+      </article>
+    }
+  </section>
+
+  <section class="networking">
+    <article class="panel">
+      <header class="panel__cabecera">
+        <div>
+          <strong>Sugerencias para tu networking</strong>
+          <small>Qué hacer con las conexiones que ya tienes</small>
+        </div>
+      </header>
+
+      <ul class="sugerencias">
+        @for (sugerencia of sugerencias; track sugerencia.id) {
+          <li class="sugerencia">
+            <span class="sugerencia__icono"><i [class]="sugerencia.icono"></i></span>
+            <div class="sugerencia__datos">
+              <strong>{{ sugerencia.titulo }}</strong>
+              <small>{{ sugerencia.detalle }}</small>
+            </div>
+            <span class="etiqueta etiqueta--{{ sugerencia.etiqueta.toLowerCase() }}">{{ sugerencia.etiqueta }}</span>
+          </li>
+        }
+      </ul>
+    </article>
+
+    <article class="panel">
+      <header class="panel__cabecera">
+        <div>
+          <strong>Conexiones por NFC y QR</strong>
+          <small>Planifica a quién llamar o seguir</small>
+        </div>
+      </header>
+
+      <div class="filtros">
+        <input type="search" placeholder="Buscar por nombre o empresa" [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)" />
+        <label>Desde <input type="date" [ngModel]="filtroDesde()" (ngModelChange)="filtroDesde.set($event)" /></label>
+        <label>Hasta <input type="date" [ngModel]="filtroHasta()" (ngModelChange)="filtroHasta.set($event)" /></label>
+        <button type="button" class="btn-mini" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+
+      <ul class="conexiones">
+        @for (conexion of conexionesFiltradas; track conexion.id) {
+          <li class="conexion">
+            <span class="conexion__avatar">{{ conexion.iniciales }}</span>
+            <span class="conexion__datos">
+              <strong>{{ conexion.persona }}</strong>
+              <small>{{ conexion.empresa }} · {{ fecha(conexion.ultimoToque) }}</small>
+            </span>
+            <span class="medio medio--{{ conexion.medio.toLowerCase() }}">
+              <i class="fa-solid" [class.fa-wifi]="conexion.medio === 'NFC'" [class.fa-qrcode]="conexion.medio === 'QR'"></i>
+              {{ conexion.toques }}
+            </span>
+            <select [value]="conexion.etiqueta" (change)="cambiarEtiqueta(conexion, $any($event.target).value)">
+              @for (opcion of etiquetas; track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.valor }}</option>
+              }
+            </select>
+          </li>
+        } @empty {
+          <li class="vacio">Ninguna conexión coincide con el filtro.</li>
+        }
+      </ul>
+
+      <footer class="resumen">
+        <span><i class="fa-solid fa-wifi"></i> NFC: {{ toquesNfc }}</span>
+        <span><i class="fa-solid fa-qrcode"></i> QR: {{ toquesQr }}</span>
+        <span><i class="fa-solid fa-hand-pointer"></i> Toques totales: {{ totalToques }}</span>
+      </footer>
+    </article>
+  </section>
+
+  <p class="nota">
+    <i class="fa-solid fa-flask"></i>
+    Datos de demostración. Al conectar el backend, los números saldrán de tu cuenta y de la empresa elegida.
+  </p>
+</div>

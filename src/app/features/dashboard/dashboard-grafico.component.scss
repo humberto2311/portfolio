@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.grafico {
+  display: grid;
+  gap: .6rem;
+}
+
+.grafico__tipos {
+  display: flex;
+  gap: .25rem;
+  flex-wrap: wrap;
+}
+
+.grafico__marco {
+  position: relative;
+  height: 210px;
+}
+
+.tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .22rem .55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &--activo {
+    color: var(--accent-cyan, #38bdf8);
+    border-color: color-mix(in srgb, var(--accent-cyan, #38bdf8) 45%, transparent);
+    background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 14%, transparent);
+  }
+}

@@ -1,0 +1,139 @@
+<div class="ubicacion">
+  <header class="cabecera">
+    <div>
+      <h1><i class="fa-solid fa-location-dot"></i> Mapa de conexiones</h1>
+      <p>Dónde hiciste tus conexiones por NFC o QR y cuántas veces hubo toque.</p>
+    </div>
+    <span class="privacidad"><i class="fa-solid fa-shield-halved"></i> Solo tú ves este mapa</span>
+  </header>
+
+  <div class="aviso">
+    <i class="fa-solid fa-lock"></i>
+    <div>
+      <strong>Tu ubicación es privada.</strong>
+      <small>
+        La ubicación solo se guarda cuando la aceptas al tocar una tarjeta. Puedes desactivarla
+        cuando quieras y el historial se deja de construir desde ese momento.
+      </small>
+    </div>
+    <button type="button" class="btn-mini">Gestionar permisos</button>
+  </div>
+
+  <section class="metricas">
+    <article class="metrica">
+      <span class="metrica__icono"><i class="fa-solid fa-hand-pointer"></i></span>
+      <div><small>Toques registrados</small><strong>{{ totalToques() }}</strong></div>
+    </article>
+    <article class="metrica">
+      <span class="metrica__icono"><i class="fa-solid fa-user-group"></i></span>
+      <div><small>Conexiones distintas</small><strong>{{ totalPersonas() }}</strong></div>
+    </article>
+    <article class="metrica">
+      <span class="metrica__icono"><i class="fa-solid fa-city"></i></span>
+      <div><small>Ciudades</small><strong>{{ ciudadesDistintas() }}</strong></div>
+    </article>
+  </section>
+
+  <section class="mapa">
+    <div class="mapa__lienzo">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" class="mapa__fondo" aria-hidden="true">
+        <defs>
+          <pattern id="rejilla" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M8 0 L0 0 0 8" fill="none" stroke="rgba(148,163,184,.18)" stroke-width="0.3" />
+          </pattern>
+        </defs>
+        <rect width="100" height="100" fill="url(#rejilla)" />
+        <path d="M12,26 C26,18 38,30 52,22 C66,14 78,26 90,20" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.8" />
+        <path d="M10,58 C24,50 40,64 54,56 C68,48 82,60 92,52" fill="none" stroke="rgba(56,189,248,.16)" stroke-width="0.8" />
+      </svg>
+
+      @for (toque of visibles(); track toque.id) {
+        <button
+          type="button"
+          class="pin"
+          [class.pin--activo]="seleccionado()?.id === toque.id"
+          [style.left.%]="posicionX(toque.longitud)"
+          [style.top.%]="posicionY(toque.latitud)"
+          [style.width.px]="burbuja(toque.toques)"
+          [style.height.px]="burbuja(toque.toques)"
+          (click)="seleccionar(toque)"
+          [title]="toque.persona + ' · ' + toque.toques + ' toques'"
+        >
+          <span>{{ toque.toques }}</span>
+        </button>
+      }
+
+      @if (seleccionado(); as elegido) {
+        <div class="ficha" [style.left.%]="posicionX(elegido.longitud)" [style.top.%]="posicionY(elegido.latitud)">
+          <button type="button" class="ficha__cerrar" (click)="seleccionado.set(null)"><i class="fa-solid fa-xmark"></i></button>
+          <strong>{{ elegido.persona }}</strong>
+          <small>{{ elegido.empresa }}</small>
+          <ul>
+            <li><i class="fa-solid fa-location-dot"></i> {{ elegido.lugar }}</li>
+            <li><i class="fa-solid fa-city"></i> {{ elegido.ciudad }}</li>
+            <li><i class="fa-regular fa-calendar"></i> {{ fecha(elegido.fecha) }}</li>
+            <li>
+              <i class="fa-solid" [class.fa-wifi]="elegido.medio === 'NFC'" [class.fa-qrcode]="elegido.medio === 'QR'"></i>
+              {{ elegido.toques }} toques por {{ elegido.medio }}
+            </li>
+          </ul>
+        </div>
+      }
+    </div>
+
+    <aside class="mapa__ciudades">
+      <h2>Por ciudad</h2>
+      <ul>
+        @for (ciudad of ciudades; track ciudad.ciudad) {
+          <li>
+            <span class="ciudad__nombre">{{ ciudad.ciudad }}</span>
+            <span class="ciudad__barra"><i [style.width.%]="(ciudad.toques / 19) * 100"></i></span>
+            <strong>{{ ciudad.toques }}</strong>
+          </li>
+        }
+      </ul>
+    </aside>
+  </section>
+
+  <section class="lista">
+    <header class="lista__cabecera">
+      <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de toques</h2>
+
+      <div class="filtros">
+        <input type="search" placeholder="Filtrar por persona o lugar" [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)" />
+        <label>Desde <input type="date" [ngModel]="filtroDesde()" (ngModelChange)="filtroDesde.set($event)" /></label>
+        <label>Hasta <input type="date" [ngModel]="filtroHasta()" (ngModelChange)="filtroHasta.set($event)" /></label>
+        <select [ngModel]="filtroMedio()" (ngModelChange)="filtroMedio.set($event)">
+          <option value="TODOS">NFC y QR</option>
+          <option value="NFC">Solo NFC</option>
+          <option value="QR">Solo QR</option>
+        </select>
+        <button type="button" class="btn-mini" (click)="limpiar()">Limpiar</button>
+      </div>
+    </header>
+
+    <ul class="toques">
+      @for (toque of visibles(); track toque.id) {
+        <li class="toque" [class.toque--activo]="seleccionado()?.id === toque.id" (click)="seleccionar(toque)">
+          <span class="toque__avatar">{{ toque.iniciales }}</span>
+          <span class="toque__datos">
+            <strong>{{ toque.persona }}</strong>
+            <small>{{ toque.empresa }} · {{ toque.lugar }}</small>
+          </span>
+          <span class="toque__fecha">{{ fecha(toque.fecha) }}</span>
+          <span class="medio medio--{{ toque.medio.toLowerCase() }}">
+            <i class="fa-solid" [class.fa-wifi]="toque.medio === 'NFC'" [class.fa-qrcode]="toque.medio === 'QR'"></i>
+            {{ toque.toques }}
+          </span>
+        </li>
+      } @empty {
+        <li class="vacio">No hay toques con esos filtros.</li>
+      }
+    </ul>
+  </section>
+
+  <p class="nota">
+    <i class="fa-solid fa-map-location-dot"></i>
+    Vista de demostración con datos de ejemplo. Cuando conectemos el backend, los toques saldrán del registro NFC y QR de tu cuenta.
+  </p>
+</div>

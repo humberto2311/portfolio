@@ -1,0 +1,20 @@
+<div class="grafico">
+  <div class="grafico__tipos">
+    @for (opcion of opciones(); track opcion.valor) {
+      <button
+        type="button"
+        class="tipo"
+        [class.tipo--activo]="activo === opcion.valor"
+        (click)="elegir(opcion.valor)"
+        [title]="opcion.etiqueta"
+      >
+        <i [class]="opcion.icono"></i>
+        <span>{{ opcion.etiqueta }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="grafico__marco">
+    <canvas #lienzo></canvas>
+  </div>
+</div>

@@ -30,13 +30,12 @@ export const routes: Routes = [
     canActivate: [accesoNativoGuard],
 
     children: [
-{ 
-        path: '', 
-        component: NfcProfileComponent, 
-        canActivate: [publicGuard] 
+      {
+        path: '',
+        component: NfcProfileComponent,
+        canActivate: [publicGuard],
+        pathMatch: 'full'
       },
-
-      { path: '', component: NfcProfileComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:username', component: ProyectosComponent }, 
       { path: 'perfil', component: PerfilComponent }, 

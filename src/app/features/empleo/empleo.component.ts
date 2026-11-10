@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { BusquedaEmpleo, GraficoCv, Vacante } from '../../core/models/empleo.model';
 import { EmpleoService } from '../../core/services/empleo.service';
@@ -10,7 +10,7 @@ import { EmpleoGraficoComponent, TipoGraficoEmpleo } from './empleo-grafico.comp
 @Component({
   selector: 'app-empleo',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmpleoGraficoComponent],
+  imports: [CommonModule, FormsModule, EmpleoGraficoComponent, RouterLink, RouterLinkActive],
   templateUrl: './empleo.component.html',
   styleUrls: ['./empleo.component.scss'],
 })

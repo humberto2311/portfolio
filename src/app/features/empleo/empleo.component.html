@@ -1,9 +1,24 @@
 <div class="empleo">
   <header class="cabecera">
-    <div>
+    <div class="cabecera__texto">
       <h1><i class="fa-solid fa-briefcase"></i> Buscar trabajo</h1>
       <p>Comparamos cada vacante con tu hoja de vida y te decimos dónde tienes más opciones.</p>
     </div>
+
+    <nav class="pestanas" aria-label="Navegación del panel">
+      <a class="pestana" routerLink="/app/dashboard" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-user"></i> Mi panel
+      </a>
+      <a class="pestana" routerLink="/app/dashboard/empresa" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-building"></i> Empresa
+      </a>
+      <a class="pestana" routerLink="/app/dashboard/empresa/mi-actividad" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-user-tie"></i> Mi actividad
+      </a>
+      <a class="pestana pestana--empleo" routerLink="/app/empleo" routerLinkActive="pestana--activa">
+        <i class="fa-solid fa-briefcase"></i> Buscar empleo
+      </a>
+    </nav>
 
     @if (busqueda(); as resumen) {
       <div class="cabecera__datos">

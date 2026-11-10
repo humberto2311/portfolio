@@ -469,3 +469,41 @@
     background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 14%, transparent);
   }
 }
+
+.acciones-panel {
+  margin-bottom: 1rem;
+}
+
+.accion-principal {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .8rem .9rem;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid color-mix(in srgb, var(--accent-cyan, #38bdf8) 45%, transparent);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--accent-cyan, #38bdf8) 20%, var(--bg-card)), var(--bg-card));
+  transition: .16s;
+
+  &:hover { transform: translateY(-1px); }
+
+  &__icono {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: var(--accent-cyan, #38bdf8);
+    color: #06202e;
+  }
+
+  &__datos {
+    flex: 1;
+
+    strong { display: block; font-size: .9rem; }
+    small { font-size: .72rem; color: var(--text-secondary, #94a3b8); }
+  }
+
+  > i { color: var(--accent-cyan, #38bdf8); }
+}

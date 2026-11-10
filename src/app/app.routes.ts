@@ -26,6 +26,7 @@ import { EmpresaComponentesComponent } from './features/empresa/empresa-componen
 import { DisenoPublicoComponent } from './features/empresa/diseno-publico/diseno-publico.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { UbicacionComponent } from './features/ubicacion/ubicacion.component';
+import { EmpleoComponent } from './features/empleo/empleo.component';
 import { AccesoNativoComponent } from './features/auth/acceso-nativo/acceso-nativo.component';
 import { accesoNativoGuard } from './core/guards/acceso-nativo.guard';
 
@@ -87,6 +88,7 @@ export const routes: Routes = [
       { path: 'dashboard/empresa', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa' } },
       { path: 'dashboard/empresa/mi-actividad', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa-personal' } },
       { path: 'ubicacion', component: UbicacionComponent, data: { anchoCompleto: true } },
+      { path: 'empleo', component: EmpleoComponent, data: { anchoCompleto: true } },
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },

@@ -84,6 +84,17 @@
     <p>{{ datos().subtitulo }}</p>
   </section>
 
+  <section class="acciones-panel">
+    <a class="accion-principal" routerLink="/app/empleo">
+      <span class="accion-principal__icono"><i class="fa-solid fa-briefcase"></i></span>
+      <span class="accion-principal__datos">
+        <strong>Buscar trabajo</strong>
+        <small>Comparamos las vacantes con tu hoja de vida y te decimos dónde postularte.</small>
+      </span>
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </section>
+
   <section class="metricas">
     @for (metrica of datos().metricas; track metrica.clave) {
       <article class="metrica">

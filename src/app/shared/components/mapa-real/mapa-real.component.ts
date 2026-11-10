@@ -44,6 +44,7 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
   private mapa: import('leaflet').Map | null = null;
   private capa: import('leaflet').TileLayer | null = null;
   private marcador: import('leaflet').Marker | null = null;
+  private marcadores: import('leaflet').Marker[] = [];
 
   constructor(@Inject(PLATFORM_ID) private plataforma: object) {}
 
@@ -123,30 +124,97 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
     this.marcar(lat, lng);
   }
 
-  marcar(lat: number, lng: number, texto?: string): void {
+  marcar(lat: number, lng: number, texto?: string, tono: 'personal' | 'empresarial' | 'local' | 'empleo' = 'empleo'): void {
     if (!this.mapa) return;
 
-    const icono = this.icono();
+    const icono = this.icono(tono);
 
     if (!this.marcador) {
       this.marcador = this.L!.marker([lat, lng], icono ? { icon: icono } : {});
       this.marcador.addTo(this.mapa);
     } else {
       this.marcador.setLatLng([lat, lng]);
+      if (icono) {
+        this.marcador.setIcon(icono);
+      }
     }
 
     if (texto) {
-      this.marcador.bindPopup(texto);
+      this.marcador.bindTooltip(texto, {
+        direction: 'top',
+        offset: [0, -12],
+        opacity: 1,
+        className: 'tooltip-mapa',
+        permanent: false,
+        sticky: false,
+      });
+      this.marcador.openTooltip();
     }
   }
 
-  private icono(): import('leaflet').DivIcon | null {
+  marcarVarios(
+    puntos: { lat: number; lng: number; texto: string; tono?: 'personal' | 'empresarial' | 'local' | 'empleo' }[],
+  ): void {
+    if (!this.mapa || !this.L) return;
+
+    this.limpiarMarcadores();
+
+    for (const punto of puntos) {
+      const icono = this.icono(punto.tono ?? 'empleo');
+
+      const marcador = this.L.marker([punto.lat, punto.lng], icono ? { icon: icono } : {})
+        .addTo(this.mapa);
+
+      marcador.bindTooltip(punto.texto, {
+        direction: 'top',
+        offset: [0, -12],
+        opacity: 1,
+        className: 'tooltip-mapa',
+      });
+
+      this.marcadores.push(marcador);
+    }
+  }
+
+  limpiarMarcadores(): void {
+    if (!this.mapa) return;
+
+    this.marcadores.forEach((marcador) => this.mapa?.removeLayer(marcador));
+    this.marcadores = [];
+
+    if (this.marcador) {
+      this.mapa.removeLayer(this.marcador);
+      this.marcador = null;
+    }
+  }
+
+  ajustar(puntos: { lat: number; lng: number }[]): void {
+    if (!this.mapa || !this.L || !puntos.length) return;
+
+    if (puntos.length === 1) {
+      this.mapa.setView([puntos[0].lat, puntos[0].lng], 15, { animate: true });
+      return;
+    }
+
+    const limites = this.L.latLngBounds(puntos.map((punto) => [punto.lat, punto.lng] as [number, number]));
+    this.mapa.fitBounds(limites, { padding: [40, 40], maxZoom: 14 });
+  }
+
+  private icono(tono: 'personal' | 'empresarial' | 'local' | 'empleo' = 'empleo'): import('leaflet').DivIcon | null {
     if (!this.L) return null;
+
+    const iconos: Record<string, string> = {
+      personal: 'fa-user',
+      empresarial: 'fa-building',
+      local: 'fa-store',
+      empleo: 'fa-briefcase',
+    };
+
     return this.L.divIcon({
-      className: 'pin-mapa',
-      html: '<span class="pin-mapa__punto"></span>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9],
+      className: `pin-mapa pin-mapa--${tono}`,
+      html: `<span class="pin-mapa__punto"><i class="fa-solid ${iconos[tono]}"></i></span>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13],
     });
   }
 }

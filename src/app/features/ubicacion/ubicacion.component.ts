@@ -3,6 +3,7 @@ import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@
 import { FormsModule } from '@angular/forms';
 import { MapaRealComponent } from '../../shared/components/mapa-real/mapa-real.component';
 import { MapillaryComponent } from '../../shared/components/mapillary/mapillary.component';
+import { EmpleoMapaComponent, VacanteUbicada } from './empleo-mapa/empleo-mapa.component';
 
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
@@ -21,7 +22,7 @@ type Medio = 'TODOS' | 'NFC' | 'QR';
 @Component({
   selector: 'app-ubicacion',
   standalone: true,
-  imports: [CommonModule, FormsModule, MapaRealComponent, MapillaryComponent],
+  imports: [CommonModule, FormsModule, MapaRealComponent, MapillaryComponent, EmpleoMapaComponent],
   templateUrl: './ubicacion.component.html',
   styleUrls: ['./ubicacion.component.scss'],
 })
@@ -42,6 +43,7 @@ export class UbicacionComponent implements AfterViewInit {
   readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
   readonly capas = signal({ personal: true, empresarial: true, locales: true });
   readonly punto = signal({ lat: 4.6097, lng: -74.0817, zoom: 12, nombre: 'Bogotá' });
+  readonly abierto = signal({ locales: true, historial: false });
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
   readonly localActivo = signal<LocalRegistrado | null>(null);
   readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
@@ -111,6 +113,10 @@ export class UbicacionComponent implements AfterViewInit {
     this.capas.set({ personal: true, empresarial: true, locales: true });
   }
 
+  alternar(panel: 'locales' | 'historial'): void {
+    this.abierto.update((actual) => ({ ...actual, [panel]: !actual[panel] }));
+  }
+
   alternarCapa(capa: 'personal' | 'empresarial' | 'locales'): void {
     this.capas.update((actual) => ({ ...actual, [capa]: !actual[capa] }));
   }
@@ -140,6 +146,62 @@ export class UbicacionComponent implements AfterViewInit {
   verPunto(lat: number, lng: number, nombre: string, zoom = 16): void {
     this.punto.set({ lat, lng, zoom, nombre });
     this.mapa?.irA(lat, lng, zoom);
+  }
+
+  ubicarVacante(item: VacanteUbicada): void {
+    const vacante = item.vacante;
+    const puntaje = vacante.puntaje ?? 0;
+    const coincidencias = (vacante.coincidencias ?? []).slice(0, 3).join(', ');
+    const empresa = vacante.empresa ?? 'Empresa';
+
+    const exacta = item.fuente === 'nominatim';
+    const donde = exacta
+      ? (item.direccion ? item.direccion.split(',').slice(0, 3).join(',') : item.ciudad)
+      : `Cerca de ${item.ciudad} (aproximada)`;
+
+    const texto = [
+      `<b>${vacante.cargo ?? 'Vacante'}</b>`,
+      `${empresa}`,
+      `<span style="color:#fcd34d;font-weight:800">${puntaje}% de cercanía</span>`,
+      `<i style="opacity:.8">${donde}</i>`,
+      vacante.modalidad ? `${vacante.modalidad}` : '',
+      coincidencias ? `Ya cumples: ${coincidencias}` : '',
+      vacante.portal ? `<span style="opacity:.6">Fuente: ${vacante.portal}</span>` : '',
+    ]
+      .filter(Boolean)
+      .join('<br>');
+
+    this.punto.set({ lat: item.lat, lng: item.lng, zoom: 15, nombre: `${empresa} · ${item.ciudad}` });
+    this.mapa?.limpiarMarcadores();
+    this.mapa?.irA(item.lat, item.lng, 15);
+    this.mapa?.marcar(item.lat, item.lng, texto, 'empleo');
+  }
+
+  ubicarVacantes(items: VacanteUbicada[]): void {
+    if (!items.length || !this.mapa) return;
+
+    this.mapa.marcarVarios(
+      items.map((item) => ({
+        lat: item.lat,
+        lng: item.lng,
+        tono: 'empleo' as const,
+        texto: [
+          `<b>${item.vacante.cargo ?? 'Vacante'}</b>`,
+          item.vacante.empresa ?? '',
+          `<span style="color:#fcd34d;font-weight:800">${item.vacante.puntaje}%</span> · ${item.ciudad}`,
+        ]
+          .filter(Boolean)
+          .join('<br>'),
+      })),
+    );
+
+    this.mapa.ajustar(items.map((item) => ({ lat: item.lat, lng: item.lng })));
+    this.punto.set({
+      lat: items[0].lat,
+      lng: items[0].lng,
+      zoom: 12,
+      nombre: `${items.length} empresas`,
+    });
   }
 
   ngAfterViewInit(): void {

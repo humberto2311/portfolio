@@ -6,7 +6,17 @@
     }
   </header>
 
-  @if (!configurado()) {
+  @if (compacto && fotos().length) {
+    <ul class="mapillary__tira">
+      @for (foto of fotos(); track foto.id) {
+        <li>
+          <button type="button" (click)="ver(foto)">
+            <img [src]="foto.miniatura" [alt]="'Foto del lugar ' + foto.id" loading="lazy" />
+          </button>
+        </li>
+      }
+    </ul>
+  } @else if (!configurado()) {
     <div class="mapillary__estado">
       <i class="fa-solid fa-circle-info"></i>
       Falta el token de Mapillary en el backend (MAPILLARY_TOKEN).

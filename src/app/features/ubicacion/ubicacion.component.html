@@ -56,21 +56,119 @@
   </div>
 
   <section class="mapa">
-    <div class="mapa__lienzo">
-      <app-mapa-real
-        [altura]="'420px'"
+    <aside class="mapa__panel">
+      <section class="panel-plegable" [class.panel-plegable--abierto]="abierto().locales">
+        <header class="panel-plegable__cabecera" (click)="alternar('locales')">
+          <h2><i class="fa-solid fa-store"></i> Locales registrados</h2>
+          <span class="panel-plegable__cuenta">{{ localesVisibles().length }}</span>
+          <i class="fa-solid fa-chevron-down panel-plegable__flecha"></i>
+        </header>
+
+        @if (abierto().locales) {
+        <div class="panel-plegable__cuerpo">
+        <div class="filtros">
+          <input type="search" placeholder="Empresa, servicio o sector" [ngModel]="busquedaLocal()" (ngModelChange)="busquedaLocal.set($event)" />
+          <select [ngModel]="filtroSector()" (ngModelChange)="filtroSector.set($any($event.target).value)">
+            <option value="">Todos los sectores</option>
+            @for (sector of sectores; track sector) {
+              <option [value]="sector">{{ sector }}</option>
+            }
+          </select>
+        </div>
+
+        <ul class="toques toques--locales">
+          @for (local of localesVisibles(); track local.id) {
+            <li class="toque"
+                [class.toque--activo]="localActivo()?.id === local.id"
+                (click)="seleccionarLocal(local)">
+              <span class="toque__avatar toque__avatar--local"><i class="fa-solid fa-store"></i></span>
+              <span class="toque__datos">
+                <strong>{{ local.nombre }}</strong>
+                <small>{{ local.servicio }}</small>
+              </span>
+              <span class="toque__ciudad">{{ local.ciudad }}</span>
+            </li>
+          } @empty {
+            <li class="vacio">No hay locales con ese filtro.</li>
+          }
+        </ul>
+        </div>
+        }
+      </section>
+
+      <section class="panel-plegable" [class.panel-plegable--abierto]="abierto().historial">
+        <header class="panel-plegable__cabecera" (click)="alternar('historial')">
+          <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de toques</h2>
+          <span class="panel-plegable__cuenta">{{ visibles().length }}</span>
+          <i class="fa-solid fa-chevron-down panel-plegable__flecha"></i>
+        </header>
+
+        @if (abierto().historial) {
+        <div class="panel-plegable__cuerpo">
+        <div class="filtros">
+          <input type="search" placeholder="Filtrar por persona o lugar" [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)" />
+          <label>Desde <input type="date" [ngModel]="filtroDesde()" (ngModelChange)="filtroDesde.set($event)" /></label>
+          <label>Hasta <input type="date" [ngModel]="filtroHasta()" (ngModelChange)="filtroHasta.set($event)" /></label>
+          <select [ngModel]="filtroMedio()" (ngModelChange)="filtroMedio.set($event)">
+            <option value="TODOS">NFC y QR</option>
+            <option value="NFC">Solo NFC</option>
+            <option value="QR">Solo QR</option>
+          </select>
+          <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+            <option value="TODOS">Personales y empresariales</option>
+            <option value="PERSONAL">Solo personales</option>
+            <option value="EMPRESARIAL">Solo empresariales</option>
+          </select>
+          <button type="button" class="btn-mini" (click)="limpiar()">Limpiar</button>
+        </div>
+
+        <ul class="toques">
+          @for (toque of visibles(); track toque.id) {
+            <li class="toque" [class.toque--activo]="seleccionado()?.id === toque.id" (click)="seleccionar(toque)">
+              <span class="toque__avatar">{{ toque.iniciales }}</span>
+              <span class="toque__datos">
+                <strong>{{ toque.persona }}</strong>
+                <small>{{ toque.empresa }} · {{ toque.lugar }}</small>
+              </span>
+              <span class="toque__fecha">{{ fecha(toque.fecha) }}</span>
+              <span class="tipo tipo--{{ toque.tipo.toLowerCase() }}">
+                <i class="fa-solid" [class.fa-user]="toque.tipo === 'PERSONAL'" [class.fa-building]="toque.tipo === 'EMPRESARIAL'"></i>
+                {{ toque.tipo === 'PERSONAL' ? 'Personal' : 'Empresarial' }}
+              </span>
+              <span class="medio medio--{{ toque.medio.toLowerCase() }}">
+                <i class="fa-solid" [class.fa-wifi]="toque.medio === 'NFC'" [class.fa-qrcode]="toque.medio === 'QR'"></i>
+                {{ toque.toques }}
+              </span>
+            </li>
+          } @empty {
+            <li class="vacio">No hay toques con esos filtros.</li>
+          }
+        </ul>
+        </div>
+        }
+      </section>
+
+      <app-empleo-mapa
+        (ubicar)="ubicarVacante($event)"
+        (ubicarTodas)="ubicarVacantes($event)"></app-empleo-mapa>
+    </aside>
+
+    <div class="mapa__zona">
+      <div class="mapa__lienzo">
+        <app-mapa-real
+          [altura]="'440px'"
+          [lat]="punto().lat"
+          [lng]="punto().lng"
+          [zoom]="punto().zoom"></app-mapa-real>
+      </div>
+
+      <app-mapillary
+        class="mapa__fotos"
+        [titulo]="'Fotos reales de ' + punto().nombre"
         [lat]="punto().lat"
         [lng]="punto().lng"
-        [zoom]="punto().zoom"></app-mapa-real>
-
+        [radio]="150"></app-mapillary>
     </div>
-
-    <app-mapillary
-      class="mapa__fotos"
-      [titulo]="'Fotos reales de ' + punto().nombre"
-      [lat]="punto().lat"
-      [lng]="punto().lng"
-      [radio]="150"></app-mapillary>
 
     <aside class="mapa__ciudades">
       <h2>Por ciudad</h2>
@@ -84,121 +182,6 @@
         }
       </ul>
     </aside>
-  </section>
-
-  <section class="lista">
-    <header class="lista__cabecera">
-      <h2><i class="fa-solid fa-store"></i> Locales registrados</h2>
-
-      <div class="filtros">
-        <input type="search" placeholder="Empresa, servicio o sector (p. ej. tecnología, café)" [ngModel]="busquedaLocal()" (ngModelChange)="busquedaLocal.set($event)" />
-        <select [ngModel]="filtroSector()" (ngModelChange)="filtroSector.set($any($event.target).value)">
-          <option value="">Todos los sectores</option>
-          @for (sector of sectores; track sector) {
-            <option [value]="sector">{{ sector }}</option>
-          }
-        </select>
-      </div>
-    </header>
-
-    <p class="lista__pista">{{ totalLocales }} locales · ¿buscas tecnología o necesitas un servicio?</p>
-
-    <ul class="toques toques--locales">
-      @for (local of localesVisibles(); track local.id) {
-        <li class="toque" (click)="localActivo.set(local)">
-          <span class="toque__avatar toque__avatar--local"><i class="fa-solid fa-store"></i></span>
-          <span class="toque__datos">
-            <strong>{{ local.nombre }}</strong>
-            <small>{{ local.servicio }}</small>
-          </span>
-          <span class="tipo tipo--local">{{ local.sector }}</span>
-          <span class="toque__ciudad">{{ local.ciudad }}</span>
-        </li>
-      } @empty {
-        <li class="vacio">No hay locales con ese filtro.</li>
-      }
-    </ul>
-  </section>
-
-  <section class="lista">
-    <header class="lista__cabecera">
-      <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de toques</h2>
-
-      <div class="filtros">
-        <input type="search" placeholder="Filtrar por persona o lugar" [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)" />
-        <label>Desde <input type="date" [ngModel]="filtroDesde()" (ngModelChange)="filtroDesde.set($event)" /></label>
-        <label>Hasta <input type="date" [ngModel]="filtroHasta()" (ngModelChange)="filtroHasta.set($event)" /></label>
-        <select [ngModel]="filtroMedio()" (ngModelChange)="filtroMedio.set($event)">
-          <option value="TODOS">NFC y QR</option>
-          <option value="NFC">Solo NFC</option>
-          <option value="QR">Solo QR</option>
-        </select>
-        <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
-          <option value="TODOS">Personales y empresariales</option>
-          <option value="PERSONAL">Solo personales</option>
-          <option value="EMPRESARIAL">Solo empresariales</option>
-        </select>
-        <button type="button" class="btn-mini" (click)="limpiar()">Limpiar</button>
-      </div>
-    </header>
-
-    <ul class="toques">
-      <div class="leyenda">
-        <span class="leyenda__pista">Toca un pin para ver el detalle</span>
-        <span><i class="punto punto--personal"></i> Personal</span>
-        <span><i class="punto punto--empresarial"></i> Empresarial</span>
-        <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
-      </div>
-
-      @for (local of localesVisibles(); track local.id) {
-        <button
-          type="button"
-          class="pin pin--local"
-          [style.left.%]="posicionX(local.longitud)"
-          [style.top.%]="posicionY(local.latitud)"
-          [style.width.px]="22"
-          [style.height.px]="22"
-          (click)="$event.stopPropagation(); seleccionarLocal(local)"
-          [title]="local.nombre + ' · ' + local.sector"
-        >
-          <i class="fa-solid fa-location-dot"></i>
-        </button>
-      }
-
-      @if (localActivo(); as local) {
-        <div class="ficha ficha--local" [style.left.%]="posicionX(local.longitud)" [style.top.%]="posicionY(local.latitud)">
-          <button type="button" class="ficha__cerrar" (click)="localActivo.set(null)"><i class="fa-solid fa-xmark"></i></button>
-          <span class="tipo tipo--local">{{ local.sector }}</span>
-          <strong>{{ local.nombre }}</strong>
-          <small>{{ local.servicio }}</small>
-          <ul>
-            <li><i class="fa-solid fa-location-dot"></i> {{ local.lugar }} · {{ local.ciudad }}</li>
-            <li><i class="fa-solid fa-star"></i> {{ local.calificacion }} / 5</li>
-          </ul>
-        </div>
-      }
-
-      @for (toque of visibles(); track toque.id) {
-        <li class="toque" [class.toque--activo]="seleccionado()?.id === toque.id" (click)="seleccionar(toque)">
-          <span class="toque__avatar">{{ toque.iniciales }}</span>
-          <span class="toque__datos">
-            <strong>{{ toque.persona }}</strong>
-            <small>{{ toque.empresa }} · {{ toque.lugar }}</small>
-          </span>
-          <span class="toque__fecha">{{ fecha(toque.fecha) }}</span>
-          <span class="tipo tipo--{{ toque.tipo.toLowerCase() }}">
-            <i class="fa-solid" [class.fa-user]="toque.tipo === 'PERSONAL'" [class.fa-building]="toque.tipo === 'EMPRESARIAL'"></i>
-            {{ toque.tipo === 'PERSONAL' ? 'Personal' : 'Empresarial' }}
-          </span>
-          <span class="medio medio--{{ toque.medio.toLowerCase() }}">
-            <i class="fa-solid" [class.fa-wifi]="toque.medio === 'NFC'" [class.fa-qrcode]="toque.medio === 'QR'"></i>
-            {{ toque.toques }}
-          </span>
-        </li>
-      } @empty {
-        <li class="vacio">No hay toques con esos filtros.</li>
-      }
-    </ul>
   </section>
 
   <p class="nota">

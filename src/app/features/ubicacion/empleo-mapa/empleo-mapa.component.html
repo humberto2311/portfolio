@@ -1,0 +1,58 @@
+<section class="empleo-mapa">
+  <header class="empleo-mapa__cabecera">
+    <h2><i class="fa-solid fa-briefcase"></i> Empresas que buscan talento</h2>
+    <small>{{ visibles().length }} de {{ total() }}</small>
+  </header>
+
+  <div class="empleo-mapa__filtros">
+    <input
+      type="search"
+      placeholder="Empresa, cargo o ciudad"
+      [ngModel]="busqueda()"
+      (ngModelChange)="busqueda.set($event)" />
+
+    <button type="button" class="empleo-mapa__btn" (click)="limpiar()">Limpiar</button>
+  </div>
+
+  @if (cargando()) {
+    <p class="empleo-mapa__estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Buscando empresas…</p>
+  } @else if (error()) {
+    <p class="empleo-mapa__estado empleo-mapa__estado--error">
+      <i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}
+    </p>
+  } @else {
+    <button type="button" class="empleo-mapa__todas" [disabled]="ubicando()" (click)="mostrarTodas()">
+      @if (ubicando()) {
+        <i class="fa-solid fa-circle-notch fa-spin"></i> Ubicando empresas…
+      } @else {
+        <i class="fa-solid fa-map-location-dot"></i> Ver todas en el mapa
+      }
+    </button>
+
+    <ul class="empleo-mapa__lista">
+      @for (vacante of visibles(); track vacante.id ?? vacante.enlace) {
+        <li
+          class="empleo-item"
+          [class.empleo-item--activa]="seleccionada() === (vacante.enlace ?? vacante.cargo)"
+          (click)="elegir(vacante)">
+          <span class="empleo-item__medidor empleo-item__medidor--{{ nivel(vacante.puntaje) }}">
+            {{ vacante.puntaje }}<small>%</small>
+          </span>
+
+          <span class="empleo-item__datos">
+            <strong>{{ vacante.cargo }}</strong>
+            <small>{{ vacante.empresa }}</small>
+            <span class="empleo-item__meta">
+              <i class="fa-solid fa-location-dot"></i> {{ vacante.ubicacion || 'Sin ciudad' }}
+              @if (vacante.portal) {
+                · {{ vacante.portal }}
+              }
+            </span>
+          </span>
+        </li>
+      } @empty {
+        <li class="empleo-mapa__vacio">No hay vacantes con ese filtro.</li>
+      }
+    </ul>
+  }
+</section>

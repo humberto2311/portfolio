@@ -25,6 +25,7 @@ export class MapillaryComponent implements OnInit, OnChanges, OnDestroy {
   @Input() radio = 150;
   @Input() titulo = 'Imágenes del lugar';
   @Input() altura = '110px';
+  @Input() compacto = false;
 
   private servicio = inject(MapaService);
 

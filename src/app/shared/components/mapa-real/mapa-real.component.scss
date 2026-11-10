@@ -98,12 +98,62 @@
 }
 
 :global(.pin-mapa__punto) {
-  width: 14px;
-  height: 14px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: linear-gradient(120deg, #38bdf8, #a78bfa);
   border: 2px solid #0b1220;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, .25);
+  color: #06202e;
+  font-size: .62rem;
+  box-shadow: 0 2px 8px rgba(2, 6, 23, .55);
+  transition: transform .15s ease;
+}
+
+:global(.pin-mapa:hover .pin-mapa__punto) {
+  transform: scale(1.18);
+}
+
+:global(.pin-mapa--personal .pin-mapa__punto) {
+  background: linear-gradient(120deg, #38bdf8, #22d3ee);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, .28);
+}
+
+:global(.pin-mapa--empresarial .pin-mapa__punto) {
+  background: linear-gradient(120deg, #a78bfa, #c084fc);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, .3);
+}
+
+:global(.pin-mapa--local .pin-mapa__punto) {
+  background: linear-gradient(120deg, #fbbf24, #f59e0b);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, .3);
+}
+
+:global(.pin-mapa--empleo .pin-mapa__punto) {
+  background: linear-gradient(120deg, #f59e0b, #f97316);
+  color: #1c1002;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, .3);
+}
+
+:global(.tooltip-mapa) {
+  padding: .45rem .6rem !important;
+  border-radius: 10px !important;
+  border: 1px solid #f59e0b !important;
+  background: rgba(15, 23, 42, .97) !important;
+  color: #e2e8f0 !important;
+  font-size: .68rem !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, .6) !important;
+  max-width: 240px !important;
+  white-space: normal !important;
+}
+
+:global(.tooltip-mapa::before) {
+  border-top-color: #f59e0b !important;
+}
+
+:global(.tooltip-mapa b) {
+  color: #fcd34d;
 }
 
 :global(.leaflet-container) {

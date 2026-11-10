@@ -24,10 +24,38 @@ export interface FotosLugar {
   fotos: FotoLugar[];
 }
 
+export interface UbicacionEmpresa {
+  empresa: string;
+  ciudad: string;
+  lat: number;
+  lng: number;
+  direccion: string;
+  fuente: string;
+  encontrada: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MapaService {
   private http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/api/mapa`;
+
+  ubicacionEmpresa(empresa: string, ciudad: string): Observable<UbicacionEmpresa> {
+    const params = new HttpParams().set('empresa', empresa ?? '').set('ciudad', ciudad ?? '');
+
+    return this.http.get<UbicacionEmpresa>(`${this.base}/ubicacion-empresa`, { params }).pipe(
+      catchError(() =>
+        of({
+          empresa,
+          ciudad,
+          lat: 0,
+          lng: 0,
+          direccion: '',
+          fuente: 'sin-datos',
+          encontrada: false,
+        } as UbicacionEmpresa),
+      ),
+    );
+  }
 
   fotos(lat: number, lng: number, radio = 150): Observable<FotosLugar> {
     const params = new HttpParams()

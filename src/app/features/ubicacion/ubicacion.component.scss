@@ -413,3 +413,50 @@
   &--personal { background: #38bdf8; }
   &--empresarial { background: #a855f7; }
 }
+
+.pin--local {
+  border-color: rgba(245, 158, 11, .75);
+  background: rgba(245, 158, 11, .3);
+  color: #fef3c7;
+  z-index: 3;
+
+  &:hover {
+    background: rgba(245, 158, 11, .6);
+    border-color: #f59e0b;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+.ficha--local {
+  border-color: color-mix(in srgb, #f59e0b 45%, transparent);
+
+  ul i { color: #f59e0b; }
+}
+
+.tipo--local {
+  color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 16%, transparent);
+}
+
+.punto--local { background: #f59e0b; }
+
+.toques--locales .toque {
+  grid-template-columns: auto 1fr auto auto;
+}
+
+.toque__avatar--local {
+  color: #f59e0b;
+  background: color-mix(in srgb, #f59e0b 16%, transparent);
+}
+
+.toque__ciudad {
+  font-size: .66rem;
+  color: var(--text-secondary, #94a3b8);
+  white-space: nowrap;
+}
+
+.lista__pista {
+  margin: 0 0 .5rem;
+  font-size: .7rem;
+  color: var(--text-secondary, #94a3b8);
+}

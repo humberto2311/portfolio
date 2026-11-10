@@ -74,10 +74,39 @@
       </svg>
 
       <div class="leyenda">
+        <span><i class="punto punto--local"></i> Local</span>
         <span><i class="punto punto--personal"></i> Personal</span>
         <span><i class="punto punto--empresarial"></i> Empresarial</span>
         <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
       </div>
+
+      @for (local of localesVisibles(); track local.id) {
+        <button
+          type="button"
+          class="pin pin--local"
+          [style.left.%]="posicionX(local.longitud)"
+          [style.top.%]="posicionY(local.latitud)"
+          [style.width.px]="22"
+          [style.height.px]="22"
+          (click)="$event.stopPropagation(); seleccionarLocal(local)"
+          [title]="local.nombre + ' · ' + local.sector"
+        >
+          <i class="fa-solid fa-location-dot"></i>
+        </button>
+      }
+
+      @if (localActivo(); as local) {
+        <div class="ficha ficha--local" [style.left.%]="posicionX(local.longitud)" [style.top.%]="posicionY(local.latitud)">
+          <button type="button" class="ficha__cerrar" (click)="localActivo.set(null)"><i class="fa-solid fa-xmark"></i></button>
+          <span class="tipo tipo--local">{{ local.sector }}</span>
+          <strong>{{ local.nombre }}</strong>
+          <small>{{ local.servicio }}</small>
+          <ul>
+            <li><i class="fa-solid fa-location-dot"></i> {{ local.lugar }} · {{ local.ciudad }}</li>
+            <li><i class="fa-solid fa-star"></i> {{ local.calificacion }} / 5</li>
+          </ul>
+        </div>
+      }
 
       @for (toque of visibles(); track toque.id) {
         <button
@@ -134,6 +163,40 @@
 
   <section class="lista">
     <header class="lista__cabecera">
+      <h2><i class="fa-solid fa-store"></i> Locales registrados</h2>
+
+      <div class="filtros">
+        <input type="search" placeholder="Empresa, servicio o sector (p. ej. tecnología, café)" [ngModel]="busquedaLocal()" (ngModelChange)="busquedaLocal.set($event)" />
+        <select [ngModel]="filtroSector()" (ngModelChange)="filtroSector.set($any($event.target).value)">
+          <option value="">Todos los sectores</option>
+          @for (sector of sectores; track sector) {
+            <option [value]="sector">{{ sector }}</option>
+          }
+        </select>
+      </div>
+    </header>
+
+    <p class="lista__pista">{{ totalLocales }} locales · ¿buscas tecnología o necesitas un servicio?</p>
+
+    <ul class="toques toques--locales">
+      @for (local of localesVisibles(); track local.id) {
+        <li class="toque" (click)="localActivo.set(local)">
+          <span class="toque__avatar toque__avatar--local"><i class="fa-solid fa-store"></i></span>
+          <span class="toque__datos">
+            <strong>{{ local.nombre }}</strong>
+            <small>{{ local.servicio }}</small>
+          </span>
+          <span class="tipo tipo--local">{{ local.sector }}</span>
+          <span class="toque__ciudad">{{ local.ciudad }}</span>
+        </li>
+      } @empty {
+        <li class="vacio">No hay locales con ese filtro.</li>
+      }
+    </ul>
+  </section>
+
+  <section class="lista">
+    <header class="lista__cabecera">
       <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de toques</h2>
 
       <div class="filtros">
@@ -156,10 +219,39 @@
 
     <ul class="toques">
       <div class="leyenda">
+        <span><i class="punto punto--local"></i> Local</span>
         <span><i class="punto punto--personal"></i> Personal</span>
         <span><i class="punto punto--empresarial"></i> Empresarial</span>
         <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
       </div>
+
+      @for (local of localesVisibles(); track local.id) {
+        <button
+          type="button"
+          class="pin pin--local"
+          [style.left.%]="posicionX(local.longitud)"
+          [style.top.%]="posicionY(local.latitud)"
+          [style.width.px]="22"
+          [style.height.px]="22"
+          (click)="$event.stopPropagation(); seleccionarLocal(local)"
+          [title]="local.nombre + ' · ' + local.sector"
+        >
+          <i class="fa-solid fa-location-dot"></i>
+        </button>
+      }
+
+      @if (localActivo(); as local) {
+        <div class="ficha ficha--local" [style.left.%]="posicionX(local.longitud)" [style.top.%]="posicionY(local.latitud)">
+          <button type="button" class="ficha__cerrar" (click)="localActivo.set(null)"><i class="fa-solid fa-xmark"></i></button>
+          <span class="tipo tipo--local">{{ local.sector }}</span>
+          <strong>{{ local.nombre }}</strong>
+          <small>{{ local.servicio }}</small>
+          <ul>
+            <li><i class="fa-solid fa-location-dot"></i> {{ local.lugar }} · {{ local.ciudad }}</li>
+            <li><i class="fa-solid fa-star"></i> {{ local.calificacion }} / 5</li>
+          </ul>
+        </div>
+      }
 
       @for (toque of visibles(); track toque.id) {
         <li class="toque" [class.toque--activo]="seleccionado()?.id === toque.id" (click)="seleccionar(toque)">

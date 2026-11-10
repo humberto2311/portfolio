@@ -4,7 +4,15 @@ import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
-import { CIUDADES_DEMO, TOQUES_DEMO, TipoConexion, ToqueUbicacion } from './ubicacion.model';
+import {
+  CIUDADES_DEMO,
+  LOCALES_DEMO,
+  LocalRegistrado,
+  SECTORES,
+  TOQUES_DEMO,
+  TipoConexion,
+  ToqueUbicacion,
+} from './ubicacion.model';
 
 type Medio = 'TODOS' | 'NFC' | 'QR';
 
@@ -29,8 +37,32 @@ export class UbicacionComponent {
   readonly filtroMedio = signal<Medio>('TODOS');
   readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
+  readonly localActivo = signal<LocalRegistrado | null>(null);
+  readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
+  readonly sectores = SECTORES;
+  readonly busquedaLocal = signal('');
+  readonly filtroSector = signal<'' | import('./ubicacion.model').SectorEmpresa>('');
 
   readonly ciudades = CIUDADES_DEMO;
+
+  readonly localesVisibles = computed(() =>
+    this.locales().filter((local) => {
+      const texto = this.busquedaLocal().trim().toLowerCase();
+      const nombre = texto
+        ? `${local.nombre} ${local.servicio} ${local.sector} ${local.ciudad} ${local.lugar}`
+            .toLowerCase()
+            .includes(texto)
+        : true;
+
+      const sector = this.filtroSector() ? local.sector === this.filtroSector() : true;
+
+      return nombre && sector;
+    }),
+  );
+
+  get totalLocales(): number {
+    return this.localesVisibles().length;
+  }
 
   readonly visibles = computed(() =>
     this.toques().filter((toque) => {
@@ -65,10 +97,18 @@ export class UbicacionComponent {
     this.filtroHasta.set('');
     this.filtroMedio.set('TODOS');
     this.filtroTipo.set('TODOS');
+    this.busquedaLocal.set('');
+    this.filtroSector.set('');
   }
 
   seleccionar(toque: ToqueUbicacion): void {
+    this.localActivo.set(null);
     this.seleccionado.set(this.seleccionado()?.id === toque.id ? null : toque);
+  }
+
+  seleccionarLocal(local: LocalRegistrado): void {
+    this.seleccionado.set(null);
+    this.localActivo.set(this.localActivo()?.id === local.id ? null : local);
   }
 
   posicionX(longitud: number): number {

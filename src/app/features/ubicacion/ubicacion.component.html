@@ -42,9 +42,22 @@
     </article>
   </section>
 
+  <div class="capas">
+    <button type="button" class="capa capa--personal" [class.capa--off]="!capas().personal" (click)="alternarCapa('personal')">
+      <i class="punto punto--personal"></i> Personal
+    </button>
+    <button type="button" class="capa capa--empresarial" [class.capa--off]="!capas().empresarial" (click)="alternarCapa('empresarial')">
+      <i class="punto punto--empresarial"></i> Empresarial
+    </button>
+    <button type="button" class="capa capa--local" [class.capa--off]="!capas().locales" (click)="alternarCapa('locales')">
+      <i class="punto punto--local"></i> Locales
+    </button>
+    <span class="capas__pista">Toca para mostrar u ocultar · el tamaño del círculo es el número de toques</span>
+  </div>
+
   <section class="mapa">
     <div class="mapa__lienzo">
-      <svg viewBox="0 0 100 100" class="mapa__fondo" aria-label="Mapa de Colombia">
+      <svg viewBox="0 0 100 100" class="mapa__fondo" aria-label="Mapa de Colombia" preserveAspectRatio="xMidYMid meet">
         <defs>
           <pattern id="rejilla" width="6" height="6" patternUnits="userSpaceOnUse">
             <path d="M6 0 L0 0 0 6" fill="none" stroke="rgba(148,163,184,.16)" stroke-width="0.25" />
@@ -58,23 +71,23 @@
         <rect width="100" height="100" fill="url(#rejilla)" />
 
         <path
-          d="M33,4 L40,3 L46,6 L52,5 L57,8 L60,13 L63,15 L70,13 L76,15 L80,20 L82,26
-             L86,28 L89,33 L88,39 L85,43 L86,48 L84,53 L80,56 L77,61 L74,66 L70,70
-             L66,76 L62,82 L57,87 L52,91 L47,93 L43,90 L40,84 L36,78 L32,72 L28,66
-             L24,60 L21,54 L19,47 L20,41 L23,36 L26,31 L25,25 L28,19 L27,13 L30,8 Z"
+          d="M42,8 L46,7 L50,9 L54,8 L57,10 L56,14 L59,16 L62,16 L64,19 L66,22
+             L64,26 L66,29 L68,32 L67,36 L69,40 L68,45 L70,49 L68,54 L64,58
+             L62,63 L58,67 L55,72 L51,76 L47,79 L43,79 L40,75 L37,70 L34,64
+             L31,58 L29,51 L28,44 L27,38 L29,32 L28,26 L30,20 L33,15 L36,11 Z"
           fill="url(#tierra)"
           stroke="rgba(56,189,248,.55)"
           stroke-width="0.7"
           stroke-linejoin="round"
         />
 
-        <path d="M60,13 L64,20 L68,26 L66,33 L70,40" fill="none" stroke="rgba(56,189,248,.28)" stroke-width="0.4" />
-        <path d="M28,66 L38,62 L48,66 L58,62 L66,66" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.4" />
-        <path d="M36,78 L44,74 L52,78 L60,74" fill="none" stroke="rgba(56,189,248,.18)" stroke-width="0.4" />
+        <path d="M42,26 L46,28 L50,27 L54,29" fill="none" stroke="rgba(56,189,248,.28)" stroke-width="0.4" />
+        <path d="M34,50 L40,47 L46,50 L52,47 L58,50" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.4" />
+        <path d="M38,64 L44,61 L50,64 L56,61" fill="none" stroke="rgba(56,189,248,.18)" stroke-width="0.4" />
       </svg>
 
       <div class="leyenda">
-        <span><i class="punto punto--local"></i> Local</span>
+        <span class="leyenda__pista">Toca un pin para ver el detalle</span>
         <span><i class="punto punto--personal"></i> Personal</span>
         <span><i class="punto punto--empresarial"></i> Empresarial</span>
         <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
@@ -219,7 +232,7 @@
 
     <ul class="toques">
       <div class="leyenda">
-        <span><i class="punto punto--local"></i> Local</span>
+        <span class="leyenda__pista">Toca un pin para ver el detalle</span>
         <span><i class="punto punto--personal"></i> Personal</span>
         <span><i class="punto punto--empresarial"></i> Empresarial</span>
         <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>

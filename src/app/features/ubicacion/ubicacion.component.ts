@@ -36,6 +36,7 @@ export class UbicacionComponent {
   readonly filtroHasta = signal('');
   readonly filtroMedio = signal<Medio>('TODOS');
   readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
+  readonly capas = signal({ personal: true, empresarial: true, locales: true });
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
   readonly localActivo = signal<LocalRegistrado | null>(null);
   readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
@@ -47,6 +48,7 @@ export class UbicacionComponent {
 
   readonly localesVisibles = computed(() =>
     this.locales().filter((local) => {
+      if (!this.capas().locales) return false;
       const texto = this.busquedaLocal().trim().toLowerCase();
       const nombre = texto
         ? `${local.nombre} ${local.servicio} ${local.sector} ${local.ciudad} ${local.lugar}`
@@ -75,8 +77,10 @@ export class UbicacionComponent {
       const hasta = this.filtroHasta() ? toque.fecha <= this.filtroHasta() : true;
       const medio = this.filtroMedio() === 'TODOS' ? true : toque.medio === this.filtroMedio();
       const tipo = this.filtroTipo() === 'TODOS' ? true : toque.tipo === this.filtroTipo();
+      const capa =
+        toque.tipo === 'PERSONAL' ? this.capas().personal : this.capas().empresarial;
 
-      return nombre && desde && hasta && medio && tipo;
+      return nombre && desde && hasta && medio && tipo && capa;
     }),
   );
 
@@ -99,6 +103,11 @@ export class UbicacionComponent {
     this.filtroTipo.set('TODOS');
     this.busquedaLocal.set('');
     this.filtroSector.set('');
+    this.capas.set({ personal: true, empresarial: true, locales: true });
+  }
+
+  alternarCapa(capa: 'personal' | 'empresarial' | 'locales'): void {
+    this.capas.update((actual) => ({ ...actual, [capa]: !actual[capa] }));
   }
 
   seleccionar(toque: ToqueUbicacion): void {
@@ -112,15 +121,17 @@ export class UbicacionComponent {
   }
 
   posicionX(longitud: number): number {
-    const minimo = -79.2;
-    const maximo = -66.7;
-    return Math.min(97, Math.max(3, ((longitud - minimo) / (maximo - minimo)) * 100));
+    const minimo = -77.8;
+    const maximo = -71.8;
+    const t = (longitud - minimo) / (maximo - minimo);
+    return Math.min(72, Math.max(28, 28 + t * 42));
   }
 
   posicionY(latitud: number): number {
-    const minimo = -4.5;
-    const maximo = 12.7;
-    return Math.min(97, Math.max(3, ((maximo - latitud) / (maximo - minimo)) * 100));
+    const minimo = -1.5;
+    const maximo = 11.5;
+    const t = (maximo - latitud) / (maximo - minimo);
+    return Math.min(88, Math.max(10, 10 + t * 78));
   }
 
   burbuja(toques: number): number {

@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { BusquedaEmpleo, Vacante } from '../../core/models/empleo.model';
+import { BusquedaEmpleo, GraficoCv, Vacante } from '../../core/models/empleo.model';
 import { EmpleoService } from '../../core/services/empleo.service';
+import { EmpleoGraficoComponent, TipoGraficoEmpleo } from './empleo-grafico.component';
 
 @Component({
   selector: 'app-empleo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EmpleoGraficoComponent],
   templateUrl: './empleo.component.html',
   styleUrls: ['./empleo.component.scss'],
 })
@@ -19,19 +20,47 @@ export class EmpleoComponent implements OnInit {
   readonly ciudad = signal('');
   readonly modalidad = signal('');
   readonly buscando = signal(false);
+  readonly cargandoGrafico = signal(true);
   readonly error = signal<string | null>(null);
+
+  readonly grafico = signal<GraficoCv | null>(null);
   readonly busqueda = signal<BusquedaEmpleo | null>(null);
   readonly historial = signal<BusquedaEmpleo[]>([]);
   readonly detalle = signal<Vacante | null>(null);
+  readonly filtroIa = signal(false);
+  readonly tipoGrafico = signal<TipoGraficoEmpleo>('barras');
   readonly descartadas = signal<string[]>([]);
 
   readonly modalidades = ['', 'Remoto', 'Híbrido', 'Presencial'];
 
+  readonly iaDisponible = computed(() => this.grafico() !== null);
+
   ngOnInit(): void {
-    this.svc.ultima().subscribe((ultima) => {
-      if (ultima) this.busqueda.set(ultima);
-    });
+    // 1. El gráfico del CV va primero, sin filtros y sin scraping.
+    this.cargarGrafico();
+
+    // 2. Historial de búsquedas guardadas.
     this.svc.historial().subscribe((lista) => this.historial.set(lista));
+  }
+
+  cargarGrafico(): void {
+    this.cargandoGrafico.set(true);
+
+    this.svc.grafico().subscribe({
+      next: (resultado) => {
+        this.cargandoGrafico.set(false);
+        this.grafico.set(resultado?.grafico ?? null);
+        // El gráfico ya trae el aviso del CV; la lista de vacantes llega con la búsqueda.
+        if (resultado?.grafico?.titular && !this.termino()) {
+          this.termino.set(resultado.grafico.titular);
+        }
+      },
+      error: (err) => {
+        this.cargandoGrafico.set(false);
+        this.grafico.set(null);
+        this.error.set(err?.error?.error ?? null);
+      },
+    });
   }
 
   buscar(): void {
@@ -44,11 +73,18 @@ export class EmpleoComponent implements OnInit {
     this.buscando.set(true);
     this.error.set(null);
 
-    this.svc.buscar(termino, this.ciudad().trim(), this.modalidad()).subscribe({
+    this.svc.buscar(termino, this.ciudad().trim(), this.modalidad(), this.filtroIa()).subscribe({
       next: (resultado) => {
         this.buscando.set(false);
         this.busqueda.set(resultado);
         this.descartadas.set([]);
+        this.detalle.set(null);
+
+        // El gráfico se refresca con el cruce contra el mercado
+        if (resultado?.grafico) {
+          this.grafico.set(resultado.grafico);
+        }
+
         this.svc.historial().subscribe((lista) => this.historial.set(lista));
       },
       error: (err) => {
@@ -64,11 +100,28 @@ export class EmpleoComponent implements OnInit {
 
     return lista
       .filter((vacante) => !descartes.has(this.clave(vacante)))
-      .sort((a, b) => b.puntaje - a.puntaje);
+      .sort((a, b) => (b.puntaje ?? 0) - (a.puntaje ?? 0));
   }
 
   get mejor(): Vacante | null {
     return this.resultados[0] ?? null;
+  }
+
+  get recomendaciones(): string[] {
+    return this.grafico()?.recomendaciones ?? [];
+  }
+
+  /** Vacantes que alimentan el gráfico general. */
+  get vacantesVisibles(): Vacante[] {
+    return this.resultados;
+  }
+
+  get indiceGeneral(): number {
+    return this.grafico()?.indiceGeneral ?? 0;
+  }
+
+  get aniosExperiencia(): number {
+    return this.grafico()?.aniosExperiencia ?? 0;
   }
 
   clave(vacante: Vacante): string {
@@ -77,7 +130,9 @@ export class EmpleoComponent implements OnInit {
 
   descartar(vacante: Vacante): void {
     this.descartadas.update((lista) => [...lista, this.clave(vacante)]);
-    if (this.detalle() && this.clave(this.detalle()!) === this.clave(vacante)) this.detalle.set(null);
+    if (this.detalle() && this.clave(this.detalle() as Vacante) === this.clave(vacante)) {
+      this.detalle.set(null);
+    }
   }
 
   ver(vacante: Vacante): void {
@@ -85,7 +140,11 @@ export class EmpleoComponent implements OnInit {
   }
 
   abrir(vacante: Vacante): void {
-    if (vacante.enlace) window.open(vacante.enlace, '_blank', 'noopener');
+    this.abrirEnlace(vacante.enlace);
+  }
+
+  abrirEnlace(enlace: string | null | undefined): void {
+    if (enlace) window.open(enlace, '_blank', 'noopener');
   }
 
   usarHistorial(item: BusquedaEmpleo): void {
@@ -94,6 +153,7 @@ export class EmpleoComponent implements OnInit {
     this.modalidad.set(item.modalidad ?? '');
     this.busqueda.set(item);
     this.descartadas.set([]);
+    this.detalle.set(null);
   }
 
   nivel(puntaje: number): 'alta' | 'media' | 'baja' {

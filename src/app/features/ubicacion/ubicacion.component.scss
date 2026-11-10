@@ -91,15 +91,29 @@
   display: grid;
   gap: .8rem;
   grid-template-columns: minmax(0, 1fr) 240px;
+  grid-template-areas:
+    "lienzo ciudades"
+    "fotos ciudades";
   margin-bottom: .9rem;
 
   @media (max-width: 860px) {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "lienzo"
+      "fotos"
+      "ciudades";
+  }
+
+  &__fotos {
+    grid-area: fotos;
+    display: block;
+    min-width: 0;
   }
 
   &__lienzo {
+    grid-area: lienzo;
     position: relative;
-    min-height: 340px;
+    min-width: 0;
     border-radius: 16px;
     border: 1px solid var(--border-soft, #1e293b);
     background:
@@ -116,6 +130,7 @@
   }
 
   &__ciudades {
+    grid-area: ciudades;
     padding: .8rem;
     border-radius: 16px;
     border: 1px solid var(--border-soft, #1e293b);

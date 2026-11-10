@@ -4,8 +4,19 @@
       <h1><i class="fa-solid fa-briefcase"></i> Buscar trabajo</h1>
       <p>Comparamos cada vacante con tu hoja de vida y te decimos dónde tienes más opciones.</p>
     </div>
+
+    @if (busqueda(); as resumen) {
+      <div class="cabecera__datos">
+        <span><strong>{{ resultados.length }}</strong> vacantes</span>
+        <span><strong>{{ resumen.mejorPuntaje }}%</strong> mejor cercanía</span>
+        @if (resumen.cacheada) {
+          <span class="cabecera__cache"><i class="fa-solid fa-database"></i> caché {{ resumen.horasRestantes }} h</span>
+        }
+      </div>
+    }
   </header>
 
+  <!-- ============ 1. FILTROS (siempre arriba) ============ -->
   <section class="buscador">
     <label class="campo campo--ancho">
       <span>Cargo o tecnología</span>
@@ -27,6 +38,15 @@
       </select>
     </label>
 
+    <label class="campo campo--ia" title="Refina el puntaje con IA (opcional)">
+      <span>Opción IA</span>
+      <button type="button" class="interruptor" [class.interruptor--on]="filtroIa()"
+              (click)="filtroIa.set(!filtroIa())" role="switch" [attr.aria-checked]="filtroIa()">
+        <i class="fa-solid fa-robot"></i>
+        <em>{{ filtroIa() ? 'ON' : 'OFF' }}</em>
+      </button>
+    </label>
+
     <button type="button" class="btn-buscar" [disabled]="buscando()" (click)="buscar()">
       @if (buscando()) {
         <i class="fa-solid fa-circle-notch fa-spin"></i> Buscando…
@@ -37,127 +57,164 @@
   </section>
 
   @if (error()) {
-    <p class="aviso aviso--error"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
+    <p class="aviso aviso--error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
   }
 
-  @if (buscando()) {
-    <div class="estado">
-      <i class="fa-solid fa-circle-notch fa-spin"></i>
-      <p>Abriendo el portal de empleo y comparando vacantes con tu CV…</p>
-    </div>
-  } @else {
-    @if (busqueda(); as datos) {
-    @if (datos.aviso) {
-      <p class="aviso"><i class="fa-solid fa-circle-info"></i> {{ datos.aviso }}</p>
-    }
+  <!-- ============ 2. GRÁFICO + VACANTES (lado a lado) ============ -->
+  <section class="tablero">
+    <!-- Columna izquierda: gráfico -->
+    <aside class="tablero__grafico">
+      @if (cargandoGrafico()) {
+        <div class="estado">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          <p>Analizando tu hoja de vida…</p>
+        </div>
+      } @else {
+        <app-empleo-grafico
+          [vacantes]="vacantesVisibles"
+          [seleccionada]="detalle()"
+          [aniosExperiencia]="aniosExperiencia"
+          [tipo]="tipoGrafico()"
+          (cambiarTipo)="tipoGrafico.set($event)"></app-empleo-grafico>
 
-    @if (resultados.length) {
-      <section class="resumen">
-        <article class="mejor">
-          <span class="mejor__sello"><i class="fa-solid fa-star"></i> Mejor opción</span>
-          @if (mejor; as top) {
-            <h2>{{ top.cargo }}</h2>
-            <p>{{ top.empresa }} · {{ top.ubicacion }}</p>
-            <div class="mejor__puntaje">
-              <strong>{{ top.puntaje }}%</strong>
-              <span>compatibilidad con tu CV</span>
-            </div>
-            <div class="chips">
-              @for (punto of top.coincidencias.slice(0, 6); track punto) {
-                <span class="chip chip--ok">{{ punto }}</span>
-              }
-            </div>
-            <div class="mejor__acciones">
-              <button type="button" class="btn btn--prim" (click)="abrir(top)">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> Postularme aquí
-              </button>
-              <button type="button" class="btn" (click)="ver(top)">Ver detalle</button>
-              <button type="button" class="btn btn--suave" (click)="descartar(top)">Descartar</button>
-            </div>
+        @if (aniosExperiencia) {
+          <p class="tablero__nota">
+            <i class="fa-solid fa-user-check"></i> {{ aniosExperiencia }} años de experiencia en tu CV
+          </p>
+        }
+      }
+    </aside>
+
+    <!-- Columna derecha: vacantes, con scroll propio -->
+    <div class="tablero__lista">
+      @if (buscando()) {
+        <div class="estado">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          <p>Consultando los portales y comparando vacantes con tu CV…</p>
+        </div>
+      } @else {
+        @if (busqueda(); as datos) {
+          @if (datos.aviso) {
+            <p class="aviso">
+              <i class="fa-solid fa-circle-info"></i> {{ datos.aviso }}
+            </p>
           }
-        </article>
+        }
 
-        <aside class="datos">
-          <div><small>Vacantes encontradas</small><strong>{{ datos.vacantes }}</strong></div>
-          <div><small>Mejor puntaje</small><strong>{{ datos.mejorPuntaje }}%</strong></div>
-          <div><small>Búsqueda</small><strong>{{ datos.termino }}</strong></div>
-        </aside>
-      </section>
+        @if (resultados.length) {
+          <header class="tablero__cabecera">
+            <h2>Convocatorias ({{ resultados.length }})</h2>
+            <small>Hunde una para ver su gráfico</small>
+          </header>
 
-      <section class="lista">
-        <header class="lista__cabecera">
-          <h2>Opciones ordenadas por compatibilidad</h2>
-          <small>Tú decides a cuál postularte. El puntaje se calcula con tu hoja de vida guardada.</small>
-        </header>
-
-        <ul>
-          @for (vacante of resultados; track vacante.id ?? vacante.enlace) {
-            <li class="vacante" [class.vacante--abierta]="detalle()?.enlace === vacante.enlace">
-              <button type="button" class="vacante__fila" (click)="ver(vacante)">
-                <span class="medidor medidor--{{ nivel(vacante.puntaje) }}">
-                  <strong>{{ vacante.puntaje }}</strong><small>%</small>
-                </span>
-
-                <span class="vacante__datos">
-                  <strong>{{ vacante.cargo }}</strong>
-                  <small>{{ vacante.empresa }} · {{ vacante.ubicacion }}</small>
-                  <span class="chips">
-                    @for (punto of vacante.coincidencias.slice(0, 4); track punto) {
-                      <span class="chip chip--ok">{{ punto }}</span>
-                    }
-                    @for (punto of vacante.faltantes.slice(0, 2); track punto) {
-                      <span class="chip chip--falta">{{ punto }}</span>
-                    }
+          <ul class="vacantes-scroll">
+            @for (vacante of resultados; track clave(vacante)) {
+              <li class="vacante"
+                  [class.vacante--abierta]="detalle()?.enlace === vacante.enlace"
+                  [class.vacante--activa]="detalle()?.enlace === vacante.enlace">
+                <button type="button" class="vacante__fila" (click)="ver(vacante)">
+                  <span class="medidor medidor--{{ nivel(vacante.puntaje) }}"
+                        [class.medidor--activo]="detalle()?.enlace === vacante.enlace">
+                    <strong>{{ vacante.puntaje }}</strong><small>%</small>
                   </span>
-                </span>
 
-                <span class="vacante__flecha"><i class="fa-solid" [class.fa-chevron-down]="detalle()?.enlace === vacante.enlace" [class.fa-chevron-right]="detalle()?.enlace !== vacante.enlace"></i></span>
-              </button>
+                  <span class="vacante__datos">
+                    <strong>
+                      {{ vacante.cargo }}
+                      @if (detalle()?.enlace === vacante.enlace) {
+                        <span class="sello-activa"><i class="fa-solid fa-check"></i> Seleccionada</span>
+                      }
+                    </strong>
+                    <small>{{ vacante.empresa }} · {{ vacante.ubicacion }}</small>
+                    <span class="vacante__portal">{{ vacante.portal }}</span>
+                    <span class="chips">
+                      @for (punto of vacante.coincidencias.slice(0, 3); track punto) {
+                        <span class="chip chip--ok">{{ punto }}</span>
+                      }
+                      @for (punto of vacante.faltantes.slice(0, 2); track punto) {
+                        <span class="chip chip--falta">{{ punto }}</span>
+                      }
+                    </span>
+                  </span>
 
-              @if (detalle()?.enlace === vacante.enlace) {
-                <div class="vacante__detalle">
-                  @if (vacante.salario) {
-                    <p><i class="fa-solid fa-money-bill-wave"></i> {{ vacante.salario }}</p>
-                  }
-                  <p class="descripcion">{{ vacante.descripcion || 'Sin descripción disponible.' }}</p>
+                  <span class="vacante__flecha">
+                    <i class="fa-solid"
+                       [class.fa-chevron-down]="detalle()?.enlace === vacante.enlace"
+                       [class.fa-chevron-right]="detalle()?.enlace !== vacante.enlace"></i>
+                  </span>
+                </button>
 
-                  <div class="bloques">
-                    <div>
-                      <h4>Coincide con tu CV</h4>
-                      <div class="chips">
-                        @for (punto of vacante.coincidencias; track punto) {
-                          <span class="chip chip--ok">{{ punto }}</span>
-                        } @empty {
-                          <small>Sin coincidencias detectadas.</small>
-                        }
+                @if (detalle()?.enlace === vacante.enlace) {
+                  <div class="vacante__detalle">
+                    @if (vacante.salario) {
+                      <p><i class="fa-solid fa-money-bill-wave"></i> {{ vacante.salario }}</p>
+                    }
+                    <p class="descripcion">{{ vacante.descripcion || 'Sin descripción disponible.' }}</p>
+
+                    <div class="bloques">
+                      <div>
+                        <h4>Coincide con tu CV</h4>
+                        <div class="chips">
+                          @for (punto of vacante.coincidencias; track punto) {
+                            <span class="chip chip--ok">{{ punto }}</span>
+                          } @empty {
+                            <small>Sin coincidencias detectadas.</small>
+                          }
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Te falta reforzar</h4>
+                        <div class="chips">
+                          @for (punto of vacante.faltantes; track punto) {
+                            <span class="chip chip--falta">{{ punto }}</span>
+                          } @empty {
+                            <small>Nada pendiente.</small>
+                          }
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <h4>Te falta reforzar</h4>
-                      <div class="chips">
-                        @for (punto of vacante.faltantes; track punto) {
-                          <span class="chip chip--falta">{{ punto }}</span>
-                        } @empty {
-                          <small>Nada pendiente.</small>
-                        }
+
+                    @if (vacante.sugerencias?.length) {
+                      <div class="sugerencias">
+                        <h4><i class="fa-solid fa-robot"></i> Sugerencias de IA</h4>
+                        <ul>
+                          @for (sug of vacante.sugerencias; track sug) {
+                            <li>{{ sug }}</li>
+                          }
+                        </ul>
                       </div>
+                    }
+
+                    <div class="acciones">
+                      <button type="button" class="btn btn--prim" (click)="abrir(vacante)">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Ir a la vacante
+                      </button>
+                      <button type="button" class="btn btn--suave" (click)="descartar(vacante)">Descartar</button>
                     </div>
                   </div>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="estado">
+            <i class="fa-regular fa-folder-open"></i>
+            <p>Sin convocatorias todavía. Escribe un cargo arriba y pulsa <b>Buscar trabajo</b>.</p>
+          </div>
+        }
+      }
+    </div>
+  </section>
 
-                  <div class="acciones">
-                    <button type="button" class="btn btn--prim" (click)="abrir(vacante)">
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i> Ir a la vacante
-                    </button>
-                    <button type="button" class="btn btn--suave" (click)="descartar(vacante)">Descartar</button>
-                  </div>
-                </div>
-              }
-            </li>
-          }
-        </ul>
-      </section>
-    }
-    }
+  @if (recomendaciones.length) {
+    <section class="sugerencias sugerencias--pie">
+      <h4><i class="fa-solid fa-lightbulb"></i> Cómo subir tu porcentaje de acierto</h4>
+      <ul>
+        @for (recomendacion of recomendaciones; track recomendacion) {
+          <li>{{ recomendacion }}</li>
+        }
+      </ul>
+    </section>
   }
 
   @if (historial().length) {
@@ -168,7 +225,10 @@
           <li>
             <button type="button" (click)="usarHistorial(item)">
               <strong>{{ item.termino }}</strong>
-              <small>{{ item.vacantes }} vacantes · mejor {{ item.mejorPuntaje }}% · {{ fecha(item.creadaEn) }}</small>
+              <small>
+                {{ item.vacantes }} vacantes · mejor {{ item.mejorPuntaje }}% · {{ fecha(item.creadaEn) }}
+                @if (item.cacheada) { · en caché }
+              </small>
             </button>
           </li>
         }

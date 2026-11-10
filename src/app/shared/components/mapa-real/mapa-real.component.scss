@@ -1,0 +1,129 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.mapa-real {
+  position: relative;
+  display: grid;
+  grid-template-rows: var(--altura-mapa, 420px) auto;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: #0b1220;
+
+  &__lienzo {
+    width: 100%;
+    height: var(--altura-mapa, 420px);
+    min-height: 240px;
+    background: #0b1220;
+  }
+
+  &__controles {
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+    display: grid;
+    justify-items: center;
+    gap: .25rem;
+    z-index: 500;
+
+    button {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      border: 1px solid var(--border-soft, #1e293b);
+      background: rgba(15, 23, 42, .92);
+      color: var(--text-primary, #e2e8f0);
+      font-size: .72rem;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+
+      &:hover {
+        border-color: var(--accent-cyan, #38bdf8);
+        color: var(--accent-cyan, #38bdf8);
+      }
+    }
+  }
+
+  &__zoom {
+    font-size: .58rem;
+    font-weight: 800;
+    color: var(--text-secondary, #94a3b8);
+    background: rgba(15, 23, 42, .92);
+    border-radius: 6px;
+    padding: .1rem .3rem;
+  }
+
+  &__pie {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .6rem;
+    font-size: .64rem;
+    color: var(--text-secondary, #94a3b8);
+    background: rgba(15, 23, 42, .85);
+    border-top: 1px solid var(--border-soft, #1e293b);
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .22rem .55rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft, #1e293b);
+    background: var(--bg-input, rgba(15, 23, 42, .55));
+    color: var(--text-primary, #e2e8f0);
+    font: inherit;
+    font-size: .64rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--accent-cyan, #38bdf8);
+    }
+  }
+
+  &__fuente {
+    margin-left: auto;
+    opacity: .7;
+  }
+}
+
+:global(.pin-mapa) {
+  display: grid;
+  place-items: center;
+}
+
+:global(.pin-mapa__punto) {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, #38bdf8, #a78bfa);
+  border: 2px solid #0b1220;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, .25);
+}
+
+:global(.leaflet-container) {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #0b1220;
+}
+
+:global(.leaflet-control-attribution) {
+  background: rgba(15, 23, 42, .82) !important;
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+}
+
+:global(.leaflet-control-attribution a) {
+  color: #7dd3fc !important;
+}
+
+:global(.leaflet-popup-content-wrapper),
+:global(.leaflet-popup-tip) {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #1e293b;
+}

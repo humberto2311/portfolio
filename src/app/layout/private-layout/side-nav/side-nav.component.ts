@@ -19,7 +19,6 @@ const NAVEGACION_PERSONAL: RailItem[] = [
   { label: 'Inicio', icon: 'fa-solid fa-house', ruta: '/app', exacto: true },
   { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
   { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
-  { label: 'Buscar trabajo', icon: 'fa-solid fa-briefcase', ruta: '/app/empleo' },
   { label: 'Talento', icon: 'fa-solid fa-magnifying-glass', ruta: '/app/talento' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
   { label: 'Portafolio', icon: 'fa-solid fa-briefcase', ruta: '/app/portafolio' },

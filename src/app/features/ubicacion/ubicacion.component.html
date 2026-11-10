@@ -57,108 +57,20 @@
 
   <section class="mapa">
     <div class="mapa__lienzo">
-      <svg viewBox="0 0 100 100" class="mapa__fondo" aria-label="Mapa de Colombia" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <pattern id="rejilla" width="6" height="6" patternUnits="userSpaceOnUse">
-            <path d="M6 0 L0 0 0 6" fill="none" stroke="rgba(148,163,184,.16)" stroke-width="0.25" />
-          </pattern>
-          <linearGradient id="tierra" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#16324a" />
-            <stop offset="100%" stop-color="#0f2537" />
-          </linearGradient>
-        </defs>
+      <app-mapa-real
+        [altura]="'420px'"
+        [lat]="punto().lat"
+        [lng]="punto().lng"
+        [zoom]="punto().zoom"></app-mapa-real>
 
-        <rect width="100" height="100" fill="url(#rejilla)" />
-
-        <path
-          d="M42,8 L46,7 L50,9 L54,8 L57,10 L56,14 L59,16 L62,16 L64,19 L66,22
-             L64,26 L66,29 L68,32 L67,36 L69,40 L68,45 L70,49 L68,54 L64,58
-             L62,63 L58,67 L55,72 L51,76 L47,79 L43,79 L40,75 L37,70 L34,64
-             L31,58 L29,51 L28,44 L27,38 L29,32 L28,26 L30,20 L33,15 L36,11 Z"
-          fill="url(#tierra)"
-          stroke="rgba(56,189,248,.55)"
-          stroke-width="0.7"
-          stroke-linejoin="round"
-        />
-
-        <path d="M42,26 L46,28 L50,27 L54,29" fill="none" stroke="rgba(56,189,248,.28)" stroke-width="0.4" />
-        <path d="M34,50 L40,47 L46,50 L52,47 L58,50" fill="none" stroke="rgba(56,189,248,.22)" stroke-width="0.4" />
-        <path d="M38,64 L44,61 L50,64 L56,61" fill="none" stroke="rgba(56,189,248,.18)" stroke-width="0.4" />
-      </svg>
-
-      <div class="leyenda">
-        <span class="leyenda__pista">Toca un pin para ver el detalle</span>
-        <span><i class="punto punto--personal"></i> Personal</span>
-        <span><i class="punto punto--empresarial"></i> Empresarial</span>
-        <span class="leyenda__pista">El tamaño del círculo es el número de toques</span>
-      </div>
-
-      @for (local of localesVisibles(); track local.id) {
-        <button
-          type="button"
-          class="pin pin--local"
-          [style.left.%]="posicionX(local.longitud)"
-          [style.top.%]="posicionY(local.latitud)"
-          [style.width.px]="22"
-          [style.height.px]="22"
-          (click)="$event.stopPropagation(); seleccionarLocal(local)"
-          [title]="local.nombre + ' · ' + local.sector"
-        >
-          <i class="fa-solid fa-location-dot"></i>
-        </button>
-      }
-
-      @if (localActivo(); as local) {
-        <div class="ficha ficha--local" [style.left.%]="posicionX(local.longitud)" [style.top.%]="posicionY(local.latitud)">
-          <button type="button" class="ficha__cerrar" (click)="localActivo.set(null)"><i class="fa-solid fa-xmark"></i></button>
-          <span class="tipo tipo--local">{{ local.sector }}</span>
-          <strong>{{ local.nombre }}</strong>
-          <small>{{ local.servicio }}</small>
-          <ul>
-            <li><i class="fa-solid fa-location-dot"></i> {{ local.lugar }} · {{ local.ciudad }}</li>
-            <li><i class="fa-solid fa-star"></i> {{ local.calificacion }} / 5</li>
-          </ul>
-        </div>
-      }
-
-      @for (toque of visibles(); track toque.id) {
-        <button
-          type="button"
-          class="pin"
-          [class.pin--activo]="seleccionado()?.id === toque.id"
-          [class.pin--empresarial]="toque.tipo === 'EMPRESARIAL'"
-          [style.left.%]="posicionX(toque.longitud)"
-          [style.top.%]="posicionY(toque.latitud)"
-          [style.width.px]="burbuja(toque.toques)"
-          [style.height.px]="burbuja(toque.toques)"
-          (click)="seleccionar(toque)"
-          [title]="toque.persona + ' · ' + toque.toques + ' toques'"
-        >
-          <span>{{ toque.toques }}</span>
-        </button>
-      }
-
-      @if (seleccionado(); as elegido) {
-        <div class="ficha" [style.left.%]="posicionX(elegido.longitud)" [style.top.%]="posicionY(elegido.latitud)">
-          <button type="button" class="ficha__cerrar" (click)="seleccionado.set(null)"><i class="fa-solid fa-xmark"></i></button>
-          <strong>{{ elegido.persona }}</strong>
-          <small>{{ elegido.empresa }}</small>
-          <ul>
-            <li><i class="fa-solid fa-location-dot"></i> {{ elegido.lugar }}</li>
-            <li><i class="fa-solid fa-city"></i> {{ elegido.ciudad }}</li>
-            <li><i class="fa-regular fa-calendar"></i> {{ fecha(elegido.fecha) }}</li>
-            <li>
-              <i class="fa-solid" [class.fa-wifi]="elegido.medio === 'NFC'" [class.fa-qrcode]="elegido.medio === 'QR'"></i>
-              {{ elegido.toques }} toques por {{ elegido.medio }}
-            </li>
-            <li>
-              <i class="fa-solid" [class.fa-user]="elegido.tipo === 'PERSONAL'" [class.fa-building]="elegido.tipo === 'EMPRESARIAL'"></i>
-              Conexión {{ elegido.tipo === 'PERSONAL' ? 'personal' : 'empresarial' }}
-            </li>
-          </ul>
-        </div>
-      }
     </div>
+
+    <app-mapillary
+      class="mapa__fotos"
+      [titulo]="'Fotos reales de ' + punto().nombre"
+      [lat]="punto().lat"
+      [lng]="punto().lng"
+      [radio]="150"></app-mapillary>
 
     <aside class="mapa__ciudades">
       <h2>Por ciudad</h2>

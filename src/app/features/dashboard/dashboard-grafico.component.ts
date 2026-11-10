@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  ArcElement,
   BarController,
   BarElement,
   CategoryScale,
@@ -40,6 +41,9 @@ function registrarChart(): void {
     LineController,
     LineElement,
     PointElement,
+    // ArcElement es obligatorio para torta y doughnut: sin él,
+    // Chart.js lanza ""arc" is not a registered element".
+    ArcElement,
     PieController,
     DoughnutController,
     CategoryScale,

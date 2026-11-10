@@ -1,0 +1,59 @@
+<div class="mapillary" [style.--alt]="altura">
+  <header class="mapillary__cabecera">
+    <span><i class="fa-solid fa-camera-retro"></i> {{ titulo }}</span>
+    @if (fotos().length) {
+      <small>{{ fotos().length }} foto(s)</small>
+    }
+  </header>
+
+  @if (!configurado()) {
+    <div class="mapillary__estado">
+      <i class="fa-solid fa-circle-info"></i>
+      Falta el token de Mapillary en el backend (MAPILLARY_TOKEN).
+    </div>
+  } @else if (cargando()) {
+    <div class="mapillary__estado">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> Buscando fotos del lugar…
+    </div>
+  } @else if (!fotos().length) {
+    <div class="mapillary__estado">
+      <i class="fa-solid fa-map-location-dot"></i>
+      <span>
+        Nadie ha subido fotos de este punto a Mapillary.
+        <button type="button" (click)="ampliar()">Buscar en 1 km</button>
+      </span>
+    </div>
+  } @else {
+    <ul class="mapillary__tira">
+      @for (foto of fotos(); track foto.id) {
+        <li>
+          <button type="button" (click)="ver(foto)">
+            <img [src]="foto.miniatura" [alt]="'Fotografía del lugar ' + foto.id" loading="lazy" />
+            @if (foto.panoramica) {
+              <span class="mapillary__pano"><i class="fa-solid fa-panorama"></i></span>
+            }
+            <span class="mapillary__lupa"><i class="fa-solid fa-expand"></i> Ver</span>
+            <em>{{ foto.fecha }}</em>
+          </button>
+        </li>
+      }
+    </ul>
+    <small class="mapillary__ayuda">Toca una foto para verla en grande</small>
+  }
+
+  @if (activa(); as foto) {
+    <div class="visor" (click)="cerrar()">
+      <figure class="visor__marco" (click)="$event.stopPropagation()">
+        <button type="button" class="visor__cerrar" (click)="cerrar()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img [src]="foto.grande" [alt]="'Fotografía del lugar ' + foto.id" />
+        <figcaption>
+          {{ foto.fecha }}
+          @if (foto.camara) { · {{ foto.camara }} }
+          · <a [href]="foto.enlace" target="_blank" rel="noopener">Ver en Mapillary</a>
+        </figcaption>
+      </figure>
+    </div>
+  }
+</div>

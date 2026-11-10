@@ -1778,3 +1778,46 @@ html { scroll-behavior: smooth; }
     }
   }
 }
+
+.empleo-card {
+  display: grid;
+  gap: .45rem;
+  border: 1px solid color-mix(in srgb, var(--accent-cyan, #38bdf8) 40%, transparent);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--accent-cyan, #38bdf8) 14%, transparent), transparent);
+}
+
+.empleo-texto {
+  margin: 0;
+  font-size: .82rem;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.5;
+}
+
+.btn-empleo {
+  background: color-mix(in srgb, $accent-cyan 18%, transparent);
+  color: $accent-cyan;
+  border: 1px solid color-mix(in srgb, $accent-cyan 45%, transparent);
+  box-shadow: none;
+
+  &:hover {
+    background: $accent-cyan;
+    color: var(--on-accent);
+    transform: translateY(-2px);
+  }
+
+  svg { flex: none; }
+}
+
+@media (max-width: 560px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-empleo {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

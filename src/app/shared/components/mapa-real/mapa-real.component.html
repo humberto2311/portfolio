@@ -1,0 +1,21 @@
+<div class="mapa-real" [style.--altura-mapa]="altura">
+  <div #contenedor class="mapa-real__lienzo"></div>
+
+  @if (!compacto) {
+    <div class="mapa-real__controles">
+      <button type="button" (click)="acercar()" title="Acercar"><i class="fa-solid fa-plus"></i></button>
+      <button type="button" (click)="alejar()" title="Alejar"><i class="fa-solid fa-minus"></i></button>
+      <span class="mapa-real__zoom">z{{ zoomActual() }}</span>
+    </div>
+
+    <footer class="mapa-real__pie">
+      <button type="button" class="mapa-real__btn" (click)="verTodoElMundo()">
+        <i class="fa-solid fa-earth-americas"></i> Todo el mundo
+      </button>
+      <button type="button" class="mapa-real__btn" (click)="centrarPais()">
+        <i class="fa-solid fa-location-crosshairs"></i> Colombia
+      </button>
+      <span class="mapa-real__fuente">OpenStreetMap</span>
+    </footer>
+  }
+</div>

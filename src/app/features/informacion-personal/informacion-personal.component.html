@@ -242,6 +242,12 @@
           <p class="welcome-desc">{{ welcomeDesc }}</p>
 
           <div class="action-buttons">
+            @if (esPropietario) {
+              <a class="btn-primary btn-empleo" [routerLink]="['/app/empleo']" title="Comparamos las vacantes con tu hoja de vida">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-3V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9-2h2v2h-2V4zm3 14H6v-2h8v2zm4-4H6v-2h12v2z"/></svg>
+                Buscar trabajo
+              </a>
+            }
             <button class="btn-primary" routerLink="/app/proyectos">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
               Ver Proyectos

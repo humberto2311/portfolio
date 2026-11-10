@@ -168,12 +168,21 @@
 
   &--abierta { border-color: color-mix(in srgb, var(--accent-cyan, #38bdf8) 45%, transparent); }
 
+  /* La vacante que alimenta el gráfico: resaltada para no perderla de vista. */
+  &--activa {
+    border-color: var(--accent-cyan, #38bdf8);
+    border-width: 2px;
+    background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 10%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-cyan, #38bdf8) 18%, transparent);
+  }
+
   &__fila {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
     gap: .65rem;
     align-items: center;
     width: 100%;
+    min-height: 64px;
     padding: .55rem .65rem;
     border: 0;
     background: transparent;
@@ -225,6 +234,29 @@
   &--alta { color: #22c55e; border-color: #22c55e; }
   &--media { color: #f59e0b; border-color: #f59e0b; }
   &--baja { color: #f87171; border-color: #f87171; }
+
+  &--activo {
+    color: #06202e;
+    background: linear-gradient(120deg, #38bdf8, #a78bfa);
+    border-color: #a78bfa;
+    transform: scale(1.06);
+  }
+}
+
+.sello-activa {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  margin-left: .4rem;
+  padding: .08rem .4rem;
+  border-radius: 999px;
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: #06202e;
+  background: linear-gradient(120deg, #38bdf8, #a78bfa);
 }
 
 .chips {
@@ -330,4 +362,313 @@
   padding: 2.5rem 1rem;
   color: var(--text-secondary, #94a3b8);
   font-size: .82rem;
+}
+
+.campo--ia {
+  .interruptor {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .42rem .7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-soft, #1e293b);
+    background: var(--bg-input, rgba(15, 23, 42, .5));
+    color: var(--text-secondary, #94a3b8);
+    font: inherit;
+    font-size: .74rem;
+    font-weight: 800;
+    cursor: pointer;
+
+    em { font-style: normal; }
+
+    &--on {
+      color: #06202e;
+      background: linear-gradient(120deg, #38bdf8, #a78bfa);
+      border-color: transparent;
+    }
+  }
+
+  &--off { opacity: .55; }
+}
+
+/* ================= Gráfico de compatibilidad del CV ================= */
+
+.diagnostico {
+  display: grid;
+  gap: .9rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: var(--bg-card, rgba(15, 23, 42, .55));
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      margin: 0;
+      font-size: .95rem;
+    }
+  }
+
+  &__indice {
+    display: grid;
+    justify-items: end;
+    line-height: 1.05;
+
+    strong {
+      font-size: 1.6rem;
+      background: linear-gradient(120deg, #38bdf8, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    small { font-size: .66rem; color: var(--text-secondary, #94a3b8); }
+  }
+
+  &__detalle {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: .7rem;
+  }
+}
+
+.tarjeta-dim {
+  display: grid;
+  gap: .45rem;
+  padding: .7rem .8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: var(--bg-input, rgba(15, 23, 42, .45));
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .5rem;
+    font-size: .76rem;
+    color: var(--text-secondary, #94a3b8);
+
+    strong { color: var(--text-primary, #e2e8f0); font-size: .9rem; }
+  }
+
+  .barra {
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, .18);
+    overflow: hidden;
+
+    span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    }
+  }
+
+  .vacio { font-size: .7rem; color: var(--text-secondary, #94a3b8); }
+
+  &--mercado {
+    border-color: color-mix(in srgb, #a78bfa 35%, transparent);
+    background: color-mix(in srgb, #a78bfa 8%, transparent);
+  }
+}
+
+.chip--mercado {
+  background: color-mix(in srgb, #a78bfa 16%, transparent);
+  border-color: color-mix(in srgb, #a78bfa 40%, transparent);
+  color: #ddd6fe;
+}
+
+.cache {
+  margin-left: .35rem;
+  font-size: .68rem;
+  opacity: .75;
+}
+
+/* ================= Ranking de probabilidad por vacante ================= */
+
+.candidatas {
+  display: grid;
+  gap: .5rem;
+
+  h4 {
+    margin: 0;
+    font-size: .82rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  ul {
+    display: grid;
+    gap: .4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 26px 1fr auto auto;
+    align-items: center;
+    gap: .6rem;
+    padding: .55rem .7rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft, #1e293b);
+    background: var(--bg-input, rgba(15, 23, 42, .45));
+  }
+
+  .pos {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: .68rem;
+    font-weight: 800;
+    color: #06202e;
+    background: linear-gradient(120deg, #38bdf8, #a78bfa);
+  }
+
+  .cand__datos {
+    display: grid;
+    gap: .15rem;
+    min-width: 0;
+
+    strong { font-size: .82rem; }
+    small { font-size: .7rem; color: var(--text-secondary, #94a3b8); }
+  }
+
+  .cand__prob {
+    display: grid;
+    justify-items: end;
+    line-height: 1.05;
+
+    strong { font-size: 1rem; }
+    small { font-size: .62rem; color: var(--text-secondary, #94a3b8); }
+
+    &--alta strong { color: #22c55e; }
+    &--media strong { color: #f59e0b; }
+    &--baja strong { color: #f87171; }
+  }
+}
+
+/* ================= Tablero: gráfico y vacantes lado a lado ================= */
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  &__datos {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    flex-wrap: wrap;
+    font-size: .74rem;
+    color: var(--text-secondary, #94a3b8);
+
+    strong { color: var(--text-primary, #e2e8f0); font-size: .95rem; }
+  }
+
+  &__cache {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .18rem .5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, #22c55e 14%, transparent);
+    border: 1px solid color-mix(in srgb, #22c55e 35%, transparent);
+    font-size: .66rem;
+  }
+}
+
+.tablero {
+  display: grid;
+  grid-template-columns: minmax(340px, 460px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+
+  &__grafico {
+    min-width: 0;
+    top: 1rem;
+    display: grid;
+    gap: .6rem;
+    padding: .9rem 1rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-soft, #1e293b);
+    background: var(--bg-card, rgba(15, 23, 42, .55));
+  }
+
+  &__nota {
+    margin: 0;
+    font-size: .7rem;
+    color: var(--text-secondary, #94a3b8);
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  &__lista {
+    display: grid;
+    gap: .5rem;
+    min-width: 0;
+  }
+
+  &__cabecera {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .6rem;
+
+    h2 { margin: 0; font-size: .95rem; }
+    small { font-size: .7rem; color: var(--text-secondary, #94a3b8); }
+  }
+}
+
+/* Lista con scroll propio: el gráfico no se mueve mientras se recorren las vacantes. */
+.vacantes-scroll {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: .45rem;
+  margin: 0;
+  padding: 0 .2rem 0 0;
+  list-style: none;
+  max-height: calc(100vh - 22rem);
+  min-height: 22rem;
+  overflow-y: auto;
+
+  /* Cada tarjeta conserva su alto: sin esto el grid las aplastaba a una línea. */
+  > li { min-height: 64px; }
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 35%, transparent);
+    border-radius: 999px;
+  }
+}
+
+.sugerencias--pie {
+  margin-top: .8rem;
+}
+
+@media (max-width: 1100px) {
+  .tablero {
+    grid-template-columns: minmax(0, 1fr);
+
+    &__grafico { position: static; }
+  }
+
+  .vacantes-scroll { max-height: none; min-height: 0; }
 }

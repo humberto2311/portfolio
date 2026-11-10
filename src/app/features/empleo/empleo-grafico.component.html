@@ -1,0 +1,95 @@
+<div class="grafico">
+  <header class="grafico__cabecera">
+    <div class="grafico__titulo">
+      @if (seleccionada) {
+        <span class="grafico__etiqueta">Vacante seleccionada</span>
+        <h3>{{ seleccionada.cargo }}</h3>
+        <small>{{ seleccionada.empresa }}{{ seleccionada.ubicacion ? ' · ' + seleccionada.ubicacion : '' }}</small>
+      } @else {
+        <span class="grafico__etiqueta">Panorama</span>
+        <h3>{{ totalVacantes }} vacantes comparadas con tu CV</h3>
+        <small>Toca una vacante de la derecha para ver por qué conviene</small>
+      }
+    </div>
+
+    @if (seleccionada) {
+      <div class="veredicto veredicto--{{ nivel }}">
+        <strong>{{ seleccionada.puntaje }}%</strong>
+        <span>{{ veredicto }}</span>
+      </div>
+    }
+  </header>
+
+  @if (seleccionada) {
+    <div class="razones">
+      <article class="razon razon--{{ coincidencias.length ? 'ok' : 'falta' }}">
+        <header>
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Skills que ya tienes</span>
+          <strong>{{ coincidencias.length }}</strong>
+        </header>
+        @if (coincidencias.length) {
+          <div class="chips">
+            @for (punto of coincidencias.slice(0, 6); track punto) {
+              <span class="chip chip--ok">{{ punto }}</span>
+            }
+          </div>
+        } @else {
+          <p>La vacante no pide tecnologías concretas.</p>
+        }
+      </article>
+
+      <article class="razon razon--{{ brechas.length ? 'falta' : 'ok' }}">
+        <header>
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Lo que te frena</span>
+          <strong>{{ brechas.length }}</strong>
+        </header>
+        @if (brechas.length) {
+          <div class="chips">
+            @for (punto of brechas.slice(0, 6); track punto) {
+              <span class="chip chip--falta">{{ punto }}</span>
+            }
+          </div>
+        } @else {
+          <p>Nada crítico: cumples lo que pide.</p>
+        }
+      </article>
+
+      <article class="razon">
+        <header>
+          <i class="fa-solid fa-briefcase"></i>
+          <span>Experiencia</span>
+        </header>
+        <p>{{ resumenExperiencia }}</p>
+      </article>
+    </div>
+  }
+
+  <div class="grafico__marco">
+    <canvas #lienzo></canvas>
+  </div>
+
+  <footer class="grafico__leyenda">
+    @if (seleccionada) {
+      <span><i class="leyenda-dot leyenda-dot--ok"></i> cumple 70 %+</span>
+      <span><i class="leyenda-dot leyenda-dot--media"></i> parcial 45-69 %</span>
+      <span><i class="leyenda-dot leyenda-dot--baja"></i> bajo menos de 45 %</span>
+    } @else {
+      <span>Las barras mas largas son donde tienes mas opciones de pasar.</span>
+    }
+
+    <div class="grafico__tipos">
+      @for (opcion of tipos; track opcion.valor) {
+        <button
+          type="button"
+          class="tipo"
+          [class.tipo--activo]="tipo === opcion.valor"
+          (click)="cambiarTipo.emit(opcion.valor)"
+          [title]="opcion.etiqueta">
+          <i [class]="opcion.icono"></i>
+        </button>
+      }
+    </div>
+  </footer>
+</div>

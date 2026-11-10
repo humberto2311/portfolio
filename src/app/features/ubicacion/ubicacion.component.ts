@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MapaRealComponent } from '../../shared/components/mapa-real/mapa-real.component';
+import { MapillaryComponent } from '../../shared/components/mapillary/mapillary.component';
 
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
@@ -19,11 +21,13 @@ type Medio = 'TODOS' | 'NFC' | 'QR';
 @Component({
   selector: 'app-ubicacion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MapaRealComponent, MapillaryComponent],
   templateUrl: './ubicacion.component.html',
   styleUrls: ['./ubicacion.component.scss'],
 })
-export class UbicacionComponent {
+export class UbicacionComponent implements AfterViewInit {
+  @ViewChild(MapaRealComponent) mapa?: MapaRealComponent;
+
   private auth = inject(AuthService);
   private empresas = inject(EmpresaService);
 
@@ -37,6 +41,7 @@ export class UbicacionComponent {
   readonly filtroMedio = signal<Medio>('TODOS');
   readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
   readonly capas = signal({ personal: true, empresarial: true, locales: true });
+  readonly punto = signal({ lat: 4.6097, lng: -74.0817, zoom: 12, nombre: 'Bogotá' });
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
   readonly localActivo = signal<LocalRegistrado | null>(null);
   readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
@@ -112,12 +117,53 @@ export class UbicacionComponent {
 
   seleccionar(toque: ToqueUbicacion): void {
     this.localActivo.set(null);
-    this.seleccionado.set(this.seleccionado()?.id === toque.id ? null : toque);
+    const mismo = this.seleccionado()?.id === toque.id;
+    this.seleccionado.set(mismo ? null : toque);
+
+    if (!mismo) {
+      this.punto.set({ lat: toque.latitud, lng: toque.longitud, zoom: 16, nombre: toque.ciudad });
+      this.mapa?.irA(toque.latitud, toque.longitud, 16);
+    }
   }
 
   seleccionarLocal(local: LocalRegistrado): void {
     this.seleccionado.set(null);
-    this.localActivo.set(this.localActivo()?.id === local.id ? null : local);
+    const mismo = this.localActivo()?.id === local.id;
+    this.localActivo.set(mismo ? null : local);
+
+    if (!mismo) {
+      this.punto.set({ lat: local.latitud, lng: local.longitud, zoom: 17, nombre: local.nombre });
+      this.mapa?.irA(local.latitud, local.longitud, 17);
+    }
+  }
+
+  verPunto(lat: number, lng: number, nombre: string, zoom = 16): void {
+    this.punto.set({ lat, lng, zoom, nombre });
+    this.mapa?.irA(lat, lng, zoom);
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.pintarPines(), 700);
+  }
+
+  private pintarPines(): void {
+    if (!this.mapa) return;
+
+    for (const toque of this.visibles()) {
+      this.mapa.marcar(
+        toque.latitud,
+        toque.longitud,
+        `<b>${toque.persona}</b><br>${toque.ciudad} · ${toque.toques} toques`,
+      );
+    }
+
+    for (const local of this.localesVisibles()) {
+      this.mapa.marcar(
+        local.latitud,
+        local.longitud,
+        `<b>${local.nombre}</b><br>${local.servicio} · ${local.ciudad}`,
+      );
+    }
   }
 
   posicionX(longitud: number): number {

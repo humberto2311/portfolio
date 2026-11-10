@@ -37,24 +37,68 @@ const BIENVENIDA: Paso = {
   titulo: 'Un minuto y ya sabes moverte',
   bajada: 'Te muestro qué hace cada botón y dónde está cada cosa. Puedes saltarlo y volver a abrir la guía desde tu foto de perfil.',
   hitos: [
+    { icono: 'fa-solid fa-layer-group', etiqueta: 'Cuatro piezas', detalle: 'tu red social, tus tarjetas NFC, tu hoja de vida y la bolsa de empleo' },
     { icono: 'fa-solid fa-compass', etiqueta: 'Primero', detalle: 'los botones que te llevan por toda la app' },
-    { icono: 'fa-solid fa-hand-pointer', etiqueta: 'Después', detalle: 'qué se hace en cada pantalla' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Después', detalle: 'tu panel, la bolsa de empleo y el mapa de conexiones' },
     { icono: 'fa-solid fa-map-location-dot', etiqueta: 'Al final', detalle: 'una lista con cada cosa y dónde encontrarla' },
   ],
 };
 
 const RIEL: Paso = {
   destino: '.rail__lista',
-  titulo: 'El riel: tus siete secciones',
+  titulo: 'El riel: tus nueve secciones',
   bajada: 'Todo lo que puedes hacer vive en esta columna.',
   hitos: [
     { icono: 'fa-solid fa-house', etiqueta: 'Inicio', detalle: 'lo que publica tu red y tu caja para publicar' },
+    { icono: 'fa-solid fa-chart-pie', etiqueta: 'Mi panel', detalle: 'tus métricas, tus gráficos y el acceso a Buscar empleo' },
+    { icono: 'fa-solid fa-map-location-dot', etiqueta: 'Mapa de conexiones', detalle: 'dónde tocaste cada tarjeta, tus locales y las empresas que publican vacantes' },
     { icono: 'fa-solid fa-magnifying-glass', etiqueta: 'Talento', detalle: 'buscar perfiles por skill, rol o cercanía' },
     { icono: 'fa-solid fa-comment-dots', etiqueta: 'Mensajes', detalle: 'abre el panel de contactos y chats' },
     { icono: 'fa-solid fa-briefcase', etiqueta: 'Portafolio', detalle: 'tus tarjetas de contacto NFC, cada una con su slug, su QR y su enlace' },
     { icono: 'fa-solid fa-diagram-project', etiqueta: 'Proyectos', detalle: 'tus repos de GitHub con su ficha' },
     { icono: 'fa-solid fa-link', etiqueta: 'Mis enlaces', detalle: 'el hub de enlaces: solo uno queda activo y ese es el que se abre al acercar tu tarjeta' },
     { icono: 'fa-solid fa-file-lines', etiqueta: 'Hoja de vida', detalle: 'el editor del CV y su descarga en PDF' },
+  ],
+};
+
+const PANEL: Paso = {
+  destino: null,
+  titulo: 'Mi panel: tu centro de mando',
+  bajada: 'Arriba tienes tres pestañas: Mi panel, Empresa y Mi actividad. Y a su lado, Buscar empleo.',
+  hitos: [
+    { icono: 'fa-solid fa-user', etiqueta: 'Mi panel', detalle: 'métricas, gráficos de visitas y tus conexiones recientes' },
+    { icono: 'fa-solid fa-building', etiqueta: 'Empresa', detalle: 'el panel de las empresas a las que perteneces' },
+    { icono: 'fa-solid fa-user-tie', etiqueta: 'Mi actividad', detalle: 'lo que has hecho dentro de la empresa' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Buscar empleo', detalle: 'el acceso directo a la bolsa de trabajo' },
+  ],
+};
+
+const EMPLEO: Paso = {
+  destino: null,
+  titulo: 'Buscar empleo: la bolsa dentro del sistema',
+  bajada: 'Bajamos vacantes reales de Computrabajo y elempleo de Colombia y las comparamos con tu hoja de vida.',
+  hitos: [
+    { icono: 'fa-solid fa-chart-simple', etiqueta: 'Un gráfico por vacante', detalle: 'toca una convocatoria y el gráfico se abre con sus razones: qué cumples, qué te falta y tu experiencia frente a la que piden' },
+    { icono: 'fa-solid fa-percent', etiqueta: 'Porcentaje de cercanía', detalle: 'nunca llega a 100: 99 es el techo, y baja a 85 si te falta una tecnología que la oferta pide' },
+    { icono: 'fa-solid fa-list-check', etiqueta: 'Todas las convocatorias', detalle: 'la lista completa a la derecha del gráfico, con scroll propio' },
+    { icono: 'fa-solid fa-rotate', etiqueta: 'Filtros', detalle: 'cargo, ciudad, modalidad y un interruptor de IA que refina el puntaje' },
+    { icono: 'fa-solid fa-database', etiqueta: 'Caché de 24 horas', detalle: 'la misma búsqueda no vuelve a consultar los portales durante un día' },
+    { icono: 'fa-solid fa-clipboard-check', etiqueta: 'Tu hoja de vida manda', detalle: 'el puntaje sale de tus habilidades, tus años de experiencia y tu formación; si el CV está vacío, el porcentaje será bajo' },
+  ],
+};
+
+const MAPA_CONEXIONES: Paso = {
+  destino: null,
+  titulo: 'Mapa de conexiones',
+  bajada: 'El mapa real de OpenStreetMap con todo lo que ha pasado alrededor de tus tarjetas.',
+  hitos: [
+    { icono: 'fa-solid fa-user', etiqueta: 'Pines personales y empresariales', detalle: 'cada color es un tipo de conexión; el tamaño del círculo es el número de toques' },
+    { icono: 'fa-solid fa-store', etiqueta: 'Locales registrados', detalle: 'los negocios que escaneaste, con su sector y su ciudad' },
+    { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Historial de toques', detalle: 'quién, dónde y cuándo; filtra por fecha, por NFC o QR' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Empresas que buscan talento', detalle: 'las empresas de tu última búsqueda de empleo, cada una con su botón Ubicación' },
+    { icono: 'fa-solid fa-location-crosshairs', etiqueta: 'Botón Ubicación', detalle: 'ubica la empresa en el mapa y abre una ficha con dirección, porcentaje, salario y lo que te falta' },
+    { icono: 'fa-solid fa-chart-simple', etiqueta: 'El porcentaje es un botón', detalle: 'tócalo y te lleva al gráfico de esa vacante' },
+    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Fotos del lugar', detalle: 'imágenes reales de Mapillary alrededor del punto que elijas' },
   ],
 };
 
@@ -129,6 +173,13 @@ const MAPA: Paso = {
     { icono: 'fa-solid fa-users', etiqueta: 'Gente por skill o rol', detalle: 'Talento' },
     { icono: 'fa-solid fa-right-from-bracket', etiqueta: 'Sesiones abiertas en otros equipos', detalle: 'Tu foto, dentro de Seguridad' },
     { icono: 'fa-solid fa-eye', etiqueta: 'Decidir si tu CV es público', detalle: 'Ajustes de cuenta' },
+    { icono: 'fa-solid fa-chart-pie', etiqueta: 'Ver tus métricas y gráficos', detalle: 'Mi panel, en el riel' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Buscar trabajo', detalle: 'Mi panel, pestaña Buscar empleo' },
+    { icono: 'fa-solid fa-percent', etiqueta: 'Ver por qué una vacante te conviene', detalle: 'Buscar empleo, toca una convocatoria' },
+    { icono: 'fa-solid fa-map-location-dot', etiqueta: 'Dónde queda la empresa de una vacante', detalle: 'Mapa de conexiones, botón Ubicación' },
+    { icono: 'fa-solid fa-store', etiqueta: 'Los locales que registraste', detalle: 'Mapa de conexiones, panel Locales registrados' },
+    { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Cuándo y dónde te tocaron la tarjeta', detalle: 'Mapa de conexiones, panel Historial de toques' },
+    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Ver fotos del lugar', detalle: 'Mapa de conexiones, tira de fotos bajo el mapa' },
   ],
 };
 
@@ -227,8 +278,8 @@ export class PrimerIngresoComponent {
 
     const base =
       window.innerWidth >= ESCRITORIO
-        ? [BIENVENIDA, RIEL, BUSQUEDA, ACCIONES, RIEL_PIE, YO, PUBLICAR, MAPA]
-        : [BIENVENIDA, TABBAR, BUSQUEDA, ACCIONES, PUBLICAR, MAPA];
+        ? [BIENVENIDA, RIEL, PANEL, EMPLEO, MAPA_CONEXIONES, BUSQUEDA, ACCIONES, RIEL_PIE, YO, PUBLICAR, MAPA]
+        : [BIENVENIDA, TABBAR, PANEL, EMPLEO, MAPA_CONEXIONES, BUSQUEDA, ACCIONES, PUBLICAR, MAPA];
 
     const disponibles = base.filter((paso) => !paso.destino || this.visible(paso.destino));
     const actuales = this.pasos();

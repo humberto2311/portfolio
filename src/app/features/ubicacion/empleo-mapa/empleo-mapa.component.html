@@ -33,11 +33,15 @@
       @for (vacante of visibles(); track vacante.id ?? vacante.enlace) {
         <li
           class="empleo-item"
-          [class.empleo-item--activa]="seleccionada() === (vacante.enlace ?? vacante.cargo)"
-          (click)="elegir(vacante)">
-          <span class="empleo-item__medidor empleo-item__medidor--{{ nivel(vacante.puntaje) }}">
+          [class.empleo-item--activa]="seleccionada() === (vacante.enlace ?? vacante.cargo)">
+
+          <button
+            type="button"
+            class="empleo-item__medidor empleo-item__medidor--{{ nivel(vacante.puntaje) }}"
+            title="Ver el diagrama de esta vacante"
+            (click)="verDiagrama(vacante, $event)">
             {{ vacante.puntaje }}<small>%</small>
-          </span>
+          </button>
 
           <span class="empleo-item__datos">
             <strong>{{ vacante.cargo }}</strong>
@@ -49,7 +53,74 @@
               }
             </span>
           </span>
+
+          <button
+            type="button"
+            class="empleo-item__ubicar"
+            title="Ver dónde queda la empresa"
+            [disabled]="ubicando()"
+            (click)="abrirUbicacion(vacante, $event)">
+            <i class="fa-solid fa-location-crosshairs"></i>
+            <span>Ubicación</span>
+          </button>
         </li>
+
+        @if (ubicacion(); as lugar) {
+          @if (seleccionada() === (vacante.enlace ?? vacante.cargo)) {
+            <li class="empleo-ficha">
+              <header>
+                <strong>{{ vacante.empresa }}</strong>
+                <button type="button" class="empleo-ficha__cerrar" (click)="cerrarUbicacion()">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </header>
+
+              <ul>
+                <li>
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ lugar.direccion || lugar.ciudad }}
+                </li>
+                <li>
+                  <i class="fa-solid fa-circle-check" [class.aprox]="lugar.fuente !== 'nominatim'"></i>
+                  {{ lugar.fuente === 'nominatim' ? 'Dirección exacta' : 'Aproximada al centro de la ciudad' }}
+                </li>
+                <li>
+                  <i class="fa-solid fa-percent"></i>
+                  {{ vacante.puntaje }}% de cercanía con tu CV
+                </li>
+                @if (vacante.modalidad) {
+                  <li><i class="fa-solid fa-building"></i> {{ vacante.modalidad }}</li>
+                }
+                @if (vacante.salario) {
+                  <li><i class="fa-solid fa-money-bill-wave"></i> {{ vacante.salario }}</li>
+                }
+                @if (vacante.coincidencias?.length) {
+                  <li>
+                    <i class="fa-solid fa-check"></i>
+                    Ya cumples: {{ vacante.coincidencias?.slice(0, 4)?.join(', ') }}
+                  </li>
+                }
+                @if (vacante.faltantes?.length) {
+                  <li>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Te falta: {{ vacante.faltantes?.slice(0, 4)?.join(', ') }}
+                  </li>
+                }
+              </ul>
+
+              <div class="empleo-ficha__acciones">
+                @if (vacante.enlace) {
+                  <a [href]="vacante.enlace" target="_blank" rel="noopener" class="empleo-ficha__btn">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Ir a la vacante
+                  </a>
+                }
+                <button type="button" class="empleo-ficha__btn" (click)="verDiagrama(vacante, $event)">
+                  <i class="fa-solid fa-chart-simple"></i> Ver diagrama
+                </button>
+              </div>
+            </li>
+          }
+        }
       } @empty {
         <li class="empleo-mapa__vacio">No hay vacantes con ese filtro.</li>
       }

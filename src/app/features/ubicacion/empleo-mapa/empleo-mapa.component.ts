@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { catchError, of, switchMap } from 'rxjs';
 
@@ -26,6 +27,7 @@ export interface VacanteUbicada {
 export class EmpleoMapaComponent implements OnInit {
   private empleo = inject(EmpleoService);
   private mapa = inject(MapaService);
+  private router = inject(Router);
 
   @Output() ubicar = new EventEmitter<VacanteUbicada>();
   @Output() ubicarTodas = new EventEmitter<VacanteUbicada[]>();
@@ -36,6 +38,7 @@ export class EmpleoMapaComponent implements OnInit {
   readonly busqueda = signal('');
   readonly seleccionada = signal<string | null>(null);
   readonly ubicando = signal(false);
+  readonly ubicacion = signal<VacanteUbicada | null>(null);
 
   readonly total = computed(() => this.vacantes().length);
 
@@ -76,9 +79,18 @@ export class EmpleoMapaComponent implements OnInit {
       });
   }
 
-  elegir(vacante: Vacante): void {
+  verDiagrama(vacante: Vacante, evento: Event): void {
+    evento.stopPropagation();
+    this.router.navigate(['/app/empleo'], {
+      queryParams: { vacante: vacante.enlace ?? vacante.cargo },
+    });
+  }
+
+  abrirUbicacion(vacante: Vacante, evento: Event): void {
+    evento.stopPropagation();
     this.seleccionada.set(vacante.enlace ?? vacante.cargo);
     this.ubicando.set(true);
+    this.ubicacion.set(null);
 
     const ciudad = vacante.ubicacion ?? '';
 
@@ -104,15 +116,23 @@ export class EmpleoMapaComponent implements OnInit {
           return;
         }
 
-        this.ubicar.emit({
+        const lugar: VacanteUbicada = {
           vacante,
           lat: ubicacion.lat,
           lng: ubicacion.lng,
           ciudad: ubicacion.ciudad || ciudad,
           direccion: ubicacion.direccion ?? '',
           fuente: ubicacion.fuente ?? '',
-        });
+        };
+
+        this.ubicacion.set(lugar);
+        this.ubicar.emit(lugar);
       });
+  }
+
+  cerrarUbicacion(): void {
+    this.ubicacion.set(null);
+    this.seleccionada.set(null);
   }
 
   mostrarTodas(): void {

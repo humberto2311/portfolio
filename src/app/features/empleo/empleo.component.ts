@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { BusquedaEmpleo, GraficoCv, Vacante } from '../../core/models/empleo.model';
 import { EmpleoService } from '../../core/services/empleo.service';
@@ -15,6 +16,7 @@ import { EmpleoGraficoComponent, TipoGraficoEmpleo } from './empleo-grafico.comp
 })
 export class EmpleoComponent implements OnInit {
   private svc = inject(EmpleoService);
+  private ruta = inject(ActivatedRoute);
 
   readonly termino = signal('');
   readonly ciudad = signal('');
@@ -36,6 +38,13 @@ export class EmpleoComponent implements OnInit {
   readonly iaDisponible = computed(() => this.grafico() !== null);
 
   ngOnInit(): void {
+    this.ruta.queryParamMap.subscribe((params) => {
+      const clave = params.get('vacante');
+      if (clave) {
+        this.abrirPorEnlace(clave);
+      }
+    });
+
     // 1. El gráfico del CV va primero, sin filtros y sin scraping.
     this.cargarGrafico();
 
@@ -132,6 +141,20 @@ export class EmpleoComponent implements OnInit {
     this.descartadas.update((lista) => [...lista, this.clave(vacante)]);
     if (this.detalle() && this.clave(this.detalle() as Vacante) === this.clave(vacante)) {
       this.detalle.set(null);
+    }
+  }
+
+  abrirPorEnlace(enlace: string): void {
+    const lista = this.busqueda()?.resultados ?? [];
+    const encontrada = lista.find((vacante) => vacante.enlace === enlace);
+
+    if (encontrada) {
+      this.detalle.set(encontrada);
+      return;
+    }
+
+    if (this.buscando() || this.cargandoGrafico()) {
+      setTimeout(() => this.abrirPorEnlace(enlace), 300);
     }
   }
 

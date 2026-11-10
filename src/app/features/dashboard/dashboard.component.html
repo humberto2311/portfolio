@@ -48,6 +48,9 @@
       <a class="pestana" routerLink="/app/dashboard/empresa/mi-actividad" routerLinkActive="pestana--activa">
         <i class="fa-solid fa-user-tie"></i> Mi actividad
       </a>
+      <a class="pestana pestana--empleo" routerLink="/app/empleo">
+        <i class="fa-solid fa-briefcase"></i> Buscar empleo
+      </a>
     </nav>
   </header>
 
@@ -82,17 +85,6 @@
   <section class="titulo">
     <h1>{{ datos().titulo }}</h1>
     <p>{{ datos().subtitulo }}</p>
-  </section>
-
-  <section class="acciones-panel">
-    <a class="accion-principal" routerLink="/app/empleo">
-      <span class="accion-principal__icono"><i class="fa-solid fa-briefcase"></i></span>
-      <span class="accion-principal__datos">
-        <strong>Buscar trabajo</strong>
-        <small>Comparamos las vacantes con tu hoja de vida y te decimos dónde postularte.</small>
-      </span>
-      <i class="fa-solid fa-arrow-right"></i>
-    </a>
   </section>
 
   <section class="metricas">

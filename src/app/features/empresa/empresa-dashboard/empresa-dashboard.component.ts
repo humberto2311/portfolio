@@ -27,16 +27,19 @@ import {
   origenPublico,
 } from '../empresa-ui';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
+import { EmpresaRedNavbarComponent } from '../red/empresa-red-navbar.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-empresa-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, EmpresaComponenteVistaComponent],
+  imports: [CommonModule, RouterLink, EmpresaComponenteVistaComponent, EmpresaRedNavbarComponent],
   templateUrl: './empresa-dashboard.component.html',
   styleUrls: ['./empresa-dashboard.component.scss'],
 })
 export class EmpresaDashboardComponent implements OnInit, OnDestroy {
   readonly empresa = inject(EmpresaService);
+  private auth = inject(AuthService);
   private diseno = inject(DisenoService);
   private router = inject(Router);
   private toast = inject(ToastService);
@@ -52,6 +55,34 @@ export class EmpresaDashboardComponent implements OnInit, OnDestroy {
   readonly alto = LIENZO_ALTO;
 
   private ajustar = (): void => this.ajustarEscala();
+
+  get empresaRed(): Empresa | null {
+    return this.empresa.empresaActual() ?? this.actual ?? null;
+  }
+
+  get miembrosRed(): MiembroEmpresa[] {
+    return this.panel()?.miembros ?? [];
+  }
+
+  get haySesion(): boolean {
+    return Boolean(this.auth.currentUser()?.id);
+  }
+
+  get espaciosRed(): { nombre: string; slug: string }[] {
+    return [];
+  }
+
+  get urlLandingRed(): string | null {
+    const slug = this.empresaRed?.slug;
+    if (!slug) return null;
+
+    const espacios = this.panel()?.espacios ?? [];
+    const principal = espacios.find((espacio) => espacio.esPrincipal) ?? espacios[0] ?? null;
+
+    return principal
+      ? `/empresa/${slug}/espacio/${principal.slug}`
+      : `/empresa/${slug}`;
+  }
 
   ngOnInit(): void {
     this.diseno.limpiarAjeno();

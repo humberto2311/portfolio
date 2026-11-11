@@ -1,13 +1,15 @@
 // src/app/features/link-hub/link-hub.component.ts
 import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 
 import { LinkItem, LinkItemPayload } from '../../core/models/LinkItem';
 import { LinkHubService } from '../../core/services/link-hub.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { EmpresaService } from '../../core/services/empresa.service';
+import { Empresa, MiembroEmpresa } from '../../core/models/empresa.model';
 
 @Component({
   selector: 'app-link-hub',
@@ -17,6 +19,7 @@ import { EmpresaService } from '../../core/services/empresa.service';
   styleUrls: ['./link-hub.component.scss']
 })
 export class LinkHubComponent implements OnInit {
+  private route = inject(ActivatedRoute);
   private readonly linkService = inject(LinkHubService);
   private readonly resumeSave = inject(ResumeSaveService);
   private readonly empresas = inject(EmpresaService);
@@ -33,6 +36,9 @@ export class LinkHubComponent implements OnInit {
   enlacesEmpresa: LinkItem[] = [];
   empresaId: string | null = null;
   empresaNombre = '';
+  empresasDisponibles: Empresa[] = [];
+  equipoEmpresa: MiembroEmpresa[] = [];
+  soloEmpresa = false;
   puedeEditarEmpresa = false;
   cargandoEmpresa = false;
   ambito: 'personal' | 'empresa' = 'personal';
@@ -71,21 +77,57 @@ export class LinkHubComponent implements OnInit {
   }
 
   loadEmpresa(): void {
-    const empresa = this.empresas.empresaActual();
-    if (!empresa?.id) return;
+    this.cargandoEmpresa = true;
 
+    this.empresas
+      .cargarMis()
+      .pipe(
+        switchMap((mias) => {
+          this.empresasDisponibles = mias;
+
+          const activa = this.empresas.empresaActual();
+          const empresa = activa ?? mias[0] ?? null;
+
+          if (!empresa?.id) return of(null);
+
+          this.seleccionarEmpresa(empresa);
+          return this.linkService.getDeEmpresa(empresa.id);
+        }),
+        catchError(() => of(null)),
+        finalize(() => (this.cargandoEmpresa = false)),
+      )
+      .subscribe((data) => {
+        this.enlacesEmpresa = data ?? [];
+        if (this.route.snapshot.routeConfig?.path === 'empresa/enlaces' && this.empresaId) {
+          this.soloEmpresa = true;
+          this.ambito = 'empresa';
+        }
+      });
+  }
+
+  seleccionarEmpresa(empresa: Empresa): void {
     this.empresaId = empresa.id;
     this.empresaNombre = empresa.nombre;
     this.puedeEditarEmpresa = (empresa.rolPropio ?? 'VISOR').toUpperCase() !== 'VISOR';
-    this.cargandoEmpresa = true;
+    this.enlacesEmpresa = [];
+    this.equipoEmpresa = [];
+
+    this.empresas.cargarPanel(empresa.id).subscribe((panel) => {
+      this.equipoEmpresa = panel?.miembros ?? [];
+    });
 
     this.linkService
       .getDeEmpresa(empresa.id)
-      .pipe(finalize(() => (this.cargandoEmpresa = false)))
-      .subscribe({
-        next: (data) => (this.enlacesEmpresa = data),
-        error: () => (this.enlacesEmpresa = [])
+      .pipe(catchError(() => []))
+      .subscribe((data) => {
+        this.enlacesEmpresa = data ?? [];
+        this.ambito = 'empresa';
       });
+  }
+
+  cambiarEmpresaPorId(id: string): void {
+    const empresa = this.empresasDisponibles.find((item) => item.id === id);
+    if (empresa) this.seleccionarEmpresa(empresa);
   }
 
   get enlacesVisibles(): LinkItem[] {
@@ -101,7 +143,14 @@ export class LinkHubComponent implements OnInit {
   }
 
   cambiarAmbito(ambito: 'personal' | 'empresa'): void {
+    if (this.soloEmpresa) return;
+    if (ambito === 'empresa' && !this.empresaId) return;
     this.ambito = ambito;
+  }
+
+  get nombreAsignado(): string {
+    const id = this.formData.asignadoA;
+    return this.equipoEmpresa.find((miembro) => miembro.usuarioId === id)?.nombre ?? 'Todo el equipo';
   }
 
   // ---------- Helpers ----------
@@ -192,6 +241,8 @@ export class LinkHubComponent implements OnInit {
       description: this.formData.description?.trim() || '',
       active: this.formData.active
     };
+
+    if (this.enEmpresa) payload.asignadoA = this.formData.asignadoA ?? null;
 
     this.isSaving = true;
     this.errorMessage = null;

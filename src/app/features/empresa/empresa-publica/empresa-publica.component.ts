@@ -105,6 +105,9 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
       this.cargarLanding(datos.empresa.slug, datos.empresa.id);
       this.cargarEnlaces(datos.empresa.id);
 
+      const tab = this.route.snapshot.queryParamMap.get('tab');
+      if (tab === 'tarjetas' || tab === 'enlaces') this.tab.set(tab);
+
       if (isPlatformBrowser(this.platformId)) {
         this.escucharActualizaciones();
 

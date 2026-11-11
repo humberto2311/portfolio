@@ -3,11 +3,16 @@
   <!-- CABECERA -->
   <header class="page-head">
     <div class="head-text">
-      <span class="eyebrow">Mi identidad</span>
-      <h1>Mis tarjetas de contacto</h1>
+      <span class="eyebrow">{{ enAmbitoEmpresa ? 'Tarjetas de empresa' : 'Mi identidad' }}</span>
+      <h1>{{ enAmbitoEmpresa ? 'Tarjetas de ' + (empresaAmbito()?.nombre ?? 'la empresa') : 'Mis tarjetas de contacto' }}</h1>
       <p>
-        Crea varias tarjetas (personal, profesional, emergencia…). El QR de cada una abre
-        esa tarjeta; la etiqueta NFC abre el enlace que tengas activo en el Hub.
+        @if (enAmbitoEmpresa) {
+          Aquí solo están las tarjetas creadas para {{ empresaAmbito()?.nombre }}. Tus tarjetas
+          personales quedan aparte, en tu perfil personal.
+        } @else {
+          Crea varias tarjetas (personal, profesional, emergencia…). El QR de cada una abre
+          esa tarjeta; la etiqueta NFC abre el enlace que tengas activo en el Hub.
+        }
       </p>
     </div>
 

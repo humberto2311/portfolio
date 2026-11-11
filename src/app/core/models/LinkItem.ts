@@ -13,6 +13,8 @@ export interface LinkItem {
   empresaId?: string;
   empresaSlug?: string;
   deEmpresa?: boolean;
+  asignadoA?: string | null;
+  asignadoNombre?: string | null;
 }
 
 export type LinkItemPayload = Omit<LinkItem, 'id' | 'createdAt' | 'updatedAt'>;

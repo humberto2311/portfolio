@@ -87,8 +87,10 @@ export class EmpresaService {
         this.listado.set(listado ?? []);
         this.activaId.set(this.empresaGuardada(this.listado()));
       }),
-      finalize(() => this.cargandoMis.set(false)),
-      shareReplay({ bufferSize: 1, refCount: false }),
+      finalize(() => {
+        this.peticionMis = null;
+        this.cargandoMis.set(false);
+      }),
     );
 
     this.peticionMis = peticion;
@@ -422,7 +424,7 @@ export class EmpresaService {
     this.activaId.set(null);
     this.panel.set(null);
     this.publica.set(null);
-    if (hayAlmacenamiento()) localStorage.removeItem(CLAVE);
+    this.olvidar();
   }
 
   parchearEmpresa(empresa: Empresa): void {
@@ -455,9 +457,12 @@ export class EmpresaService {
     if (!hayAlmacenamiento()) return null;
 
     const guardado = localStorage.getItem(CLAVE);
-    const [dueño, id] = (guardado ?? '|').split('|');
+    if (guardado === null) return null;
 
-    if (!id || dueño !== this.auth.currentUser()?.id) return null;
+    const [dueño, id] = guardado.split('|');
+
+    if (dueño !== this.auth.currentUser()?.id) return null;
+    if (!id) return null;
 
     return mias.some((empresa) => empresa.id === id) ? id : null;
   }
@@ -467,6 +472,13 @@ export class EmpresaService {
 
     const dueño = this.auth.currentUser()?.id;
     if (dueño) localStorage.setItem(CLAVE, `${dueño}|${empresaId}`);
+  }
+
+  private olvidar(): void {
+    if (!hayAlmacenamiento()) return;
+
+    const dueño = this.auth.currentUser()?.id;
+    if (dueño) localStorage.setItem(CLAVE, `${dueño}|`);
   }
 }
 

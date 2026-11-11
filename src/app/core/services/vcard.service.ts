@@ -15,6 +15,20 @@ export class VcardService {
     return this.http.get<VCardPayload[]>(`${this.base}/mis-tarjetas`);
   }
 
+  /** Tarjetas creadas a nivel de una empresa concreta. */
+  listarDeEmpresa(empresaId: string): Observable<VCardPayload[]> {
+    return this.http.get<VCardPayload[]>(`${this.base}/mis-tarjetas`, {
+      params: { empresaId },
+    });
+  }
+
+  /** Tarjetas personales, sin empresa asociada. */
+  listarPersonales(): Observable<VCardPayload[]> {
+    return this.http.get<VCardPayload[]>(`${this.base}/mis-tarjetas`, {
+      params: { ambito: 'personal' },
+    });
+  }
+
   /** Mi tarjeta por defecto (la primera o la marcada porDefecto). */
   miTarjeta(): Observable<VCardPayload | null> {
     return this.http
@@ -75,6 +89,7 @@ export class VcardService {
       nombre: '',
       puesto: '',
       empresa: '',
+      empresaId: null,
       telefono: '',
       email: '',
       web: '',

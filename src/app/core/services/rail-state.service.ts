@@ -8,7 +8,13 @@ function hayAlmacenamiento(): boolean {
 
 @Injectable({ providedIn: 'root' })
 export class RailStateService {
-  readonly colapsado = signal(hayAlmacenamiento() ? localStorage.getItem(CLAVE) === '1' : true);
+  readonly colapsado = signal(
+    hayAlmacenamiento() ? localStorage.getItem(CLAVE) === '1' : this.pantallaEstrecha(),
+  );
+
+  private pantallaEstrecha(): boolean {
+    return typeof window !== 'undefined' && window.innerWidth < 1180;
+  }
 
   alternar(): void {
     const siguiente = !this.colapsado();

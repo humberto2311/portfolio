@@ -66,6 +66,39 @@ export class ArchivoService {
     return 'no-soportado';
   }
 
+  /** Reparte un archivo (vCard, PDF…) por el selector del sistema cuando existe. */
+  async compartirArchivo(blob: Blob, nombre: string, titulo: string): Promise<ResultadoEnlace> {
+    const archivo = nombreSeguro(nombre);
+    const file = new File([blob], archivo, { type: blob.type || 'text/vcard' });
+
+    if (this.esNativa) {
+      const { Share } = await import('@capacitor/share');
+      try {
+        const { Filesystem, Directory } = await import('@capacitor/filesystem');
+        const base64 = await this.aBase64(blob);
+        const guardado = await Filesystem.writeFile({ path: archivo, data: base64, directory: Directory.Cache });
+
+        await Share.share({ title: titulo, url: guardado.uri, dialogTitle: titulo });
+        return 'compartido';
+      } catch (e) {
+        return cancelado(e) ? 'cancelado' : 'no-soportado';
+      }
+    }
+
+    const nav = navigator as Navigator & { canShare?: (datos: ShareData) => boolean };
+
+    if (nav.share && nav.canShare?.({ files: [file] })) {
+      try {
+        await nav.share({ files: [file], title: titulo });
+        return 'compartido';
+      } catch (e) {
+        return cancelado(e) ? 'cancelado' : 'no-soportado';
+      }
+    }
+
+    return 'no-soportado';
+  }
+
   private async guardarNativo(blob: Blob, nombre: string, titulo?: string): Promise<ResultadoArchivo> {
     const { Directory, Filesystem } = await import('@capacitor/filesystem');
     const { Share } = await import('@capacitor/share');

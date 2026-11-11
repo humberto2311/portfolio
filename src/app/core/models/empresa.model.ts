@@ -340,6 +340,7 @@ export interface PanelEmpresa {
   documentos: DocumentoEmpresa[];
   componentes: ComponenteLienzo[];
   diseno: DisenoEmpresa;
+  espacios?: EspacioEmpresa[];
 }
 
 export interface EmpresaPublica {

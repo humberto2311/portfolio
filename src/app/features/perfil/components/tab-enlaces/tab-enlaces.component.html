@@ -15,16 +15,21 @@
         <em>{{ personales().length }}</em>
       </button>
 
-      @if (empresaNombre()) {
-        <button type="button" class="ambito" [class.ambito--activo]="ambito() === 'empresa'" (click)="cambiar('empresa')">
-          <i class="fa-solid fa-building"></i>
-          <span>
-            <strong>Enlaces de {{ empresaNombre() }}</strong>
-            <small>Son de la empresa y los comparte el equipo</small>
-          </span>
-          <em>{{ deEmpresa().length }}</em>
-        </button>
-      }
+      <button
+        type="button"
+        class="ambito"
+        [class.ambito--activo]="ambito() === 'empresa'"
+        [disabled]="!empresaNombre()"
+        (click)="cambiar('empresa')">
+        <i class="fa-solid fa-building"></i>
+        <span>
+          <strong>{{ empresaNombre() ? 'Enlaces de ' + empresaNombre() : 'Enlaces de empresa' }}</strong>
+          <small>
+            {{ empresaNombre() ? 'Son de la empresa y los comparte el equipo' : 'Crea tu empresa para tener enlaces propios' }}
+          </small>
+        </span>
+        <em>{{ deEmpresa().length }}</em>
+      </button>
     </div>
 
     @if (cargando()) {

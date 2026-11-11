@@ -115,14 +115,25 @@
             <i class="fa-solid fa-wifi"></i>
             <div>
               <strong>Toque detectado</strong>
-              <span>Estamos guardando el contacto en tu teléfono…</span>
+              <span>
+                @if (esNativa) {
+                  Estamos guardando el contacto en tu teléfono…
+                } @else {
+                  Esta es la tarjeta que acabas de leer. Compártela o guárdala con el botón de abajo.
+                }
+              </span>
             </div>
           </div>
         }
 
         <button type="button" class="guardar" [class.destacado]="modoNfc()" (click)="guardarContacto()">
-          <i class="fa-solid fa-address-card"></i>
-          Guardar en mis contactos
+          @if (esNativa) {
+            <i class="fa-solid fa-address-card"></i>
+            Guardar en mis contactos
+          } @else {
+            <i class="fa-solid fa-share-nodes"></i>
+            Compartir contacto
+          }
         </button>
 
         <footer class="pie">
@@ -140,7 +151,12 @@
 
       <p class="pista">
         <i class="fa-solid fa-circle-info"></i>
-        Al guardar se añade el contacto completo a tu teléfono: teléfono, correo, enlaces y notas.
+        @if (esNativa) {
+          Al guardar se añade el contacto completo a tu teléfono: teléfono, correo, enlaces y notas.
+        } @else {
+          En el computador se abre el menú para compartir el contacto; en el celular o la app se
+          guarda directamente en tu agenda.
+        }
       </p>
     </div>
   }

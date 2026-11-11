@@ -11,37 +11,70 @@
     </div>
   </header>
 
-  <div class="hub-ambitos">
-    <button
-      type="button"
-      class="hub-ambito"
-      [class.hub-ambito--activo]="!enEmpresa"
-      (click)="cambiarAmbito('personal')"
-    >
-      <i class="fas fa-user"></i>
-      <span>
-        <strong>Mis enlaces personales</strong>
-        <small>Son tuyos y van contigo a donde vayas</small>
-      </span>
-      <em>{{ links.length }}</em>
-    </button>
-
-    @if (empresaId) {
+  <div class="hub-ambitos" [class.hub-ambitos--unico]="soloEmpresa">
+    @if (!soloEmpresa) {
       <button
         type="button"
         class="hub-ambito"
-        [class.hub-ambito--activo]="enEmpresa"
-        (click)="cambiarAmbito('empresa')"
+        [class.hub-ambito--activo]="!enEmpresa"
+        (click)="cambiarAmbito('personal')"
       >
-        <i class="fas fa-building"></i>
+        <i class="fas fa-user"></i>
         <span>
-          <strong>Enlaces de {{ empresaNombre }}</strong>
-          <small>Son de la empresa y los comparte todo el equipo</small>
+          <strong>Mis enlaces personales</strong>
+          <small>Son tuyos y van contigo a donde vayas</small>
         </span>
-        <em>{{ enlacesEmpresa.length }}</em>
+        <em>{{ links.length }}</em>
       </button>
     }
+
+    <button
+      type="button"
+      class="hub-ambito"
+      [class.hub-ambito--activo]="enEmpresa"
+      [disabled]="!empresaId"
+      (click)="cambiarAmbito('empresa')"
+    >
+      <i class="fas fa-building"></i>
+      <span>
+        <strong>{{ empresaId ? 'Enlaces de ' + empresaNombre : 'Enlaces de empresa' }}</strong>
+        <small>
+          {{ empresaId ? 'Son de la empresa y los comparte todo el equipo' : 'Crea tu empresa para tener enlaces propios' }}
+        </small>
+      </span>
+      <em>{{ enlacesEmpresa.length }}</em>
+    </button>
   </div>
+
+  @if (enEmpresa && empresasDisponibles.length) {
+    <div class="hub-empresas">
+      <p class="hub-empresas__titulo">Tus empresas</p>
+      <div class="hub-empresas__lista">
+        @for (empresa of empresasDisponibles; track empresa.id) {
+          <button
+            type="button"
+            class="hub-empresa"
+            [class.hub-empresa--activa]="empresa.id === empresaId"
+            (click)="cambiarEmpresaPorId(empresa.id)">
+            <span class="hub-empresa__avatar">
+              @if (empresa.logoUrl) {
+                <img [src]="empresa.logoUrl" [alt]="empresa.nombre" />
+              } @else {
+                {{ empresa.nombre.slice(0, 2).toUpperCase() }}
+              }
+            </span>
+            <span class="hub-empresa__datos">
+              <strong>{{ empresa.nombre }}</strong>
+              <small>{{ empresa.rolEtiqueta ?? 'Miembro' }}</small>
+            </span>
+            @if (empresa.id === empresaId) {
+              <i class="fas fa-check"></i>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
 
   <div class="hub-content">
     <!-- Panel Izquierdo: Preview -->
@@ -181,6 +214,23 @@
           <label>Descripción (Opcional)</label>
           <textarea rows="2" [(ngModel)]="formData.description" placeholder="Breve descripción..."></textarea>
         </div>
+
+        @if (enEmpresa) {
+          <div class="form-group">
+            <label>¿Quién lleva este enlace?</label>
+            <select [(ngModel)]="formData.asignadoA" class="campo-select">
+              <option [ngValue]="null">Todo el equipo</option>
+              @for (miembro of equipoEmpresa; track miembro.usuarioId) {
+                <option [ngValue]="miembro.usuarioId">
+                  {{ miembro.nombre }} · {{ miembro.puesto || miembro.rolEtiqueta }}
+                </option>
+              }
+            </select>
+            <small class="form-ayuda">
+              Si lo asignas a una persona, el enlace queda marcado como suyo dentro de la empresa.
+            </small>
+          </div>
+        }
 
         <div class="form-group">
           <label>Icono Representativo</label>

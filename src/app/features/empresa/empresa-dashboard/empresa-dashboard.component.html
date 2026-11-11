@@ -1,4 +1,15 @@
 <div class="empresa-page diseno-visita" [style.--marca]="acento">
+  @if (empresaRed; as miEmpresa) {
+    <app-empresa-red-navbar
+      [empresa]="miEmpresa"
+      [equipo]="miembrosRed"
+      [espacios]="espaciosRed"
+      [haySesion]="haySesion"
+      [puedeEditar]="true"
+      [urlEspacio]="urlLandingRed"
+    />
+  }
+
   <div class="barra">
     <div class="barra__modo">
       <i class="fa-solid fa-building"></i>

@@ -46,6 +46,14 @@ export class EmpresaRedNavbarComponent implements OnInit {
 
   readonly usuario = this.auth.currentUser;
 
+  get urlEnlaces(): string {
+    return '/app/empresa/enlaces';
+  }
+
+  get urlTarjetas(): string {
+    return '/app/empresa/tarjetas';
+  }
+
   ngOnInit(): void {
     if (this.haySesion) {
       this.directorio.cargarRed().subscribe({ error: () => {} });

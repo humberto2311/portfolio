@@ -78,7 +78,7 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
 
         if (t && this.modoNfc()) {
           this.registrarToque();
-          setTimeout(() => this.guardarContacto(), 700);
+          if (this.archivos.esNativa) setTimeout(() => this.guardarContacto(true), 700);
         }
       },
       error: () => {
@@ -125,30 +125,53 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
     });
   }
 
-  guardarContacto(): void {
+  guardarContacto(silencioso = false): void {
     const t = this.tarjeta();
     if (!this.userId || !t?.slug) return;
 
+    const nombre = this.tarjeta()?.nombre ?? 'Contacto';
+
     this.vcardService.vcfPublico(this.userId, t.slug).subscribe({
       next: async (blob) => {
-        const nombre = this.nombreArchivo();
+        if (this.archivos.esNativa) {
+          try {
+            await this.archivos.guardar(blob, this.nombreArchivo(), nombre);
+            if (!silencioso) this.aviso.set('Listo. Elige "Añadir a contactos" y quedará en tu agenda.');
+          } catch {
+            if (!silencioso) this.aviso.set('No se pudo guardar el contacto. Intenta de nuevo.');
+          }
+          return;
+        }
+
+        const compartido = await this.archivos.compartirArchivo(blob, this.nombreArchivo(), nombre);
+
+        if (compartido === 'compartido') {
+          if (!silencioso) this.aviso.set('Contacto compartido.');
+          return;
+        }
+        if (compartido === 'cancelado') {
+          if (!silencioso) this.aviso.set('Se cerró sin compartir el contacto.');
+          return;
+        }
+
+        if (silencioso) {
+          this.aviso.set('Tu navegador no puede compartir el contacto solo. Toca "Compartir contacto" abajo.');
+          return;
+        }
+
         try {
-          const resultado = await this.archivos.guardar(
-            blob,
-            nombre,
-            this.tarjeta()?.nombre ?? 'Contacto'
-          );
-          this.aviso.set(
-            resultado === 'cancelado'
-              ? 'Se cerró sin guardar. Vuelve a tocar "Guardar contacto" cuando quieras.'
-              : 'Listo. Elige "Añadir a contactos" y quedará guardado en tu agenda.'
-          );
+          await this.archivos.guardar(blob, this.nombreArchivo(), nombre);
+          this.aviso.set('Contacto descargado. Ábrelo para añadirlo a tu agenda.');
         } catch {
           this.aviso.set('No se pudo guardar el contacto. Intenta de nuevo.');
         }
       },
       error: () => this.aviso.set('No se pudo descargar el contacto. Intenta de nuevo.'),
     });
+  }
+
+  get esNativa(): boolean {
+    return this.archivos.esNativa;
   }
 
   async compartir(): Promise<void> {

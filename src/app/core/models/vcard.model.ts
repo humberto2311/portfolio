@@ -34,6 +34,9 @@ export interface VCardPayload {
   nombre: string;
   puesto: string;
   empresa: string;
+
+  /** Empresa a la que pertenece la tarjeta. Vacío = tarjeta personal. */
+  empresaId?: string | null;
   telefono: string;
   email: string;
   web: string;

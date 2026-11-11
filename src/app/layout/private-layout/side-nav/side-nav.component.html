@@ -117,25 +117,27 @@
             </span>
           }
 
+
+
           @for (espacio of misEspacios; track espacio.id) {
-            <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
-              <span class="rail__espacio-avatar">
-                @if (espacio.logoUrl) {
-                  <img [src]="espacio.logoUrl" [alt]="espacio.nombre" />
-                } @else {
-                  {{ espacio.nombre.slice(0, 2).toUpperCase() }}
-                }
-              </span>
-              <span class="rail__espacio-datos">
-                <strong>{{ espacio.nombre }}</strong>
-                <small>{{ espacio.rol }}</small>
-              </span>
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </button>
-          } @empty {
-            @if (espacioActual) {
-              <p class="rail__espacios-vacio">No tienes otra empresa todavía.</p>
+            @if (espacio.id !== espacioActual?.id) {
+              <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
+                <span class="rail__espacio-avatar">
+                  @if (espacio.logoUrl) {
+                    <img [src]="espacio.logoUrl" [alt]="espacio.nombre" />
+                  } @else {
+                    {{ espacio.nombre.slice(0, 2).toUpperCase() }}
+                  }
+                </span>
+                <span class="rail__espacio-datos">
+                  <strong>{{ espacio.nombre }}</strong>
+                  <small>{{ espacio.rol }}</small>
+                </span>
+                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </button>
             }
+          } @empty {
+            <p class="rail__espacios-vacio">No tienes otra empresa todavía.</p>
           }
 
           @if (enEmpresa) {
@@ -146,6 +148,15 @@
                 <small>Salir del modo empresa</small>
               </span>
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          } @else if (misEspacios.length) {
+            <button type="button" class="rail__espacio rail__espacio--personal" (click)="irAPersonal()">
+              <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+              <span class="rail__espacio-datos">
+                <strong>Mi perfil personal</strong>
+                <small>aquí estás</small>
+              </span>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
             </button>
           }
         </div>

@@ -1,10 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { RailStateService } from '../../../core/services/rail-state.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
+import { Empresa } from '../../../core/models/empresa.model';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
 
 interface RailItem {
@@ -37,6 +39,8 @@ const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
   { label: 'Mi actividad', icon: 'fa-solid fa-user-tie', ruta: '/app/dashboard/empresa/mi-actividad' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
+  { label: 'Enlaces de la empresa', icon: 'fa-solid fa-link', ruta: '/app/empresa/enlaces', nota: 'Del equipo' },
+  { label: 'Tarjetas del equipo', icon: 'fa-solid fa-address-card', ruta: '/app/empresa/tarjetas', nota: 'vCards' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
 ];
 
@@ -49,6 +53,7 @@ const NAVEGACION_EMPRESA: RailItem[] = [
 })
 export class SideNavComponent {
   private auth = inject(AuthService);
+  private destruir = inject(DestroyRef);
   private perfiles = inject(UserProfileService);
   private router = inject(Router);
   readonly mensajes = inject(SidePanelService);
@@ -57,6 +62,15 @@ export class SideNavComponent {
 
   readonly user = this.auth.currentUser;
   readonly avatar = this.perfiles.avatar;
+
+  constructor() {
+    this.empresa.cargarMis().pipe(takeUntilDestroyed(this.destruir)).subscribe();
+
+    effect(() => {
+      this.empresa.enModoEmpresa();
+      this.espaciosAbiertos.set(false);
+    });
+  }
 
   get navegacion(): RailItem[] {
     return this.empresa.enModoEmpresa() ? NAVEGACION_EMPRESA : NAVEGACION_PERSONAL;
@@ -107,18 +121,21 @@ export class SideNavComponent {
 
   readonly espaciosAbiertos = signal(false);
 
-  get misEspacios(): { id: string; nombre: string; rol: string; logoUrl?: string | null }[] {
-    const activa = this.empresa.empresaActual()?.id ?? null;
+  get misEmpresas(): Empresa[] {
+    const activa = this.empresa.empresaActual();
+    if (activa && !this.empresa.listado().some((empresa) => empresa.id === activa.id)) {
+      return [activa, ...this.empresa.listado()];
+    }
+    return this.empresa.listado();
+  }
 
-    return this.empresa
-      .listado()
-      .filter((empresa) => empresa.id !== activa)
-      .map((empresa) => ({
-        id: empresa.id,
-        nombre: empresa.nombre,
-        rol: empresa.rolEtiqueta ?? 'Miembro',
-        logoUrl: empresa.logoUrl ?? null,
-      }));
+  get misEspacios(): { id: string; nombre: string; rol: string; logoUrl?: string | null }[] {
+    return this.misEmpresas.map((empresa) => ({
+      id: empresa.id,
+      nombre: empresa.nombre,
+      rol: empresa.rolEtiqueta ?? 'Miembro',
+      logoUrl: empresa.logoUrl ?? null,
+    }));
   }
 
   get espacioActual(): { id: string; nombre: string; rol: string } | null {
@@ -128,22 +145,30 @@ export class SideNavComponent {
   }
 
   get hayEspacios(): boolean {
-    return this.empresa.listado().length > 0;
+    return this.misEmpresas.length > 0;
   }
 
   alternarEspacios(): void {
     this.espaciosAbiertos.update((valor) => !valor);
+    if (this.espaciosAbiertos()) {
+      this.empresa.cargarMis(true).subscribe();
+    }
   }
 
   irAEspacio(id: string): void {
     this.espaciosAbiertos.set(false);
     this.empresa.entrar(id);
-    void this.router.navigateByUrl('/app/empresa');
+    void this.router.navigateByUrl('/app/empresa').then(() => window.scrollTo({ top: 0 }));
   }
 
   irAPersonal(): void {
     this.espaciosAbiertos.set(false);
     this.empresa.salir();
+    void this.router.navigateByUrl('/app/perfil');
+  }
+
+  irAperfilPersonal(): void {
+    this.espaciosAbiertos.set(false);
     void this.router.navigateByUrl('/app/perfil');
   }
 

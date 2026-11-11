@@ -2,7 +2,9 @@ import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { ActivatedRoute } from '@angular/router';
 import { VcardService } from '../../core/services/vcard.service';
+import { EmpresaService } from '../../core/services/empresa.service';
 import { ArchivoService } from '../../core/services/archivo.service';
 import { DisenoService } from '../../core/services/diseno.service';
 import {
@@ -42,6 +44,8 @@ interface GrupoCampos {
 })
 export class PortafolioComponent implements OnInit, OnDestroy {
   private vcardService = inject(VcardService);
+  private route = inject(ActivatedRoute);
+  private empresas = inject(EmpresaService);
   private archivos = inject(ArchivoService);
   private diseno = inject(DisenoService);
 
@@ -60,8 +64,10 @@ export class PortafolioComponent implements OnInit, OnDestroy {
   menuCampos = signal(false);
   mensaje = signal<string | null>(null);
 
-  /** Todas las tarjetas del usuario. */
+  /** Tarjetas visibles según el ámbito (personal o de una empresa). */
   tarjetas = signal<VCardPayload[]>([]);
+  /** Empresa cuyo ámbito de tarjetas se está viendo. */
+  empresaAmbito = signal<{ id: string; nombre: string } | null>(null);
   /** Tarjeta que se está editando. */
   tarjeta = signal<VCardPayload>(this.vcardService.vacia());
 
@@ -166,15 +172,43 @@ export class PortafolioComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
+    if (this.route.snapshot.routeConfig?.path === 'empresa/tarjetas') {
+      this.resolverAmbito();
+      return;
+    }
+
     this.cargar();
   }
 
   // ====== CARGA ======
 
+  get enAmbitoEmpresa(): boolean {
+    return this.empresaAmbito() !== null;
+  }
+
+  private resolverAmbito(): void {
+    if (this.route.snapshot.routeConfig?.path !== 'empresa/tarjetas') return;
+
+    this.empresas
+      .cargarMis()
+      .subscribe((mias) => {
+        const empresa = this.empresas.empresaActual() ?? mias[0] ?? null;
+        if (!empresa) return;
+
+        this.empresaAmbito.set({ id: empresa.id, nombre: empresa.nombre });
+        this.cargar();
+      });
+  }
+
   cargar(): void {
     this.cargando.set(true);
 
-    this.vcardService.listar().subscribe({
+    const empresaId = this.empresaAmbito()?.id;
+    const peticion = empresaId
+      ? this.vcardService.listarDeEmpresa(empresaId)
+      : this.vcardService.listarPersonales();
+
+    peticion.subscribe({
       next: (lista) => {
         this.tarjetas.set(lista ?? []);
 
@@ -204,7 +238,14 @@ export class PortafolioComponent implements OnInit, OnDestroy {
   }
 
   crearNueva(plantilla: PlantillaVcard = 'PERSONAL'): void {
-    this.tarjeta.set(this.vcardService.vacia(plantilla, plantilla.toLowerCase()));
+    const empresa = this.empresaAmbito();
+    const nueva = this.vcardService.vacia(plantilla, plantilla.toLowerCase());
+
+    this.tarjeta.set(
+      empresa
+        ? { ...nueva, empresaId: empresa.id, empresa: empresa.nombre }
+        : nueva,
+    );
   }
 
   // ====== PLANTILLAS ======
@@ -316,7 +357,12 @@ export class PortafolioComponent implements OnInit, OnDestroy {
     this.guardando.set(true);
     this.mensaje.set(null);
 
-    this.vcardService.guardar(this.tarjeta()).subscribe({
+    const empresa = this.empresaAmbito();
+    const payload: VCardPayload = empresa
+      ? { ...this.tarjeta(), empresaId: empresa.id, empresa: empresa.nombre }
+      : { ...this.tarjeta(), empresaId: null };
+
+    this.vcardService.guardar(payload).subscribe({
       next: (t) => {
         const normalizada: VCardPayload = { ...t, campos: t.campos ?? [] };
         this.tarjeta.set(normalizada);

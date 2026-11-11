@@ -98,6 +98,16 @@
       </a>
     }
 
+    <a class="red-nav__boton" [routerLink]="urlEnlaces" (click)="cerraPanel()" title="Enlaces de la empresa">
+      <i class="fa-solid fa-link"></i>
+      <span>Enlaces</span>
+    </a>
+
+    <a class="red-nav__boton" [routerLink]="urlTarjetas" (click)="cerraPanel()" title="Tarjetas (vCards) del equipo">
+      <i class="fa-solid fa-address-card"></i>
+      <span>Tarjetas</span>
+    </a>
+
     @if (puedeEditar) {
       <a class="red-nav__boton red-nav__boton--editar" routerLink="/app/empresa/ajustes" (click)="cerraPanel()">
         <i class="fa-solid fa-pen-to-square"></i>

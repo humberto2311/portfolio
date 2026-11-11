@@ -36,6 +36,8 @@ import {
 } from '../empresa-ui';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
 import { EmpresaRedNavbarComponent } from '../red/empresa-red-navbar.component';
+import { LinkItem } from '../../../core/models/LinkItem';
+import { LinkHubService } from '../../../core/services/link-hub.service';
 
 
 @Component({
@@ -54,12 +56,14 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private panelLateral = inject(SidePanelService);
   private toast = inject(ToastService);
+  private linkHub = inject(LinkHubService);
 
   @ViewChild('marco') marco?: ElementRef<HTMLElement>;
 
   readonly datos = signal<EmpresaPublica | null>(null);
   readonly cargando = signal(true);
-  readonly tab = signal<'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios'>('inicio');
+  readonly enlaces = signal<LinkItem[]>([]);
+  readonly tab = signal<'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios' | 'enlaces' | 'tarjetas'>('inicio');
   readonly espacios = signal<EspacioEmpresa[]>([]);
   readonly siguiendo = signal(false);
   readonly seguidores = signal(0);
@@ -99,6 +103,7 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
 
       this.cargarRed(datos.empresa.id);
       this.cargarLanding(datos.empresa.slug, datos.empresa.id);
+      this.cargarEnlaces(datos.empresa.id);
 
       if (isPlatformBrowser(this.platformId)) {
         this.escucharActualizaciones();
@@ -331,6 +336,26 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
     return this.espacios().length ? this.espacios() : (this.red()?.espacios ?? []);
   }
 
+  private cargarEnlaces(empresaId: string): void {
+    this.linkHub
+      .getDeEmpresa(empresaId)
+      .pipe(catchError(() => of([])))
+      .subscribe((lista) => this.enlaces.set(lista ?? []));
+  }
+
+  get enlacesDeEmpresa(): LinkItem[] {
+    return this.enlaces();
+  }
+
+  get tarjetasDeEquipo(): MiembroEmpresa[] {
+    return (this.red()?.miembros ?? []).filter((miembro) => miembro.visibleEnEquipo);
+  }
+
+  urlTarjeta(miembro: MiembroEmpresa): string {
+    const slug = this.empresa?.slug ?? '';
+    return `/tarjeta/${miembro.usuarioId}?empresa=${slug}`;
+  }
+
   get puedeEditar(): boolean {
     return Boolean(this.red()?.puedeEditar);
   }
@@ -355,7 +380,7 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
     return this.piezas.filter((pieza) => pieza.tipo === tipo).length;
   }
 
-  cambiarTab(tab: 'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios'): void {
+  cambiarTab(tab: 'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios' | 'enlaces' | 'tarjetas'): void {
     this.tab.set(tab);
   }
 

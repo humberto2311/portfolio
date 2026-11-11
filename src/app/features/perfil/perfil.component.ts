@@ -13,6 +13,7 @@ import { TabInformacionComponent } from './components/tab-informacion/tab-inform
 import { TabFotosComponent } from './components/tab-fotos/tab-fotos.component';
 import { TabContactosComponent } from './components/tab-contactos/tab-contactos.component';
 import { TabEmpresaComponent } from './components/tab-empresa/tab-empresa.component';
+import { TabEnlacesComponent } from './components/tab-enlaces/tab-enlaces.component';
 import { ToastComponent } from './components/toast/toast.component';
 
 @Component({
@@ -27,6 +28,7 @@ import { ToastComponent } from './components/toast/toast.component';
     TabFotosComponent,
     TabContactosComponent,
     TabEmpresaComponent,
+    TabEnlacesComponent,
     ToastComponent,
     TabContactosComponent 
   ],

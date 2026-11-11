@@ -1,7 +1,7 @@
 <div class="espacio diseno-visita">
   @if (espacio(); as esp) {
     <app-espacio-navbar
-      [espacio]="esp"
+      [espacio]="espacioNavbar ?? esp"
       [haySesion]="haySesion"
       [puedeEditar]="puedeEditar"
       [urlPerfilEmpresa]="urlPerfil"
@@ -281,7 +281,7 @@
         </section>
       }
 
-      <section class="cierre">
+      <section class="cierre" id="contacto">
         <h2>¿Hablamos?</h2>
         <p>Este es el espacio de {{ esp.empresaNombre }} en N-soft. Escríbenos y te respondemos por el chat.</p>
         <div class="cierre__acciones">

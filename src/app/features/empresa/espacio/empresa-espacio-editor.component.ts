@@ -94,6 +94,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   readonly disenos = signal<DisenoLienzo[]>([]);
   readonly seccionDiseno = signal<string | null>(null);
   readonly piezas = signal<ComponenteLienzo[]>([]);
+  readonly cambiosSinGuardar = signal(false);
   readonly zonas = ZONAS;
   readonly alineaciones = ALINEACIONES;
   readonly cambiando = signal(false);
@@ -175,6 +176,10 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     return this.disenos();
   }
 
+  get urlVistaPrevia(): string {
+    return `/app/empresa/espacio/vista?espacio=${encodeURIComponent(this.form.slug || 'mi-espacio')}`;
+  }
+
   disenoDeSeccion(seccion: SeccionEspacio): DisenoLienzo | null {
     if (!seccion.disenoSlug) return null;
     return this.disenos().find((diseno) => diseno.slug === seccion.disenoSlug) ?? null;
@@ -216,7 +221,24 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     this.secciones = [...this.secciones, nueva];
     this.seccionAbierta.set(nueva.clave);
     this.vista.set('secciones');
+    this.cambiosSinGuardar.set(true);
+    this.cambiosSinGuardar.set(true);
     this.toast.show(`«${diseno.nombre}» añadido a tu espacio`);
+  }
+
+  usarDiseno(seccion: SeccionEspacio, diseno: DisenoLienzo): void {
+    seccion.disenoSlug = diseno.slug;
+    seccion.tipo = 'LIENZO';
+    if (!seccion.titulo || seccion.titulo === 'Nueva sección') seccion.titulo = diseno.nombre;
+    this.seccionDiseno.set(null);
+    this.cambiosSinGuardar.set(true);
+    this.recargarPiezas();
+    this.toast.show(`«${diseno.nombre}» se verá en esta sección`);
+  }
+
+  recargarPiezas(): void {
+    const empresaActual = this.empresaActual;
+    if (empresaActual) this.cargarDisenos(empresaActual.id);
   }
 
   irADisenos(): void {
@@ -238,10 +260,13 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   private cargarPiezasDeDisenos(empresaId: string, lista: DisenoLienzo[]): void {
     if (!lista.length) return;
 
-    let pendientes = lista.length;
+    const faltantes = lista.filter((diseno) => !diseno.piezas || !diseno.piezas.length);
+    const objetivo = faltantes.length ? faltantes : lista;
+
+    let pendientes = objetivo.length;
     const mapa = new Map<string, ComponenteLienzo[]>();
 
-    for (const diseno of lista) {
+    for (const diseno of objetivo) {
       this.empresa.piezasDiseno(empresaId, diseno.id).subscribe((piezas) => {
         mapa.set(diseno.slug, piezas ?? []);
         pendientes -= 1;
@@ -265,6 +290,10 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   zonaDe(seccion: SeccionEspacio): string {
     return (seccion.estilo && seccion.estilo.trim()) || 'contenedor';
+  }
+
+  anclaDeSeccion(seccion: SeccionEspacio): string {
+    return anclaSeccion(seccion);
   }
 
   estilosDe(seccion: SeccionEspacio): Record<string, string> {
@@ -437,18 +466,25 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     const [movida] = copia.splice(indice, 1);
     copia.splice(destino, 0, movida);
     this.secciones = copia.map((seccion, posicion) => ({ ...seccion, orden: posicion }));
+    this.cambiosSinGuardar.set(true);
   }
 
   alternarSeccion(indice: number): void {
     this.secciones = this.secciones.map((seccion, posicion) =>
       posicion === indice ? { ...seccion, visible: !seccion.visible } : seccion,
     );
+    this.cambiosSinGuardar.set(true);
   }
 
   quitarSeccion(indice: number): void {
     this.secciones = this.secciones
       .filter((_, posicion) => posicion !== indice)
       .map((seccion, posicion) => ({ ...seccion, orden: posicion }));
+    this.cambiosSinGuardar.set(true);
+  }
+
+  marcarCambios(): void {
+    this.cambiosSinGuardar.set(true);
   }
 
   agregarSeccion(tipo: TipoSeccionEspacio): void {
@@ -468,6 +504,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     this.secciones = [...this.secciones, nueva];
     this.seccionAbierta.set(nueva.clave);
     this.vista.set('secciones');
+    this.cambiosSinGuardar.set(true);
   }
 
   agregarSeleccionada(): void {
@@ -568,6 +605,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
           const existe = lista.some((item) => item.id === espacio.id);
           return existe ? lista.map((item) => (item.id === espacio.id ? espacio : item)) : [...lista, espacio];
         });
+        this.cambiosSinGuardar.set(false);
         this.toast.show('Espacio guardado');
       },
       error: () => {

@@ -95,7 +95,7 @@ export interface PerfilData {
   disenoActivo?: boolean;
 }
 
-export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa';
+export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa' | 'enlaces';
 
 
 // ===== DTOs del backend (coinciden con /v3/api-docs) =====

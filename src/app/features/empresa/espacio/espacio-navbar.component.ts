@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { EnlaceEspacio, EspacioEmpresa } from '../../../core/models/empresa.model';
-import { esExterno, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
+import { anclasDe, esExterno, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
 
 @Component({
   selector: 'app-espacio-navbar',
@@ -40,8 +40,25 @@ export class EspacioNavbarComponent {
     return urlEnlace(enlace, this.espacio?.empresaSlug ?? '', this.espacio?.slug ?? '');
   }
 
+  ir(enlace: EnlaceEspacio, evento: Event): void {
+    if (!this.activo(enlace) || enlace.tipo !== 'ANCLA') return;
+
+    const destino = document.getElementById((enlace.destino ?? '').replace(/^#/, '').trim());
+    if (!destino) return;
+
+    evento.preventDefault();
+    destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.cerrar();
+  }
+
   activo(enlace: EnlaceEspacio): boolean {
-    return tieneDestino(enlace);
+    if (!tieneDestino(enlace)) return false;
+    if (enlace.tipo !== 'ANCLA') return true;
+    return this.anclas.has((enlace.destino ?? '').replace(/^#/, '').trim());
+  }
+
+  private get anclas(): Set<string> {
+    return new Set(anclasDe(this.espacio?.secciones ?? []));
   }
 
   sinAccion(evento: Event): void {

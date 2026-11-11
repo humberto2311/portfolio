@@ -15,6 +15,55 @@
     </a>
   </div>
 
+  <div class="red-nav__buscador" [class.red-nav__buscador--abierto]="buscadorAbierto()">
+    <button type="button" class="red-nav__lupa" (click)="abrirBuscador()" [title]="buscadorAbierto() ? 'Cerrar búsqueda' : 'Buscar personas y empresas'">
+      <i class="fa-solid" [class.fa-magnifying-glass]="!buscadorAbierto()" [class.fa-xmark]="buscadorAbierto()"></i>
+    </button>
+
+    @if (buscadorAbierto()) {
+      <input
+        type="search"
+        class="red-nav__campo"
+        placeholder="Buscar personas o empresas…"
+        autocomplete="off"
+        (input)="buscar($event)"
+      />
+
+      @if (red.buscando()) {
+        <span class="red-nav__buscando"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+      }
+
+      @if (red.termino().length >= 2) {
+        <div class="red-nav__resultados">
+          @for (resultado of red.resultados(); track resultado.tipo + resultado.id) {
+            <button type="button" class="red-nav__resultado" (click)="irA(resultado)">
+              <span class="red-nav__resultado-avatar">
+                @if (resultado.avatarUrl) {
+                  <img [src]="resultado.avatarUrl" [alt]="resultado.nombre" />
+                } @else {
+                  {{ resultado.iniciales }}
+                }
+              </span>
+              <span class="red-nav__resultado-datos">
+                <strong>{{ resultado.nombre }}</strong>
+                <small>{{ resultado.detalle || (resultado.tipo === 'empresa' ? 'Empresa' : 'Persona') }}</small>
+              </span>
+              <i class="fa-solid" [class.fa-building]="resultado.tipo === 'empresa'" [class.fa-user]="resultado.tipo === 'persona'"></i>
+            </button>
+          } @empty {
+            <p class="red-nav__sin-resultados">
+              @if (red.buscando()) {
+                Buscando…
+              } @else {
+                Nadie con ese nombre. Prueba con otra palabra.
+              }
+            </p>
+          }
+        </div>
+      }
+    }
+  </div>
+
   <div class="red-nav__acciones" aria-label="Navegación de la empresa">
     <button
       type="button"

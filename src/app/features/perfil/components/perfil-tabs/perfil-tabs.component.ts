@@ -18,7 +18,8 @@ export class PerfilTabsComponent {
     { id: 'publicaciones', label: 'Publicaciones', icon: 'fa-newspaper' },
     { id: 'informacion',   label: 'Información',   icon: 'fa-circle-info' },
     { id: 'fotos',         label: 'Fotos',         icon: 'fa-images' },
-    { id: 'amigos',        label: 'Contactos',     icon: 'fa-users', soloPc: true }
+    { id: 'amigos',        label: 'Contactos',     icon: 'fa-users', soloPc: true },
+    { id: 'enlaces',       label: 'Enlaces',       icon: 'fa-link' }
   ];
 
   get listaTabs(): { id: TabId; label: string; icon: string; soloPc?: boolean }[] {

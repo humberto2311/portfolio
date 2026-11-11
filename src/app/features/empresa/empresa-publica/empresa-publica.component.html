@@ -135,6 +135,16 @@
         <button type="button" [class.pestana--activa]="tab() === 'espacios'" (click)="cambiarTab('espacios')">
           <i class="fa-solid fa-layer-group"></i> Espacios
         </button>
+        @if (enlacesDeEmpresa.length) {
+          <button type="button" [class.pestana--activa]="tab() === 'enlaces'" (click)="cambiarTab('enlaces')">
+            <i class="fa-solid fa-link"></i> Enlaces
+          </button>
+        }
+        @if (esMiEmpresa) {
+          <button type="button" [class.pestana--activa]="tab() === 'tarjetas'" (click)="cambiarTab('tarjetas')">
+            <i class="fa-solid fa-id-badge"></i> Tarjetas
+          </button>
+        }
       </nav>
 
       @switch (tab()) {
@@ -539,6 +549,55 @@
             } @empty {
               <p class="vacio">La empresa todavía no publicó un espacio propio.</p>
             }
+          </section>
+        }
+
+        @case ('enlaces') {
+          <section class="bloque">
+            <header class="bloque__cabecera">
+              <h2><i class="fa-solid fa-link"></i> Enlaces de {{ publica.empresa.nombre }}</h2>
+              <p>Estos enlaces son de la empresa y los comparte todo el equipo.</p>
+            </header>
+
+            <div class="rejilla-enlaces">
+              @for (enlace of enlacesDeEmpresa; track enlace.id) {
+                <a class="enlace-card" [href]="enlace.url" target="_blank" rel="noopener" [class.enlace-card--activo]="enlace.active">
+                  <span class="enlace-card__icono"><i [class]="enlace.iconClass || 'fa-solid fa-link'"></i></span>
+                  <span class="enlace-card__datos">
+                    <strong>{{ enlace.title }}</strong>
+                    <small>{{ enlace.description || enlace.url }}</small>
+                  </span>
+                  @if (enlace.active) {
+                    <em class="enlace-card__marca">Activo</em>
+                  }
+                  <i class="fa-solid fa-arrow-up-right-from-square enlace-card__flecha"></i>
+                </a>
+              } @empty {
+                <p class="vacio">La empresa todavía no añadió enlaces.</p>
+              }
+            </div>
+          </section>
+        }
+
+        @case ('tarjetas') {
+          <section class="bloque">
+            <header class="bloque__cabecera">
+              <h2><i class="fa-solid fa-id-badge"></i> Tarjetas del equipo</h2>
+              <p>Cada persona del equipo tiene su tarjeta con los datos y enlaces de {{ publica.empresa.nombre }}.</p>
+            </header>
+
+            <div class="rejilla-espacios">
+              @for (miembro of tarjetasDeEquipo; track miembro.usuarioId) {
+                <a class="espacio-card espacio-card--propio" [routerLink]="['/tarjeta', miembro.usuarioId]">
+                  <span class="espacio-card__icono"><i class="fa-solid fa-id-badge"></i></span>
+                  <h3>{{ miembro.nombre }}</h3>
+                  <p>{{ miembro.puesto || miembro.rolEtiqueta || 'Equipo' }}</p>
+                  <span class="espacio-card__enlace">Ver tarjeta <i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+              } @empty {
+                <p class="vacio">Todavía no hay personas visibles en el equipo.</p>
+              }
+            </div>
           </section>
         }
       }

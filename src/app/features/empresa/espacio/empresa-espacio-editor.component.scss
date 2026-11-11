@@ -1278,3 +1278,34 @@
     background: var(--accent-soft);
   }
 }
+
+.lienzo__guardar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-cyan);
+  background: var(--accent-cyan);
+  color: var(--on-accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+}
+
+.lienzo__pendiente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px dashed var(--danger);
+  color: var(--danger);
+  font-size: 0.72rem;
+  font-weight: 800;
+}

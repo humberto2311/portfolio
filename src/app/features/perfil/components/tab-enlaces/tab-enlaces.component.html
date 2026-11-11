@@ -1,0 +1,60 @@
+<div class="enlaces">
+  <section class="tarjeta">
+    <header class="tarjeta__cabecera">
+      <h2><i class="fa-solid fa-link"></i> Enlaces</h2>
+      <a class="enlace" routerLink="/app/hub">Administrar</a>
+    </header>
+
+    <div class="ambitos">
+      <button type="button" class="ambito" [class.ambito--activo]="ambito() === 'personal'" (click)="cambiar('personal')">
+        <i class="fa-solid fa-user"></i>
+        <span>
+          <strong>Mis enlaces personales</strong>
+          <small>Van contigo a donde vayas</small>
+        </span>
+        <em>{{ personales().length }}</em>
+      </button>
+
+      @if (empresaNombre()) {
+        <button type="button" class="ambito" [class.ambito--activo]="ambito() === 'empresa'" (click)="cambiar('empresa')">
+          <i class="fa-solid fa-building"></i>
+          <span>
+            <strong>Enlaces de {{ empresaNombre() }}</strong>
+            <small>Son de la empresa y los comparte el equipo</small>
+          </span>
+          <em>{{ deEmpresa().length }}</em>
+        </button>
+      }
+    </div>
+
+    @if (cargando()) {
+      <p class="estado"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando enlaces…</p>
+    } @else {
+      <ul class="lista">
+        @for (enlace of lista; track enlace.id) {
+          <li class="fila" [class.fila--activo]="enlace.active">
+            <span class="fila__icono"><i [class]="enlace.iconClass || 'fa-solid fa-link'"></i></span>
+            <span class="fila__datos">
+              <strong>{{ enlace.title }}</strong>
+              <small>{{ enlace.description || enlace.url }}</small>
+            </span>
+            @if (enlace.active) {
+              <span class="fila__marca">Activo</span>
+            }
+            <a class="fila__abrir" [href]="enlace.url" target="_blank" rel="noopener" title="Abrir">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </li>
+        } @empty {
+          <li class="estado">
+            @if (ambito() === 'empresa') {
+              {{ empresaNombre() }} todavía no tiene enlaces propios.
+            } @else {
+              Todavía no has añadido enlaces personales.
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

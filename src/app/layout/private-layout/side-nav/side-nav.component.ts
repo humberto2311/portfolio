@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
@@ -64,10 +64,7 @@ export class SideNavComponent {
 
   get salida(): RailItem[] {
     if (this.empresa.enModoEmpresa()) {
-      return [
-        { label: 'Ajustes de la empresa', icon: 'fa-solid fa-gear', accion: 'ajustes' },
-        { label: 'Volver a mi perfil personal', icon: 'fa-solid fa-user', accion: 'salir' },
-      ];
+      return [{ label: 'Ajustes de la empresa', icon: 'fa-solid fa-gear', accion: 'ajustes' }];
     }
     return [{ label: 'Ajustes de cuenta', icon: 'fa-solid fa-gear', accion: 'ajustes' }];
   }
@@ -108,9 +105,46 @@ export class SideNavComponent {
     return this.empresa.empresaActual()?.logoUrl ?? null;
   }
 
-  salirEmpresa(): void {
+  readonly espaciosAbiertos = signal(false);
+
+  get misEspacios(): { id: string; nombre: string; rol: string; logoUrl?: string | null }[] {
+    const activa = this.empresa.empresaActual()?.id ?? null;
+
+    return this.empresa
+      .listado()
+      .filter((empresa) => empresa.id !== activa)
+      .map((empresa) => ({
+        id: empresa.id,
+        nombre: empresa.nombre,
+        rol: empresa.rolEtiqueta ?? 'Miembro',
+        logoUrl: empresa.logoUrl ?? null,
+      }));
+  }
+
+  get espacioActual(): { id: string; nombre: string; rol: string } | null {
+    const activa = this.empresa.empresaActual();
+    if (!activa) return null;
+    return { id: activa.id, nombre: activa.nombre, rol: activa.rolEtiqueta ?? 'Miembro' };
+  }
+
+  get hayEspacios(): boolean {
+    return this.empresa.listado().length > 0;
+  }
+
+  alternarEspacios(): void {
+    this.espaciosAbiertos.update((valor) => !valor);
+  }
+
+  irAEspacio(id: string): void {
+    this.espaciosAbiertos.set(false);
+    this.empresa.entrar(id);
+    void this.router.navigateByUrl('/app/empresa');
+  }
+
+  irAPersonal(): void {
+    this.espaciosAbiertos.set(false);
     this.empresa.salir();
-    this.router.navigate(['/app']);
+    void this.router.navigateByUrl('/app/perfil');
   }
 
   iniciales(): string {

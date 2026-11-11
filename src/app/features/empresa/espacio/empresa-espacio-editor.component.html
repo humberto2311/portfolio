@@ -71,7 +71,7 @@
 
         <div class="lienzo__secciones">
           @for (seccion of espacioVista.secciones; track $index) {
-            <article class="lienzo__seccion" [ngStyle]="estilosDe(seccion)">
+            <article class="lienzo__seccion" [id]="anclaDeSeccion(seccion)" [ngStyle]="estilosDe(seccion)">
               <header>
                 <h3>{{ seccion.titulo || etiquetaDe(seccion.tipo) }}</h3>
                 @if (seccion.subtitulo) {
@@ -430,7 +430,7 @@
                                     type="button"
                                     class="diseno-seccion__opcion"
                                     [class.diseno-seccion__opcion--activa]="seccion.disenoSlug === diseno.slug"
-                                    (click)="elegirDiseno(seccion, diseno)"
+                                    (click)="usarDiseno(seccion, diseno)"
                                   >
                                     <i class="fa-solid fa-window-maximize"></i>
                                     <span>
@@ -595,9 +595,18 @@
               <i class="fa-solid fa-link"></i>
               {{ urlPublica }}
             </span>
-            <a class="lienzo__abrir" [routerLink]="urlVista">
+            @if (cambiosSinGuardar()) {
+              <span class="lienzo__pendiente">
+                <i class="fa-solid fa-circle-exclamation"></i> Cambios sin guardar
+              </span>
+            }
+            <a class="lienzo__abrir" [routerLink]="urlVistaPrevia" target="_blank" rel="noopener">
               <i class="fa-solid fa-up-right-from-square"></i> Abrir como visitante
             </a>
+            <button type="button" class="lienzo__guardar" [disabled]="guardando()" (click)="guardar()">
+              <i class="fa-solid" [class.fa-floppy-disk]="!guardando()" [class.fa-circle-notch]="guardando()" [class.fa-spin]="guardando()"></i>
+              {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
             <span class="lienzo__sello" [class.lienzo__sello--ok]="form.publicado">
               <i class="fa-solid" [class.fa-globe]="form.publicado" [class.fa-lock]="!form.publicado"></i>
               {{ form.publicado ? 'Publicado' : 'Borrador' }}
@@ -611,7 +620,7 @@
               [puedeEditar]="true"
             />
 
-            <div class="lienzo__hero">
+            <div class="lienzo__hero" id="inicio">
               <div class="lienzo__fondo" [style.background-image]="form.portadaUrl ? 'url(' + form.portadaUrl + ')' : null"></div>
               <div class="lienzo__velo"></div>
               <div class="lienzo__centro">
@@ -632,7 +641,7 @@
 
             <div class="lienzo__secciones">
               @for (seccion of espacioVista.secciones; track $index) {
-                <article class="lienzo__seccion" [ngStyle]="estilosDe(seccion)" [style.box-shadow]="null">
+                <article class="lienzo__seccion" [id]="anclaDeSeccion(seccion)" [ngStyle]="estilosDe(seccion)" [style.box-shadow]="null">
                   <header>
                     <h3>{{ seccion.titulo || etiquetaDe(seccion.tipo) }}</h3>
                     @if (seccion.subtitulo) {
@@ -641,14 +650,27 @@
                   </header>
 
                   @if (seccion.tipo === 'LIENZO') {
-                    @if (piezas().length) {
-                      @for (pieza of piezas(); track pieza.id) {
+                    @if (piezasDe(seccion).length) {
+                      @for (pieza of piezasDe(seccion); track pieza.id) {
                         <div class="lienzo__pieza">
                           <app-empresa-componente-vista [componente]="pieza" modo="publico" />
                         </div>
                       }
                     } @else {
-                      <p class="lienzo__vacio">Aquí se mostrará el diseño elegido en «Ajustes».</p>
+                      <div class="lienzo__vacio lienzo__vacio--guia">
+                        <i class="fa-solid fa-pen-ruler"></i>
+                        <p>
+                          @if (seccion.disenoSlug) {
+                            El diseño «{{ seccion.disenoSlug }}» no tiene piezas todavía: ábrelo en «Mis diseños»
+                            y añade ahí lo que quieras mostrar.
+                          } @else {
+                            Esta sección todavía no tiene diseño. Elige uno de «Mis diseños» para que se vea aquí.
+                          }
+                        </p>
+                        <button type="button" class="boton-mini" (click)="abrirSelectorDiseno(seccion)">
+                          <i class="fa-solid fa-plus"></i> Elegir diseño
+                        </button>
+                      </div>
                     }
                   } @else if (seccion.texto) {
                     <p class="lienzo__texto">{{ seccion.texto }}</p>

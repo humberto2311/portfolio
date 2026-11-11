@@ -31,12 +31,7 @@
   <ul class="rail__lista rail__lista--pie">
     @for (item of salida; track item.label) {
       <li>
-        @if (item.accion === 'salir') {
-          <button type="button" class="rail__item" [title]="item.label" (click)="salirEmpresa()">
-            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
-            <span class="rail__etiqueta">{{ item.label }}</span>
-          </button>
-        } @else if (item.accion === 'ajustes') {
+        @if (item.accion === 'ajustes') {
           <button type="button" class="rail__item" [title]="item.label" (click)="abrirAjustes()">
             <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
             <span class="rail__etiqueta">{{ item.label }}</span>
@@ -86,10 +81,75 @@
     </span>
   </a>
 
-  @if (enEmpresa) {
-    <button type="button" class="rail__cambiar" (click)="salirEmpresa()" title="Cambiar de espacio">
-      <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-      <span class="rail__etiqueta">Cambiar de espacio</span>
-    </button>
+  @if (hayEspacios) {
+    <div class="rail__cambiar-caja">
+      <button
+        type="button"
+        class="rail__cambiar"
+        (click)="alternarEspacios()"
+        [attr.aria-expanded]="espaciosAbiertos()"
+        title="Cambiar de espacio">
+        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+        <span class="rail__etiqueta">Cambiar de espacio</span>
+      </button>
+
+      @if (espaciosAbiertos()) {
+        <div class="rail__espacios">
+          <p class="rail__espacios-titulo">Ir a otro espacio</p>
+
+          @if (espacioActual; as actual) {
+            <span class="rail__espacio rail__espacio--actual">
+              <span class="rail__espacio-avatar">{{ actual.nombre.slice(0, 2).toUpperCase() }}</span>
+              <span class="rail__espacio-datos">
+                <strong>{{ actual.nombre }}</strong>
+                <small>{{ actual.rol }} · aquí estás</small>
+              </span>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+            </span>
+          } @else {
+            <span class="rail__espacio rail__espacio--actual">
+              <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+              <span class="rail__espacio-datos">
+                <strong>Mi perfil personal</strong>
+                <small>aquí estás</small>
+              </span>
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+            </span>
+          }
+
+          @for (espacio of misEspacios; track espacio.id) {
+            <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
+              <span class="rail__espacio-avatar">
+                @if (espacio.logoUrl) {
+                  <img [src]="espacio.logoUrl" [alt]="espacio.nombre" />
+                } @else {
+                  {{ espacio.nombre.slice(0, 2).toUpperCase() }}
+                }
+              </span>
+              <span class="rail__espacio-datos">
+                <strong>{{ espacio.nombre }}</strong>
+                <small>{{ espacio.rol }}</small>
+              </span>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          } @empty {
+            @if (espacioActual) {
+              <p class="rail__espacios-vacio">No tienes otra empresa todavía.</p>
+            }
+          }
+
+          @if (enEmpresa) {
+            <button type="button" class="rail__espacio rail__espacio--personal" (click)="irAPersonal()">
+              <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+              <span class="rail__espacio-datos">
+                <strong>Mi perfil personal</strong>
+                <small>Salir del modo empresa</small>
+              </span>
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      }
+    </div>
   }
 </nav>

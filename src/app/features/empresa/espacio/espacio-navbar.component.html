@@ -29,7 +29,7 @@
             {{ enlace.etiqueta }}
           </a>
         } @else {
-          <a [href]="href(enlace)">
+          <a [href]="href(enlace)" (click)="ir(enlace, $event)">
             @if (enlace.icono) {
               <i [class]="enlace.icono"></i>
             }
@@ -68,7 +68,7 @@
     <nav class="espacio-nav__movil" aria-label="Navegación del espacio en móvil">
       @for (enlace of enlaces; track enlace.etiqueta + enlace.destino) {
         @if (activo(enlace)) {
-          <a [href]="href(enlace)" (click)="cerrar()">
+          <a [href]="href(enlace)" (click)="ir(enlace, $event)">
             @if (enlace.icono) {
               <i [class]="enlace.icono"></i>
             }

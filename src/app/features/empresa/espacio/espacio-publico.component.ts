@@ -106,6 +106,12 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
       .sort((a, b) => a.orden - b.orden);
   }
 
+  get espacioNavbar(): EspacioEmpresa | null {
+    const base = this.espacio();
+    if (!base) return null;
+    return { ...base, secciones: this.secciones };
+  }
+
   get iniciales(): string {
     const partes = (this.espacio()?.empresaNombre ?? '').trim().split(/\s+/).filter(Boolean);
     if (!partes.length) return 'E';

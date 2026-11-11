@@ -9,6 +9,7 @@ import { EmpresaService } from '../../../core/services/empresa.service';
 import { UserDirectoryService } from '../../../core/services/user-directory.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { BusquedaRedService, ResultadoRed } from '../../../core/services/busqueda-red.service';
 
 type PanelAbierto = 'miembros' | 'espacios' | 'cuenta' | 'proponer' | null;
 
@@ -30,6 +31,7 @@ export class EmpresaRedNavbarComponent implements OnInit {
   @Input() urlEspacio: string | null = null;
 
   readonly panel = signal<PanelAbierto>(null);
+  readonly buscadorAbierto = signal(false);
   readonly publicando = signal(false);
   borrador = '';
 
@@ -38,6 +40,7 @@ export class EmpresaRedNavbarComponent implements OnInit {
   private directorio = inject(UserDirectoryService);
   private panelLateral = inject(SidePanelService);
   private toast = inject(ToastService);
+  readonly red = inject(BusquedaRedService);
   private router = inject(Router);
   private elRef = inject(ElementRef);
 
@@ -47,6 +50,20 @@ export class EmpresaRedNavbarComponent implements OnInit {
     if (this.haySesion) {
       this.directorio.cargarRed().subscribe({ error: () => {} });
     }
+  }
+
+  abrirBuscador(): void {
+    this.buscadorAbierto.set(!this.buscadorAbierto());
+    if (!this.buscadorAbierto()) this.red.limpiar();
+  }
+
+  buscar(evento: Event): void {
+    this.red.buscar((evento.target as HTMLInputElement).value);
+  }
+
+  irA(resultado: ResultadoRed): void {
+    this.buscadorAbierto.set(false);
+    this.red.ir(resultado);
   }
 
   get urlPerfil(): string {

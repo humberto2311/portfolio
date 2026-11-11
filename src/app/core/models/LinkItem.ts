@@ -10,6 +10,9 @@ export interface LinkItem {
   /** Solo en 'cv': lectura en vivo del estado del perfil, no un campo del enlace. */
   isPublic?: boolean;
   profileId?: number;
+  empresaId?: string;
+  empresaSlug?: string;
+  deEmpresa?: boolean;
 }
 
 export type LinkItemPayload = Omit<LinkItem, 'id' | 'createdAt' | 'updatedAt'>;

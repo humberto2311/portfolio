@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { ChatEmpresa } from '../models/chat.model';
@@ -282,6 +282,26 @@ export class EmpresaService {
     return this.http
       .get<EspacioEmpresa>(`${this.raiz}/public/${slug}/espacio/${espacio}`)
       .pipe(catchError(() => of(null)));
+  }
+
+  espacioParaVer(slug: string, espacio: string): Observable<EspacioEmpresa | null> {
+    return this.espacioPublico(slug, espacio).pipe(
+      switchMap((publicado) =>
+        publicado ? of(publicado) : this.espacioDeEmpresaPorSlug(slug, espacio),
+      ),
+      catchError(() => of(null)),
+    );
+  }
+
+  private espacioDeEmpresaPorSlug(slug: string, espacio: string): Observable<EspacioEmpresa | null> {
+    return this.cargarMis().pipe(
+      switchMap((mias) => {
+        const empresa = mias.find((item) => item.slug === slug);
+        if (!empresa) return of(null);
+        return this.http.get<EspacioEmpresa>(`${this.raiz}/${empresa.id}/espacios/${espacio}`);
+      }),
+      catchError(() => of(null)),
+    );
   }
 
   espacioDeEmpresa(empresaId: string, espacioSlug: string): Observable<EspacioEmpresa | null> {

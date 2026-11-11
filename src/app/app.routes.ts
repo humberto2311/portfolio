@@ -96,6 +96,7 @@ export const routes: Routes = [
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
       { path: 'empresa/espacio', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true } },
+      { path: 'empresa/espacio/vista', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true, modo: 'vista' } },
       { path: 'empresa/componentes', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
       { path: 'empresa/disenos', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
       {

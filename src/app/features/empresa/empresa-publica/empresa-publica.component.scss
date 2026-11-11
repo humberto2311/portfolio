@@ -845,3 +845,12 @@
     h1 { font-size: 1.35rem; }
   }
 }
+
+.red__estado-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}

@@ -36,7 +36,7 @@
               <i class="fa-solid fa-comment-dots"></i> Escríbenos
             </button>
             <a class="boton boton--suave" [routerLink]="urlPerfil">
-              <i class="fa-solid fa-newspaper"></i> Perfil en la red
+              <i class="fa-solid fa-building"></i> Perfil de {{ esp.empresaNombre }} en la red
             </a>
           </div>
         </div>
@@ -257,7 +257,15 @@
             }
 
             @case ('LIENZO') {
-              @if (piezas().length) {
+              @if (piezasDe(seccion).length) {
+                <div class="lienzo">
+                  @for (pieza of piezasDe(seccion); track pieza.id) {
+                    <div class="lienzo__pieza" [style.min-height.px]="pieza.alto || 260">
+                      <app-empresa-componente-vista [componente]="pieza" modo="publico" />
+                    </div>
+                  }
+                </div>
+              } @else if (piezas().length) {
                 <div class="lienzo">
                   @for (pieza of piezas(); track pieza.id) {
                     <div class="lienzo__pieza" [style.min-height.px]="pieza.alto || 260">
@@ -277,25 +285,41 @@
         <h2>¿Hablamos?</h2>
         <p>Este es el espacio de {{ esp.empresaNombre }} en N-soft. Escríbenos y te respondemos por el chat.</p>
         <div class="cierre__acciones">
-          <button type="button" class="boton boton--fuerte" (click)="abrirChatEmpresa()">
+          <a class="boton boton--fuerte" [routerLink]="urlPerfil">
+            <i class="fa-solid fa-building"></i> Ir al perfil de {{ esp.empresaNombre }} en la red
+          </a>
+          <button type="button" class="boton" (click)="abrirChatEmpresa()">
             <i class="fa-solid fa-comment-dots"></i> Abrir chat
           </button>
-          <a class="boton" [routerLink]="urlPerfil">
-            <i class="fa-solid fa-newspaper"></i> Ver el perfil en la red
-          </a>
         </div>
       </section>
     </main>
 
     <footer class="espacio__pie">
-      <span>
-        @if (esp.pie) {
-          {{ esp.pie }}
-        } @else {
-          {{ esp.empresaNombre }} · {{ esp.nombre }}
-        }
-      </span>
-      <a [routerLink]="urlPerfil"><i class="fa-solid fa-cube"></i> Hecho en N-soft</a>
+      <div class="espacio__pie-firma">
+        <span class="espacio__pie-marca">
+          <i class="fa-solid fa-cube"></i> N-soft
+        </span>
+        <span class="espacio__pie-texto">
+          @if (esp.pie) {
+            {{ esp.pie }}
+          } @else {
+            {{ esp.empresaNombre }} · {{ esp.nombre }}
+          }
+        </span>
+      </div>
+
+      <nav class="espacio__pie-enlaces" aria-label="Enlaces de N-soft">
+        <a [routerLink]="urlPerfil">
+          <i class="fa-solid fa-building"></i> Perfil de {{ esp.empresaNombre }} en la red
+        </a>
+        <a routerLink="/app/politicas">
+          <i class="fa-solid fa-shield-halved"></i> Políticas de seguridad
+        </a>
+        <span class="espacio__pie-red">
+          <i class="fa-solid fa-network-wired"></i> N-soft, la red profesional
+        </span>
+      </nav>
     </footer>
   } @else if (cargando()) {
     <div class="espacio__estado">

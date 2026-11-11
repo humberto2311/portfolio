@@ -186,13 +186,19 @@ export function seccionesIniciales(): SeccionEspacio[] {
   ];
 }
 
-export function navbarInicial(): EnlaceEspacio[] {
-  return [
-    enlaceInicial('Inicio', '#inicio'),
-    enlaceInicial('Servicios', '#lo-que-hacemos'),
-    enlaceInicial('Equipo', '#nuestro-equipo'),
-    enlaceInicial('Contacto', '#hablemos'),
-  ];
+export function navbarInicial(secciones: SeccionEspacio[] = []): EnlaceEspacio[] {
+  const anclas = anclasDe(secciones);
+  const ordenadas = [...secciones].sort((a, b) => a.orden - b.orden);
+
+  const inicio = enlaceInicial('Inicio', '#inicio');
+  const enlaces = ordenadas
+    .filter((seccion) => seccion.visible)
+    .slice(0, 4)
+    .map((seccion) => enlaceInicial(seccion.titulo || etiquetaSeccion(seccion.tipo), `#${anclaSeccion(seccion)}`));
+
+  const contacto = anclas.includes('contacto') ? enlaceInicial('Contacto', '#contacto') : null;
+
+  return [inicio, ...enlaces, ...(contacto ? [contacto] : [])];
 }
 
 export function urlEnlace(enlace: EnlaceEspacio, slug: string, espacio: string): string {
@@ -203,9 +209,28 @@ export function urlEnlace(enlace: EnlaceEspacio, slug: string, espacio: string):
       return enlace.destino.startsWith('/')
         ? enlace.destino.replace(':empresa', slug).replace(':espacio', espacio)
         : `/${enlace.destino}`;
-    default:
-      return enlace.destino.startsWith('#') ? enlace.destino : `#${enlace.destino}`;
+    default: {
+      const limpio = (enlace.destino ?? '').replace(/^#/, '').trim();
+      return limpio ? `#${limpio}` : '';
+    }
   }
+}
+
+export function tieneDestino(enlace: EnlaceEspacio): boolean {
+  const destino = (enlace.destino ?? '').trim();
+  if (!destino || destino === '#') return false;
+  return destino.replace(/^#/, '').trim().length > 0 || enlace.tipo !== 'ANCLA';
+}
+
+export function anclasDe(secciones: SeccionEspacio[]): string[] {
+  const anclas = new Set<string>(['inicio']);
+
+  for (const seccion of [...secciones].sort((a, b) => a.orden - b.orden)) {
+    anclas.add(anclaSeccion(seccion));
+  }
+
+  anclas.add('contacto');
+  return [...anclas];
 }
 
 export function esExterno(enlace: EnlaceEspacio): boolean {

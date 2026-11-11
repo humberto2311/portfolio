@@ -556,9 +556,25 @@
   } @else {
     <div class="red__estado">
       <i class="fa-solid fa-building-circle-exclamation"></i>
-      <h1>Esta empresa no está disponible</h1>
-      <p>El enlace no existe o su perfil todavía no se ha publicado.</p>
-      <a class="btn btn--primary" routerLink="/">Ir a N-soft</a>
+      @if (empresaPropia) {
+        <h1>{{ empresaPropia.nombre }} todavía no está publicada</h1>
+        <p>Los demás no pueden ver la empresa hasta que la publiques. Tu equipo y tú sí pueden entrar.</p>
+        <div class="red__estado-acciones">
+          <a class="btn btn--primary" routerLink="/app/empresa/ajustes" [queryParams]="{ tab: 'publicacion' }">
+            <i class="fa-solid fa-upload"></i> Publicar la empresa
+          </a>
+          <a class="btn" routerLink="/app/empresa">
+            <i class="fa-solid fa-sliders"></i> Ir al panel de la empresa
+          </a>
+          <a class="btn" routerLink="/app/empresa/espacio">
+            <i class="fa-solid fa-globe"></i> Editar mi espacio
+          </a>
+        </div>
+      } @else {
+        <h1>Esta empresa no está disponible</h1>
+        <p>El enlace no existe o su perfil todavía no se ha publicado.</p>
+        <a class="btn btn--primary" routerLink="/">Ir a N-soft</a>
+      }
     </div>
   }
 </div>

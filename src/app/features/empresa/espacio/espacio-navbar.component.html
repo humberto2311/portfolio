@@ -14,7 +14,14 @@
 
     <nav class="espacio-nav__enlaces" aria-label="Navegación del espacio">
       @for (enlace of enlaces; track enlace.etiqueta + enlace.destino) {
-        @if (externo(enlace)) {
+        @if (!activo(enlace)) {
+          <span class="espacio-nav__sin-accion" aria-disabled="true">
+            @if (enlace.icono) {
+              <i [class]="enlace.icono"></i>
+            }
+            {{ enlace.etiqueta }}
+          </span>
+        } @else if (externo(enlace)) {
           <a [href]="href(enlace)" target="_blank" rel="noopener">
             @if (enlace.icono) {
               <i [class]="enlace.icono"></i>
@@ -60,12 +67,21 @@
   @if (menuAbierto()) {
     <nav class="espacio-nav__movil" aria-label="Navegación del espacio en móvil">
       @for (enlace of enlaces; track enlace.etiqueta + enlace.destino) {
-        <a [href]="href(enlace)" (click)="cerrar()">
-          @if (enlace.icono) {
-            <i [class]="enlace.icono"></i>
-          }
-          {{ enlace.etiqueta }}
-        </a>
+        @if (activo(enlace)) {
+          <a [href]="href(enlace)" (click)="cerrar()">
+            @if (enlace.icono) {
+              <i [class]="enlace.icono"></i>
+            }
+            {{ enlace.etiqueta }}
+          </a>
+        } @else {
+          <span class="espacio-nav__sin-accion" aria-disabled="true">
+            @if (enlace.icono) {
+              <i [class]="enlace.icono"></i>
+            }
+            {{ enlace.etiqueta }}
+          </span>
+        }
       }
       <a [routerLink]="urlPerfil" (click)="cerrar()">
         <i class="fa-solid fa-newspaper"></i> Perfil en la red

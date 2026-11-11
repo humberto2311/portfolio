@@ -519,11 +519,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.2rem;
+  flex-wrap: wrap;
   max-width: 1120px;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem 1.1rem 1.6rem;
+  padding: 1.2rem 1.1rem 1.8rem;
+  border-top: 1px solid var(--border-soft);
   font-size: .74rem;
   color: var(--text-faint);
 
@@ -535,6 +537,46 @@
   }
 
   i { color: var(--accent-cyan); }
+}
+
+.espacio__pie-firma {
+  display: grid;
+  gap: 3px;
+  min-width: 180px;
+}
+
+.espacio__pie-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  color: var(--text-secondary);
+}
+
+.espacio__pie-texto {
+  color: var(--text-faint);
+}
+
+.espacio__pie-enlaces {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  a,
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+}
+
+.espacio__pie-red {
+  color: var(--text-faint);
+  opacity: .85;
 }
 
 @media (max-width: 720px) {

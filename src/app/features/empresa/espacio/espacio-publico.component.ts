@@ -60,6 +60,8 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
     puedeEditar: false,
   });
   readonly piezas = signal<ComponenteLienzo[]>([]);
+  readonly piezasPorSeccion = signal<Record<string, ComponenteLienzo[]>>({});
+  readonly disenos = signal<DisenoLienzo[]>([]);
   readonly redEmpresa = signal<Empresa | null>(null);
 
   ngOnInit(): void {
@@ -71,7 +73,7 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.empresaService.espacioPublico(slug, espacioSlug).subscribe((espacio) => {
+    this.empresaService.espacioParaVer(slug, espacioSlug).subscribe((espacio) => {
       this.cargando.set(false);
       if (!espacio) return;
 
@@ -310,6 +312,8 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
       (seccion) => seccion.visible && seccion.tipo === 'LIENZO',
     );
 
+    if (usaDiseno) this.cargarDisenosDeSecciones(espacio);
+
     if (!usaDiseno || !espacio.disenoSlug) return;
 
     forkJoin({
@@ -327,6 +331,50 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
             .sort((a, b) => (a.detras === b.detras ? a.capa - b.capa : a.detras ? -1 : 1)),
         );
       });
+  }
+
+  piezasDe(seccion: SeccionEspacio): ComponenteLienzo[] {
+    return this.piezasPorSeccion()[this.claveSeccion(seccion)] ?? [];
+  }
+
+  disenoDe(seccion: SeccionEspacio): DisenoLienzo | null {
+    if (!seccion.disenoSlug) return null;
+    return this.disenos().find((diseno) => diseno.slug === seccion.disenoSlug) ?? null;
+  }
+
+  private claveSeccion(seccion: SeccionEspacio): string {
+    return seccion.id ?? `${seccion.tipo}-${seccion.orden}`;
+  }
+
+  private cargarDisenosDeSecciones(espacio: EspacioEmpresa): void {
+    const slugs = [...new Set(
+      (espacio.secciones ?? [])
+        .filter((seccion) => seccion.visible && seccion.disenoSlug)
+        .map((seccion) => seccion.disenoSlug as string),
+    )];
+
+    if (!slugs.length) return;
+
+    for (const slug of slugs) {
+      this.empresaService
+        .disenoPublico(slug)
+        .pipe(catchError(() => of(null)))
+        .subscribe((diseno) => {
+          if (!diseno) return;
+
+          const piezas = [...(diseno.piezas ?? [])]
+            .filter((pieza) => pieza.visible)
+            .sort((a, b) => (a.detras === b.detras ? a.capa - b.capa : a.detras ? -1 : 1));
+
+          this.disenos.update((lista) => [...lista.filter((item) => item.slug !== slug), diseno]);
+
+          const mapa = { ...this.piezasPorSeccion() };
+          for (const seccion of espacio.secciones ?? []) {
+            if (seccion.disenoSlug === slug) mapa[this.claveSeccion(seccion)] = piezas;
+          }
+          this.piezasPorSeccion.set(mapa);
+        });
+    }
   }
 
   private aplicarColores(espacio: EspacioEmpresa): void {

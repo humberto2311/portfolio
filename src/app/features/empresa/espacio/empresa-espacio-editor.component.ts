@@ -1,9 +1,11 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, OnDestroy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import {
+  ComponenteLienzo,
+  DisenoLienzo,
   EnlaceEspacio,
   EspacioEmpresa,
   EspacioForm,
@@ -30,6 +32,7 @@ import {
 } from './espacio-ui';
 
 type VistaEditor = 'estructura' | 'navbar' | 'secciones' | 'diseno';
+type ModoEspacio = 'editar' | 'vista';
 
 export interface ZonaSeccion {
   clave: string;
@@ -68,6 +71,8 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   private diseno = inject(DisenoService);
   private toast = inject(ToastService);
   private plataforma = inject(PLATFORM_ID);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   readonly espacios = signal<EspacioEmpresa[]>([]);
   readonly actual = signal<EspacioEmpresa | null>(null);
@@ -86,16 +91,24 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   ];
 
   readonly nuevaSeccion = signal<TipoSeccionEspacio>('SERVICIOS');
+  readonly disenos = signal<DisenoLienzo[]>([]);
+  readonly seccionDiseno = signal<string | null>(null);
+  readonly piezas = signal<ComponenteLienzo[]>([]);
   readonly zonas = ZONAS;
   readonly alineaciones = ALINEACIONES;
   readonly cambiando = signal(false);
+  readonly modo = signal<ModoEspacio>('editar');
+  readonly puedeEditar = computed(
+    () => Boolean(this.empresa.acceso()?.editaLienzo || this.empresa.acceso()?.editaPerfil),
+  );
 
   form: EspacioForm = {};
   navbar: EnlaceEspacio[] = [];
   secciones: SeccionEditor[] = [];
-  piezas = signal<import('../../../core/models/empresa.model').ComponenteLienzo[]>([]);
 
   ngOnInit(): void {
+    this.modo.set(this.route.snapshot.data['modo'] === 'vista' ? 'vista' : 'editar');
+
     this.empresa.cargarMis().subscribe((mias) => {
       if (!mias.length) {
         this.cargando.set(false);
@@ -105,17 +118,12 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       const activa = this.empresa.activaId() ?? mias[0].id;
       if (!this.empresa.activaId()) this.empresa.entrar(activa);
 
-      this.empresa.espacios(activa).subscribe((lista) => {
-        this.espacios.set(lista);
-        this.cargando.set(false);
-
-        if (lista.length) {
-          this.abrir(lista[0]);
-        } else {
-          this.prepararNuevo();
-        }
-      });
+      this.empresa.cargarPanel(activa).subscribe(() => this.cargarEspacios(activa));
     });
+  }
+
+  get enVista(): boolean {
+    return this.modo() === 'vista';
   }
 
   ngOnDestroy(): void {
@@ -134,16 +142,117 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     return this.form.slug ?? '';
   }
 
-  get puedeEditar(): boolean {
-    return Boolean(this.empresa.acceso()?.editaPerfil || this.empresa.acceso()?.editaLienzo);
+  get urlPublica(): string {
+    if (this.enVista) return this.urlVista;
+    return urlEspacio(this.slugEmpresa, this.espacioSlug);
   }
 
-  get urlPublica(): string {
-    return urlEspacio(this.slugEmpresa, this.espacioSlug);
+  get urlVista(): string {
+    return urlEspacio(this.slugEmpresa, this.espacioSlug || 'mi-espacio');
+  }
+
+  get urlRed(): string {
+    return this.slugEmpresa ? `/empresa/${this.slugEmpresa}` : '/app/empresa';
+  }
+
+  get esPrincipalActual(): boolean {
+    return Boolean(this.form.esPrincipal);
+  }
+
+  irAEditar(): void {
+    void this.router.navigateByUrl('/app/empresa/espacio');
+  }
+
+  irAlPerfil(): void {
+    void this.router.navigateByUrl(this.urlRed);
   }
 
   get esNuevo(): boolean {
     return !this.actual();
+  }
+
+  get disenosPublicados(): DisenoLienzo[] {
+    return this.disenos();
+  }
+
+  disenoDeSeccion(seccion: SeccionEspacio): DisenoLienzo | null {
+    if (!seccion.disenoSlug) return null;
+    return this.disenos().find((diseno) => diseno.slug === seccion.disenoSlug) ?? null;
+  }
+
+  piezasDe(seccion: SeccionEspacio): ComponenteLienzo[] {
+    const diseno = this.disenoDeSeccion(seccion);
+    return diseno?.piezas ?? [];
+  }
+
+  abrirSelectorDiseno(seccion: SeccionEspacio): void {
+    this.seccionDiseno.set(this.seccionDiseno() === this.claveActual(seccion) ? null : this.claveActual(seccion));
+  }
+
+  elegirDiseno(seccion: SeccionEspacio, diseno: DisenoLienzo | null): void {
+    seccion.disenoSlug = diseno?.slug ?? null;
+    if (diseno) {
+      seccion.tipo = 'LIENZO';
+      if (!seccion.titulo || seccion.titulo === 'Nueva sección') seccion.titulo = diseno.nombre;
+    }
+    this.seccionDiseno.set(null);
+    this.toast.show(diseno ? `«${diseno.nombre}» se mostrará en esta sección` : 'Sección sin diseño');
+  }
+
+  crearSeccionConDiseno(diseno: DisenoLienzo): void {
+    const nueva: SeccionEditor = {
+      tipo: 'LIENZO',
+      titulo: diseno.nombre,
+      subtitulo: diseno.descripcion ?? null,
+      texto: null,
+      orden: this.secciones.length,
+      visible: true,
+      alineacion: 'center',
+      estilo: 'contenedor',
+      disenoSlug: diseno.slug,
+      clave: `lienzo-${Date.now()}`,
+    };
+
+    this.secciones = [...this.secciones, nueva];
+    this.seccionAbierta.set(nueva.clave);
+    this.vista.set('secciones');
+    this.toast.show(`«${diseno.nombre}» añadido a tu espacio`);
+  }
+
+  irADisenos(): void {
+    void this.router.navigateByUrl('/app/empresa/disenos');
+  }
+
+  private claveActual(seccion: SeccionEspacio): string {
+    const indice = this.secciones.findIndex((item) => item === seccion);
+    return this.secciones[indice]?.clave ?? '';
+  }
+
+  private cargarDisenos(empresaId: string): void {
+    this.empresa.listarDisenos(empresaId).subscribe((lista) => {
+      this.disenos.set(lista ?? []);
+      this.cargarPiezasDeDisenos(empresaId, lista ?? []);
+    });
+  }
+
+  private cargarPiezasDeDisenos(empresaId: string, lista: DisenoLienzo[]): void {
+    if (!lista.length) return;
+
+    let pendientes = lista.length;
+    const mapa = new Map<string, ComponenteLienzo[]>();
+
+    for (const diseno of lista) {
+      this.empresa.piezasDiseno(empresaId, diseno.id).subscribe((piezas) => {
+        mapa.set(diseno.slug, piezas ?? []);
+        pendientes -= 1;
+
+        if (pendientes === 0) {
+          this.disenos.update((actuales) =>
+            actuales.map((item) => ({ ...item, piezas: mapa.get(item.slug) ?? item.piezas ?? [] })),
+          );
+        }
+      });
+    }
   }
 
   get publicado(): boolean {
@@ -261,14 +370,14 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       disenoSlug: espacio.disenoSlug ?? '',
     };
 
-    this.navbar = espacio.navbar?.length
-      ? espacio.navbar.map((enlace) => ({ ...enlace }))
-      : navbarInicial();
-
     this.secciones = (espacio.secciones?.length ? espacio.secciones : seccionesIniciales())
       .slice()
       .sort((a, b) => a.orden - b.orden)
       .map((seccion, indice) => ({ ...seccion, orden: indice, clave: this.claveSeccion(seccion, indice) }));
+
+    this.navbar = espacio.navbar?.length
+      ? espacio.navbar.map((enlace) => ({ ...enlace }))
+      : navbarInicial(this.secciones);
 
     this.piezas.set([]);
     this.cargarPiezas(espacio);
@@ -292,11 +401,11 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       disenoSlug: '',
     };
 
-    this.navbar = navbarInicial();
     this.secciones = seccionesIniciales().map((seccion, indice) => ({
       ...seccion,
       clave: this.claveSeccion(seccion, indice),
     }));
+    this.navbar = navbarInicial(this.secciones);
 
     this.piezas.set([]);
     this.vista.set('estructura');
@@ -372,7 +481,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   agregarEnlace(): void {
     this.navbar = [
       ...this.navbar,
-      { etiqueta: 'Nuevo enlace', tipo: 'ANCLA', destino: '#inicio', icono: null, visible: true },
+      { etiqueta: 'Nuevo enlace', tipo: 'ANCLA', destino: '', icono: null, visible: true },
     ];
   }
 
@@ -392,12 +501,22 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   anclasDisponibles(): { valor: string; etiqueta: string }[] {
     return [
+      { valor: '', etiqueta: 'Sin acción (no hace nada)' },
       { valor: '#inicio', etiqueta: 'Inicio (portada)' },
       ...this.secciones.map((seccion) => ({
         valor: `#${anclaSeccion(seccion)}`,
         etiqueta: seccion.titulo || etiquetaSeccion(seccion.tipo),
       })),
+      { valor: '#contacto', etiqueta: 'Contacto (cierre)' },
     ];
+  }
+
+  anclasRotas(): string[] {
+    const validas = new Set(this.anclasDisponibles().map((ancla) => ancla.valor).filter(Boolean));
+
+    return this.navbar
+      .filter((enlace) => enlace.tipo === 'ANCLA' && enlace.destino && !validas.has(enlace.destino))
+      .map((enlace) => enlace.etiqueta);
   }
 
   etiquetaDe(tipo: TipoSeccionEspacio): string {
@@ -432,6 +551,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
         visible: seccion.visible,
         alineacion: seccion.alineacion ?? 'left',
         estilo: seccion.estilo ?? null,
+        disenoSlug: seccion.disenoSlug ?? null,
       })),
     };
 
@@ -493,6 +613,24 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     }
 
     this.toast.show(url);
+  }
+
+  private cargarEspacios(empresaId: string): void {
+    this.empresa.espacios(empresaId).subscribe((lista) => {
+      this.espacios.set(lista);
+      this.cargando.set(false);
+
+      if (!lista.length) {
+        this.prepararNuevo();
+        this.cargarDisenos(empresaId);
+        return;
+      }
+
+      const preferido = this.route.snapshot.queryParamMap.get('espacio');
+      const elegido = preferido ? lista.find((espacio) => espacio.slug === preferido) : undefined;
+      this.abrir(elegido ?? lista[0]);
+      this.cargarDisenos(empresaId);
+    });
   }
 
   private claveSeccion(seccion: SeccionEspacio, indice: number): string {

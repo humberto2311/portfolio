@@ -130,6 +130,17 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
     return this.datos()?.empresa ?? null;
   }
 
+  get empresaPropia(): Empresa | null {
+    const activa = this.servicio.empresaActual();
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (!activa || !slug) return null;
+    return activa.slug === slug ? activa : null;
+  }
+
+  get esMiEmpresa(): boolean {
+    return Boolean(this.empresaPropia);
+  }
+
   get componentes(): ComponenteLienzo[] {
     return [...(this.datos()?.componentes ?? [])]
       .filter((componente) => componente.visible)

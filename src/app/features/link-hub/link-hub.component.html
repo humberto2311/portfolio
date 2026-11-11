@@ -11,6 +11,38 @@
     </div>
   </header>
 
+  <div class="hub-ambitos">
+    <button
+      type="button"
+      class="hub-ambito"
+      [class.hub-ambito--activo]="!enEmpresa"
+      (click)="cambiarAmbito('personal')"
+    >
+      <i class="fas fa-user"></i>
+      <span>
+        <strong>Mis enlaces personales</strong>
+        <small>Son tuyos y van contigo a donde vayas</small>
+      </span>
+      <em>{{ links.length }}</em>
+    </button>
+
+    @if (empresaId) {
+      <button
+        type="button"
+        class="hub-ambito"
+        [class.hub-ambito--activo]="enEmpresa"
+        (click)="cambiarAmbito('empresa')"
+      >
+        <i class="fas fa-building"></i>
+        <span>
+          <strong>Enlaces de {{ empresaNombre }}</strong>
+          <small>Son de la empresa y los comparte todo el equipo</small>
+        </span>
+        <em>{{ enlacesEmpresa.length }}</em>
+      </button>
+    }
+  </div>
+
   <div class="hub-content">
     <!-- Panel Izquierdo: Preview -->
     <aside class="active-preview-card">
@@ -20,15 +52,15 @@
         </span>
       </div>
 
-      <ng-container *ngIf="activeLink; else noActiveLink">
+      <ng-container *ngIf="enlaceActivo as activo; else noActiveLink">
         <div class="preview-body">
           <div class="preview-icon">
-            <i [class]="activeLink.iconClass"></i>
+            <i [class]="activo.iconClass"></i>
           </div>
-          <h3>{{ activeLink.title }}</h3>
-          <p class="description">{{ activeLink.description || 'Sin descripción disponible' }}</p>
+          <h3>{{ activo.title }}</h3>
+          <p class="description">{{ activo.description || 'Sin descripción disponible' }}</p>
 
-          <a [href]="activeLink.url" target="_blank" rel="noopener noreferrer" class="visit-btn">
+          <a [href]="activo.url" target="_blank" rel="noopener noreferrer" class="visit-btn">
             <span>Visitar Enlace</span>
             <i class="fas fa-external-link-alt"></i>
           </a>
@@ -46,17 +78,25 @@
     <main class="links-manager">
       <div class="manager-header">
         <div>
-          <h2>Mis Enlaces</h2>
-          <span class="count-tag">{{ links.length }} en total</span>
+          <h2>{{ enEmpresa ? 'Enlaces de ' + empresaNombre : 'Mis Enlaces' }}</h2>
+          <span class="count-tag">{{ enlacesVisibles.length }} en total</span>
         </div>
-        <button class="btn-primary" (click)="openCreateModal()">
+        <button class="btn-primary" (click)="openCreateModal()" [disabled]="enEmpresa && !puedeEditarEmpresa">
           <i class="fas fa-plus"></i> Agregar enlace
         </button>
       </div>
 
+      @if (enEmpresa) {
+        <p class="hub-nota">
+          <i class="fas fa-circle-info"></i>
+          Estos enlaces son de {{ empresaNombre }}: todo el equipo los ve, pero solo los editores los cambian.
+          Los enlaces personales de cada persona nunca se comparten con la empresa.
+        </p>
+      }
+
       <div class="links-list">
         <div
-          *ngFor="let link of links"
+          *ngFor="let link of enlacesVisibles"
           class="link-item"
           [class.is-active]="link.active"
           [class.es-cv]="esDelCv(link)"
@@ -100,12 +140,12 @@
               {{ link.active ? 'Activo' : 'Inactivo' }}
             </span>
             <!-- Iconos profesionales con clases SCSS de FontAwesome -->
-            @if (!esDelCv(link)) {
+            @if (!esDelCv(link) && (!enEmpresa || puedeEditarEmpresa)) {
               <button class="icon-btn edit-btn" (click)="openEditModal(link, $event)" title="Editar">
                 <i class="fas fa-pen"></i>
               </button>
             }
-            @if (!esDelCv(link)) {
+            @if (!esDelCv(link) && (!enEmpresa || puedeEditarEmpresa)) {
               <button class="icon-btn delete-btn" (click)="deleteLink(link.id, $event)" title="Eliminar">
                 <i class="fas fa-trash-alt"></i>
               </button>

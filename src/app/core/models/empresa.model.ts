@@ -391,6 +391,7 @@ export interface SeccionEspacio {
   visible: boolean;
   alineacion?: 'left' | 'center' | 'right' | null;
   estilo?: string | null;
+  disenoSlug?: string | null;
 }
 
 export interface EspacioEmpresa {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { EnlaceEspacio, EspacioEmpresa } from '../../../core/models/empresa.model';
-import { esExterno, urlEnlace, urlRed } from '../espacio/espacio-ui';
+import { esExterno, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
 
 @Component({
   selector: 'app-espacio-navbar',
@@ -38,6 +38,15 @@ export class EspacioNavbarComponent {
 
   href(enlace: EnlaceEspacio): string {
     return urlEnlace(enlace, this.espacio?.empresaSlug ?? '', this.espacio?.slug ?? '');
+  }
+
+  activo(enlace: EnlaceEspacio): boolean {
+    return tieneDestino(enlace);
+  }
+
+  sinAccion(evento: Event): void {
+    evento.preventDefault();
+    evento.stopPropagation();
   }
 
   externo(enlace: EnlaceEspacio): boolean {

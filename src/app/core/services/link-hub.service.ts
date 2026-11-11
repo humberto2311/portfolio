@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LinkItem, LinkItemPayload } from '../models/LinkItem';
 
@@ -30,5 +30,23 @@ export class LinkHubService {
   }
   setActive(id: string): Observable<LinkItem> {
     return this.http.patch<LinkItem>(`${this.baseUrl}/${id}/active`, { active: true });
+  }
+
+  getDeEmpresa(empresaId: string): Observable<LinkItem[]> {
+    return this.http
+      .get<LinkItem[]>(`${environment.apiUrl}/api/empresas/${empresaId}/enlaces`)
+      .pipe(catchError(() => of([])));
+  }
+
+  crearDeEmpresa(empresaId: string, payload: LinkItemPayload): Observable<LinkItem> {
+    return this.http.post<LinkItem>(`${environment.apiUrl}/api/empresas/${empresaId}/enlaces`, payload);
+  }
+
+  actualizarDeEmpresa(empresaId: string, id: string, payload: LinkItemPayload): Observable<LinkItem> {
+    return this.http.put<LinkItem>(`${environment.apiUrl}/api/empresas/${empresaId}/enlaces/${id}`, payload);
+  }
+
+  borrarDeEmpresa(empresaId: string, id: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/api/empresas/${empresaId}/enlaces/${id}`);
   }
 }

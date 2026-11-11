@@ -7,6 +7,7 @@ import { finalize } from 'rxjs/operators';
 import { LinkItem, LinkItemPayload } from '../../core/models/LinkItem';
 import { LinkHubService } from '../../core/services/link-hub.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
+import { EmpresaService } from '../../core/services/empresa.service';
 
 @Component({
   selector: 'app-link-hub',
@@ -18,6 +19,7 @@ import { ResumeSaveService } from '../../core/services/resume-save.service';
 export class LinkHubComponent implements OnInit {
   private readonly linkService = inject(LinkHubService);
   private readonly resumeSave = inject(ResumeSaveService);
+  private readonly empresas = inject(EmpresaService);
 
   availableIcons = [
     { id: 'globe',  name: 'Web',      class: 'fas fa-globe' },
@@ -28,6 +30,12 @@ export class LinkHubComponent implements OnInit {
   ];
 
   links: LinkItem[] = [];
+  enlacesEmpresa: LinkItem[] = [];
+  empresaId: string | null = null;
+  empresaNombre = '';
+  puedeEditarEmpresa = false;
+  cargandoEmpresa = false;
+  ambito: 'personal' | 'empresa' = 'personal';
 
   isLoading = false;
   isSaving = false;
@@ -40,6 +48,7 @@ export class LinkHubComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLinks();
+    this.loadEmpresa();
   }
 
   // ---------- Carga ----------
@@ -59,6 +68,40 @@ export class LinkHubComponent implements OnInit {
           this.errorMessage = 'No se pudieron cargar los enlaces.';
         }
       });
+  }
+
+  loadEmpresa(): void {
+    const empresa = this.empresas.empresaActual();
+    if (!empresa?.id) return;
+
+    this.empresaId = empresa.id;
+    this.empresaNombre = empresa.nombre;
+    this.puedeEditarEmpresa = (empresa.rolPropio ?? 'VISOR').toUpperCase() !== 'VISOR';
+    this.cargandoEmpresa = true;
+
+    this.linkService
+      .getDeEmpresa(empresa.id)
+      .pipe(finalize(() => (this.cargandoEmpresa = false)))
+      .subscribe({
+        next: (data) => (this.enlacesEmpresa = data),
+        error: () => (this.enlacesEmpresa = [])
+      });
+  }
+
+  get enlacesVisibles(): LinkItem[] {
+    return this.ambito === 'empresa' ? this.enlacesEmpresa : this.links;
+  }
+
+  get enlaceActivo(): LinkItem | undefined {
+    return this.enlacesVisibles.find((enlace) => enlace.active);
+  }
+
+  get enEmpresa(): boolean {
+    return this.ambito === 'empresa';
+  }
+
+  cambiarAmbito(ambito: 'personal' | 'empresa'): void {
+    this.ambito = ambito;
   }
 
   // ---------- Helpers ----------
@@ -91,12 +134,24 @@ export class LinkHubComponent implements OnInit {
   // ---------- Activar ----------
   setActiveLink(id: string, event?: Event): void {
     if (event) event.stopPropagation();
+
+    if (this.enEmpresa) {
+      if (!this.puedeEditarEmpresa || !this.empresaId) return;
+      const actual = this.enlacesEmpresa.find((l) => l.id === id);
+      if (!actual || actual.active) return;
+
+      this.linkService.actualizarDeEmpresa(this.empresaId, id, { ...actual, active: true } as LinkItemPayload).subscribe({
+        next: () => this.enlacesEmpresa.forEach((l) => (l.active = l.id === id)),
+        error: () => (this.errorMessage = 'No se pudo activar el enlace de la empresa.')
+      });
+      return;
+    }
+
     const current = this.links.find(l => l.id === id);
     if (!current || current.active) return;
 
     this.linkService.setActive(id).subscribe({
       next: () => {
-        // Actualización optimista local
         this.links.forEach(l => (l.active = l.id === id));
       },
       error: (err) => {
@@ -141,6 +196,29 @@ export class LinkHubComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = null;
 
+    if (this.enEmpresa) {
+      if (!this.empresaId) return;
+      const request$ = this.isEditing
+        ? this.linkService.actualizarDeEmpresa(this.empresaId, this.formData.id, payload)
+        : this.linkService.crearDeEmpresa(this.empresaId, payload);
+
+      request$.pipe(finalize(() => (this.isSaving = false))).subscribe({
+        next: (saved) => {
+          const i = this.enlacesEmpresa.findIndex((l) => l.id === saved.id);
+          if (i !== -1) this.enlacesEmpresa[i] = saved;
+          else this.enlacesEmpresa.push(saved);
+
+          if (saved.active) this.enlacesEmpresa.forEach((l) => (l.active = l.id === saved.id));
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage = 'No se pudo guardar el enlace de la empresa.';
+        }
+      });
+      return;
+    }
+
     const request$ = this.isEditing
       ? this.linkService.update(this.formData.id, payload)
       : this.linkService.create(payload);
@@ -171,6 +249,15 @@ export class LinkHubComponent implements OnInit {
   // ---------- Eliminar ----------
   deleteLink(id: string, event?: Event): void {
     if (event) event.stopPropagation();
+
+    if (this.enEmpresa) {
+      if (!this.empresaId) return;
+      this.linkService.borrarDeEmpresa(this.empresaId, id).subscribe({
+        next: () => (this.enlacesEmpresa = this.enlacesEmpresa.filter((l) => l.id !== id)),
+        error: () => (this.errorMessage = 'No se pudo eliminar el enlace de la empresa.')
+      });
+      return;
+    }
 
     this.linkService.delete(id).subscribe({
       next: () => {

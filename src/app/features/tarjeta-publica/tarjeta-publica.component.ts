@@ -76,10 +76,8 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
         this.tarjeta.set(t);
         this.cargando.set(false);
 
-        if (t && this.modoNfc()) {
-          this.registrarToque();
-          if (this.archivos.esNativa) setTimeout(() => this.guardarContacto(true), 700);
-        }
+        if (t && this.modoNfc()) this.registrarToque();
+        if (t) setTimeout(() => void this.accionPrincipal(), 600);
       },
       error: () => {
         this.noEncontrada.set(true);
@@ -123,6 +121,52 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
       origen: this.archivos.esNativa ? 'ETIQUETA' : 'NAVEGADOR',
       tieneApp: this.archivos.esNativa,
     });
+  }
+
+  get urlTarjeta(): string {
+    const t = this.tarjeta();
+    return t ? `${window.location.origin}/tarjeta/${this.userId}/${t.slug}` : window.location.href;
+  }
+
+  get whatsapp(): string | null {
+    const t = this.tarjeta();
+    const numero = (t?.telefono ?? '').replace(/\D/g, '');
+    return numero.length >= 7 ? `https://wa.me/${numero}` : null;
+  }
+
+  get mensajeContacto(): string {
+    const t = this.tarjeta();
+    if (!t) return '';
+
+    const lineas = [t.nombre, t.puesto, t.empresa, t.telefono, t.email, this.urlTarjeta];
+    return lineas.filter((linea) => Boolean(linea && String(linea).trim())).join('\n');
+  }
+
+  async accionPrincipal(): Promise<void> {
+    if (this.archivos.esNativa) {
+      this.guardarContacto(true);
+      return;
+    }
+
+    const compartido = await this.archivos.compartirTexto(
+      this.mensajeContacto,
+      this.tarjeta()?.nombre ?? 'Contacto',
+    );
+
+    if (compartido !== 'compartido') {
+      this.aviso.set('Elige por dónde quieres compartir el contacto.');
+    }
+  }
+
+  compartirPorCorreo(): void {
+    const t = this.tarjeta();
+    const asunto = t ? `Contacto de ${t.nombre}` : 'Contacto';
+    window.location.href = `mailto:?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(this.mensajeContacto)}`;
+  }
+
+  compartirPorWhatsapp(): void {
+    const url = this.whatsapp;
+    if (url) window.open(`${url}?text=${encodeURIComponent(this.mensajeContacto)}`, '_blank', 'noopener');
   }
 
   guardarContacto(silencioso = false): void {

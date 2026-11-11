@@ -66,6 +66,32 @@ export class ArchivoService {
     return 'no-soportado';
   }
 
+  /** Reparte un texto (el contacto en líneas) por el selector del sistema. */
+  async compartirTexto(texto: string, titulo: string): Promise<ResultadoEnlace> {
+    if (!texto.trim()) return 'no-soportado';
+
+    if (this.esNativa) {
+      const { Share } = await import('@capacitor/share');
+      try {
+        await Share.share({ text: texto, title: titulo, dialogTitle: titulo });
+        return 'compartido';
+      } catch (e) {
+        return cancelado(e) ? 'cancelado' : 'no-soportado';
+      }
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: texto, title: titulo });
+        return 'compartido';
+      } catch (e) {
+        return cancelado(e) ? 'cancelado' : 'no-soportado';
+      }
+    }
+
+    return 'no-soportado';
+  }
+
   /** Reparte un archivo (vCard, PDF…) por el selector del sistema cuando existe. */
   async compartirArchivo(blob: Blob, nombre: string, titulo: string): Promise<ResultadoEnlace> {
     const archivo = nombreSeguro(nombre);

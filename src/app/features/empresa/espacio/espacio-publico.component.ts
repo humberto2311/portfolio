@@ -64,9 +64,20 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
   readonly disenos = signal<DisenoLienzo[]>([]);
   readonly redEmpresa = signal<Empresa | null>(null);
 
+  readonly esPrevia = signal(false);
+
+  volverAlEditor(): void {
+    const slug = this.route.snapshot.paramMap.get('slug');
+    const espacioSlug = this.route.snapshot.paramMap.get('espacio');
+    void this.router.navigate(['/app/empresa/espacio'], {
+      queryParams: espacioSlug ? { espacio: espacioSlug } : {},
+    });
+  }
+
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
     const espacioSlug = this.route.snapshot.paramMap.get('espacio');
+    this.esPrevia.set(this.route.snapshot.queryParamMap.get('vista') === 'previa');
 
     if (!slug || !espacioSlug) {
       this.cargando.set(false);

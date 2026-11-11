@@ -177,6 +177,9 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   }
 
   get urlVistaPrevia(): string {
+    if (this.slugEmpresa && this.form.slug) {
+      return `${urlEspacio(this.slugEmpresa, this.form.slug)}?vista=previa`;
+    }
     return `/app/empresa/espacio/vista?espacio=${encodeURIComponent(this.form.slug || 'mi-espacio')}`;
   }
 

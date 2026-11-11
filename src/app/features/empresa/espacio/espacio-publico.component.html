@@ -330,8 +330,18 @@
     <div class="espacio__estado">
       <i class="fa-solid fa-lock"></i>
       <h1>Este espacio no está disponible</h1>
-      <p>El enlace no existe o la empresa todavía no lo publicó.</p>
-      <a class="boton boton--fuerte" routerLink="/">Ir a N-soft</a>
+      @if (esPrevia()) {
+        <p>
+          El espacio todavía no está guardado, así que aún no tiene enlace propio. Guarda los
+          cambios y vuelve a abrir esta vista para verla como la verá un visitante.
+        </p>
+        <button type="button" class="boton boton--fuerte" (click)="volverAlEditor()">
+          Volver al editor
+        </button>
+      } @else {
+        <p>El enlace no existe o la empresa todavía no lo publicó.</p>
+        <a class="boton boton--fuerte" routerLink="/">Ir a N-soft</a>
+      }
     </div>
   }
 </div>

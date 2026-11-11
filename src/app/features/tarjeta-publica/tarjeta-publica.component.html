@@ -126,15 +126,37 @@
           </div>
         }
 
-        <button type="button" class="guardar" [class.destacado]="modoNfc()" (click)="guardarContacto()">
-          @if (esNativa) {
+        @if (esNativa) {
+          <button type="button" class="guardar" [class.destacado]="modoNfc()" (click)="guardarContacto()">
             <i class="fa-solid fa-address-card"></i>
             Guardar en mis contactos
-          } @else {
-            <i class="fa-solid fa-share-nodes"></i>
-            Compartir contacto
-          }
-        </button>
+          </button>
+        } @else {
+          <div class="reparto">
+            <p class="reparto__titulo">
+              <i class="fa-solid fa-share-nodes"></i>
+              Compartir este contacto
+            </p>
+            <div class="reparto__opciones">
+              <button type="button" class="reparto__opcion reparto__opcion--fuerte" (click)="accionPrincipal()">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span>Compartir</span>
+              </button>
+              <button type="button" class="reparto__opcion" (click)="compartirPorWhatsapp()" [disabled]="!whatsapp">
+                <i class="fa-brands fa-whatsapp"></i>
+                <span>WhatsApp</span>
+              </button>
+              <button type="button" class="reparto__opcion" (click)="compartirPorCorreo()">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Correo</span>
+              </button>
+              <button type="button" class="reparto__opcion" (click)="copiar(mensajeContacto, 'Contacto copiado')">
+                <i class="fa-solid fa-copy"></i>
+                <span>Copiar</span>
+              </button>
+            </div>
+          </div>
+        }
 
         <footer class="pie">
           <span class="marca">N-SOFT</span>
@@ -154,8 +176,7 @@
         @if (esNativa) {
           Al guardar se añade el contacto completo a tu teléfono: teléfono, correo, enlaces y notas.
         } @else {
-          En el computador se abre el menú para compartir el contacto; en el celular o la app se
-          guarda directamente en tu agenda.
+          Elige por dónde compartir el contacto: WhatsApp, correo, cualquier app o el portapapeles.
         }
       </p>
     </div>

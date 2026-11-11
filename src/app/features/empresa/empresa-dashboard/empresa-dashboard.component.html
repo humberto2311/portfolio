@@ -3,6 +3,7 @@
     <div class="barra__modo">
       <i class="fa-solid fa-building"></i>
       <span>Modo empresa</span>
+      <small>Estás en el espacio de la empresa, no en tu cuenta personal</small>
     </div>
 
     <div class="barra__acciones">
@@ -18,7 +19,7 @@
       }
 
       <button type="button" class="btn-ghost" (click)="salir()">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> Volver a mi perfil
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Volver a mi perfil personal
       </button>
     </div>
   </div>
@@ -93,6 +94,10 @@
         <div class="cabecera__botones">
           <a class="btn-primary" routerLink="/app/empresa/ajustes">
             <i class="fa-solid fa-pen-to-square"></i> {{ acceso?.editaPerfil ? 'Editar empresa' : 'Ajustes' }}
+          </a>
+
+          <a class="btn-ghost" routerLink="/app/empresa/espacio">
+            <i class="fa-solid fa-globe"></i> Mi espacio
           </a>
 
           @if (autorizadoDiseno) {

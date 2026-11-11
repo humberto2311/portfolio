@@ -135,7 +135,7 @@ export class EmpresaComponentesComponent implements OnInit {
   get subtitulo(): string {
     return this.modoPublico()
       ? 'Menús, tarjetas e información publicados, cada uno con su propio enlace.'
-      : 'Cada lienzo guarda sus propias piezas: un menú, una tarjeta, un catálogo. Aquí los abres, los compartes o los borras.';
+      : 'Cada diseño es un componente de tu página: un menú, una tarjeta, un catálogo. Diséñalo aquí y luego elige en qué sección de tu espacio se muestra.';
   }
 
   cambiarFiltro(valor: Filtro): void {

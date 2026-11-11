@@ -118,7 +118,6 @@
     <div class="taller" [class.taller--sin-lateral]="lateralPlegado()" [class.taller--sin-inspector]="inspectorPlegado()">
       <main class="area">
         <div class="marco" #marco (wheel)="alRodar($event)">
-          <!-- Menú flotante encima del lienzo: se colapsa para ver solo la hoja -->
           @if (!lateralPlegado()) {
             <aside class="flotante" aria-label="Herramientas del diseñador">
               <header class="flotante__cabecera">
@@ -247,7 +246,6 @@
             </button>
           }
 
-          <!-- Grupo que se centra: la hoja a escala y el inspector flotante encima de ella -->
           <div class="escena">
           <div class="hoja" [style.width.px]="ancho * escala()" [style.height.px]="altoHoja * escala()">
           <div
@@ -275,7 +273,6 @@
                 <div class="capa__vista">
                   <app-empresa-componente-vista [componente]="vistaDe(componente)" modo="editor" />
                   @if (seleccionClave() === componente.clave) {
-                    <!-- Encima del HTML/iframe para que se pueda arrastrar desde cualquier punto -->
                     <span class="capa__velo"></span>
                   }
                 </div>

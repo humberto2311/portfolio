@@ -15,6 +15,7 @@
 
       <app-perfil-tabs
         [tabActiva]="seccionActiva"
+        [mostrarEmpresa]="mostrarEmpresa"
         (tabChanged)="cambiarSeccion($event)" />
 
       <div class="tab-content">
@@ -23,8 +24,8 @@
           @case ('informacion') { <app-tab-informacion [perfil]="p" /> }
           @case ('fotos') { <app-tab-fotos [userId]="p.id" [esMiPerfil]="esMiPerfil" /> }
           
-          <!-- 👇 PASAMOS EL ID DEL USUARIO -->
           @case ('amigos') { <app-tab-contactos [userId]="p.id" [esMiPerfil]="esMiPerfil" /> }
+          @case ('empresa') { <app-tab-empresa /> }
         }
       </div>
     } @else {

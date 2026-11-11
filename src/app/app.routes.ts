@@ -24,6 +24,8 @@ import { EmpresaPublicaComponent } from './features/empresa/empresa-publica/empr
 import { EmpresaComponenteComponent } from './features/empresa/empresa-componente/empresa-componente.component';
 import { EmpresaComponentesComponent } from './features/empresa/empresa-componentes/empresa-componentes.component';
 import { DisenoPublicoComponent } from './features/empresa/diseno-publico/diseno-publico.component';
+import { EspacioPublicoComponent } from './features/empresa/espacio/espacio-publico.component';
+import { EmpresaEspacioEditorComponent } from './features/empresa/espacio/empresa-espacio-editor.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { UbicacionComponent } from './features/ubicacion/ubicacion.component';
 import { EmpleoComponent } from './features/empleo/empleo.component';
@@ -64,6 +66,7 @@ export const routes: Routes = [
   // Página propia de un diseño público (menú, tarjeta, catálogo…)
   { path: 'diseno/:slug', component: DisenoPublicoComponent },
   { path: 'empresa/:slug', component: EmpresaPublicaComponent, canActivate: [authGuard] },
+  { path: 'empresa/:slug/espacio/:espacio', component: EspacioPublicoComponent },
   // Carpeta pública de componentes de la empresa (menús, tarjetas, información...)
   { path: 'empresa/:slug/componentes', component: EmpresaComponentesComponent },
   // Enlace propio de cada componente creado en el lienzo
@@ -92,6 +95,7 @@ export const routes: Routes = [
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
+      { path: 'empresa/espacio', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true } },
       { path: 'empresa/componentes', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
       { path: 'empresa/disenos', component: EmpresaComponentesComponent, data: { anchoCompleto: true } },
       {

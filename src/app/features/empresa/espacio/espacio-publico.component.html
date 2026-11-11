@@ -1,0 +1,313 @@
+<div class="espacio diseno-visita">
+  @if (espacio(); as esp) {
+    <app-espacio-navbar
+      [espacio]="esp"
+      [haySesion]="haySesion"
+      [puedeEditar]="puedeEditar"
+      [urlPerfilEmpresa]="urlPerfil"
+    />
+
+    <main class="espacio__cuerpo">
+      <section class="hero" id="inicio">
+        <div class="hero__fondo" [style.background-image]="esp.portadaUrl ? 'url(' + esp.portadaUrl + ')' : null"></div>
+        <div class="hero__velo"></div>
+
+        <div class="hero__contenido">
+          <span class="hero__logo">
+            @if (esp.logoUrl) {
+              <img [src]="esp.logoUrl" [alt]="esp.empresaNombre" />
+            } @else {
+              <span>{{ iniciales }}</span>
+            }
+          </span>
+
+          <p class="hero__sello">{{ esp.nombre }}</p>
+          <h1>{{ esp.empresaNombre }}</h1>
+
+          @if (esp.lema) {
+            <p class="hero__lema">{{ esp.lema }}</p>
+          }
+
+          <div class="hero__acciones">
+            <a class="boton boton--fuerte" [href]="'#' + (secciones.length ? ancla(secciones[secciones.length - 1]) : 'contacto')">
+              <i class="fa-solid fa-arrow-down"></i> Conócenos
+            </a>
+            <button type="button" class="boton" (click)="abrirChatEmpresa()">
+              <i class="fa-solid fa-comment-dots"></i> Escríbenos
+            </button>
+            <a class="boton boton--suave" [routerLink]="urlPerfil">
+              <i class="fa-solid fa-newspaper"></i> Perfil en la red
+            </a>
+          </div>
+        </div>
+      </section>
+
+      @for (seccion of secciones; track seccion.orden) {
+        <section
+          class="seccion"
+          [id]="ancla(seccion)"
+          [class.seccion--alta]="altoSeccion(seccion) === 'seccion--alta'"
+          [class.seccion--centrada]="centrada(seccion)"
+        >
+          <header class="seccion__cabecera">
+            <h2>{{ seccion.titulo || seccion.tipo }}</h2>
+            @if (seccion.subtitulo) {
+              <p>{{ seccion.subtitulo }}</p>
+            }
+          </header>
+
+          @switch (seccion.tipo) {
+            @case ('PRESENTACION') {
+              <div class="prosa">
+                @for (parrafo of parrafos(seccion.texto); track $index) {
+                  <p>{{ parrafo }}</p>
+                }
+                @if (!seccion.texto) {
+                  <p class="prosa--vacia">Esta sección todavía no tiene texto.</p>
+                }
+              </div>
+            }
+
+            @case ('SERVICIOS') {
+              <div class="rejilla rejilla--tres">
+                @for (bloque of bloques(seccion.texto); track $index) {
+                  <article class="pieza">
+                    <span class="pieza__icono"><i class="fa-solid fa-check"></i></span>
+                    <h3>{{ bloque.titulo }}</h3>
+                    @if (bloque.texto) {
+                      <p>{{ bloque.texto }}</p>
+                    }
+                  </article>
+                } @empty {
+                  <p class="prosa--vacia">Añade un servicio por bloque, separados por una línea en blanco.</p>
+                }
+              </div>
+            }
+
+            @case ('PRODUCTOS') {
+              <div class="rejilla rejilla--tres">
+                @for (bloque of bloques(seccion.texto); track $index) {
+                  <article class="pieza pieza--producto">
+                    <span class="pieza__icono"><i class="fa-solid fa-bag-shopping"></i></span>
+                    <h3>{{ bloque.titulo }}</h3>
+                    @if (bloque.texto) {
+                      <p>{{ bloque.texto }}</p>
+                    }
+                  </article>
+                } @empty {
+                  <p class="prosa--vacia">Todavía no hay productos publicados.</p>
+                }
+              </div>
+            }
+
+            @case ('GALERIA') {
+              <div class="galeria">
+                @for (bloque of bloques(seccion.texto); track $index) {
+                  <figure>
+                    <img [src]="bloque.titulo" [alt]="bloque.texto || 'Imagen de la empresa'" />
+                    @if (bloque.texto) {
+                      <figcaption>{{ bloque.texto }}</figcaption>
+                    }
+                  </figure>
+                } @empty {
+                  <p class="prosa--vacia">Pega una URL de imagen por línea para armar la galería.</p>
+                }
+              </div>
+            }
+
+            @case ('EQUIPO') {
+              <div class="equipo">
+                @for (miembro of miembros; track miembro.id) {
+                  <article class="persona">
+                    <span class="persona__avatar">
+                      @if (miembro.avatarUrl) {
+                        <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+                      } @else {
+                        <span>{{ inicialesDe(miembro.nombre) }}</span>
+                      }
+                    </span>
+                    <strong>{{ miembro.nombre }}</strong>
+                    <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+                    <button type="button" class="boton boton--mini" (click)="escribirAMiembro(miembro)">
+                      <i class="fa-solid fa-comment-dots"></i> Escribir
+                    </button>
+                  </article>
+                } @empty {
+                  <p class="prosa--vacia">La empresa todavía no muestra su equipo.</p>
+                }
+              </div>
+            }
+
+            @case ('TESTIMONIOS') {
+              <div class="rejilla rejilla--dos">
+                @for (bloque of bloques(seccion.texto); track $index) {
+                  <blockquote class="testimonio">
+                    <i class="fa-solid fa-quote-left"></i>
+                    <p>{{ bloque.texto || bloque.titulo }}</p>
+                    <footer>{{ bloque.texto ? bloque.titulo : '' }}</footer>
+                  </blockquote>
+                } @empty {
+                  <p class="prosa--vacia">Añade un testimonio por bloque: primera línea el nombre, luego el texto.</p>
+                }
+              </div>
+            }
+
+            @case ('PUBLICACIONES') {
+              <div class="muro">
+                @for (publicacion of publicaciones; track publicacion.id) {
+                  <article class="entrada">
+                    <header class="entrada__cabecera">
+                      <span class="entrada__avatar">
+                        @if (esp.logoUrl) {
+                          <img [src]="esp.logoUrl" [alt]="esp.empresaNombre" />
+                        } @else {
+                          <span>{{ iniciales }}</span>
+                        }
+                      </span>
+                      <span class="entrada__autor">
+                        <strong>{{ esp.empresaNombre }}</strong>
+                        <small>{{ publicacion.creadoEn || 'hace un momento' }}</small>
+                      </span>
+                    </header>
+                    <p class="entrada__texto">{{ publicacion.contenido }}</p>
+                    <footer class="entrada__pie">
+                      <span><i class="fa-solid fa-heart"></i> {{ publicacion.likes }}</span>
+                      <span><i class="fa-regular fa-comment"></i> {{ publicacion.comentarios }}</span>
+                    </footer>
+                  </article>
+                } @empty {
+                  <p class="prosa--vacia">Sin publicaciones todavía.</p>
+                }
+                <a class="boton" [routerLink]="urlPerfil">
+                  <i class="fa-solid fa-arrow-right"></i> Ver todo en la red
+                </a>
+              </div>
+            }
+
+            @case ('UBICACION') {
+              <ul class="datos">
+                @for (fila of contacto; track fila.etiqueta) {
+                  @if (fila.etiqueta === 'Dirección' || fila.etiqueta === 'Ubicación' || fila.etiqueta === 'Horario') {
+                    <li>
+                      <i [class]="fila.icono"></i>
+                      <span class="datos__etiqueta">{{ fila.etiqueta }}</span>
+                      <span class="datos__valor">{{ fila.valor }}</span>
+                    </li>
+                  }
+                } @empty {
+                  <p class="prosa--vacia">La empresa todavía no cargó su ubicación.</p>
+                }
+              </ul>
+            }
+
+            @case ('CONTACTO') {
+              @if (seccion.texto) {
+                <div class="prosa">
+                  @for (parrafo of parrafos(seccion.texto); track $index) {
+                    <p>{{ parrafo }}</p>
+                  }
+                </div>
+              }
+
+              <div class="contacto">
+                @for (fila of contacto; track fila.etiqueta) {
+                  @if (fila.url) {
+                    <a class="contacto__fila" [href]="fila.url" [attr.target]="fila.url.startsWith('http') ? '_blank' : null" rel="noopener">
+                      <i [class]="fila.icono"></i>
+                      <span class="contacto__etiqueta">{{ fila.etiqueta }}</span>
+                      <span class="contacto__valor">{{ fila.valor }}</span>
+                    </a>
+                  } @else {
+                    <span class="contacto__fila">
+                      <i [class]="fila.icono"></i>
+                      <span class="contacto__etiqueta">{{ fila.etiqueta }}</span>
+                      <span class="contacto__valor">{{ fila.valor }}</span>
+                    </span>
+                  }
+                } @empty {
+                  <p class="prosa--vacia">Sin datos de contacto publicados.</p>
+                }
+              </div>
+            }
+
+            @case ('REDES') {
+              <div class="redes">
+                @for (red of redes; track red.url) {
+                  <a class="redes__item" [href]="red.url" target="_blank" rel="noopener">
+                    <i [class]="iconoRed(red.nombre)"></i>
+                    {{ red.nombre }}
+                  </a>
+                } @empty {
+                  <p class="prosa--vacia">La empresa no publicó redes sociales.</p>
+                }
+              </div>
+            }
+
+            @case ('ENLACES') {
+              <div class="enlaces">
+                @for (bloque of bloques(seccion.texto); track $index) {
+                  <a class="enlaces__item" [href]="bloque.texto || '#'" target="_blank" rel="noopener">
+                    <span>{{ bloque.titulo }}</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                } @empty {
+                  <p class="prosa--vacia">Añade un enlace por línea: primero el nombre, luego la URL.</p>
+                }
+              </div>
+            }
+
+            @case ('LIENZO') {
+              @if (piezas().length) {
+                <div class="lienzo">
+                  @for (pieza of piezas(); track pieza.id) {
+                    <div class="lienzo__pieza" [style.min-height.px]="pieza.alto || 260">
+                      <app-empresa-componente-vista [componente]="pieza" modo="publico" />
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="prosa--vacia">Esta sección mostrará el diseño publicado desde el diseñador visual.</p>
+              }
+            }
+          }
+        </section>
+      }
+
+      <section class="cierre">
+        <h2>¿Hablamos?</h2>
+        <p>Este es el espacio de {{ esp.empresaNombre }} en N-soft. Escríbenos y te respondemos por el chat.</p>
+        <div class="cierre__acciones">
+          <button type="button" class="boton boton--fuerte" (click)="abrirChatEmpresa()">
+            <i class="fa-solid fa-comment-dots"></i> Abrir chat
+          </button>
+          <a class="boton" [routerLink]="urlPerfil">
+            <i class="fa-solid fa-newspaper"></i> Ver el perfil en la red
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="espacio__pie">
+      <span>
+        @if (esp.pie) {
+          {{ esp.pie }}
+        } @else {
+          {{ esp.empresaNombre }} · {{ esp.nombre }}
+        }
+      </span>
+      <a [routerLink]="urlPerfil"><i class="fa-solid fa-cube"></i> Hecho en N-soft</a>
+    </footer>
+  } @else if (cargando()) {
+    <div class="espacio__estado">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <p>Cargando el espacio…</p>
+    </div>
+  } @else {
+    <div class="espacio__estado">
+      <i class="fa-solid fa-lock"></i>
+      <h1>Este espacio no está disponible</h1>
+      <p>El enlace no existe o la empresa todavía no lo publicó.</p>
+      <a class="boton boton--fuerte" routerLink="/">Ir a N-soft</a>
+    </div>
+  }
+</div>

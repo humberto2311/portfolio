@@ -1,316 +1,564 @@
-<div class="pub diseno-visita">
-  <header class="pub__barra">
-    <a class="pub__marca" routerLink="/" aria-label="N-soft">
-      <i class="fa-solid fa-cube"></i>
-      <span>N-soft</span>
-    </a>
+<div class="red diseno-visita">
+  @if (datos(); as publica) {
+    <app-empresa-red-navbar
+      [empresa]="publica.empresa"
+      [equipo]="miembros"
+      [espacios]="espaciosPublicos"
+      [haySesion]="haySesion"
+      [siguiendo]="siguiendo()"
+      [puedeEditar]="puedeEditar"
+      [urlEspacio]="urlLanding()"
+    />
 
-    <a class="pub__entrar" routerLink="/acceso">
-      <i class="fa-solid fa-right-to-bracket"></i> Entrar
-    </a>
-  </header>
+    <main class="red__cuerpo">
+      <section class="portada">
+        <div class="portada__fondo" [style.background-image]="portada(publica.empresa)"></div>
+        <div class="portada__velo"></div>
+      </section>
 
-  @if (cargando()) {
-    <div class="estado">
+      <section class="ficha" [class.ficha--centrada]="true">
+        <div class="ficha__logo">
+          @if (publica.empresa.logoUrl) {
+            <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
+          } @else {
+            <span>{{ iniciales() }}</span>
+          }
+        </div>
+
+        <div class="ficha__datos">
+          <div class="ficha__sellos">
+            <span class="sello">{{ tipoEmpresa }}</span>
+            @if (sectorEmpresa) {
+              <span class="sello">{{ sectorEmpresa }}</span>
+            }
+            @if (publica.empresa.certificada) {
+              <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Certificada</span>
+            }
+            @if (ubicacion) {
+              <span class="sello"><i class="fa-solid fa-location-dot"></i> {{ ubicacion }}</span>
+            }
+          </div>
+
+          <div class="ficha__nombre">
+            <h1>{{ publica.empresa.nombre }}</h1>
+          </div>
+
+          @if (publica.empresa.eslogan) {
+            <p class="ficha__eslogan">{{ publica.empresa.eslogan }}</p>
+          }
+
+          <div class="ficha__cuentas">
+            <button type="button" class="cuenta" (click)="cambiarTab('seguidores')">
+              <strong>{{ totalSeguidores() }}</strong> seguidores
+            </button>
+            <button type="button" class="cuenta" (click)="cambiarTab('seguidores')">
+              <strong>{{ seguidos() }}</strong> seguidos
+            </button>
+            <button type="button" class="cuenta" (click)="cambiarTab('miembros')">
+              <strong>{{ totalMiembros }}</strong> miembros
+            </button>
+            <button type="button" class="cuenta" (click)="cambiarTab('publicaciones')">
+              <strong>{{ totalPublicaciones }}</strong> publicaciones
+            </button>
+            @if (puedeEditar) {
+              <button type="button" class="cuenta" (click)="cambiarTab('propuestas')">
+                <strong>{{ totalPropuestas }}</strong> por aprobar
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="ficha__acciones">
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="seguirEmpresa()"
+            [class.btn--siguiendo]="siguiendo()"
+          >
+            <i class="fa-solid" [class.fa-user-plus]="!siguiendo()" [class.fa-check]="siguiendo()"></i>
+            {{ siguiendo() ? 'Siguiendo' : 'Seguir' }}
+          </button>
+
+          <button type="button" class="btn" (click)="abrirChat()">
+            <i class="fa-solid fa-comment-dots"></i> Chatear
+          </button>
+
+          @if (urlLanding()) {
+            <a class="btn btn--landing" [routerLink]="urlLanding()">
+              <i class="fa-solid fa-rocket"></i> Ir a la landing
+            </a>
+          }
+
+          @if (espaciosPublicos.length) {
+            <button type="button" class="btn btn--espacio" (click)="cambiarTab('espacios')">
+              <i class="fa-solid fa-globe"></i> Espacios
+            </button>
+          }
+
+          @if (puedeEditar) {
+            <a class="btn" routerLink="/app/empresa/espacio">
+              <i class="fa-solid fa-pen-ruler"></i> Editar mi espacio
+            </a>
+          }
+        </div>
+      </section>
+
+      <nav class="pestanas" aria-label="Secciones de la empresa">
+        <button type="button" [class.pestana--activa]="tab() === 'inicio'" (click)="cambiarTab('inicio')">
+          <i class="fa-solid fa-house"></i> Inicio
+        </button>
+        <button type="button" [class.pestana--activa]="tab() === 'publicaciones'" (click)="cambiarTab('publicaciones')">
+          <i class="fa-solid fa-newspaper"></i> Publicaciones
+        </button>
+        <button type="button" [class.pestana--activa]="tab() === 'miembros'" (click)="cambiarTab('miembros')">
+          <i class="fa-solid fa-users"></i> Miembros
+        </button>
+        <button type="button" [class.pestana--activa]="tab() === 'seguidores'" (click)="cambiarTab('seguidores')">
+          <i class="fa-solid fa-user-group"></i> Seguidores
+        </button>
+        @if (puedeEditar) {
+          <button type="button" [class.pestana--activa]="tab() === 'propuestas'" (click)="cambiarTab('propuestas')">
+            <i class="fa-solid fa-inbox"></i> Por aprobar
+            @if (totalPropuestas) {
+              <em>{{ totalPropuestas }}</em>
+            }
+          </button>
+        }
+        @if (urlLanding()) {
+          <button type="button" class="pestana--sitio" (click)="irALanding()">
+            <i class="fa-solid fa-rocket"></i> Landing
+          </button>
+        }
+        <button type="button" [class.pestana--activa]="tab() === 'informacion'" (click)="cambiarTab('informacion')">
+          <i class="fa-solid fa-circle-info"></i> Información
+        </button>
+        <button type="button" [class.pestana--activa]="tab() === 'espacios'" (click)="cambiarTab('espacios')">
+          <i class="fa-solid fa-layer-group"></i> Espacios
+        </button>
+      </nav>
+
+      @switch (tab()) {
+        @case ('inicio') {
+          <div class="rejilla">
+            <aside class="columna">
+              <section class="tarjeta">
+                <header class="tarjeta__cabecera">
+                  <h2><i class="fa-solid fa-address-card"></i> Presentación</h2>
+                </header>
+                @if (publica.empresa.descripcion) {
+                  <p class="tarjeta__texto">{{ publica.empresa.descripcion }}</p>
+                } @else {
+                  <p class="tarjeta__texto tarjeta__texto--vacio">Esta empresa todavía no escribió su descripción.</p>
+                }
+                @if (publica.empresa.horario) {
+                  <p class="tarjeta__linea"><i class="fa-solid fa-clock"></i> {{ publica.empresa.horario }}</p>
+                }
+                @if (ubicacion) {
+                  <p class="tarjeta__linea"><i class="fa-solid fa-location-dot"></i> {{ ubicacion }}</p>
+                }
+              </section>
+
+              @if (espaciosPublicos.length) {
+                <section class="tarjeta">
+                  <header class="tarjeta__cabecera">
+                    <h2><i class="fa-solid fa-globe"></i> Espacios</h2>
+                  </header>
+                  <ul class="lista-espacios">
+                    @for (espacio of espaciosPublicos; track espacio.slug) {
+                      <li>
+                        <button type="button" (click)="irAEspacio(espacio)">
+                          <span class="lista-espacios__icono"><i class="fa-solid fa-globe"></i></span>
+                          <span class="lista-espacios__datos">
+                            <strong>{{ espacio.nombre }}</strong>
+                            <small>{{ espacio.lema || 'Página propia de la empresa' }}</small>
+                          </span>
+                          <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+            </aside>
+
+            <div class="columna columna--principal">
+              <section class="tarjeta">
+                <header class="tarjeta__cabecera">
+                  <h2><i class="fa-solid fa-pen"></i> Publicar como {{ publica.empresa.nombre }}</h2>
+                </header>
+                <div class="redactor__fila">
+                  <span class="redactor__avatar">
+                    @if (publica.empresa.logoUrl) {
+                      <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
+                    } @else {
+                      <span>{{ iniciales() }}</span>
+                    }
+                  </span>
+                  <textarea
+                    class="redactor"
+                    rows="3"
+                    placeholder="¿Qué quieres contarle a tus seguidores?"
+                    [value]="borrador()"
+                    (input)="actualizarBorrador($event)"
+                    [disabled]="!puedeEditar"
+                  ></textarea>
+                </div>
+                <div class="redactor__pie">
+                  <small>
+                    @if (puedeEditar) {
+                      Publicas como empresa: apareces en el perfil de {{ publica.empresa.nombre }}.
+                    } @else {
+                      Solo administradores y editores pueden publicar aquí.
+                    }
+                  </small>
+                  <button
+                    type="button"
+                    class="btn btn--primary"
+                    [disabled]="!borrador().trim() || publicando() || !puedeEditar"
+                    (click)="publicar()"
+                  >
+                    @if (publicando()) {
+                      <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    } @else {
+                      <i class="fa-solid fa-paper-plane"></i>
+                    }
+                    Publicar
+                  </button>
+                </div>
+              </section>
+
+              <section class="muro">
+                @for (publicacion of publicacionesRed; track publicacion.id) {
+                  <article class="entrada">
+                    <header class="entrada__cabecera">
+                      <span class="entrada__avatar">
+                        @if (publica.empresa.logoUrl) {
+                          <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
+                        } @else {
+                          <span>{{ iniciales() }}</span>
+                        }
+                      </span>
+                      <span class="entrada__autor">
+                        <strong>{{ publica.empresa.nombre }}</strong>
+                        @if (publicacion.deMiembro && publicacion.autorNombre) {
+                          <small>
+                            <i class="fa-solid fa-user-tie"></i>
+                            Publicado por {{ publicacion.autorNombre }}
+                          </small>
+                        } @else {
+                          <small>Cuenta oficial</small>
+                        }
+                      </span>
+                      <span class="entrada__sello"><i class="fa-solid fa-building"></i></span>
+
+                      @if (puedeEditar) {
+                        <button type="button" class="entrada__borrar" title="Eliminar" (click)="borrarPublicacion(publicacion)">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      }
+                    </header>
+
+                    <p class="entrada__fecha">{{ publicacion.creadoEn || 'hace un momento' }}</p>
+
+                    <p class="entrada__texto">{{ publicacion.contenido }}</p>
+
+                    @if (publicacion.estado === 'PENDIENTE') {
+                      <p class="entrada__pendiente">
+                        <i class="fa-solid fa-clock"></i> Pendiente de aprobación por la empresa
+                      </p>
+                    }
+
+                    @if (publicacion.imagenUrl) {
+                      <div class="entrada__imagen">
+                        <img [src]="publicacion.imagenUrl" alt="Publicación de la empresa" />
+                      </div>
+                    }
+
+                    <footer class="entrada__pie">
+                      <button type="button" [class.activo]="publicacion.meGusta" (click)="meGusta(publicacion)">
+                        <i class="fa-solid fa-heart"></i> {{ publicacion.likes }}
+                      </button>
+                      <span><i class="fa-regular fa-comment"></i> {{ publicacion.comentarios }}</span>
+                      <span><i class="fa-solid fa-retweet"></i> {{ publicacion.compartidos }}</span>
+                    </footer>
+                  </article>
+                } @empty {
+                  <p class="vacio">La empresa todavía no ha publicado en su red.</p>
+                }
+              </section>
+            </div>
+
+            <aside class="columna">
+              <section class="tarjeta">
+                <header class="tarjeta__cabecera">
+                  <h2><i class="fa-solid fa-users"></i> Miembros</h2>
+                  <button type="button" class="enlace" (click)="cambiarTab('miembros')">Ver todos</button>
+                </header>
+                <ul class="miembros">
+                  @for (miembro of miembros.slice(0, 6); track miembro.id) {
+                    <li>
+                      <span class="miembros__avatar">
+                        @if (miembro.avatarUrl) {
+                          <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+                        } @else {
+                          <span>{{ inicialesMiembro(miembro.nombre) }}</span>
+                        }
+                      </span>
+                      <span class="miembros__datos">
+                        <strong>{{ miembro.nombre }}</strong>
+                        <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+                      </span>
+                      <button type="button" class="miembros__chat" title="Escribir" (click)="escribirAMiembro(miembro)">
+                        <i class="fa-solid fa-comment-dots"></i>
+                      </button>
+                    </li>
+                  } @empty {
+                    <li class="vacio">Sin miembros visibles.</li>
+                  }
+                </ul>
+              </section>
+
+              @if (tieneContacto) {
+                <section class="tarjeta">
+                  <header class="tarjeta__cabecera">
+                    <h2><i class="fa-solid fa-address-book"></i> Contacto</h2>
+                  </header>
+                  <ul class="contacto">
+                    @if (publica.empresa.telefono) {
+                      <li><i class="fa-solid fa-phone"></i><a [href]="telefonoUrl">{{ publica.empresa.telefono }}</a></li>
+                    }
+                    @if (publica.empresa.whatsapp) {
+                      <li><i class="fa-brands fa-whatsapp"></i><a [href]="whatsappUrl" target="_blank" rel="noopener">WhatsApp</a></li>
+                    }
+                    @if (publica.empresa.correo) {
+                      <li><i class="fa-solid fa-envelope"></i><a [href]="correoUrl">{{ publica.empresa.correo }}</a></li>
+                    }
+                    @if (publica.empresa.sitioWeb) {
+                      <li><i class="fa-solid fa-globe"></i><a [href]="publica.empresa.sitioWeb" target="_blank" rel="noopener">Sitio web</a></li>
+                    }
+                  </ul>
+                </section>
+              }
+            </aside>
+          </div>
+        }
+
+        @case ('publicaciones') {
+          <section class="muro muro--ancho">
+            @for (publicacion of publicacionesRed; track publicacion.id) {
+              <article class="entrada">
+                <header class="entrada__cabecera">
+                  <span class="entrada__avatar">
+                    @if (publica.empresa.logoUrl) {
+                      <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
+                    } @else {
+                      <span>{{ iniciales() }}</span>
+                    }
+                  </span>
+                  <span class="entrada__autor">
+                    <strong>{{ publica.empresa.nombre }}</strong>
+                    <small>{{ publicacion.creadoEn || 'hace un momento' }}</small>
+                  </span>
+                </header>
+                <p class="entrada__texto">{{ publicacion.contenido }}</p>
+                @if (publicacion.imagenUrl) {
+                  <div class="entrada__imagen">
+                    <img [src]="publicacion.imagenUrl" alt="Publicación de la empresa" />
+                  </div>
+                }
+                <footer class="entrada__pie">
+                  <button type="button" [class.activo]="publicacion.meGusta" (click)="meGusta(publicacion)">
+                    <i class="fa-solid fa-heart"></i> {{ publicacion.likes }}
+                  </button>
+                  <span><i class="fa-regular fa-comment"></i> {{ publicacion.comentarios }}</span>
+                  <span><i class="fa-solid fa-retweet"></i> {{ publicacion.compartidos }}</span>
+                </footer>
+              </article>
+            } @empty {
+              <p class="vacio">Sin publicaciones todavía.</p>
+            }
+          </section>
+        }
+
+        @case ('miembros') {
+          <section class="rejilla-miembros">
+            @for (miembro of miembros; track miembro.id) {
+              <article class="miembro">
+                <span class="miembro__avatar">
+                  @if (miembro.avatarUrl) {
+                    <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+                  } @else {
+                    <span>{{ inicialesMiembro(miembro.nombre) }}</span>
+                  }
+                </span>
+                <strong>{{ miembro.nombre }}</strong>
+                <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+                <button type="button" class="btn btn--mini" (click)="escribirAMiembro(miembro)">
+                  <i class="fa-solid fa-comment-dots"></i> Escribir
+                </button>
+              </article>
+            } @empty {
+              <p class="vacio">La empresa no muestra su equipo.</p>
+            }
+          </section>
+        }
+
+        @case ('seguidores') {
+          <section class="rejilla-miembros">
+            @for (persona of seguidoresRed; track persona.id) {
+              <article class="miembro">
+                <span class="miembro__avatar">
+                  @if (persona.avatarUrl) {
+                    <img [src]="persona.avatarUrl" [alt]="persona.nombre" />
+                  } @else {
+                    <span>{{ inicialesMiembro(persona.nombre) }}</span>
+                  }
+                </span>
+                <strong>{{ persona.nombre }}</strong>
+                <small>{{ persona.puesto || persona.rolEtiqueta }}</small>
+                <button type="button" class="btn btn--mini" (click)="escribirAMiembro(persona)">
+                  <i class="fa-solid fa-comment-dots"></i> Escribir
+                </button>
+              </article>
+            } @empty {
+              <p class="vacio">Todavía no hay personas que sigan a la empresa.</p>
+            }
+          </section>
+        }
+
+        @case ('propuestas') {
+          <section class="muro muro--ancho">
+            @for (publicacion of propuestas; track publicacion.id) {
+              <article class="entrada">
+                <header class="entrada__cabecera">
+                  <span class="entrada__avatar">
+                    @if (publicacion.autorAvatar) {
+                      <img [src]="publicacion.autorAvatar" [alt]="publicacion.autorNombre || 'Autor'" />
+                    } @else {
+                      <span>{{ inicialesMiembro(publicacion.autorNombre || '?') }}</span>
+                    }
+                  </span>
+                  <span class="entrada__autor">
+                    <strong>{{ publicacion.autorNombre || 'Alguien' }}</strong>
+                    <small>Propuesta para {{ publica.empresa.nombre }}</small>
+                  </span>
+                  <span class="entrada__sello"><i class="fa-solid fa-inbox"></i></span>
+                </header>
+
+                <p class="entrada__fecha">{{ publicacion.creadoEn || 'hace un momento' }}</p>
+                <p class="entrada__texto">{{ publicacion.contenido }}</p>
+
+                @if (publicacion.imagenUrl) {
+                  <div class="entrada__imagen">
+                    <img [src]="publicacion.imagenUrl" alt="Propuesta" />
+                  </div>
+                }
+
+                <footer class="entrada__pie">
+                  <button type="button" class="aprobar" (click)="aprobarPropuesta(publicacion)">
+                    <i class="fa-solid fa-check"></i> Aprobar y publicar
+                  </button>
+                  <button type="button" class="rechazar" (click)="rechazarPropuesta(publicacion)">
+                    <i class="fa-solid fa-xmark"></i> Rechazar
+                  </button>
+                </footer>
+              </article>
+            } @empty {
+              <p class="vacio">No hay propuestas esperando aprobación.</p>
+            }
+          </section>
+        }
+
+        @case ('informacion') {
+          <div class="rejilla rejilla--info">
+            <section class="tarjeta">
+              <header class="tarjeta__cabecera">
+                <h2><i class="fa-solid fa-building"></i> Sobre la empresa</h2>
+              </header>
+              <p class="tarjeta__texto">{{ publica.empresa.descripcion || 'Sin descripción.' }}</p>
+              <ul class="contacto">
+                @if (publica.empresa.razonSocial) {
+                  <li><i class="fa-solid fa-signature"></i><span>{{ publica.empresa.razonSocial }}</span></li>
+                }
+                @if (publica.empresa.nit) {
+                  <li><i class="fa-solid fa-id-card"></i><span>NIT {{ publica.empresa.nit }}</span></li>
+                }
+                @if (publica.empresa.direccion) {
+                  <li><i class="fa-solid fa-map"></i><span>{{ publica.empresa.direccion }}</span></li>
+                }
+                @if (ubicacion) {
+                  <li><i class="fa-solid fa-location-dot"></i><span>{{ ubicacion }}</span></li>
+                }
+                @if (publica.empresa.horario) {
+                  <li><i class="fa-solid fa-clock"></i><span>{{ publica.empresa.horario }}</span></li>
+                }
+              </ul>
+            </section>
+
+            <section class="tarjeta">
+              <header class="tarjeta__cabecera">
+                <h2><i class="fa-solid fa-share-nodes"></i> Canales</h2>
+              </header>
+              <ul class="contacto">
+                @for (red of redes; track red.url) {
+                  <li>
+                    <i class="fa-solid fa-link"></i>
+                    <a [href]="red.url" target="_blank" rel="noopener">{{ red.nombre }}</a>
+                  </li>
+                }
+                @if (publica.empresa.instagramUrl) {
+                  <li><i class="fa-brands fa-instagram"></i><a [href]="publica.empresa.instagramUrl" target="_blank" rel="noopener">Instagram</a></li>
+                }
+                @if (publica.empresa.facebookUrl) {
+                  <li><i class="fa-brands fa-facebook-f"></i><a [href]="publica.empresa.facebookUrl" target="_blank" rel="noopener">Facebook</a></li>
+                }
+                @if (publica.empresa.tiktokUrl) {
+                  <li><i class="fa-brands fa-tiktok"></i><a [href]="publica.empresa.tiktokUrl" target="_blank" rel="noopener">TikTok</a></li>
+                }
+              </ul>
+            </section>
+          </div>
+        }
+
+        @case ('espacios') {
+          <section class="rejilla-espacios">
+            <article class="espacio-card" [routerLink]="urlRedEmpresa">
+              <span class="espacio-card__icono"><i class="fa-solid fa-newspaper"></i></span>
+              <h3>Perfil en la red</h3>
+              <p>Publicaciones, miembros e información de {{ publica.empresa.nombre }}.</p>
+              <span class="espacio-card__enlace">Ver perfil <i class="fa-solid fa-arrow-right"></i></span>
+            </article>
+
+            @for (espacio of espaciosPublicos; track espacio.slug) {
+              <article class="espacio-card espacio-card--propio" [routerLink]="['/empresa', publica.empresa.slug, 'espacio', espacio.slug]">
+                <span class="espacio-card__icono"><i class="fa-solid fa-globe"></i></span>
+                <h3>{{ espacio.nombre }}</h3>
+                <p>{{ espacio.lema || 'Página propia de la empresa.' }}</p>
+                <span class="espacio-card__enlace">Entrar <i class="fa-solid fa-arrow-right"></i></span>
+              </article>
+            } @empty {
+              <p class="vacio">La empresa todavía no publicó un espacio propio.</p>
+            }
+          </section>
+        }
+      }
+    </main>
+
+    <footer class="red__pie">
+      <span><i class="fa-solid fa-cube"></i> N-soft</span>
+      <span>{{ publica.empresa.nombre }} · {{ tipoEmpresa }}</span>
+    </footer>
+  } @else if (cargando()) {
+    <div class="red__estado">
       <i class="fa-solid fa-circle-notch fa-spin"></i>
       <p>Cargando la empresa…</p>
     </div>
   } @else {
-    @if (datos(); as publica) {
-      <main class="pub__contenido">
-        <section class="hero">
-          <div class="hero__portada" [style.background-image]="portada(publica.empresa)"></div>
-          <div class="hero__velo"></div>
-
-          <div class="hero__cuerpo">
-            <div class="hero__logo">
-              @if (publica.empresa.logoUrl) {
-                <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
-              } @else {
-                <span>{{ iniciales() }}</span>
-              }
-            </div>
-
-            <div class="hero__datos">
-              <div class="hero__sellos">
-                <span class="sello">{{ tipoEmpresa }}</span>
-                @if (sectorEmpresa) {
-                  <span class="sello">{{ sectorEmpresa }}</span>
-                }
-                @if (publica.empresa.certificada) {
-                  <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Certificada</span>
-                }
-              </div>
-
-              <h1>{{ publica.empresa.nombre }}</h1>
-
-              @if (publica.empresa.eslogan) {
-                <p class="hero__eslogan">{{ publica.empresa.eslogan }}</p>
-              }
-
-              @if (publica.empresa.descripcion) {
-                <p class="hero__descripcion">{{ publica.empresa.descripcion }}</p>
-              }
-
-              <div class="hero__meta">
-                @if (ubicacion) {
-                  <span><i class="fa-solid fa-location-dot"></i> {{ ubicacion }}</span>
-                }
-                @if (publica.empresa.direccion) {
-                  <span><i class="fa-solid fa-map"></i> {{ publica.empresa.direccion }}</span>
-                }
-                @if (publica.empresa.horario) {
-                  <span><i class="fa-solid fa-clock"></i> {{ publica.empresa.horario }}</span>
-                }
-              </div>
-
-              <div class="hero__acciones">
-                <button type="button" class="btn btn--primary" (click)="seguirEmpresa()" [class.btn--siguiendo]="siguiendo()">
-                  <i class="fa-solid" [class.fa-user-plus]="!siguiendo()" [class.fa-check]="siguiendo()"></i>
-                  {{ siguiendo() ? 'Siguiendo' : 'Seguir' }}
-                </button>
-                <button type="button" class="btn" (click)="abrirChat()">
-                  <i class="fa-solid fa-comment-dots"></i> Chatear
-                </button>
-                @if (whatsappUrl) {
-                  <a class="btn btn--primary" [href]="whatsappUrl" target="_blank" rel="noopener">
-                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                  </a>
-                }
-                @if (telefonoUrl) {
-                  <a class="btn" [href]="telefonoUrl">
-                    <i class="fa-solid fa-phone"></i> Llamar
-                  </a>
-                }
-                @if (correoUrl) {
-                  <a class="btn" [href]="correoUrl">
-                    <i class="fa-solid fa-envelope"></i> Escribir
-                  </a>
-                }
-                @if (publica.empresa.sitioWeb) {
-                  <a class="btn" [href]="publica.empresa.sitioWeb" target="_blank" rel="noopener">
-                    <i class="fa-solid fa-globe"></i> Sitio web
-                  </a>
-                }
-              </div>
-
-              @if (publica.empresa.instagramUrl || publica.empresa.facebookUrl || publica.empresa.tiktokUrl) {
-                <div class="hero__sociales">
-                  @if (publica.empresa.instagramUrl) {
-                    <a [href]="publica.empresa.instagramUrl" target="_blank" rel="noopener" title="Instagram">
-                      <i class="fa-brands fa-instagram"></i>
-                    </a>
-                  }
-                  @if (publica.empresa.facebookUrl) {
-                    <a [href]="publica.empresa.facebookUrl" target="_blank" rel="noopener" title="Facebook">
-                      <i class="fa-brands fa-facebook-f"></i>
-                    </a>
-                  }
-                  @if (publica.empresa.tiktokUrl) {
-                    <a [href]="publica.empresa.tiktokUrl" target="_blank" rel="noopener" title="TikTok">
-                      <i class="fa-brands fa-tiktok"></i>
-                    </a>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        </section>
-
-        @if (componentes.length) {
-          <section class="lienzo" aria-label="Contenido de la empresa">
-            <div class="lienzo__marco" #marco [style.height.px]="alto * escala()">
-              <div class="lienzo__hoja" [style.width.px]="ancho * escala()" [style.height.px]="alto * escala()">
-                <div
-                  class="lienzo__stage"
-                  [style.width.px]="ancho"
-                  [style.height.px]="alto"
-                  [style.transform]="'scale(' + escala() + ')'"
-                >
-                  @for (componente of componentes; track componente.id ?? $index) {
-                    <div
-                      class="lienzo__capa"
-                      [style.left.px]="componente.x"
-                      [style.top.px]="componente.y"
-                      [style.width.px]="componente.ancho"
-                      [style.height.px]="componente.alto"
-                      [style.z-index]="zIndex(componente)"
-                    >
-                      <app-empresa-componente-vista [componente]="componente" modo="publico" />
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </section>
-        }
-
-        <section class="publicidad" aria-label="Publicidad de la empresa">
-          <header class="seccion__head">
-            <h2><i class="fa-solid fa-rectangle-ad"></i> Publicidad</h2>
-            <p>Lo que la empresa quiere que veas primero.</p>
-          </header>
-
-          <div class="publicidad__rejilla">
-            <article class="anuncio anuncio--grande">
-              <span class="anuncio__sello">Destacado</span>
-              <h3>{{ publica.empresa.nombre }}</h3>
-              <p>{{ publica.empresa.eslogan || publica.empresa.descripcion || 'Espacio publicitario de la empresa.' }}</p>
-              @if (publica.empresa.sitioWeb) {
-                <a class="anuncio__cta" [href]="publica.empresa.sitioWeb" target="_blank" rel="noopener">
-                  Ver más <i class="fa-solid fa-arrow-right"></i>
-                </a>
-              }
-            </article>
-
-            <article class="anuncio">
-              <span class="anuncio__sello anuncio__sello--suave">Promoción</span>
-              <h3>Conoce la empresa</h3>
-              <p>Este espacio lo administra el equipo de {{ publica.empresa.nombre }}.</p>
-            </article>
-
-            <article class="anuncio anuncio--contacto">
-              <h3>¿Hablamos?</h3>
-              <p>Escríbenos y te contamos cómo trabajamos.</p>
-              <div class="anuncio__acciones">
-                @if (correoUrl) {
-                  <a class="btn btn--mini" [href]="correoUrl"><i class="fa-solid fa-envelope"></i> Correo</a>
-                }
-                @if (whatsappUrl) {
-                  <a class="btn btn--mini" [href]="whatsappUrl" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
-                }
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="muro" aria-label="Publicaciones de la empresa">
-          <header class="seccion__head">
-            <h2><i class="fa-solid fa-newspaper"></i> Publicaciones</h2>
-            <p>Lo que publica {{ handleCreador || 'la cuenta de la empresa' }} como empresa.</p>
-          </header>
-
-          @if (cargandoPublicaciones()) {
-            <p class="estado-mini"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando publicaciones…</p>
-          } @else {
-            <ul class="muro__lista">
-              @for (publicacion of publicacionesEquipo(); track publicacion.id) {
-                <li class="entrada">
-                  <header class="entrada__cabecera">
-                    <span class="entrada__avatar">
-                      @if (publica.empresa.logoUrl) {
-                        <img [src]="publica.empresa.logoUrl" [alt]="publica.empresa.nombre" />
-                      } @else {
-                        <span>{{ iniciales() }}</span>
-                      }
-                    </span>
-                    <span class="entrada__datos">
-                      <strong>{{ publica.empresa.nombre }}</strong>
-                      <small>{{ handleCreador || 'cuenta de la empresa' }}</small>
-                    </span>
-                  </header>
-
-                  <p class="entrada__texto">{{ publicacion.content }}</p>
-
-                  <footer class="entrada__pie">
-                    <span><i class="fa-regular fa-heart"></i> {{ publicacion.likesCount ?? 0 }}</span>
-                    <span><i class="fa-regular fa-comment"></i> {{ publicacion.commentsCount ?? 0 }}</span>
-                  </footer>
-                </li>
-              } @empty {
-                <li class="estado-mini">La empresa todavía no ha publicado nada.</li>
-              }
-            </ul>
-          }
-        </section>
-
-        @if (equipo.length) {
-          <section class="equipo">
-            <header class="seccion__head">
-              <h2><i class="fa-solid fa-users"></i> Nuestro equipo</h2>
-              <p>Las personas que hacen posible esta empresa.</p>
-            </header>
-
-            <ul class="equipo__lista">
-              @for (miembro of equipo; track miembro.id) {
-                <li class="persona">
-                  <span class="persona__avatar">
-                    @if (miembro.avatarUrl) {
-                      <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
-                    } @else {
-                      <span>{{ inicialesMiembro(miembro.nombre) }}</span>
-                    }
-                  </span>
-                  <span class="persona__datos">
-                    <strong>{{ miembro.nombre }}</strong>
-                    <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
-                  </span>
-                </li>
-              }
-            </ul>
-          </section>
-        }
-
-        @if (tieneContacto) {
-          <section class="contacto">
-            <header class="seccion__head">
-              <h2><i class="fa-solid fa-address-book"></i> Contacto</h2>
-              <p>Escríbenos o visítanos.</p>
-            </header>
-
-            <ul class="contacto__lista">
-              @if (publica.empresa.telefono) {
-                <li>
-                  <i class="fa-solid fa-phone"></i>
-                  <a [href]="telefonoUrl">{{ publica.empresa.telefono }}</a>
-                </li>
-              }
-              @if (publica.empresa.whatsapp) {
-                <li>
-                  <i class="fa-brands fa-whatsapp"></i>
-                  <a [href]="whatsappUrl" target="_blank" rel="noopener">{{ publica.empresa.whatsapp }}</a>
-                </li>
-              }
-              @if (publica.empresa.correo) {
-                <li>
-                  <i class="fa-solid fa-envelope"></i>
-                  <a [href]="correoUrl">{{ publica.empresa.correo }}</a>
-                </li>
-              }
-              @if (publica.empresa.direccion) {
-                <li>
-                  <i class="fa-solid fa-map"></i>
-                  <span>{{ publica.empresa.direccion }}</span>
-                </li>
-              }
-              @if (ubicacion) {
-                <li>
-                  <i class="fa-solid fa-location-dot"></i>
-                  <span>{{ ubicacion }}</span>
-                </li>
-              }
-              @if (publica.empresa.horario) {
-                <li>
-                  <i class="fa-solid fa-clock"></i>
-                  <span>{{ publica.empresa.horario }}</span>
-                </li>
-              }
-            </ul>
-          </section>
-        }
-      </main>
-
-      <footer class="pub__pie">
-        <span><i class="fa-solid fa-cube"></i> N-soft</span>
-        <span>{{ publica.empresa.nombre }} · {{ tipoEmpresa }}</span>
-      </footer>
-    } @else {
-      <div class="estado">
-        <i class="fa-solid fa-building-circle-exclamation"></i>
-        <h1>Esta empresa no está disponible</h1>
-        <p>El enlace no existe o su página todavía no se ha publicado.</p>
-        <a class="btn btn--primary" routerLink="/">Ir a N-soft</a>
-      </div>
-    }
+    <div class="red__estado">
+      <i class="fa-solid fa-building-circle-exclamation"></i>
+      <h1>Esta empresa no está disponible</h1>
+      <p>El enlace no existe o su perfil todavía no se ha publicado.</p>
+      <a class="btn btn--primary" routerLink="/">Ir a N-soft</a>
+    </div>
   }
 </div>

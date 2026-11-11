@@ -12,12 +12,14 @@ interface RailItem {
   icon: string;
   ruta?: string;
   exacto?: boolean;
-  accion?: 'mensajes' | 'salir';
+  accion?: 'mensajes' | 'salir' | 'ajustes';
+  nota?: string;
 }
 
 const NAVEGACION_PERSONAL: RailItem[] = [
   { label: 'Inicio', icon: 'fa-solid fa-house', ruta: '/app', exacto: true },
   { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
+  { label: 'Mi perfil', icon: 'fa-solid fa-id-badge', ruta: '/app/perfil' },
   { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
   { label: 'Talento', icon: 'fa-solid fa-magnifying-glass', ruta: '/app/talento' },
   { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
@@ -28,14 +30,14 @@ const NAVEGACION_PERSONAL: RailItem[] = [
 ];
 
 const NAVEGACION_EMPRESA: RailItem[] = [
-  { label: 'Mi empresa', icon: 'fa-solid fa-building', ruta: '/app/empresa', exacto: true },
-  { label: 'Panel de control', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+  { label: 'Perfil en la red', icon: 'fa-solid fa-building', ruta: '/app/empresa', exacto: true, nota: 'Lo que ven los demás' },
+  { label: 'Mi espacio', icon: 'fa-solid fa-globe', ruta: '/app/empresa/espacio', nota: 'Tu landing' },
+  { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
+  { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
+  { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
   { label: 'Mi actividad', icon: 'fa-solid fa-user-tie', ruta: '/app/dashboard/empresa/mi-actividad' },
-  { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
-  { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo' },
-  { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos' },
-  { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
+  { label: 'Mensajes', icon: 'fa-solid fa-comment-dots', accion: 'mensajes' },
 ];
 
 @Component({
@@ -63,11 +65,30 @@ export class SideNavComponent {
   get salida(): RailItem[] {
     if (this.empresa.enModoEmpresa()) {
       return [
-        { label: 'Ajustes de empresa', icon: 'fa-solid fa-gear', ruta: '/app/empresa/ajustes' },
-        { label: 'Volver a mi perfil', icon: 'fa-solid fa-user', accion: 'salir' },
+        { label: 'Ajustes de la empresa', icon: 'fa-solid fa-gear', accion: 'ajustes' },
+        { label: 'Volver a mi perfil personal', icon: 'fa-solid fa-user', accion: 'salir' },
       ];
     }
-    return [{ label: 'Ajustes', icon: 'fa-solid fa-gear', ruta: '/app/ajustes/cuenta' }];
+    return [{ label: 'Ajustes de cuenta', icon: 'fa-solid fa-gear', accion: 'ajustes' }];
+  }
+
+  get tituloAjustes(): string {
+    return this.empresa.enModoEmpresa() ? 'Ajustes de la empresa' : 'Ajustes de cuenta';
+  }
+
+  get subtituloAjustes(): string {
+    return this.empresa.enModoEmpresa()
+      ? 'Perfil, equipo y permisos de la empresa'
+      : 'Tus datos personales, privacidad y seguridad';
+  }
+
+  get enEmpresa(): boolean {
+    return this.empresa.enModoEmpresa();
+  }
+
+  abrirAjustes(): void {
+    const destino = this.empresa.enModoEmpresa() ? '/app/empresa/ajustes' : '/app/ajustes/cuenta';
+    void this.router.navigateByUrl(destino);
   }
 
   get tituloCuenta(): string {

@@ -1,0 +1,80 @@
+<header class="espacio-nav">
+  <div class="espacio-nav__fila">
+    <a class="espacio-nav__marca" [routerLink]="urlPerfil" [title]="espacio.empresaNombre">
+      @if (espacio.logoUrl) {
+        <img [src]="espacio.logoUrl" [alt]="espacio.empresaNombre" />
+      } @else {
+        <span class="espacio-nav__iniciales">{{ iniciales }}</span>
+      }
+      <span class="espacio-nav__titulo">
+        <strong>{{ espacio.empresaNombre }}</strong>
+        <small>{{ espacio.nombre }}</small>
+      </span>
+    </a>
+
+    <nav class="espacio-nav__enlaces" aria-label="Navegación del espacio">
+      @for (enlace of enlaces; track enlace.etiqueta + enlace.destino) {
+        @if (externo(enlace)) {
+          <a [href]="href(enlace)" target="_blank" rel="noopener">
+            @if (enlace.icono) {
+              <i [class]="enlace.icono"></i>
+            }
+            {{ enlace.etiqueta }}
+          </a>
+        } @else {
+          <a [href]="href(enlace)">
+            @if (enlace.icono) {
+              <i [class]="enlace.icono"></i>
+            }
+            {{ enlace.etiqueta }}
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="espacio-nav__acciones">
+      <a class="espacio-nav__volver" [routerLink]="urlPerfil">
+        <i class="fa-solid fa-building"></i>
+        <span>Perfil de {{ espacio.empresaNombre }}</span>
+      </a>
+
+      @if (puedeEditar) {
+        <a class="espacio-nav__editar" routerLink="/app/empresa/espacio">
+          <i class="fa-solid fa-pen-ruler"></i>
+          <span>Editar espacio</span>
+        </a>
+      }
+
+      @if (!haySesion) {
+        <a class="espacio-nav__entrar" routerLink="/acceso">
+          <i class="fa-solid fa-right-to-bracket"></i> Entrar
+        </a>
+      }
+
+      <button type="button" class="espacio-nav__menu" (click)="alternar()" aria-label="Menú">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  @if (menuAbierto()) {
+    <nav class="espacio-nav__movil" aria-label="Navegación del espacio en móvil">
+      @for (enlace of enlaces; track enlace.etiqueta + enlace.destino) {
+        <a [href]="href(enlace)" (click)="cerrar()">
+          @if (enlace.icono) {
+            <i [class]="enlace.icono"></i>
+          }
+          {{ enlace.etiqueta }}
+        </a>
+      }
+      <a [routerLink]="urlPerfil" (click)="cerrar()">
+        <i class="fa-solid fa-newspaper"></i> Perfil en la red
+      </a>
+      @if (puedeEditar) {
+        <a routerLink="/app/empresa/espacio" (click)="cerrar()">
+          <i class="fa-solid fa-pen-ruler"></i> Editar espacio
+        </a>
+      }
+    </nav>
+  }
+</header>

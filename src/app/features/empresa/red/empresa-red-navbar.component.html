@@ -1,0 +1,251 @@
+<header class="red-nav">
+  <div class="red-nav__marca">
+    <a class="red-nav__logo" routerLink="/" aria-label="N-soft">
+      <i class="fa-solid fa-cube"></i>
+      <span>N-soft</span>
+    </a>
+
+    <a class="red-nav__empresa" [routerLink]="urlPerfil" [title]="empresa.nombre">
+      @if (empresa.logoUrl) {
+        <img [src]="empresa.logoUrl" [alt]="empresa.nombre" />
+      } @else {
+        <span class="red-nav__iniciales">{{ iniciales }}</span>
+      }
+      <span class="red-nav__nombre">{{ empresa.nombre }}</span>
+    </a>
+  </div>
+
+  <div class="red-nav__acciones" aria-label="Navegación de la empresa">
+    <button
+      type="button"
+      class="red-nav__boton"
+      [class.red-nav__boton--activo]="panel() === 'espacios'"
+      (click)="alternar('espacios')"
+    >
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Espacios</span>
+      @if (espacios.length) {
+        <em>{{ espacios.length }}</em>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="red-nav__boton"
+      [class.red-nav__boton--activo]="panel() === 'miembros'"
+      (click)="alternar('miembros')"
+    >
+      <i class="fa-solid fa-users"></i>
+      <span>Miembros</span>
+      @if (equipo.length) {
+        <em>{{ equipo.length }}</em>
+      }
+    </button>
+
+    @if (urlEspacio) {
+      <a class="red-nav__boton red-nav__boton--sitio" [routerLink]="urlEspacio" (click)="cerraPanel()">
+        <i class="fa-solid fa-globe"></i>
+        <span>Ir a la landing</span>
+      </a>
+    }
+
+    @if (puedeEditar) {
+      <a class="red-nav__boton red-nav__boton--editar" routerLink="/app/empresa/ajustes" (click)="cerraPanel()">
+        <i class="fa-solid fa-pen-to-square"></i>
+        <span>Editar perfil</span>
+      </a>
+    }
+
+    @if (haySesion) {
+      <button type="button" class="red-nav__boton red-nav__boton--publicar" (click)="abrirPropuesta()">
+        <i class="fa-solid fa-pen"></i>
+        <span>Publicar aquí</span>
+      </button>
+
+      <button
+        type="button"
+        class="red-nav__cuenta"
+        [class.red-nav__cuenta--activa]="panel() === 'cuenta'"
+        (click)="alternar('cuenta')"
+        aria-label="Mi cuenta y ajustes"
+        [attr.aria-expanded]="panel() === 'cuenta'"
+      >
+        <i class="fa-solid fa-user"></i>
+      </button>
+    } @else {
+      <a class="red-nav__entrar" routerLink="/acceso">
+        <i class="fa-solid fa-right-to-bracket"></i> Entrar
+      </a>
+    }
+  </div>
+
+  @if (panel() === 'miembros') {
+    <div class="red-nav__panel">
+      <header>
+        <strong>Miembros de {{ empresa.nombre }}</strong>
+        <button type="button" (click)="cerraPanel()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <ul>
+        @for (miembro of equipo; track miembro.id) {
+          <li>
+            <span class="red-nav__avatar">
+              @if (miembro.avatarUrl) {
+                <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+              } @else {
+                <span>{{ inicialesDe(miembro.nombre) }}</span>
+              }
+            </span>
+            <span class="red-nav__datos">
+              <strong>{{ miembro.nombre }}</strong>
+              <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+            </span>
+            <button type="button" class="red-nav__mini" (click)="escribirAMiembro(miembro)" title="Escribir">
+              <i class="fa-solid fa-comment-dots"></i>
+            </button>
+          </li>
+        } @empty {
+          <li class="red-nav__vacio">La empresa todavía no muestra su equipo.</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (panel() === 'espacios') {
+    <div class="red-nav__panel">
+      <header>
+        <strong>Espacios de {{ empresa.nombre }}</strong>
+        <button type="button" (click)="cerraPanel()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <ul>
+        <li class="red-nav__enlace" [class.red-nav__enlace--activo]="!espacioActivo">
+          <a [routerLink]="urlPerfil" (click)="cerraPanel()">
+            <i class="fa-solid fa-newspaper"></i>
+            <span>Perfil en la red</span>
+            <small>Publicaciones y miembros</small>
+          </a>
+        </li>
+        @for (espacio of espacios; track espacio.slug) {
+          <li class="red-nav__enlace" [class.red-nav__enlace--activo]="espacioActivo === espacio.slug">
+            <a [routerLink]="['/empresa', empresa.slug, 'espacio', espacio.slug]" (click)="cerraPanel()">
+              <i class="fa-solid fa-globe"></i>
+              <span>{{ espacio.nombre }}</span>
+              <small>Espacio propio</small>
+            </a>
+          </li>
+        } @empty {
+          <li class="red-nav__vacio">Todavía no hay espacios publicados.</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (panel() === 'cuenta') {
+    <div class="red-nav__panel red-nav__panel--cuenta">
+      <header>
+        <strong>Tu cuenta</strong>
+        <button type="button" (click)="cerraPanel()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <div class="cuenta__ficha">
+        <span class="cuenta__avatar">{{ inicialesUsuario }}</span>
+        <span class="cuenta__datos">
+          <strong>{{ nombreUsuario }}</strong>
+          <small>{{ correoUsuario }}</small>
+          <em>{{ etiquetaRol() }}</em>
+        </span>
+      </div>
+
+      <div class="cuenta__bloque">
+        <p class="cuenta__rotulo">Estás en el espacio de {{ empresa.nombre }}</p>
+        <button type="button" class="cuenta__fila" (click)="irAMiPerfil()">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Volver a mi perfil personal</span>
+        </button>
+        <button type="button" class="cuenta__fila" (click)="irAlFeed()">
+          <i class="fa-solid fa-house"></i>
+          <span>Ir al inicio de la red</span>
+        </button>
+      </div>
+
+      <div class="cuenta__bloque">
+        <p class="cuenta__rotulo">Ajustes</p>
+        <button type="button" class="cuenta__fila" (click)="irAAjustes()">
+          <i class="fa-solid fa-gear"></i>
+          <span>Ajustes de cuenta</span>
+        </button>
+        <button type="button" class="cuenta__fila" (click)="irASeguridad()">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Seguridad</span>
+        </button>
+        @if (soyMiembro) {
+          <button type="button" class="cuenta__fila" (click)="irAMiEmpresa()">
+            <i class="fa-solid fa-building"></i>
+            <span>Panel de mi empresa</span>
+          </button>
+        }
+      </div>
+
+      <div class="cuenta__bloque">
+        <p class="cuenta__rotulo">En esta empresa</p>
+        <button type="button" class="cuenta__fila" (click)="abrirPropuesta()">
+          <i class="fa-solid fa-pen"></i>
+          <span>Publicar en su muro</span>
+        </button>
+        @if (urlEspacio) {
+          <a class="cuenta__fila" [routerLink]="urlEspacio" (click)="cerraPanel()">
+            <i class="fa-solid fa-globe"></i>
+            <span>Ver su landing</span>
+          </a>
+        }
+      </div>
+    </div>
+  }
+
+  @if (panel() === 'proponer') {
+    <div class="red-nav__panel red-nav__panel--proponer">
+      <header>
+        <strong>Publicar en {{ empresa.nombre }}</strong>
+        <button type="button" (click)="cerraPanel()" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      </header>
+
+      <textarea
+        rows="3"
+        [(ngModel)]="borrador"
+        placeholder="Escribe lo que quieres publicar en el muro de {{ empresa.nombre }}"
+      ></textarea>
+
+      <p class="proponer__aviso">
+        @if (miRol; as yo) {
+          @if (yo.rol !== 'VISOR') {
+            Publicas como parte de {{ empresa.nombre }}: aparecerá al instante en su perfil.
+          } @else {
+            Tu propuesta llegará a los administradores de {{ empresa.nombre }} y aparecerá cuando la aprueben.
+          }
+        } @else if (esSeguidor) {
+          Sigues a {{ empresa.nombre }}: tu propuesta aparecerá cuando la aprueben.
+        } @else {
+          No sigues a {{ empresa.nombre }}, pero puedes proponer: aparecerá si lo aprueban.
+        }
+      </p>
+
+      <div class="proponer__pie">
+        <button type="button" class="red-nav__cancelar" (click)="cerraPanel()">Cancelar</button>
+        <button
+          type="button"
+          class="red-nav__enviar"
+          [disabled]="!borrador.trim() || publicando()"
+          (click)="enviarPropuesta()"
+        >
+          @if (publicando()) {
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+          } @else {
+            <i class="fa-solid fa-paper-plane"></i>
+          }
+          Enviar
+        </button>
+      </div>
+    </div>
+  }
+</header>

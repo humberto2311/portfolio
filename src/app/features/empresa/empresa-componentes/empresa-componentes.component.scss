@@ -494,3 +494,75 @@
   opacity: .5;
   cursor: not-allowed;
 }
+
+.ruta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed var(--border-soft);
+  background: var(--bg-alt);
+}
+
+.ruta__pasos {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ruta__paso {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.15s;
+
+  i {
+    color: var(--text-faint);
+  }
+
+  &:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+}
+
+.ruta__paso--hecho {
+  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent-cyan);
+
+  i {
+    color: var(--accent-cyan);
+  }
+}
+
+.ruta__flecha {
+  font-size: 0.6rem;
+  color: var(--text-faint);
+}
+
+.ruta__atajo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

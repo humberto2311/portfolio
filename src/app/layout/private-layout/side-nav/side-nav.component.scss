@@ -228,3 +228,30 @@
     display: none;
   }
 }
+
+.rail__cambiar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: calc(100% - 12px);
+  margin: 0 6px 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed var(--border-soft);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.16s;
+
+  i {
+    font-size: 0.78rem;
+  }
+
+  &:hover {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    background: var(--accent-soft);
+  }
+}

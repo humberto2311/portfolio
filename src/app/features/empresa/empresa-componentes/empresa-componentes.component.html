@@ -18,6 +18,27 @@
     }
   </header>
 
+  @if (!modoPublico()) {
+    <section class="ruta">
+      <div class="ruta__pasos">
+        <span class="ruta__paso ruta__paso--hecho">
+          <i class="fa-solid fa-pen-ruler"></i> 1. Diseña el componente
+        </span>
+        <i class="fa-solid fa-arrow-right ruta__flecha"></i>
+        <a class="ruta__paso" routerLink="/app/empresa/espacio">
+          <i class="fa-solid fa-table-list"></i> 2. Elige la sección en tu espacio
+        </a>
+        <i class="fa-solid fa-arrow-right ruta__flecha"></i>
+        <a class="ruta__paso" routerLink="/app/empresa/espacio">
+          <i class="fa-solid fa-globe"></i> 3. Publica tu página
+        </a>
+      </div>
+      <a class="ruta__atajo" routerLink="/app/empresa/espacio">
+        <i class="fa-solid fa-arrow-right-long"></i> Ir a mi espacio
+      </a>
+    </section>
+  }
+
   @if (!modoPublico() && creando()) {
     <div class="nuevo">
       <input

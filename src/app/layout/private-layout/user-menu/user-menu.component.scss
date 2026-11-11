@@ -126,3 +126,23 @@
     color: $danger;
   }
 }
+
+.user-menu__grupo {
+  margin: 8px 10px 4px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-muted;
+
+  &:not(:first-child) {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid $bg-border;
+  }
+}
+
+.user-menu__volver {
+  color: $accent !important;
+  font-weight: 700;
+}

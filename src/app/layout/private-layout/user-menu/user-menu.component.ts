@@ -6,6 +6,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { ResumeService } from '../../../core/services/resume.service';
 import { TourService } from '../../../core/services/tour.service';
+import { EmpresaService } from '../../../core/services/empresa.service';
 
 @Component({
   selector: 'app-user-menu',
@@ -21,12 +22,15 @@ export class UserMenuComponent implements OnInit {
   private perfiles = inject(UserProfileService);
   private resumes = inject(ResumeService);
   private tour = inject(TourService);
+  private empresas = inject(EmpresaService);
 
   readonly user = this.auth.currentUser;
   readonly menuOpen = signal(false);
   readonly avatar = this.perfiles.avatar;
   readonly rol = signal<string>('');
   readonly nativa = Capacitor.isNativePlatform();
+  readonly enEmpresa = this.empresas.enModoEmpresa;
+  readonly empresaActual = this.empresas.empresaActual;
 
   ngOnInit(): void {
     this.perfiles.cargarMiAvatar();
@@ -72,6 +76,12 @@ export class UserMenuComponent implements OnInit {
   goTo(path: string) {
     this.menuOpen.set(false);
     this.router.navigate([path]);
+  }
+
+  volverAPersonal() {
+    this.menuOpen.set(false);
+    this.empresas.salir();
+    this.router.navigate(['/app/perfil']);
   }
 
   abrirGuia() {

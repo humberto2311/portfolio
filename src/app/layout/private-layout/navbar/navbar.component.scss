@@ -168,6 +168,26 @@
   @include avatar-base(34px, 0.75rem);
 }
 
+.resultados__avatar--empresa {
+  border-radius: 10px;
+  background: $accent-soft;
+  color: $accent;
+}
+
+.popover__titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid $bg-border;
+  font-size: 0.78rem;
+  color: $text-muted;
+  font-weight: 600;
+
+  i { color: $accent; }
+}
+
 .resultados__datos {
   display: flex;
   flex-direction: column;

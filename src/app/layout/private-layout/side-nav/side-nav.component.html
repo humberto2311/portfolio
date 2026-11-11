@@ -36,6 +36,11 @@
             <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
             <span class="rail__etiqueta">{{ item.label }}</span>
           </button>
+        } @else if (item.accion === 'ajustes') {
+          <button type="button" class="rail__item" [title]="item.label" (click)="abrirAjustes()">
+            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+            <span class="rail__etiqueta">{{ item.label }}</span>
+          </button>
         } @else {
           <a class="rail__item" [title]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
             <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
@@ -80,4 +85,11 @@
       <small>{{ subtituloCuenta }}</small>
     </span>
   </a>
+
+  @if (enEmpresa) {
+    <button type="button" class="rail__cambiar" (click)="salirEmpresa()" title="Cambiar de espacio">
+      <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+      <span class="rail__etiqueta">Cambiar de espacio</span>
+    </button>
+  }
 </nav>

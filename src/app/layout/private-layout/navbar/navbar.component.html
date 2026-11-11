@@ -9,8 +9,8 @@
       <input
         #campo
         type="search"
-        placeholder="Buscar personas"
-        aria-label="Buscar personas por nombre o usuario"
+        placeholder="Buscar en N-soft: personas, publicaciones, espacios"
+        aria-label="Buscar en N-soft"
         autocomplete="off"
         [value]="searchQuery"
         (input)="onSearchInput(campo.value)"
@@ -22,6 +22,50 @@
         </button>
       }
     </div>
+
+    @if (mostrarRed()) {
+      <div class="popover popover--red">
+        <header class="popover__titulo">
+          <span>Resultados para «{{ red.termino() }}»</span>
+          @if (red.buscando()) {
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+          }
+        </header>
+
+        <ul class="resultados">
+          @for (r of red.resultados(); track r.tipo + r.id) {
+            <li>
+              <button type="button" (click)="irAResultado(r)">
+                <span class="resultados__avatar" [class.resultados__avatar--empresa]="r.tipo === 'empresa'">
+                  @if (r.avatarUrl) {
+                    <img [src]="r.avatarUrl" [alt]="r.nombre" />
+                  } @else {
+                    {{ r.iniciales }}
+                  }
+                </span>
+                <span class="resultados__datos">
+                  <strong>{{ r.nombre }}</strong>
+                  <small>
+                    @if (r.tipo === 'empresa') {
+                      <i class="fa-solid fa-building"></i> Empresa
+                    } @else {
+                      &#64;{{ r.usuario }}
+                    }
+                    @if (r.detalle) { · {{ r.detalle }} }
+                  </small>
+                </span>
+                <span class="resultados__relacion" [class.otro]="r.tipo === 'persona'">
+                  {{ r.tipo === 'empresa' ? 'Ver perfil' : 'Persona' }}
+                </span>
+              </button>
+            </li>
+          }
+          @if (!red.buscando() && red.resultados().length === 0) {
+            <li class="resultados__vacio">Sin resultados para «{{ red.termino() }}»</li>
+          }
+        </ul>
+      </div>
+    }
 
     @if (mostrarSugerencias()) {
       <div class="popover">

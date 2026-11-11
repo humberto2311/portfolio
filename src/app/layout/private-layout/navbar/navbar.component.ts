@@ -11,6 +11,7 @@ import {
 import { UserMenuComponent } from '../user-menu/user-menu.component';
 import { NotificacionesComponent } from '../notificaciones/notificaciones.component';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { BusquedaRedService, ResultadoRed } from '../../../core/services/busqueda-red.service';
 
 @Component({
   selector: 'app-private-navbar',
@@ -25,6 +26,7 @@ export class PrivateNavbarComponent implements OnDestroy {
   private elRef = inject(ElementRef);
   private perfilService = inject(PerfilService);
   private directorio = inject(UserDirectoryService);
+  readonly red = inject(BusquedaRedService);
 
   readonly user = this.auth.currentUser;
   searchQuery = '';
@@ -32,6 +34,7 @@ export class PrivateNavbarComponent implements OnDestroy {
   sugerencias = signal<SugerenciaUsuario[]>([]);
   indice = signal(0);
   mostrarSugerencias = signal(false);
+  mostrarRed = signal(false);
 
   readonly filtro = signal<'Todos' | RelacionUsuario>('Todos');
   readonly filtros: ('Todos' | RelacionUsuario)[] = ['Todos', 'Por NFC', 'Sigues', 'Te sigue', 'Sugerido'];
@@ -48,6 +51,7 @@ export class PrivateNavbarComponent implements OnDestroy {
   onDocumentClick(event: MouseEvent) {
     if (!this.elRef.nativeElement.contains(event.target)) {
       this.cerrarSugerencias();
+      this.mostrarRed.set(false);
     }
   }
 
@@ -60,17 +64,31 @@ export class PrivateNavbarComponent implements OnDestroy {
     if (this.timer) clearTimeout(this.timer);
 
     const termino = valor.trim();
+
+    this.red.buscar(termino);
+    this.mostrarRed.set(termino.length >= 2);
+
     if (!termino) {
       this.cerrarSugerencias();
+      this.mostrarRed.set(false);
       return;
     }
 
     this.timer = setTimeout(() => this.buscar(termino), 250);
   }
 
+  irAResultado(resultado: ResultadoRed): void {
+    this.cerrarSugerencias();
+    this.mostrarRed.set(false);
+    this.searchQuery = '';
+    this.red.ir(resultado);
+  }
+
   limpiar(campo: HTMLInputElement): void {
     this.searchQuery = '';
     this.cerrarSugerencias();
+    this.mostrarRed.set(false);
+    this.red.limpiar();
     campo.focus();
   }
 
@@ -92,6 +110,12 @@ export class PrivateNavbarComponent implements OnDestroy {
   }
 
   onKeydown(event: KeyboardEvent): void {
+    if (this.mostrarRed() && this.red.resultados().length && event.key === 'Enter') {
+      event.preventDefault();
+      this.irAResultado(this.red.resultados()[0]);
+      return;
+    }
+
     if (!this.mostrarSugerencias()) {
       if (event.key === 'Enter') this.onSearch();
       return;
@@ -156,4 +180,5 @@ export class PrivateNavbarComponent implements OnDestroy {
     this.mostrarSugerencias.set(false);
     this.sugerencias.set([]);
   }
+
 }

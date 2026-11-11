@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, finalize, shareReplay, tap } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { ChatEmpresa } from '../models/chat.model';
 import { AuthService } from './auth.service';
 import {
   CatalogoEmpresa,
@@ -16,9 +17,13 @@ import {
   Empresa,
   EmpresaForm,
   EmpresaPublica,
+  EspacioEmpresa,
+  EspacioForm,
   InvitarMiembro,
+  PublicacionRed,
   MiembroEmpresa,
   PanelEmpresa,
+  PerfilRedEmpresa,
   ActualizarMiembro,
 } from '../models/empresa.model';
 
@@ -177,6 +182,131 @@ export class EmpresaService {
     return this.http
       .get<ComponenteLienzo>(`${this.raiz}/public/${slug}/componentes/${componenteId}`)
       .pipe(catchError(() => of(null)));
+  }
+
+  perfilRed(empresaId: string): Observable<PerfilRedEmpresa | null> {
+    return this.http
+      .get<PerfilRedEmpresa>(`${this.raiz}/${empresaId}/red`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  espacioPrincipal(empresaSlug: string, empresaId?: string): Observable<EspacioEmpresa | null> {
+    return this.http
+      .get<EspacioEmpresa>(`${this.raiz}/public/${empresaSlug}/espacio`)
+      .pipe(
+        catchError(() =>
+          empresaId
+            ? this.http
+                .get<EspacioEmpresa[]>(`${this.raiz}/${empresaId}/espacios`)
+                .pipe(map((lista) => lista.find((espacio) => espacio.esPrincipal && espacio.publicado) ?? lista.find((espacio) => espacio.publicado) ?? null))
+            : of(null),
+        ),
+      );
+  }
+
+  buscarPublicas(texto: string): Observable<{ id: string; nombre: string; slug: string; logoUrl?: string | null; eslogan?: string | null; tipo?: string | null }[]> {
+    return this.http
+      .get<{ id: string; nombre: string; slug: string; logoUrl?: string | null; eslogan?: string | null; tipo?: string | null }[]>(
+        `${this.raiz}/buscar`,
+        { params: { q: texto } },
+      )
+      .pipe(catchError(() => of([])));
+  }
+
+  seguirRed(empresaId: string): Observable<{ siguiendo: boolean; seguidores: number }> {
+    return this.http.post<{ siguiendo: boolean; seguidores: number }>(
+      `${this.raiz}/${empresaId}/red/seguir`,
+      {},
+    );
+  }
+
+  meGustaRed(empresaId: string, publicacionId: string): Observable<{ meGusta: boolean; likes: number }> {
+    return this.http.post<{ meGusta: boolean; likes: number }>(
+      `${this.raiz}/${empresaId}/red/publicaciones/${publicacionId}/me-gusta`,
+      {},
+    );
+  }
+
+  abrirChatEmpresa(empresaId: string): Observable<ChatEmpresa> {
+    return this.http.post<ChatEmpresa>(`${this.raiz}/${empresaId}/chat/empresa`, {});
+  }
+
+  publicarComoEmpresa(empresaId: string, contenido: string, imagenUrl?: string | null): Observable<PublicacionRed> {
+    return this.http.post<PublicacionRed>(`${this.raiz}/${empresaId}/red/publicaciones`, {
+      contenido,
+      imagenUrl: imagenUrl ?? null,
+    });
+  }
+
+  proponerEnRed(empresaId: string, contenido: string, imagenUrl?: string | null): Observable<PublicacionRed> {
+    return this.http.post<PublicacionRed>(`${this.raiz}/${empresaId}/red/propuestas`, {
+      contenido,
+      imagenUrl: imagenUrl ?? null,
+    });
+  }
+
+  aprobarPropuesta(empresaId: string, publicacionId: string): Observable<PublicacionRed> {
+    return this.http.post<PublicacionRed>(`${this.raiz}/${empresaId}/red/publicaciones/${publicacionId}/aprobar`, {});
+  }
+
+  rechazarPropuesta(empresaId: string, publicacionId: string): Observable<PublicacionRed> {
+    return this.http.post<PublicacionRed>(`${this.raiz}/${empresaId}/red/publicaciones/${publicacionId}/rechazar`, {});
+  }
+
+  borrarPublicacionEmpresa(empresaId: string, publicacionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.raiz}/${empresaId}/red/publicaciones/${publicacionId}`);
+  }
+
+  publicarEnRed(
+    empresaId: string,
+    contenido: string,
+    imagenUrl?: string | null,
+  ): Observable<PublicacionRed> {
+    return this.http.post<PublicacionRed>(
+      `${this.raiz}/${empresaId}/red/publicaciones`,
+      { contenido, imagenUrl: imagenUrl ?? null },
+    );
+  }
+
+  borrarPublicacionRed(empresaId: string, publicacionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.raiz}/${empresaId}/red/publicaciones/${publicacionId}`);
+  }
+
+  espacios(empresaId: string): Observable<EspacioEmpresa[]> {
+    return this.http
+      .get<EspacioEmpresa[]>(`${this.raiz}/${empresaId}/espacios`)
+      .pipe(catchError(() => of([])));
+  }
+
+  espacioPublico(slug: string, espacio: string): Observable<EspacioEmpresa | null> {
+    return this.http
+      .get<EspacioEmpresa>(`${this.raiz}/public/${slug}/espacio/${espacio}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  espacioDeEmpresa(empresaId: string, espacioSlug: string): Observable<EspacioEmpresa | null> {
+    return this.http
+      .get<EspacioEmpresa>(`${this.raiz}/${empresaId}/espacios/${espacioSlug}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  crearEspacio(empresaId: string, form: EspacioForm): Observable<EspacioEmpresa> {
+    return this.http.post<EspacioEmpresa>(`${this.raiz}/${empresaId}/espacios`, form);
+  }
+
+  actualizarEspacio(empresaId: string, espacioId: string, form: EspacioForm): Observable<EspacioEmpresa> {
+    return this.http.put<EspacioEmpresa>(`${this.raiz}/${empresaId}/espacios/${espacioId}`, form);
+  }
+
+  publicarEspacio(empresaId: string, espacioId: string, publicado: boolean): Observable<EspacioEmpresa> {
+    return this.http.patch<EspacioEmpresa>(
+      `${this.raiz}/${empresaId}/espacios/${espacioId}/publicar?publicado=${publicado}`,
+      {},
+    );
+  }
+
+  borrarEspacio(empresaId: string, espacioId: string): Observable<void> {
+    return this.http.delete<void>(`${this.raiz}/${empresaId}/espacios/${espacioId}`);
   }
 
   crear(form: EmpresaForm): Observable<Empresa> {

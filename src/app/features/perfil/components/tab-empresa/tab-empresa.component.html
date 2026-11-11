@@ -1,0 +1,123 @@
+<div class="empresa">
+  @if (cargando()) {
+    <div class="empresa__estado">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> Cargando tu espacio de empresa…
+    </div>
+  } @else if (empresa) {
+    <section class="tarjeta tarjeta--ficha">
+      <div class="ficha">
+        <span class="ficha__logo">
+          @if (empresa.logoUrl) {
+            <img [src]="empresa.logoUrl" [alt]="empresa.nombre" />
+          } @else {
+            <span>{{ iniciales(empresa.nombre) }}</span>
+          }
+        </span>
+
+        <div class="ficha__datos">
+          <h2>{{ empresa.nombre }}</h2>
+          @if (empresa.eslogan) {
+            <p>{{ empresa.eslogan }}</p>
+          }
+          <div class="ficha__cuentas">
+            <span><strong>{{ seguidores }}</strong> seguidores</span>
+            <span><strong>{{ miembros.length }}</strong> miembros</span>
+            <span><strong>{{ espacios.length }}</strong> espacios</span>
+            <span><strong>{{ publicaciones }}</strong> publicaciones</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn--primary" (click)="irAlPerfil()">
+          <i class="fa-solid fa-building"></i> Ver en la red
+        </button>
+      </div>
+    </section>
+
+    @if (puedeEditar) {
+      <section class="tarjeta">
+        <header class="tarjeta__cabecera">
+          <h2><i class="fa-solid fa-sliders"></i> Herramientas de empresa</h2>
+        </header>
+        <div class="herramientas">
+          @for (accion of acciones; track accion.clave) {
+            <a class="herramienta" [routerLink]="accion.ruta">
+              <i [class]="accion.icono"></i>
+              <span>{{ accion.etiqueta }}</span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h2><i class="fa-solid fa-globe"></i> Mi landing</h2>
+        @if (puedeEditar) {
+          <a class="enlace" routerLink="/app/empresa/espacio">Diseñar</a>
+        }
+      </header>
+
+      <ul class="espacios">
+        @for (espacio of espacios; track espacio.id) {
+          <li>
+            <button type="button" class="espacio__abrir" (click)="irAEspacio(espacio)">
+              <span class="espacio__icono"><i class="fa-solid fa-globe"></i></span>
+              <span class="espacio__datos">
+                <strong>{{ espacio.nombre }}</strong>
+                <small>{{ espacio.lema || 'Landing de la empresa' }}</small>
+              </span>
+              @if (espacio.esPrincipal) {
+                <span class="espacio__sello">Principal</span>
+              }
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button type="button" class="espacio__copiar" title="Copiar enlace" (click)="copiarEnlaceEspacio(espacio)">
+              <i class="fa-solid fa-link"></i>
+            </button>
+          </li>
+        } @empty {
+          <li class="empresa__vacio">
+            Todavía no has publicado una landing.
+            @if (puedeEditar) {
+              <a routerLink="/app/empresa/espacio">Crear mi landing</a>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="tarjeta">
+      <header class="tarjeta__cabecera">
+        <h2><i class="fa-solid fa-users"></i> Miembros</h2>
+      </header>
+      <ul class="miembros">
+        @for (miembro of miembros.slice(0, 8); track miembro.id) {
+          <li>
+            <span class="miembros__avatar">
+              @if (miembro.avatarUrl) {
+                <img [src]="miembro.avatarUrl" [alt]="miembro.nombre" />
+              } @else {
+                <span>{{ iniciales(miembro.nombre) }}</span>
+              }
+            </span>
+            <span class="miembros__datos">
+              <strong>{{ miembro.nombre }}</strong>
+              <small>{{ miembro.puesto || miembro.rolEtiqueta }}</small>
+            </span>
+            <button type="button" class="miembros__chat" title="Escribir" (click)="escribirAMiembro(miembro)">
+              <i class="fa-solid fa-comment-dots"></i>
+            </button>
+          </li>
+        } @empty {
+          <li class="empresa__vacio">La empresa no muestra su equipo.</li>
+        }
+      </ul>
+    </section>
+  } @else {
+    <div class="empresa__estado">
+      <i class="fa-solid fa-building-circle-exclamation"></i>
+      Todavía no perteneces a ninguna empresa.
+      <a routerLink="/app/empresa">Crear o unirme a una empresa</a>
+    </div>
+  }
+</div>

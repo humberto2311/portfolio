@@ -12,6 +12,7 @@ import { TabPublicacionesComponent } from './components/tab-publicaciones/tab-pu
 import { TabInformacionComponent } from './components/tab-informacion/tab-informacion.component';
 import { TabFotosComponent } from './components/tab-fotos/tab-fotos.component';
 import { TabContactosComponent } from './components/tab-contactos/tab-contactos.component';
+import { TabEmpresaComponent } from './components/tab-empresa/tab-empresa.component';
 import { ToastComponent } from './components/toast/toast.component';
 
 @Component({
@@ -25,6 +26,7 @@ import { ToastComponent } from './components/toast/toast.component';
     TabInformacionComponent,
     TabFotosComponent,
     TabContactosComponent,
+    TabEmpresaComponent,
     ToastComponent,
     TabContactosComponent 
   ],
@@ -45,6 +47,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
   seccionActiva: TabId = 'publicaciones';
   esMiPerfil = false;
   disenoAplicado = signal(false);
+  mostrarEmpresa = false;
 
   errorCarga: string | null = null;
 
@@ -105,6 +108,8 @@ export class PerfilComponent implements OnInit, OnDestroy {
     } else {
       this.esMiPerfil = false;
     }
+
+    this.mostrarEmpresa = this.esMiPerfil;
 
     this.aplicarDisenoDelPerfil();
   }

@@ -24,30 +24,73 @@
         </span>
       </div>
 
-      <button type="button" (click)="goTo('/app/perfil')">
-        <i class="fa-solid fa-user" aria-hidden="true"></i>
-        <span>Mi perfil</span>
-      </button>
+      @if (enEmpresa()) {
+        <p class="user-menu__grupo">Mi cuenta personal</p>
 
-      <button type="button" (click)="goTo('/app/hub')">
-        <i class="fa-solid fa-link" aria-hidden="true"></i>
-        <span>Mis enlaces</span>
-      </button>
+        <button type="button" class="user-menu__volver" (click)="volverAPersonal()">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          <span>Volver a mi perfil personal</span>
+        </button>
 
-      <button type="button" *ngIf="nativa" (click)="goTo('/app/emisora')">
-        <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
-        <span>Emitir por NFC</span>
-      </button>
+        <button type="button" (click)="goTo('/app/perfil')">
+          <i class="fa-solid fa-user" aria-hidden="true"></i>
+          <span>Mi perfil personal</span>
+        </button>
 
-      <button type="button" (click)="goTo('/app/ajustes/cuenta')">
-        <i class="fa-solid fa-gear" aria-hidden="true"></i>
-        <span>Ajustes de cuenta</span>
-      </button>
+        <button type="button" (click)="goTo('/app/ajustes/cuenta')">
+          <i class="fa-solid fa-user-gear" aria-hidden="true"></i>
+          <span>Mis ajustes personales</span>
+        </button>
 
-      <button type="button" (click)="goTo('/app/ajustes/seguridad')">
-        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-        <span>Seguridad</span>
-      </button>
+        <button type="button" (click)="goTo('/app/ajustes/seguridad')">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+          <span>Seguridad de mi cuenta</span>
+        </button>
+
+        <p class="user-menu__grupo">Mi empresa{{ empresaActual() ? ': ' + empresaActual()!.nombre : '' }}</p>
+
+        <button type="button" (click)="goTo('/app/empresa')">
+          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <span>Perfil de la empresa en la red</span>
+        </button>
+
+        <button type="button" (click)="goTo('/app/empresa/espacio')">
+          <i class="fa-solid fa-globe" aria-hidden="true"></i>
+          <span>Mi espacio (landing)</span>
+        </button>
+
+        <button type="button" (click)="goTo('/app/empresa/ajustes')">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+          <span>Ajustes de la empresa</span>
+        </button>
+      } @else {
+        <p class="user-menu__grupo">Mi cuenta personal</p>
+
+        <button type="button" (click)="goTo('/app/perfil')">
+          <i class="fa-solid fa-user" aria-hidden="true"></i>
+          <span>Mi perfil</span>
+        </button>
+
+        <button type="button" (click)="goTo('/app/hub')">
+          <i class="fa-solid fa-link" aria-hidden="true"></i>
+          <span>Mis enlaces</span>
+        </button>
+
+        <button type="button" *ngIf="nativa" (click)="goTo('/app/emisora')">
+          <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
+          <span>Emitir por NFC</span>
+        </button>
+
+        <button type="button" (click)="goTo('/app/ajustes/cuenta')">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+          <span>Ajustes de cuenta</span>
+        </button>
+
+        <button type="button" (click)="goTo('/app/ajustes/seguridad')">
+          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+          <span>Seguridad</span>
+        </button>
+      }
 
       <button type="button" (click)="abrirGuia()">
         <i class="fa-solid fa-circle-question" aria-hidden="true"></i>

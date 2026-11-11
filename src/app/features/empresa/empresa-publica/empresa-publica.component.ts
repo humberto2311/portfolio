@@ -10,19 +10,23 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { catchError, of } from 'rxjs';
 
 import {
   ComponenteLienzo,
   DisenoLienzo,
   Empresa,
   EmpresaPublica,
+  EspacioEmpresa,
   MiembroEmpresa,
+  PerfilRedEmpresa,
+  PublicacionRed,
 } from '../../../core/models/empresa.model';
 import { DisenoService } from '../../../core/services/diseno.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
-import { PostService } from '../../../core/services/post.service';
 import {
   LIENZO_ALTO,
   LIENZO_ANCHO,
@@ -31,23 +35,13 @@ import {
   leerJson,
 } from '../empresa-ui';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
+import { EmpresaRedNavbarComponent } from '../red/empresa-red-navbar.component';
 
-interface PublicacionEmpresa {
-  id: string;
-  content?: string;
-  createdAt?: string;
-  autorNombre?: string;
-  nombreAutor?: string;
-  autorUsername?: string;
-  username?: string;
-  likesCount?: number;
-  commentsCount?: number;
-}
 
 @Component({
   selector: 'app-empresa-publica',
   standalone: true,
-  imports: [CommonModule, RouterLink, EmpresaComponenteVistaComponent],
+  imports: [CommonModule, RouterLink, EmpresaComponenteVistaComponent, EmpresaRedNavbarComponent],
   templateUrl: './empresa-publica.component.html',
   styleUrls: ['./empresa-publica.component.scss'],
 })
@@ -59,22 +53,33 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(AuthService);
   private panelLateral = inject(SidePanelService);
-  private publicaciones = inject(PostService);
+  private toast = inject(ToastService);
 
   @ViewChild('marco') marco?: ElementRef<HTMLElement>;
 
   readonly datos = signal<EmpresaPublica | null>(null);
   readonly cargando = signal(true);
-  readonly escala = signal(0.5);
+  readonly tab = signal<'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios'>('inicio');
+  readonly espacios = signal<EspacioEmpresa[]>([]);
   readonly siguiendo = signal(false);
-  readonly publicacionesEquipo = signal<PublicacionEmpresa[]>([]);
-  readonly cargandoPublicaciones = signal(true);
+  readonly seguidores = signal(0);
+  readonly seguidos = signal(0);
+  readonly totalSeguidores = signal(0);
+  readonly urlLanding = signal<string | null>(null);
+  readonly red = signal<PerfilRedEmpresa | null>(null);
+  readonly borrador = signal('');
+  readonly publicando = signal(false);
+  readonly escala = signal(0.5);
 
   readonly ancho = LIENZO_ANCHO;
   readonly alto = LIENZO_ALTO;
 
   private observador: ResizeObserver | null = null;
   private ajustar = (): void => this.calcular();
+  private recargarRed = (): void => {
+    const empresa = this.empresa;
+    if (empresa) this.cargarRed(empresa.id);
+  };
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -89,16 +94,14 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
       if (!datos) return;
 
       this.datos.set(datos);
-      this.diseno.aplicarAjeno({
-        acento: datos.diseno.acento ?? null,
-        secundario: datos.diseno.secundario ?? null,
-        fondoUrl: datos.diseno.fondoUrl ?? null,
-        css: datos.diseno.css ?? null,
-        activo: datos.diseno.activo,
-      });
+      this.espacios.set(datos.espacios ?? []);
+      this.diseno.aplicarAjeno(this.disenoDe(datos));
+
+      this.cargarRed(datos.empresa.id);
+      this.cargarLanding(datos.empresa.slug, datos.empresa.id);
 
       if (isPlatformBrowser(this.platformId)) {
-        this.cargarPublicaciones();
+        this.escucharActualizaciones();
 
         setTimeout(() => {
           this.observar();
@@ -109,6 +112,10 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('empresa-red-actualizar', this.recargarRed);
+    }
+
     this.observador?.disconnect();
     this.observador = null;
 
@@ -265,7 +272,24 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.siguiendo.update((valor) => !valor);
+    const empresa = this.empresa;
+    if (!empresa) return;
+
+    const anterior = this.siguiendo();
+    this.siguiendo.set(!anterior);
+    this.seguidores.update((valor) => Math.max(0, valor + (anterior ? -1 : 1)));
+    this.totalSeguidores.update((valor) => Math.max(0, valor + (anterior ? -1 : 1)));
+
+    this.servicio.seguirRed(empresa.id).subscribe({
+      next: (respuesta) => {
+        this.siguiendo.set(respuesta.siguiendo);
+        this.seguidores.set(respuesta.seguidores);
+      },
+      error: () => {
+        this.siguiendo.set(anterior);
+        this.seguidores.update((valor) => Math.max(0, valor + (anterior ? 1 : -1)));
+      },
+    });
   }
 
   abrirChat(): void {
@@ -274,31 +298,248 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const creador = (this.empresa as any)?.creadaPor;
-    if (!creador?.id) return;
+    const empresa = this.empresa;
+    if (!empresa) return;
 
-    this.panelLateral.abrirChatCon({
-      id: creador.id,
-      name: creador.nombre ?? this.empresa?.nombre ?? 'Empresa',
-      gitUsername: creador.usuario,
-      statusText: this.empresa?.nombre ?? '',
-    });
+    this.panelLateral.abrirChatDeEmpresa(empresa.id);
   }
 
-  private cargarPublicaciones(): void {
-    const creador = (this.empresa as any)?.creadaPor?.id;
-    if (!creador) {
-      this.cargandoPublicaciones.set(false);
+  get publicacionesRed(): PublicacionRed[] {
+    return this.red()?.publicaciones ?? [];
+  }
+
+  get miembros(): MiembroEmpresa[] {
+    return this.red()?.miembros ?? this.equipo;
+  }
+
+  get redes(): { nombre: string; url: string }[] {
+    return this.red()?.redes ?? [];
+  }
+
+  get espaciosPublicos(): EspacioEmpresa[] {
+    return this.espacios().length ? this.espacios() : (this.red()?.espacios ?? []);
+  }
+
+  get puedeEditar(): boolean {
+    return Boolean(this.red()?.puedeEditar);
+  }
+
+  get urlRedEmpresa(): string {
+    return `/empresa/${this.empresa?.slug ?? ''}`;
+  }
+
+  get seguidoresRed(): MiembroEmpresa[] {
+    return this.red()?.seguidoresLista ?? [];
+  }
+
+  get totalMiembros(): number {
+    return this.miembros.length;
+  }
+
+  get totalPublicaciones(): number {
+    return this.publicacionesRed.length;
+  }
+
+  contarTipo(tipo: string): number {
+    return this.piezas.filter((pieza) => pieza.tipo === tipo).length;
+  }
+
+  cambiarTab(tab: 'inicio' | 'publicaciones' | 'miembros' | 'seguidores' | 'propuestas' | 'informacion' | 'espacios'): void {
+    this.tab.set(tab);
+  }
+
+  actualizarBorrador(evento: Event): void {
+    this.borrador.set((evento.target as HTMLTextAreaElement).value);
+  }
+
+  publicar(): void {
+    const empresa = this.empresa;
+    const texto = this.borrador().trim();
+    if (!empresa || !texto || this.publicando()) return;
+
+    if (!this.haySesion) {
+      void this.router.navigate(['/acceso']);
       return;
     }
 
-    this.publicaciones.feed(creador, 0, 12).subscribe({
-      next: (pagina) => {
-        this.publicacionesEquipo.set((pagina?.content ?? []) as PublicacionEmpresa[]);
-        this.cargandoPublicaciones.set(false);
+    this.publicando.set(true);
+    this.servicio.publicarComoEmpresa(empresa.id, texto).subscribe({
+      next: (publicacion) => {
+        this.red.update((actual) =>
+          actual ? { ...actual, publicaciones: [publicacion, ...actual.publicaciones] } : actual,
+        );
+        this.borrador.set('');
+        this.publicando.set(false);
+        this.toast.show('Publicación creada');
       },
-      error: () => this.cargandoPublicaciones.set(false),
+      error: () => {
+        this.toast.show('No se pudo publicar. Revisa tu rol en la empresa.');
+        this.publicando.set(false);
+      },
     });
+  }
+
+  get propuestas(): PublicacionRed[] {
+    return this.red()?.pendientes ?? [];
+  }
+
+  get totalPropuestas(): number {
+    return this.propuestas.length;
+  }
+
+  aprobarPropuesta(publicacion: PublicacionRed): void {
+    const empresa = this.empresa;
+    if (!empresa) return;
+
+    this.servicio.aprobarPropuesta(empresa.id, publicacion.id).subscribe({
+      next: () => {
+        this.toast.show('Publicación aprobada');
+        this.recargarRed();
+      },
+      error: () => this.toast.show('No se pudo aprobar la propuesta'),
+    });
+  }
+
+  rechazarPropuesta(publicacion: PublicacionRed): void {
+    const empresa = this.empresa;
+    if (!empresa) return;
+
+    this.servicio.rechazarPropuesta(empresa.id, publicacion.id).subscribe({
+      next: () => {
+        this.toast.show('Propuesta rechazada');
+        this.recargarRed();
+      },
+      error: () => this.toast.show('No se pudo rechazar la propuesta'),
+    });
+  }
+
+  borrarPublicacion(publicacion: PublicacionRed): void {
+    const empresa = this.empresa;
+    if (!empresa || !publicacion) return;
+
+    this.servicio.borrarPublicacionEmpresa(empresa.id, publicacion.id).subscribe({
+      next: () => {
+        this.red.update((actual) =>
+          actual
+            ? { ...actual, publicaciones: actual.publicaciones.filter((item) => item.id !== publicacion.id) }
+            : actual,
+        );
+        this.toast.show('Publicación eliminada');
+      },
+      error: () => this.toast.show('No se pudo eliminar la publicación'),
+    });
+  }
+
+  meGusta(publicacion: PublicacionRed): void {
+    if (!this.haySesion) {
+      void this.router.navigate(['/acceso']);
+      return;
+    }
+
+    const empresa = this.empresa;
+    if (!empresa) return;
+
+    const anterior = Boolean(publicacion.meGusta);
+    this.red.update((actual) =>
+      actual
+        ? {
+            ...actual,
+            publicaciones: actual.publicaciones.map((item) =>
+              item.id === publicacion.id
+                ? {
+                    ...item,
+                    meGusta: !anterior,
+                    likes: Math.max(0, item.likes + (anterior ? -1 : 1)),
+                  }
+                : item,
+            ),
+          }
+        : actual,
+    );
+
+    this.servicio
+      .meGustaRed(empresa.id, publicacion.id)
+      .pipe(catchError(() => of(null)))
+      .subscribe((respuesta) => {
+        if (respuesta) return;
+        this.red.update((actual) =>
+          actual
+            ? {
+                ...actual,
+                publicaciones: actual.publicaciones.map((item) =>
+                  item.id === publicacion.id
+                    ? { ...item, meGusta: anterior, likes: publicacion.likes }
+                    : item,
+                ),
+              }
+            : actual,
+        );
+      });
+  }
+
+  escribirAMiembro(miembro: MiembroEmpresa): void {
+    if (!this.haySesion) {
+      void this.router.navigate(['/acceso']);
+      return;
+    }
+
+    this.panelLateral.abrirChatCon({
+      id: miembro.usuarioId,
+      name: miembro.nombre,
+      avatar: miembro.avatarUrl ?? null,
+      statusText: miembro.puesto || miembro.rolEtiqueta,
+    });
+  }
+
+  irALanding(): void {
+    const url = this.urlLanding();
+    if (url) void this.router.navigateByUrl(url);
+  }
+
+  irAEspacio(espacio: EspacioEmpresa): void {
+    void this.router.navigate(['/empresa', this.empresa?.slug, 'espacio', espacio.slug]);
+  }
+
+  private disenoDe(datos: EmpresaPublica) {
+    return {
+      acento: datos.diseno.acento ?? null,
+      secundario: datos.diseno.secundario ?? null,
+      fondoUrl: datos.diseno.fondoUrl ?? null,
+      css: datos.diseno.css ?? null,
+      activo: datos.diseno.activo,
+    };
+  }
+
+  private cargarRed(empresaId: string): void {
+    this.servicio.perfilRed(empresaId).subscribe((red) => {
+      if (!red) return;
+      this.red.set(red);
+      this.siguiendo.set(red.siguiendo);
+      this.seguidores.set(red.seguidores);
+      this.totalSeguidores.set(red.seguidores);
+      this.seguidos.set(red.seguidos ?? red.miembros?.length ?? 0);
+      if (red.espacios?.length) this.espacios.set(red.espacios);
+
+      const principal = red.espacioPrincipal ?? red.espacios?.find((espacio) => espacio.esPrincipal);
+      if (principal) this.urlLanding.set(this.urlDeEspacio(principal.slug));
+    });
+  }
+
+  private cargarLanding(slug: string, empresaId: string): void {
+    if (this.urlLanding()) return;
+
+    this.servicio.espacioPrincipal(slug, empresaId).subscribe((espacio) => {
+      if (espacio) this.urlLanding.set(this.urlDeEspacio(espacio.slug));
+    });
+  }
+
+  private urlDeEspacio(espacioSlug: string): string {
+    return `/empresa/${this.empresa?.slug ?? ''}/espacio/${espacioSlug}`;
+  }
+
+  private escucharActualizaciones(): void {
+    window.removeEventListener('empresa-red-actualizar', this.recargarRed);
+    window.addEventListener('empresa-red-actualizar', this.recargarRed);
   }
 
   private observar(): void {

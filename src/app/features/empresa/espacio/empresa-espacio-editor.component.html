@@ -1,0 +1,491 @@
+<div class="editor editor--estudio">
+  <header class="estudio">
+    <div class="estudio__ruta">
+      <span class="estudio__modo"><i class="fa-solid fa-building"></i> Espacio de {{ nombreEmpresa }}</span>
+      <i class="fa-solid fa-chevron-right estudio__sep"></i>
+      <h1>{{ form.nombre || 'Mi espacio' }}</h1>
+      <span class="estudio__chip" [class.estudio__chip--ok]="publicado">
+        <i class="fa-solid" [class.fa-globe]="publicado" [class.fa-lock]="!publicado"></i>
+        {{ publicado ? 'Público' : 'Privado' }}
+      </span>
+    </div>
+
+    <div class="estudio__acciones">
+      <a class="boton" [routerLink]="urlPublica" target="_blank" rel="noopener">
+        <i class="fa-solid fa-up-right-from-square"></i> Ver página
+      </a>
+      <button type="button" class="boton" (click)="copiarEnlace()">
+        <i class="fa-solid fa-link"></i> Enlace
+      </button>
+      <button type="button" class="boton boton--fuerte" [disabled]="guardando()" (click)="guardar()">
+        @if (guardando()) {
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+        } @else {
+          <i class="fa-solid fa-floppy-disk"></i>
+        }
+        Guardar
+      </button>
+    </div>
+  </header>
+
+  <div class="franja">
+    <div class="franja__privacidad">
+      <span class="franja__rotulo">
+        <i class="fa-solid fa-eye"></i> ¿Quién puede ver este espacio?
+      </span>
+      <div class="alternador">
+        <button
+          type="button"
+          class="alternador__lado"
+          [class.alternador__lado--activo]="!publicado"
+          (click)="cambiarVisibilidad(false)"
+        >
+          <i class="fa-solid fa-lock"></i>
+          <span>
+            <strong>Privado</strong>
+            <small>Solo tú y tu equipo</small>
+          </span>
+        </button>
+        <button
+          type="button"
+          class="alternador__lado"
+          [class.alternador__lado--activo]="publicado"
+          (click)="cambiarVisibilidad(true)"
+        >
+          <i class="fa-solid fa-globe"></i>
+          <span>
+            <strong>Público</strong>
+            <small>Cualquiera con el enlace</small>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <div class="franja__espacios">
+      <span class="franja__rotulo"><i class="fa-solid fa-layer-group"></i> Tus espacios ({{ espacios().length }})</span>
+      <div class="pestanas-espacio">
+        @for (espacio of espacios(); track espacio.id) {
+          <button
+            type="button"
+            class="pestana-espacio"
+            [class.pestana-espacio--activa]="actual()?.id === espacio.id"
+            (click)="seleccionarEspacio(espacio)"
+          >
+            <i class="fa-solid" [class.fa-globe]="espacio.publicado" [class.fa-lock]="!espacio.publicado"></i>
+            {{ espacio.nombre }}
+            @if (espacio.esPrincipal) {
+              <em>Principal</em>
+            }
+          </button>
+        }
+        <button type="button" class="pestana-espacio pestana-espacio--nueva" (click)="crearOtro()">
+          <i class="fa-solid fa-plus"></i> Nuevo espacio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="editor__estado">
+      <i class="fa-solid fa-circle-notch fa-spin"></i> Cargando tus espacios…
+    </div>
+  } @else {
+    <div class="editor__cuerpo">
+      <aside class="panel">
+        <nav class="panel__vistas">
+          <button type="button" [class.activo]="vista() === 'estructura'" (click)="cambiarVista('estructura')">
+            <i class="fa-solid fa-sliders"></i> Ajustes
+          </button>
+          <button type="button" [class.activo]="vista() === 'navbar'" (click)="cambiarVista('navbar')">
+            <i class="fa-solid fa-bars"></i> Navbar
+          </button>
+          <button type="button" [class.activo]="vista() === 'secciones'" (click)="cambiarVista('secciones')">
+            <i class="fa-solid fa-table-list"></i> Secciones
+          </button>
+          <button type="button" [class.activo]="vista() === 'diseno'" (click)="cambiarVista('diseno')">
+            <i class="fa-solid fa-palette"></i> Estilo
+          </button>
+        </nav>
+
+        @switch (vista()) {
+          @case ('estructura') {
+            <section class="panel__bloque">
+              <h2>Identidad del espacio</h2>
+
+              <label class="campo">
+                <span>Nombre del espacio</span>
+                <input type="text" [(ngModel)]="form.nombre" placeholder="Ej. Nuestro restaurante" />
+              </label>
+
+              <label class="campo">
+                <span>Enlace</span>
+                <div class="campo__fila">
+                  <span class="campo__prefijo">/empresa/{{ slugEmpresa }}/espacio/</span>
+                  <input type="text" [(ngModel)]="form.slug" (blur)="normalizarSlug()" placeholder="mi-espacio" />
+                </div>
+              </label>
+
+              <label class="campo">
+                <span>Lema corto</span>
+                <input type="text" [(ngModel)]="form.lema" placeholder="Lo que verán al entrar" />
+              </label>
+
+              <label class="campo">
+                <span>Imagen de portada (URL)</span>
+                <input type="text" [(ngModel)]="form.portadaUrl" placeholder="https://…" />
+              </label>
+
+              <label class="campo">
+                <span>Logo del espacio (URL, opcional)</span>
+                <input type="text" [(ngModel)]="form.logoUrl" placeholder="Se usa el logo de la empresa" />
+              </label>
+
+              <label class="campo">
+                <span>Pie de página</span>
+                <input type="text" [(ngModel)]="form.pie" placeholder="Dirección, teléfono o frase corta" />
+              </label>
+
+              <label class="campo">
+                <span>Diseño del lienzo para la sección «Diseño»</span>
+                <input type="text" [(ngModel)]="form.disenoSlug" placeholder="slug del diseño publicado" />
+              </label>
+
+              <div class="campo campo--interruptor">
+                <label>
+                  <input type="checkbox" [(ngModel)]="form.esPrincipal" />
+                  <span>Usar como espacio principal de la empresa</span>
+                </label>
+                <label>
+                  <input type="checkbox" [(ngModel)]="form.publicado" />
+                  <span>Visible para todo el mundo</span>
+                </label>
+              </div>
+
+              @if (!esNuevo) {
+                <div class="panel__publicar">
+                  @if (form.publicado) {
+                    <button type="button" class="boton" (click)="publicar(false)">
+                      <i class="fa-solid fa-lock"></i> Pasar a borrador
+                    </button>
+                  } @else {
+                    <button type="button" class="boton boton--fuerte" (click)="publicar(true)">
+                      <i class="fa-solid fa-upload"></i> Publicar espacio
+                    </button>
+                  }
+                </div>
+              }
+            </section>
+          }
+
+          @case ('navbar') {
+            <section class="panel__bloque">
+              <h2>Barra de navegación</h2>
+              <p class="panel__pista">
+                Cada enlace puede llevar a una sección de esta página, a una ruta de N-soft o a otro sitio.
+                Por ejemplo «Publicaciones» puede apuntar al perfil de la empresa en la red.
+              </p>
+
+              <ul class="lista-navbar">
+                @for (enlace of navbar; track $index) {
+                  <li class="enlace">
+                    <div class="enlace__fila">
+                      <span class="enlace__icono">
+                        @if (enlace.icono) {
+                          <i [class]="enlace.icono"></i>
+                        } @else {
+                          <i class="fa-solid fa-link"></i>
+                        }
+                      </span>
+                      <input type="text" [(ngModel)]="enlace.etiqueta" placeholder="Texto del enlace" />
+                      <button type="button" class="icono" title="Subir" (click)="moverEnlace($index, -1)">
+                        <i class="fa-solid fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="icono" title="Bajar" (click)="moverEnlace($index, 1)">
+                        <i class="fa-solid fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="icono icono--peligro" title="Quitar" (click)="quitarEnlace($index)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+
+                    <div class="enlace__fila enlace__fila--secundaria">
+                      <select [(ngModel)]="enlace.tipo">
+                        @for (tipo of tiposEnlace; track tipo.valor) {
+                          <option [ngValue]="tipo.valor">{{ tipo.etiqueta }}</option>
+                        }
+                      </select>
+
+                      @if (enlace.tipo === 'ANCLA') {
+                        <select [(ngModel)]="enlace.destino">
+                          @for (ancla of anclasDisponibles(); track ancla.valor) {
+                            <option [value]="ancla.valor">{{ ancla.etiqueta }}</option>
+                          }
+                        </select>
+                      } @else if (enlace.tipo === 'RUTA') {
+                        <input type="text" [(ngModel)]="enlace.destino" placeholder="/empresa/:empresa" />
+                      } @else {
+                        <input type="text" [(ngModel)]="enlace.destino" placeholder="https://…" />
+                      }
+
+                      <select [(ngModel)]="enlace.icono">
+                        <option [ngValue]="null">Sin icono</option>
+                        @for (icono of iconos; track icono.valor) {
+                          <option [value]="icono.valor">{{ icono.etiqueta }}</option>
+                        }
+                      </select>
+                    </div>
+                  </li>
+                } @empty {
+                  <li class="panel__pista">Sin enlaces: la barra mostrará solo la marca.</li>
+                }
+              </ul>
+
+              <button type="button" class="boton" (click)="agregarEnlace()">
+                <i class="fa-solid fa-plus"></i> Añadir enlace
+              </button>
+            </section>
+          }
+
+          @case ('secciones') {
+            <section class="panel__bloque">
+              <h2>Secciones de la página</h2>
+              <p class="panel__pista">Arrastra el orden con las flechas y abre cada sección para escribir su contenido.</p>
+
+              <ul class="lista-secciones">
+                @for (seccion of secciones; track seccion.clave; let indice = $index) {
+                  <li class="seccion" [class.seccion--oculta]="!seccion.visible">
+                    <div class="seccion__fila">
+                      <span class="seccion__icono"><i [class]="iconoDe(seccion.tipo)"></i></span>
+                      <button type="button" class="seccion__titulo" (click)="editarSeccion(seccion.clave)">
+                        <strong>{{ seccion.titulo || etiquetaDe(seccion.tipo) }}</strong>
+                        <small>{{ etiquetaDe(seccion.tipo) }}</small>
+                      </button>
+                      <button type="button" class="icono" title="Subir" (click)="moverSeccion(indice, -1)">
+                        <i class="fa-solid fa-arrow-up"></i>
+                      </button>
+                      <button type="button" class="icono" title="Bajar" (click)="moverSeccion(indice, 1)">
+                        <i class="fa-solid fa-arrow-down"></i>
+                      </button>
+                      <button type="button" class="icono" title="Mostrar u ocultar" (click)="alternarSeccion(indice)">
+                        <i class="fa-solid" [class.fa-eye]="seccion.visible" [class.fa-eye-slash]="!seccion.visible"></i>
+                      </button>
+                      <button type="button" class="icono icono--peligro" title="Quitar" (click)="quitarSeccion(indice)">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+
+                    @if (seccionAbierta() === seccion.clave) {
+                      <div class="seccion__editor">
+                        <label class="campo">
+                          <span>Título</span>
+                          <input type="text" [(ngModel)]="seccion.titulo" />
+                        </label>
+
+                        <label class="campo">
+                          <span>Subtítulo</span>
+                          <input type="text" [(ngModel)]="seccion.subtitulo" />
+                        </label>
+
+                        <label class="campo">
+                          <span>Contenido</span>
+                          <textarea rows="6" [(ngModel)]="seccion.texto"></textarea>
+                          <small>
+                            @switch (seccion.tipo) {
+                              @case ('SERVICIOS') { Un servicio por bloque: primera línea el nombre, luego la descripción. }
+                              @case ('PRODUCTOS') { Un producto por bloque: primera línea el nombre, luego la descripción. }
+                              @case ('GALERIA') { Una imagen por línea con su URL, y debajo el pie de foto. }
+                              @case ('TESTIMONIOS') { Un testimonio por bloque: primera línea el cliente, luego su frase. }
+                              @case ('ENLACES') { Un enlace por bloque: primera línea el nombre, luego la URL. }
+                              @default { Texto libre. Separa los párrafos con una línea en blanco. }
+                            }
+                          </small>
+                        </label>
+
+                        <label class="campo">
+                          <span>Alineación del texto</span>
+                          <div class="segmentado">
+                            @for (alineacion of alineaciones; track alineacion.valor) {
+                              <button
+                                type="button"
+                                [class.segmentado__opcion--activa]="(seccion.alineacion || 'left') === alineacion.valor"
+                                class="segmentado__opcion"
+                                (click)="elegirAlineacion(seccion, alineacion.valor)"
+                              >
+                                {{ alineacion.etiqueta }}
+                              </button>
+                            }
+                          </div>
+                        </label>
+
+                        <div class="campo">
+                          <span>¿Cuánto espacio ocupa?</span>
+                          <p class="campo__nota">Así lo verá el visitante dentro de la página.</p>
+                          <div class="zonas">
+                            @for (zona of zonas; track zona.clave) {
+                              <button
+                                type="button"
+                                class="zona"
+                                [class.zona--activa]="zonaDe(seccion) === zona.clave"
+                                (click)="elegirZona(seccion, zona.clave)"
+                                [title]="zona.ayuda"
+                              >
+                                <i [class]="zona.icono"></i>
+                                <span>
+                                  <strong>{{ zona.etiqueta }}</strong>
+                                  <small>{{ zona.ayuda }}</small>
+                                </span>
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </li>
+                } @empty {
+                  <li class="panel__pista">Todavía no hay secciones.</li>
+                }
+              </ul>
+
+              <div class="panel__agregar">
+                <select [ngModel]="nuevaSeccion()" (ngModelChange)="nuevaSeccion.set($event)">
+                  @for (opcion of catalogo; track opcion.tipo) {
+                    <option [ngValue]="opcion.tipo">{{ opcion.etiqueta }}</option>
+                  }
+                </select>
+                <button type="button" class="boton boton--fuerte" (click)="agregarSeleccionada()">
+                  <i class="fa-solid fa-plus"></i> Añadir sección
+                </button>
+              </div>
+            </section>
+          }
+
+          @case ('diseno') {
+            <section class="panel__bloque">
+              <h2>Estilo del espacio</h2>
+
+              <label class="campo">
+                <span>Plantilla</span>
+                <select [(ngModel)]="form.estilo">
+                  @for (estilo of estilos; track estilo.valor) {
+                    <option [value]="estilo.valor">{{ estilo.etiqueta }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="campo">
+                <span>Color principal</span>
+                <div class="campo__color">
+                  <input type="color" [(ngModel)]="form.colorPrincipal" />
+                  <input type="text" [(ngModel)]="form.colorPrincipal" placeholder="#2563eb" />
+                </div>
+              </label>
+
+              <label class="campo">
+                <span>Color secundario</span>
+                <div class="campo__color">
+                  <input type="color" [(ngModel)]="form.colorSecundario" />
+                  <input type="text" [(ngModel)]="form.colorSecundario" placeholder="#0ea5e9" />
+                </div>
+              </label>
+
+              <p class="panel__pista">
+                Los colores también tiñen la vista previa. Para piezas avanzadas usa el
+                <a routerLink="/app/empresa/lienzo">diseñador visual</a> y elige el diseño en la sección «Diseño».
+              </p>
+
+              <div class="panel__atajos">
+                <a routerLink="/app/empresa/lienzo">
+                  <i class="fa-solid fa-pen-ruler"></i>
+                  <span>
+                    <strong>Diseñar un componente</strong>
+                    <small>Un menú, una tarjeta, un catálogo</small>
+                  </span>
+                </a>
+                <a routerLink="/app/empresa/disenos">
+                  <i class="fa-solid fa-folder-open"></i>
+                  <span>
+                    <strong>Mis diseños</strong>
+                    <small>Lo que ya creaste, listo para usar</small>
+                  </span>
+                </a>
+              </div>
+            </section>
+          }
+        }
+      </aside>
+
+      <section class="lienzo">
+        <header class="lienzo__barra">
+          <span class="lienzo__url">
+            <i class="fa-solid fa-link"></i>
+            {{ urlPublica }}
+          </span>
+          <span class="lienzo__sello" [class.lienzo__sello--ok]="form.publicado">
+            <i class="fa-solid" [class.fa-globe]="form.publicado" [class.fa-lock]="!form.publicado"></i>
+            {{ form.publicado ? 'Publicado' : 'Borrador' }}
+          </span>
+        </header>
+
+        <div class="lienzo__marco">
+          <app-espacio-navbar
+            [espacio]="espacioVista"
+            [haySesion]="true"
+            [puedeEditar]="true"
+          />
+
+          <div class="lienzo__hero">
+            <div class="lienzo__fondo" [style.background-image]="form.portadaUrl ? 'url(' + form.portadaUrl + ')' : null"></div>
+            <div class="lienzo__velo"></div>
+            <div class="lienzo__centro">
+              <span class="lienzo__logo">
+                @if (form.logoUrl || empresaActual?.logoUrl) {
+                  <img [src]="form.logoUrl || empresaActual?.logoUrl" alt="Logo" />
+                } @else {
+                  <i class="fa-solid fa-building"></i>
+                }
+              </span>
+              <p class="lienzo__sello-espacio">{{ espacioVista.nombre }}</p>
+              <h2>{{ espacioVista.empresaNombre }}</h2>
+              @if (form.lema) {
+                <p class="lienzo__lema">{{ form.lema }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="lienzo__secciones">
+            @for (seccion of espacioVista.secciones; track $index) {
+              <article class="lienzo__seccion" [ngStyle]="estilosDe(seccion)" [style.box-shadow]="null">
+                <header>
+                  <h3>{{ seccion.titulo || etiquetaDe(seccion.tipo) }}</h3>
+                  @if (seccion.subtitulo) {
+                    <p>{{ seccion.subtitulo }}</p>
+                  }
+                </header>
+
+                @if (seccion.tipo === 'LIENZO') {
+                  @if (piezas().length) {
+                    @for (pieza of piezas(); track pieza.id) {
+                      <div class="lienzo__pieza">
+                        <app-empresa-componente-vista [componente]="pieza" modo="publico" />
+                      </div>
+                    }
+                  } @else {
+                    <p class="lienzo__vacio">Aquí se mostrará el diseño elegido en «Ajustes».</p>
+                  }
+                } @else if (seccion.texto) {
+                  <p class="lienzo__texto">{{ seccion.texto }}</p>
+                } @else {
+                  <p class="lienzo__vacio">
+                    Sección {{ etiquetaDe(seccion.tipo) }}: el contenido se toma del perfil de la empresa.
+                  </p>
+                }
+              </article>
+            } @empty {
+              <p class="lienzo__vacio">Añade secciones para verlas aquí.</p>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+</div>

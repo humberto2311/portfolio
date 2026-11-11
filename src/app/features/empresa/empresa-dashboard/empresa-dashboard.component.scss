@@ -29,6 +29,15 @@
     letter-spacing: .02em;
     color: var(--accent-cyan);
     text-transform: uppercase;
+
+    small {
+      margin-left: .35rem;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-faint);
+    }
   }
 
   &__acciones {

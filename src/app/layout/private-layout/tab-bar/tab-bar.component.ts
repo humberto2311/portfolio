@@ -36,16 +36,22 @@ export class TabBarComponent {
     if (this.empresa.enModoEmpresa()) {
       const actual = this.empresa.empresaActual();
       return [
-        { label: 'Panel de la empresa', icon: 'fa-solid fa-building', ruta: '/app/empresa' },
+        { label: 'Perfil en la red (lo que ven los demás)', icon: 'fa-solid fa-building', ruta: '/app/empresa' },
+        { label: 'Mi espacio (tu landing)', icon: 'fa-solid fa-globe', ruta: '/app/empresa/espacio' },
+        { label: 'Diseño (armar secciones)', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo' },
+        { label: 'Mis diseños (componentes)', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos' },
+        { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
         { label: 'Ajustes de la empresa', icon: 'fa-solid fa-gear', ruta: '/app/empresa/ajustes' },
         ...(actual
           ? [{ label: 'Ver página pública', icon: 'fa-solid fa-globe', ruta: `/empresa/${actual.slug}` }]
           : []),
-        { label: 'Volver a mi perfil', icon: 'fa-solid fa-user', accion: 'salir' },
+        { label: 'Volver a mi perfil personal', icon: 'fa-solid fa-user', accion: 'salir' },
       ];
     }
 
     return [
+      { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
+      { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
       { label: 'Portafolio', icon: 'fa-solid fa-briefcase', ruta: '/app/portafolio' },
       { label: 'Proyectos', icon: 'fa-solid fa-diagram-project', ruta: '/app/proyectos' },
       { label: 'Mis enlaces', icon: 'fa-solid fa-link', ruta: '/app/hub' },

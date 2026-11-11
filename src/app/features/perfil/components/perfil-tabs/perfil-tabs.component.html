@@ -1,5 +1,5 @@
 <nav class="tabs-nav">
-  @for (tab of tabs; track tab.id) {
+  @for (tab of listaTabs; track tab.id) {
     <button
       class="tab-btn"
       [class.active]="tabActiva === tab.id"

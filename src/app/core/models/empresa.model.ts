@@ -351,4 +351,138 @@ export interface EmpresaPublica {
   piezas?: ComponenteLienzo[];
   /** Diseños públicos de la empresa. */
   disenos?: DisenoLienzo[];
+  /** Espacios propios de la empresa (landing personal de cada una). */
+  espacios?: EspacioEmpresa[];
+}
+
+export type TipoSeccionEspacio =
+  | 'PRESENTACION'
+  | 'SERVICIOS'
+  | 'PRODUCTOS'
+  | 'GALERIA'
+  | 'EQUIPO'
+  | 'TESTIMONIOS'
+  | 'PUBLICACIONES'
+  | 'UBICACION'
+  | 'CONTACTO'
+  | 'REDES'
+  | 'LIENZO'
+  | 'ENLACES';
+
+export type TipoEnlaceEspacio = 'ANCLA' | 'RUTA' | 'EXTERNO';
+
+export type EstiloEspacio = 'CLASICO' | 'REVISTA' | 'TARJETAS' | 'OSCURO';
+
+export interface EnlaceEspacio {
+  etiqueta: string;
+  tipo: TipoEnlaceEspacio;
+  destino: string;
+  icono?: string | null;
+  visible?: boolean | null;
+}
+
+export interface SeccionEspacio {
+  id?: string | null;
+  tipo: TipoSeccionEspacio;
+  titulo?: string | null;
+  subtitulo?: string | null;
+  texto?: string | null;
+  orden: number;
+  visible: boolean;
+  alineacion?: 'left' | 'center' | 'right' | null;
+  estilo?: string | null;
+}
+
+export interface EspacioEmpresa {
+  id: string;
+  empresaId: string;
+  empresaNombre: string;
+  empresaSlug: string;
+  nombre: string;
+  slug: string;
+  esPrincipal: boolean;
+  publicado: boolean;
+  estilo: EstiloEspacio;
+  lema?: string | null;
+  portadaUrl?: string | null;
+  logoUrl?: string | null;
+  colorPrincipal?: string | null;
+  colorSecundario?: string | null;
+  pie?: string | null;
+  navbar: EnlaceEspacio[];
+  secciones: SeccionEspacio[];
+  actualizadoEn?: string | null;
+  /** Diseño del lienzo que se usa como una de las secciones. */
+  disenoSlug?: string | null;
+}
+
+export interface EspacioForm {
+  nombre?: string | null;
+  slug?: string | null;
+  esPrincipal?: boolean | null;
+  publicado?: boolean | null;
+  estilo?: EstiloEspacio | null;
+  lema?: string | null;
+  portadaUrl?: string | null;
+  logoUrl?: string | null;
+  colorPrincipal?: string | null;
+  colorSecundario?: string | null;
+  pie?: string | null;
+  disenoSlug?: string | null;
+  navbar?: EnlaceEspacio[];
+  secciones?: SeccionEspacio[];
+}
+
+export interface PublicacionRed {
+  id: string;
+  autorId?: string | null;
+  autorNombre?: string | null;
+  autorUsuario?: string | null;
+  autorAvatar?: string | null;
+  iniciales?: string | null;
+  contenido: string;
+  imagenUrl?: string | null;
+  creadoEn?: string | null;
+  likes: number;
+  comentarios: number;
+  compartidos: number;
+  meGusta?: boolean | null;
+  estado?: string | null;
+  tipo?: string | null;
+  deMiembro?: boolean | null;
+  propio?: boolean | null;
+}
+
+export interface PerfilRedEmpresa {
+  empresa?: Empresa | null;
+  empresaId: string;
+  empresaNombre: string;
+  empresaSlug: string;
+  eslogan?: string | null;
+  descripcion?: string | null;
+  tipo?: string | null;
+  sector?: string | null;
+  tipoEtiqueta?: string | null;
+  sectorEtiqueta?: string | null;
+  logoUrl?: string | null;
+  portadaUrl?: string | null;
+  ciudad?: string | null;
+  departamento?: string | null;
+  direccion?: string | null;
+  telefono?: string | null;
+  whatsapp?: string | null;
+  correo?: string | null;
+  sitioWeb?: string | null;
+  horario?: string | null;
+  redes: { nombre: string; url: string }[];
+  miembros: MiembroEmpresa[];
+  seguidores: number;
+  seguidos?: number;
+  seguidoresLista?: MiembroEmpresa[];
+  siguiendo: boolean;
+  puedeEditar: boolean;
+  espacioPrincipal?: EspacioEmpresa | null;
+  espacios: EspacioEmpresa[];
+  publicaciones: PublicacionRed[];
+  pendientes?: PublicacionRed[] | null;
 }

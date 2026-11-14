@@ -743,3 +743,30 @@
     }
   }
 }
+
+@media (max-width: 560px) {
+  .cabecera {
+    gap: .5rem;
+
+    h1 {
+      font-size: 1.1rem;
+    }
+  }
+
+  .metricas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mapa {
+    gap: .7rem;
+  }
+
+  .mapa__panel {
+    max-height: none;
+  }
+
+  .aviso {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}

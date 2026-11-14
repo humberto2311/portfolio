@@ -17,6 +17,7 @@ import { EmpresaService } from '../../../core/services/empresa.service';
 import { DisenoService } from '../../../core/services/diseno.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
+import { TemaService } from '../../../core/services/tema.service';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
 import { EspacioNavbarComponent } from './espacio-navbar.component';
 import { anclaSeccion, urlRed } from './espacio-ui';
@@ -64,7 +65,111 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
   readonly disenos = signal<DisenoLienzo[]>([]);
   readonly redEmpresa = signal<Empresa | null>(null);
 
+  /** Imágenes de la empresa: la landing cae en ellas cuando el espacio no tiene una válida. */
+  private readonly marcaEmpresa = signal<{ logoUrl: string; portadaUrl: string }>({
+    logoUrl: '',
+    portadaUrl: '',
+  });
+
+  private readonly rotas = signal<Record<'logoUrl' | 'portadaUrl', boolean>>({
+    logoUrl: false,
+    portadaUrl: false,
+  });
+
+  get imagenLogo(): string | null {
+    const esp = this.espacio();
+    if (!this.rotas().logoUrl) {
+      const propio = esp?.logoUrl?.trim();
+      if (propio) return propio;
+    }
+    return this.marcaEmpresa().logoUrl || null;
+  }
+
+  get imagenPortada(): string | null {
+    const esp = this.espacio();
+    if (!this.rotas().portadaUrl) {
+      const propia = esp?.portadaUrl?.trim();
+      if (propia) return propia;
+    }
+    return this.marcaEmpresa().portadaUrl || null;
+  }
+
+  imagenFallida(campo: 'logoUrl' | 'portadaUrl'): void {
+    if (this.rotas()[campo]) return;
+    this.rotas.update((valor) => ({ ...valor, [campo]: true }));
+  }
+
+  private guardarMarca(logo?: string | null, portada?: string | null): void {
+    this.marcaEmpresa.update((actual) => ({
+      logoUrl: actual.logoUrl || (logo ?? '').trim() || '',
+      portadaUrl: actual.portadaUrl || (portada ?? '').trim() || '',
+    }));
+  }
+
   readonly esPrevia = signal(false);
+  readonly tema = inject(TemaService);
+
+  /** Tono del texto del hero: se elige automáticamente según lo oscura que sea la imagen. */
+  readonly tonoPortada = signal<'oscuro' | 'claro'>('oscuro');
+
+  constructor() {
+    this.tema.pintar(this.tema.claro());
+  }
+
+  /** Color de texto elegido para la sección (se guarda en estilo como "texto:#ffffff"). */
+  colorDeSeccion(seccion: SeccionEspacio): string | null {
+    const valor = (seccion.estilo ?? '').trim();
+    return valor.startsWith('texto:') ? valor.slice(6) || null : null;
+  }
+
+  /** Estilos en línea de la sección, con el color elegido. */
+  estiloDeSeccion(seccion: SeccionEspacio): Record<string, string> {
+    const color = this.colorDeSeccion(seccion);
+    return color ? { color } : {};
+  }
+
+  /** Lee la portada y decide si el texto del hero va en negro o en blanco. */
+  private medirPortada(url: string | null): void {
+    if (!url) {
+      this.tonoPortada.set('oscuro');
+      return;
+    }
+
+    if (typeof Image === 'undefined') return;
+
+    const imagen = new Image();
+    imagen.crossOrigin = 'anonymous';
+    imagen.referrerPolicy = 'no-referrer';
+
+    imagen.onload = () => {
+      try {
+        const lienzo = document.createElement('canvas');
+        const ancho = 24;
+        const alto = 24;
+        lienzo.width = ancho;
+        lienzo.height = alto;
+
+        const contexto = lienzo.getContext('2d');
+        if (!contexto) return;
+
+        contexto.drawImage(imagen, 0, 0, ancho, alto);
+        const datos = contexto.getImageData(0, 0, ancho, alto).data;
+
+        let suma = 0;
+        for (let i = 0; i < datos.length; i += 4) {
+          suma += 0.2126 * datos[i] + 0.7152 * datos[i + 1] + 0.0722 * datos[i + 2];
+        }
+
+        const brillo = suma / (datos.length / 4);
+        this.tonoPortada.set(brillo > 140 ? 'oscuro' : 'claro');
+      } catch {
+        this.tonoPortada.set('claro');
+      }
+    };
+
+    imagen.onerror = () => this.tonoPortada.set('claro');
+    imagen.src = url;
+  }
 
   volverAlEditor(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
@@ -90,6 +195,7 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
 
       this.espacio.set(espacio);
       this.aplicarColores(espacio);
+      this.medirPortada(espacio.portadaUrl ?? null);
       this.cargarRed(espacio);
       this.cargarLienzo(espacio);
     });
@@ -321,6 +427,7 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
         puedeEditar: red.puedeEditar,
       });
       this.redEmpresa.set(red.empresa ?? null);
+      this.guardarMarca(red.empresa?.logoUrl ?? red.logoUrl, red.empresa?.portadaUrl ?? red.portadaUrl);
     });
   }
 

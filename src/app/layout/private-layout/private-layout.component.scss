@@ -12,16 +12,25 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* En celular `fixed` se queda corto con la barra del navegador: se usa scroll. */
+@media (max-width: 1023.98px) {
+  .shell {
+    background-attachment: scroll;
+  }
+}
+
 .shell__body {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  min-width: 0;
 }
 
 .shell__main {
   flex: 1;
   width: 100%;
   max-width: 1000px;
+  min-width: 0;
   margin: 0 auto;
   padding: 16px 14px calc(#{$tabbar-height} + 28px + var(--safe-bottom));
 }
@@ -73,5 +82,15 @@
 @media (min-width: $bp-desktop) {
   .shell__main--full {
     padding: 20px 24px 56px;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell__main {
+    padding: 12px 10px calc(#{$tabbar-height} + 24px + var(--safe-bottom));
+  }
+
+  .shell__main--full {
+    padding: 8px 8px calc(#{$tabbar-height} + 20px + var(--safe-bottom));
   }
 }

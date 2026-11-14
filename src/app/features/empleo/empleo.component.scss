@@ -716,3 +716,50 @@
     background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 14%, transparent);
   }
 }
+
+@media (max-width: 560px) {
+  .buscador {
+    padding: .65rem;
+
+    .btn-buscar {
+      width: 100%;
+      justify-content: center;
+      min-height: 42px;
+    }
+  }
+
+  .campo {
+    input,
+    select {
+      min-height: 40px;
+      font-size: .85rem;
+    }
+  }
+
+  .vacante__fila {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: .5rem;
+    padding: .5rem;
+  }
+
+  .medidor {
+    width: 42px;
+    height: 42px;
+  }
+
+  .acciones {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      justify-content: center;
+      min-height: 42px;
+    }
+  }
+}
+
+/* El chat va debajo del tablero, con el mismo ancho que el gráfico */
+.tablero--chat {
+  display: block;
+  margin-top: 1rem;
+}

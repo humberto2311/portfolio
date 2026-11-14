@@ -1,0 +1,118 @@
+<section class="chat-ia" aria-label="Chat con IA para mejorar tu hoja de vida">
+  <header class="chat-ia__cabecera">
+    <div class="chat-ia__titulo">
+      <span class="chat-ia__icono"><i class="fa-solid fa-robot"></i></span>
+      <div>
+        <h3>Chat con IA</h3>
+        <small>
+          {{ nombreCv() }} · lee tus estadísticas y tu hoja de vida
+          @if (totalVacantes()) {
+            · {{ totalVacantes() }} vacantes en pantalla
+          }
+          · índice {{ indice() }}%
+        </small>
+      </div>
+    </div>
+
+    @if (iaDisponible()) {
+      <span class="chat-ia__estado"><i class="fa-solid fa-circle"></i> en línea</span>
+    } @else {
+      <span class="chat-ia__estado chat-ia__estado--apagado">recomendaciones del sistema</span>
+    }
+  </header>
+
+  <div class="chat-ia__hilo" #hilo>
+    @if (cargando()) {
+      <div class="burbuja burbuja--ia">
+        <p><i class="fa-solid fa-circle-notch fa-spin"></i> Estoy leyendo tu hoja de vida…</p>
+      </div>
+    }
+
+    @for (mensaje of mensajes(); track $index) {
+      <div class="burbuja" [class.burbuja--ia]="mensaje.autor === 'ia'" [class.burbuja--yo]="mensaje.autor === 'yo'">
+        <p class="burbuja__texto">{{ mensaje.texto }}</p>
+
+        @if (mensaje.mejoras?.length) {
+          <ul class="burbuja__mejoras">
+            @for (mejora of mensaje.mejoras; track mejora) {
+              <li><i class="fa-solid fa-check"></i> {{ mejora }}</li>
+            }
+          </ul>
+        }
+
+        @if (mensaje.propuesta; as propuesta) {
+          <div class="burbuja__propuesta">
+            <strong><i class="fa-solid fa-wand-magic-sparkles"></i> Esto cambiaría en tu CV</strong>
+            @if (propuesta.titular) {
+              <p><span>Titular</span> {{ propuesta.titular }}</p>
+            }
+            @if (propuesta.resumen) {
+              <p><span>Resumen</span> {{ propuesta.resumen }}</p>
+            }
+            @if (propuesta.habilidades?.length || propuesta.tecnologias?.length) {
+              <p>
+                <span>Habilidades</span>
+                {{ (propuesta.habilidades ?? []).concat(propuesta.tecnologias ?? []).join(', ') }}
+              </p>
+            }
+          </div>
+        }
+
+        <small class="burbuja__hora">{{ mensaje.hora }}</small>
+      </div>
+    }
+
+    @if (escribiendo()) {
+      <div class="burbuja burbuja--ia burbuja--pensando">
+        <i class="fa-solid fa-circle-notch fa-spin"></i> pensando…
+      </div>
+    }
+
+    @if (hayPropuesta() && escribiendo() === false) {
+      <div class="chat-ia__decision">
+        <p>¿Quieres que acomode esta información en tu CV?</p>
+        <div class="chat-ia__botones">
+          <button type="button" class="btn-si" (click)="aceptar()">
+            <i class="fa-solid fa-check"></i> Sí, acomódala
+          </button>
+          <button type="button" class="btn-no" (click)="rechazar()">No, gracias</button>
+        </div>
+      </div>
+    }
+
+    @if (cvListo()) {
+      <div class="chat-ia__listo">
+        <p><i class="fa-solid fa-circle-check"></i> Ya puedes ir a CV a ver y descargar tu hoja de vida.</p>
+        <a [routerLink]="enlaceCv()" class="chat-ia__enlace">
+          <i class="fa-solid fa-file-lines"></i> Ir a mi hoja de vida
+        </a>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="chat-ia__error"><i class="fa-solid fa-triangle-exclamation"></i> {{ error() }}</p>
+  }
+
+  <div class="chat-ia__sugerencias">
+    @for (sugerencia of sugeridas; track sugerencia) {
+      <button type="button" (click)="enviarSugerida(sugerencia)" [disabled]="escribiendo()">
+        {{ sugerencia }}
+      </button>
+    }
+  </div>
+
+  <div class="chat-ia__entrada">
+    <textarea
+      rows="1"
+      placeholder="Pregúntale qué mejorar en tu hoja de vida…"
+      [ngModel]="texto()"
+      (ngModelChange)="texto.set($event)"
+      (keydown)="onEnter($event)"
+      [disabled]="escribiendo()"
+    ></textarea>
+    <button type="button" (click)="preguntar(texto())" [disabled]="escribiendo() || !texto().trim()">
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </div>
+</section>

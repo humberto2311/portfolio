@@ -39,22 +39,28 @@
     </div>
 
     <nav class="pestanas" aria-label="Ámbito del panel">
-      <a class="pestana" routerLink="/app/dashboard" routerLinkActive="pestana--activa" [routerLinkActiveOptions]="{ exact: true }">
-        <i class="fa-solid fa-user"></i> Mi panel
-      </a>
-      <a class="pestana" routerLink="/app/dashboard/empresa" routerLinkActive="pestana--activa">
-        <i class="fa-solid fa-building"></i> Empresa
-      </a>
-      <a class="pestana" routerLink="/app/dashboard/empresa/mi-actividad" routerLinkActive="pestana--activa">
-        <i class="fa-solid fa-user-tie"></i> Mi actividad
-      </a>
-      <a class="pestana pestana--empleo" routerLink="/app/empleo">
-        <i class="fa-solid fa-briefcase"></i> Buscar empleo
-      </a>
+      @if (esAmbitoEmpresa) {
+        <span class="pestana pestana--activa" aria-current="page">
+          <i class="fa-solid fa-building"></i> Panel de la empresa
+        </span>
+      } @else {
+        <a class="pestana" routerLink="/app/dashboard" routerLinkActive="pestana--activa" [routerLinkActiveOptions]="{ exact: true }">
+          <i class="fa-solid fa-user"></i> Mi panel
+        </a>
+        <a class="pestana" routerLink="/app/dashboard/empresa" routerLinkActive="pestana--activa">
+          <i class="fa-solid fa-building"></i> Empresa
+        </a>
+        <a class="pestana" routerLink="/app/dashboard/empresa/mi-actividad" routerLinkActive="pestana--activa">
+          <i class="fa-solid fa-user-tie"></i> Mi actividad
+        </a>
+        <a class="pestana pestana--empleo" routerLink="/app/empleo">
+          <i class="fa-solid fa-briefcase"></i> Buscar empleo
+        </a>
+      }
     </nav>
   </header>
 
-  @if (misEmpresas.length) {
+  @if (!esAmbitoEmpresa && misEmpresas.length) {
     <section class="membresias">
       <h2><i class="fa-solid fa-people-group"></i> Empresas a las que perteneces</h2>
       <ul>
@@ -120,6 +126,7 @@
     }
   </section>
 
+  @if (!esAmbitoEmpresa) {
   <section class="networking">
     <article class="panel">
       <header class="panel__cabecera">
@@ -189,6 +196,7 @@
     </article>
   </section>
 
+  }
   <p class="nota">
     <i class="fa-solid fa-flask"></i>
     Datos de demostración. Al conectar el backend, los números saldrán de tu cuenta y de la empresa elegida.

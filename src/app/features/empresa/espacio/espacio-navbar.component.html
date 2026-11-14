@@ -1,8 +1,8 @@
 <header class="espacio-nav">
   <div class="espacio-nav__fila">
     <a class="espacio-nav__marca" [routerLink]="urlPerfil" [title]="espacio.empresaNombre">
-      @if (espacio.logoUrl) {
-        <img [src]="espacio.logoUrl" [alt]="espacio.empresaNombre" />
+      @if (imagenLogo) {
+        <img [src]="imagenLogo" [alt]="espacio.empresaNombre" (error)="logoFallido = true" />
       } @else {
         <span class="espacio-nav__iniciales">{{ iniciales }}</span>
       }
@@ -40,6 +40,16 @@
     </nav>
 
     <div class="espacio-nav__acciones">
+      <button
+        type="button"
+        class="espacio-nav__tema"
+        (click)="alternarTema()"
+        [attr.aria-pressed]="tema.claro()"
+        [attr.aria-label]="tema.claro() ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'"
+        [title]="tema.claro() ? 'Modo oscuro' : 'Modo claro'">
+        <i class="fa-solid" [class.fa-moon]="!tema.claro()" [class.fa-sun]="tema.claro()"></i>
+      </button>
+
       <a class="espacio-nav__volver" [routerLink]="urlPerfil">
         <i class="fa-solid fa-building"></i>
         <span>Perfil de {{ espacio.empresaNombre }}</span>

@@ -484,3 +484,46 @@
 }
 
 
+
+@media (max-width: 768px) {
+  .tablero {
+    padding-bottom: 1.5rem;
+  }
+
+  .cabecera {
+    gap: .75rem;
+  }
+
+  .pestanas {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: .15rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .pestana {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    min-height: 36px;
+  }
+
+  .metricas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .titulo h1 {
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
+}

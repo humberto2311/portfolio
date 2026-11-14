@@ -194,3 +194,18 @@
     place-items: center;
   }
 }
+
+@media (max-width: 640px) {
+  .visor {
+    padding: 0.5rem;
+
+    &__marco {
+      max-width: 100%;
+      max-height: calc(100dvh - 1rem);
+
+      img {
+        max-height: 72dvh;
+      }
+    }
+  }
+}

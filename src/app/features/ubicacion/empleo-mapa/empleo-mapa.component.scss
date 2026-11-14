@@ -315,3 +315,35 @@
     &:hover { border-color: #f59e0b; color: #fcd34d; }
   }
 }
+
+@media (max-width: 420px) {
+  .empleo-mapa {
+    padding: .6rem .55rem;
+
+    &__cabecera {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: .15rem;
+    }
+
+    &__filtros input[type='search'] {
+      flex: 1 1 100%;
+      min-height: 38px;
+    }
+  }
+
+  .empleo-item {
+    grid-template-columns: 40px minmax(0, 1fr);
+    row-gap: .35rem;
+
+    &__ubicar {
+      grid-column: 1 / -1;
+      justify-content: center;
+      min-height: 38px;
+
+      span {
+        display: inline;
+      }
+    }
+  }
+}

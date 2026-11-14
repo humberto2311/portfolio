@@ -405,6 +405,8 @@ export interface EspacioEmpresa {
   esPrincipal: boolean;
   publicado: boolean;
   estilo: EstiloEspacio;
+  /** La portada con el nombre, el lema y los botones se ve arriba en la landing. */
+  mostrarIdentidad?: boolean | null;
   lema?: string | null;
   portadaUrl?: string | null;
   logoUrl?: string | null;
@@ -424,6 +426,7 @@ export interface EspacioForm {
   esPrincipal?: boolean | null;
   publicado?: boolean | null;
   estilo?: EstiloEspacio | null;
+  mostrarIdentidad?: boolean | null;
   lema?: string | null;
   portadaUrl?: string | null;
   logoUrl?: string | null;

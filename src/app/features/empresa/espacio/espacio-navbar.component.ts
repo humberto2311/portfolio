@@ -1,8 +1,9 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { EnlaceEspacio, EspacioEmpresa } from '../../../core/models/empresa.model';
+import { TemaService } from '../../../core/services/tema.service';
 import { anclasDe, esExterno, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
 
 @Component({
@@ -19,6 +20,17 @@ export class EspacioNavbarComponent {
   @Input() urlPerfilEmpresa: string | null = null;
 
   readonly menuAbierto = signal(false);
+  logoFallido = false;
+  readonly tema = inject(TemaService);
+
+  alternarTema(): void {
+    this.tema.alternar();
+  }
+
+  get imagenLogo(): string | null {
+    if (this.logoFallido) return null;
+    return this.espacio?.logoUrl?.trim() || null;
+  }
 
   get urlPerfil(): string {
     return this.urlPerfilEmpresa || urlRed(this.espacio?.empresaSlug ?? '');

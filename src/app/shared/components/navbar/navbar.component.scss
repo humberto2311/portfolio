@@ -375,6 +375,38 @@ $alto: 64px;
   }
 }
 
+@media (max-width: 720px) {
+  .pub__acciones {
+    gap: 6px;
+  }
+
+  .pub__cta {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.82rem;
+  }
+
+  .pub__menu {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .pub__panel {
+    max-height: calc(100dvh - #{$alto});
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: calc(14px + var(--safe-bottom));
+  }
+}
+
+@media (max-width: 560px) {
+  .pub__creador,
+  .pub__tema {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   .pub__inner {
     gap: 10px;

@@ -65,12 +65,8 @@
     routerLinkActive="activo"
     [title]="tituloCuenta">
     <span class="rail__avatar">
-      @if (logotipoEmpresa) {
-        <img [src]="logotipoEmpresa" [alt]="tituloCuenta" />
-      } @else if (empresa.enModoEmpresa()) {
-        <span>{{ tituloCuenta.slice(0, 2).toUpperCase() }}</span>
-      } @else if (avatar()) {
-        <img [src]="avatar()" [alt]="'Foto de ' + (user()?.fullName ?? 'mí')" />
+      @if (fotoCuenta) {
+        <img [src]="fotoCuenta" [alt]="tituloCuenta" (error)="fotoCuentaFallida($event)" />
       } @else {
         <span>{{ iniciales() }}</span>
       }
@@ -88,18 +84,24 @@
         class="rail__cambiar"
         (click)="alternarEspacios()"
         [attr.aria-expanded]="espaciosAbiertos()"
-        title="Cambiar de espacio">
+        [title]="tituloCuenta + ' · cambiar de espacio'">
         <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
         <span class="rail__etiqueta">Cambiar de espacio</span>
       </button>
 
       @if (espaciosAbiertos()) {
-        <div class="rail__espacios">
+        <div class="rail__espacios" role="menu" aria-label="Ir a otro espacio">
           <p class="rail__espacios-titulo">Ir a otro espacio</p>
 
           @if (espacioActual; as actual) {
             <span class="rail__espacio rail__espacio--actual">
-              <span class="rail__espacio-avatar">{{ actual.nombre.slice(0, 2).toUpperCase() }}</span>
+              <span class="rail__espacio-avatar">
+                @if (actual.logoUrl) {
+                  <img [src]="actual.logoUrl" [alt]="actual.nombre" (error)="fotoCuentaFallida($event)" />
+                } @else {
+                  {{ inicialesDe(actual.nombre) }}
+                }
+              </span>
               <span class="rail__espacio-datos">
                 <strong>{{ actual.nombre }}</strong>
                 <small>{{ actual.rol }} · aquí estás</small>
@@ -124,9 +126,9 @@
               <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
                 <span class="rail__espacio-avatar">
                   @if (espacio.logoUrl) {
-                    <img [src]="espacio.logoUrl" [alt]="espacio.nombre" />
+                    <img [src]="espacio.logoUrl" [alt]="espacio.nombre" (error)="fotoCuentaFallida($event)" />
                   } @else {
-                    {{ espacio.nombre.slice(0, 2).toUpperCase() }}
+                    {{ inicialesDe(espacio.nombre) }}
                   }
                 </span>
                 <span class="rail__espacio-datos">

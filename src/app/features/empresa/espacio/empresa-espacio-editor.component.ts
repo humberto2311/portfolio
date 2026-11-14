@@ -16,7 +16,9 @@ import {
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { DisenoService } from '../../../core/services/diseno.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { UserProfileService } from '../../../core/services/user-profile.service';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
+import { leerImagen } from '../empresa-ui';
 import { EspacioNavbarComponent } from './espacio-navbar.component';
 import {
   CATALOGO_SECCIONES,
@@ -70,6 +72,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   private empresa = inject(EmpresaService);
   private diseno = inject(DisenoService);
   private toast = inject(ToastService);
+  private perfiles = inject(UserProfileService);
   private plataforma = inject(PLATFORM_ID);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -109,6 +112,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.modo.set(this.route.snapshot.data['modo'] === 'vista' ? 'vista' : 'editar');
+    this.perfiles.cargarMiAvatar();
 
     this.empresa.cargarMis().subscribe((mias) => {
       if (!mias.length) {
@@ -133,6 +137,99 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   get empresaActual() {
     return this.empresa.empresaActual();
+  }
+
+  /** Logo de la empresa: valor inicial del logo de un espacio nuevo. */
+  get logoInicial(): string {
+    return this.empresaActual?.logoUrl?.trim() || '';
+  }
+
+  /** Portada de la empresa: valor inicial de la portada de un espacio nuevo. */
+  get portadaInicial(): string {
+    return this.empresaActual?.portadaUrl?.trim() || '';
+  }
+
+  /** Vuelve a copiar la imagen de la empresa en este espacio (no toca el perfil de la empresa). */
+  usarImagenDeLaEmpresa(campo: 'logoUrl' | 'portadaUrl'): void {
+    const valor = campo === 'logoUrl' ? this.logoInicial : this.portadaInicial;
+    if (!valor) {
+      this.toast.show(
+        campo === 'logoUrl'
+          ? 'La empresa todavía no tiene logo: súbelo en Ajustes de la empresa'
+          : 'La empresa todavía no tiene portada: súbela en Ajustes de la empresa',
+      );
+      return;
+    }
+
+    this.form[campo] = valor;
+    this.cambiosSinGuardar.set(true);
+    this.toast.show('Imagen copiada de la empresa. Puedes cambiarla sin tocar la empresa');
+  }
+
+  /** Sube una imagen propia del espacio desde el equipo o el móvil. */
+  subirImagen(campo: 'logoUrl' | 'portadaUrl', input: HTMLInputElement): void {
+    const archivo = input.files?.[0];
+    input.value = '';
+    if (!archivo) return;
+
+    leerImagen(archivo, 1_400_000).then(
+      (url) => {
+        this.form[campo] = url;
+        this.cambiosSinGuardar.set(true);
+        this.toast.show('Imagen cargada. Guarda el espacio para conservarla');
+      },
+      (error: Error) => this.toast.show(error.message),
+    );
+  }
+
+  quitarImagen(campo: 'logoUrl' | 'portadaUrl'): void {
+    this.form[campo] = '';
+    this.cambiosSinGuardar.set(true);
+  }
+
+  /** Imágenes que no se pudieron cargar (por ejemplo, un base64 guardado a medias). */
+  private readonly rotas = signal<Record<'portadaUrl' | 'logoUrl', boolean>>({
+    portadaUrl: false,
+    logoUrl: false,
+  });
+
+  get imagenPortada(): string | null {
+    if (!this.rotas().portadaUrl) {
+      const valor = (this.form.portadaUrl ?? '').trim();
+      if (valor) return valor;
+    }
+    return this.portadaInicial || this.portadaDelPerfil || null;
+  }
+
+  get imagenLogo(): string | null {
+    if (!this.rotas().logoUrl) {
+      const propio = (this.form.logoUrl ?? '').trim();
+      if (propio) return propio;
+    }
+    return this.logoInicial || this.fotoDelPerfil || null;
+  }
+
+  /** Una imagen guardada incompleta deja de mostrarse y se cae a la de la empresa. */
+  imagenFallida(campo: 'portadaUrl' | 'logoUrl'): void {
+    if (this.rotas()[campo]) return;
+    this.rotas.update((valor) => ({ ...valor, [campo]: true }));
+  }
+
+  /** Aviso cuando la imagen guardada está dañada y se está mostrando otra. */
+  get imagenDanada(): boolean {
+    return this.rotas().portadaUrl || this.rotas().logoUrl;
+  }
+
+  get avisoImagen(): string {
+    return 'La imagen guardada está incompleta y no se puede mostrar. Vuelve a subirla o usa la de la empresa.';
+  }
+
+  private get fotoDelPerfil(): string {
+    return this.perfiles.avatar()?.trim() || '';
+  }
+
+  private get portadaDelPerfil(): string {
+    return this.perfiles.portada()?.trim() || '';
   }
 
   get slugEmpresa(): string {
@@ -370,6 +467,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       esPrincipal: Boolean(this.form.esPrincipal),
       publicado: Boolean(this.form.publicado),
       estilo: (this.form.estilo as EspacioEmpresa['estilo']) ?? 'CLASICO',
+      mostrarIdentidad: this.form.mostrarIdentidad !== false,
       lema: this.form.lema ?? null,
       portadaUrl: this.form.portadaUrl ?? null,
       logoUrl: this.form.logoUrl ?? empresaActual?.logoUrl ?? null,
@@ -393,6 +491,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       esPrincipal: espacio.esPrincipal,
       publicado: espacio.publicado,
       estilo: espacio.estilo,
+      mostrarIdentidad: espacio.mostrarIdentidad !== false,
       lema: espacio.lema ?? '',
       portadaUrl: espacio.portadaUrl ?? '',
       logoUrl: espacio.logoUrl ?? '',
@@ -402,14 +501,12 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       disenoSlug: espacio.disenoSlug ?? '',
     };
 
-    this.secciones = (espacio.secciones?.length ? espacio.secciones : seccionesIniciales())
+    this.secciones = (espacio.secciones ?? [])
       .slice()
       .sort((a, b) => a.orden - b.orden)
       .map((seccion, indice) => ({ ...seccion, orden: indice, clave: this.claveSeccion(seccion, indice) }));
 
-    this.navbar = espacio.navbar?.length
-      ? espacio.navbar.map((enlace) => ({ ...enlace }))
-      : navbarInicial(this.secciones);
+    this.navbar = (espacio.navbar ?? []).map((enlace) => ({ ...enlace }));
 
     this.piezas.set([]);
     this.cargarPiezas(espacio);
@@ -424,9 +521,10 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       esPrincipal: this.espacios().length === 0,
       publicado: false,
       estilo: 'CLASICO',
+      mostrarIdentidad: true,
       lema: 'Una página propia dentro de N-soft',
-      portadaUrl: '',
-      logoUrl: '',
+      portadaUrl: this.portadaInicial,
+      logoUrl: this.logoInicial,
       colorPrincipal: '',
       colorSecundario: '',
       pie: '',
@@ -578,8 +676,15 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const avisoImagen = this.imagenDemasiadoGrande();
+    if (avisoImagen) {
+      this.toast.show(avisoImagen);
+      return;
+    }
+
     const payload: EspacioForm = {
       ...this.form,
+      mostrarIdentidad: this.form.mostrarIdentidad !== false,
       navbar: this.navbar,
       secciones: this.secciones.map((seccion, indice) => ({
         id: seccion.id ?? null,
@@ -691,13 +796,71 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Color de texto de la portada; "auto" deja que se elija según la imagen. */
+  readonly colorTextoAuto = signal(true);
+  readonly colorTextoValor = signal('#ffffff');
+
+  colorTexto(): string {
+    return this.colorTextoAuto() ? this.colorTextoValor() : this.colorTextoValor();
+  }
+
+  cambiarColorTexto(valor: string): void {
+    if (!valor) return;
+    this.colorTextoAuto.set(false);
+    this.colorTextoValor.set(valor);
+    this.cambiosSinGuardar.set(true);
+    this.aplicarColores();
+  }
+
+  colorTextoAutomatico(): void {
+    this.colorTextoAuto.set(true);
+    this.cambiosSinGuardar.set(true);
+    this.aplicarColores();
+  }
+
+  /** Lleva a los ajustes donde se edita la identidad (nombre, lema, logo, portada). */
+  irAIdentidad(): void {
+    this.vista.set('estructura');
+    if (typeof document === 'undefined') return;
+
+    setTimeout(() => {
+      document.getElementById('identidad-espacio')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
+
+  /** Deja la portada (la identidad del espacio) visible u oculta en la landing. */
+  alternarIdentidad(): void {
+    this.form.mostrarIdentidad = this.form.mostrarIdentidad === false;
+    this.cambiosSinGuardar.set(true);
+  }
+
+  /** Cambia un color y lo refleja en la vista previa al momento. */
+  cambiarColor(campo: 'colorPrincipal' | 'colorSecundario', valor: string): void {
+    this.form[campo] = valor;
+    this.cambiosSinGuardar.set(true);
+    this.aplicarColores();
+  }
+
+  /** Antes de guardar, avisa si una imagen es tan grande que el servidor la rechazaría. */
+  private imagenDemasiadoGrande(): string | null {
+    const limite = 6_000_000;
+    const portada = (this.form.portadaUrl ?? '').length;
+    const logo = (this.form.logoUrl ?? '').length;
+
+    if (portada > limite) return 'La portada pesa demasiado. Usa una imagen de menos de 4 MB.';
+    if (logo > limite) return 'El logo pesa demasiado. Usa una imagen de menos de 4 MB.';
+    return null;
+  }
+
   private aplicarColores(): void {
+    const texto = this.colorTextoAuto() ? null : this.colorTextoValor();
+
     this.diseno.aplicarAjeno({
       acento: this.form.colorPrincipal || null,
       secundario: this.form.colorSecundario || null,
       fondoUrl: null,
-      css: null,
-      activo: Boolean(this.form.colorPrincipal || this.form.colorSecundario),
+      css: texto ? `.hero__contenido, .hero h1, .hero__lema, .hero__sello { color: ${texto} !important; }` : null,
+      activo: Boolean(this.form.colorPrincipal || this.form.colorSecundario || texto),
     });
   }
 }

@@ -163,3 +163,43 @@
     padding: 0.2rem 0.6rem;
   }
 }
+
+@media (max-width: 560px) {
+  :host {
+    padding: 1rem 0 2rem;
+  }
+
+  .talento {
+    padding: 0 0.75rem;
+  }
+
+  .filtros {
+    gap: 0.6rem;
+
+    .campo {
+      flex: 1 1 100%;
+    }
+
+    .limpiar {
+      width: 100%;
+      min-height: 44px;
+    }
+  }
+
+  .perfil {
+    padding: 0.8rem 0.85rem;
+  }
+
+  .perfil-link {
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .datos {
+    .nombre,
+    .rol,
+    .usuario {
+      overflow-wrap: anywhere;
+    }
+  }
+}

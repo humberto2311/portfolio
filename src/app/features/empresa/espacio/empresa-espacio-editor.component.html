@@ -50,13 +50,22 @@
       <div class="marco-vista">
         <app-espacio-navbar [espacio]="espacioVista" [haySesion]="true" [puedeEditar]="false" />
 
+        @if (form.mostrarIdentidad === false) {
+          <div class="marco-vista__oculto">
+            <i class="fa-solid fa-eye-slash"></i>
+            Identidad del espacio oculta: no se verá en la landing.
+            <button type="button" class="boton-mini" (click)="alternarIdentidad()">
+              <i class="fa-solid fa-eye"></i> Mostrar
+            </button>
+          </div>
+        } @else {
         <div class="lienzo__hero">
-          <div class="lienzo__fondo" [style.background-image]="form.portadaUrl ? 'url(' + form.portadaUrl + ')' : null"></div>
+          <div class="lienzo__fondo" [style.background-image]="imagenPortada ? 'url(' + imagenPortada + ')' : null"></div>
           <div class="lienzo__velo"></div>
           <div class="lienzo__centro">
             <span class="lienzo__logo">
-              @if (form.logoUrl || empresaActual?.logoUrl) {
-                <img [src]="form.logoUrl || empresaActual?.logoUrl" alt="Logo" />
+              @if (imagenLogo) {
+                <img [src]="imagenLogo" alt="Logo" (error)="imagenFallida('logoUrl')" />
               } @else {
                 <i class="fa-solid fa-building"></i>
               }
@@ -66,8 +75,13 @@
             @if (form.lema) {
               <p class="lienzo__lema">{{ form.lema }}</p>
             }
+            <button type="button" class="lienzo__ojo" title="Ocultar la identidad"
+                    (click)="alternarIdentidad()">
+              <i class="fa-solid fa-eye-slash"></i>
+            </button>
           </div>
         </div>
+        }
 
         <div class="lienzo__secciones">
           @for (seccion of espacioVista.secciones; track $index) {
@@ -221,8 +235,15 @@
 
           @switch (vista()) {
             @case ('estructura') {
-              <section class="panel__bloque">
+              <section class="panel__bloque" id="identidad-espacio">
                 <h2>Identidad del espacio</h2>
+
+                @if (imagenDanada) {
+                  <p class="campo__aviso">
+                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                    {{ avisoImagen }}
+                  </p>
+                }
 
                 <label class="campo">
                   <span>Nombre del espacio</span>
@@ -242,15 +263,63 @@
                   <input type="text" [(ngModel)]="form.lema" placeholder="Lo que verán al entrar" />
                 </label>
 
-                <label class="campo">
-                  <span>Imagen de portada (URL)</span>
-                  <input type="text" [(ngModel)]="form.portadaUrl" placeholder="https://…" />
-                </label>
+                <div class="campo">
+                  <span>Imagen de portada</span>
+                  <p class="campo__ayuda">
+                    Empieza con la portada de la empresa. Si la cambias aquí, la de la empresa sigue igual.
+                  </p>
+                  <div class="campo__media">
+                    @if (imagenPortada) {
+                      <img class="campo__muestra" [src]="imagenPortada" alt="Portada del espacio" (error)="imagenFallida('portadaUrl')" />
+                    } @else {
+                      <span class="campo__vacio"><i class="fa-regular fa-image" aria-hidden="true"></i> Sin portada</span>
+                    }
+                    <div class="campo__media-acciones">
+                      <label class="btn-mini">
+                        <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="subirImagen('portadaUrl', $any($event.target))" />
+                        <i class="fa-solid fa-upload" aria-hidden="true"></i> Subir imagen
+                      </label>
+                      <button type="button" class="btn-mini" (click)="usarImagenDeLaEmpresa('portadaUrl')">
+                        <i class="fa-solid fa-building" aria-hidden="true"></i> Usar la de la empresa
+                      </button>
+                      @if (imagenPortada) {
+                        <button type="button" class="btn-mini btn-mini--quitar" (click)="quitarImagen('portadaUrl')">
+                          <i class="fa-solid fa-xmark" aria-hidden="true"></i> Quitar
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <input type="text" class="campo__texto" [(ngModel)]="form.portadaUrl" placeholder="https://… (opcional)" title="Enlace o URL de la imagen" />
+                </div>
 
-                <label class="campo">
-                  <span>Logo del espacio (URL, opcional)</span>
-                  <input type="text" [(ngModel)]="form.logoUrl" placeholder="Se usa el logo de la empresa" />
-                </label>
+                <div class="campo">
+                  <span>Logo del espacio</span>
+                  <p class="campo__ayuda">
+                    Empieza con el logo de la empresa. Si lo cambias aquí, el de la empresa sigue igual.
+                  </p>
+                  <div class="campo__media">
+                    @if (imagenLogo) {
+                      <img class="campo__muestra campo__muestra--logo" [src]="imagenLogo" alt="Logo del espacio" (error)="imagenFallida('logoUrl')" />
+                    } @else {
+                      <span class="campo__vacio"><i class="fa-regular fa-user" aria-hidden="true"></i> Sin logo</span>
+                    }
+                    <div class="campo__media-acciones">
+                      <label class="btn-mini">
+                        <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="subirImagen('logoUrl', $any($event.target))" />
+                        <i class="fa-solid fa-upload" aria-hidden="true"></i> Subir imagen
+                      </label>
+                      <button type="button" class="btn-mini" (click)="usarImagenDeLaEmpresa('logoUrl')">
+                        <i class="fa-solid fa-building" aria-hidden="true"></i> Usar el de la empresa
+                      </button>
+                      @if (form.logoUrl) {
+                        <button type="button" class="btn-mini btn-mini--quitar" (click)="quitarImagen('logoUrl')">
+                          <i class="fa-solid fa-xmark" aria-hidden="true"></i> Quitar
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <input type="text" class="campo__texto" [(ngModel)]="form.logoUrl" placeholder="Se usa el logo de la empresa" title="Enlace o URL del logo" />
+                </div>
 
                 <label class="campo">
                   <span>Pie de página</span>
@@ -369,6 +438,25 @@
               <section class="panel__bloque">
                 <h2>Secciones de la página</h2>
                 <p class="panel__pista">Arrastra el orden con las flechas y abre cada sección para escribir su contenido.</p>
+
+                <div class="fila-fija" [class.fila-fija--oculta]="form.mostrarIdentidad === false">
+                  <span class="seccion__icono"><i class="fa-solid fa-id-badge"></i></span>
+                  <button type="button" class="seccion__titulo" (click)="irAIdentidad()">
+                    <strong>Identidad del espacio</strong>
+                    <small>Portada con el nombre, el lema y los botones. Siempre va arriba.</small>
+                  </button>
+                  <button type="button" class="icono" title="Editar"
+                          (click)="irAIdentidad()">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button type="button" class="icono" [title]="form.mostrarIdentidad === false ? 'Mostrar' : 'Ocultar'"
+                          (click)="alternarIdentidad()">
+                    <i class="fa-solid" [class.fa-eye]="form.mostrarIdentidad !== false" [class.fa-eye-slash]="form.mostrarIdentidad === false"></i>
+                  </button>
+                  <button type="button" class="icono" disabled title="La identidad no se puede eliminar; solo ocultar">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
 
                 <ul class="lista-secciones">
                   @for (seccion of secciones; track seccion.clave; let indice = $index) {
@@ -550,18 +638,33 @@
                 <label class="campo">
                   <span>Color principal</span>
                   <div class="campo__color">
-                    <input type="color" [(ngModel)]="form.colorPrincipal" />
-                    <input type="text" [(ngModel)]="form.colorPrincipal" placeholder="#2563eb" />
+                    <input type="color" [ngModel]="form.colorPrincipal" (ngModelChange)="cambiarColor('colorPrincipal', $event)" />
+                    <input type="text" [ngModel]="form.colorPrincipal" (ngModelChange)="cambiarColor('colorPrincipal', $event)" placeholder="#2563eb" />
                   </div>
                 </label>
 
                 <label class="campo">
                   <span>Color secundario</span>
                   <div class="campo__color">
-                    <input type="color" [(ngModel)]="form.colorSecundario" />
-                    <input type="text" [(ngModel)]="form.colorSecundario" placeholder="#0ea5e9" />
+                    <input type="color" [ngModel]="form.colorSecundario" (ngModelChange)="cambiarColor('colorSecundario', $event)" />
+                    <input type="text" [ngModel]="form.colorSecundario" (ngModelChange)="cambiarColor('colorSecundario', $event)" placeholder="#0ea5e9" />
                   </div>
                 </label>
+
+                <div class="campo">
+                  <span>Color del texto</span>
+                  <div class="campo__color">
+                    <input type="color" [ngModel]="colorTexto()" (ngModelChange)="cambiarColorTexto($event)" />
+                    <input type="text" [ngModel]="colorTexto()" (ngModelChange)="cambiarColorTexto($event)" placeholder="#ffffff" />
+                  </div>
+                  <p class="campo__ayuda">
+                    Se aplica al título, el eslogan y el texto de la portada, así se lee sobre
+                    cualquier imagen. Déjalo en automático para que se elija solo.
+                  </p>
+                  <button type="button" class="btn-mini" (click)="colorTextoAutomatico()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Automático
+                  </button>
+                </div>
 
                 <p class="panel__pista">
                   Los colores también tiñen la vista previa. Para piezas avanzadas usa el
@@ -621,12 +724,12 @@
             />
 
             <div class="lienzo__hero" id="inicio">
-              <div class="lienzo__fondo" [style.background-image]="form.portadaUrl ? 'url(' + form.portadaUrl + ')' : null"></div>
+              <div class="lienzo__fondo" [style.background-image]="imagenPortada ? 'url(' + imagenPortada + ')' : null"></div>
               <div class="lienzo__velo"></div>
               <div class="lienzo__centro">
                 <span class="lienzo__logo">
-                  @if (form.logoUrl || empresaActual?.logoUrl) {
-                    <img [src]="form.logoUrl || empresaActual?.logoUrl" alt="Logo" />
+                  @if (imagenLogo) {
+                    <img [src]="imagenLogo" alt="Logo" (error)="imagenFallida('logoUrl')" />
                   } @else {
                     <i class="fa-solid fa-building"></i>
                   }

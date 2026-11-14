@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -37,7 +38,6 @@ const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
   { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
-  { label: 'Mi actividad', icon: 'fa-solid fa-user-tie', ruta: '/app/dashboard/empresa/mi-actividad' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
   { label: 'Enlaces de la empresa', icon: 'fa-solid fa-link', ruta: '/app/empresa/enlaces', nota: 'Del equipo' },
   { label: 'Tarjetas del equipo', icon: 'fa-solid fa-address-card', ruta: '/app/empresa/tarjetas', nota: 'vCards' },
@@ -59,12 +59,17 @@ export class SideNavComponent {
   readonly mensajes = inject(SidePanelService);
   readonly rail = inject(RailStateService);
   readonly empresa = inject(EmpresaService);
+  private readonly documento = inject(DOCUMENT);
 
   readonly user = this.auth.currentUser;
   readonly avatar = this.perfiles.avatar;
 
+  private readonly quitarOyentes: (() => void)[] = [];
+
   constructor() {
     this.empresa.cargarMis().pipe(takeUntilDestroyed(this.destruir)).subscribe();
+    this.escucharClicFuera();
+    this.destruir.onDestroy(() => this.quitarOyentes.splice(0).forEach((quitar) => quitar()));
 
     effect(() => {
       this.empresa.enModoEmpresa();
@@ -119,6 +124,29 @@ export class SideNavComponent {
     return this.empresa.empresaActual()?.logoUrl ?? null;
   }
 
+  /** Foto de la cuenta que se está usando: logo de la empresa o foto del perfil personal. */
+  get fotoCuenta(): string | null {
+    if (this.empresa.enModoEmpresa()) return this.logotipoEmpresa;
+    return this.avatar();
+  }
+
+  /** Oculta la imagen rota para que queden las iniciales en su lugar. */
+  fotoCuentaFallida(evento: Event): void {
+    const img = evento.target as HTMLImageElement | null;
+    if (img) {
+      img.style.display = 'none';
+      img.parentElement?.classList.add('sin-foto');
+    }
+  }
+
+  inicialesDe(nombre: string): string {
+    const limpio = (nombre ?? '').trim();
+    if (!limpio) return 'U';
+    const partes = limpio.split(/\s+/).filter(Boolean);
+    if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+    return (partes[0][0] + partes[1][0]).toUpperCase();
+  }
+
   readonly espaciosAbiertos = signal(false);
 
   get misEmpresas(): Empresa[] {
@@ -138,10 +166,15 @@ export class SideNavComponent {
     }));
   }
 
-  get espacioActual(): { id: string; nombre: string; rol: string } | null {
+  get espacioActual(): { id: string; nombre: string; rol: string; logoUrl?: string | null } | null {
     const activa = this.empresa.empresaActual();
     if (!activa) return null;
-    return { id: activa.id, nombre: activa.nombre, rol: activa.rolEtiqueta ?? 'Miembro' };
+    return {
+      id: activa.id,
+      nombre: activa.nombre,
+      rol: activa.rolEtiqueta ?? 'Miembro',
+      logoUrl: activa.logoUrl ?? null,
+    };
   }
 
   get hayEspacios(): boolean {
@@ -155,10 +188,31 @@ export class SideNavComponent {
     }
   }
 
+  /** Cierra el menú de espacios al pulsar en cualquier sitio que no sea el panel o su botón. */
+  private escucharClicFuera(): void {
+    const escuchar = (evento: Event) => {
+      if (!this.espaciosAbiertos()) return;
+      const destino = evento.target as HTMLElement | null;
+      if (destino?.closest('.rail__cambiar-caja')) return;
+      this.espaciosAbiertos.set(false);
+    };
+
+    const conEscape = (evento: KeyboardEvent) => {
+      if (evento.key === 'Escape') this.espaciosAbiertos.set(false);
+    };
+
+    this.documento.addEventListener('pointerdown', escuchar, true);
+    this.documento.addEventListener('keydown', conEscape);
+    this.quitarOyentes.push(() => {
+      this.documento.removeEventListener('pointerdown', escuchar, true);
+      this.documento.removeEventListener('keydown', conEscape);
+    });
+  }
+
   irAEspacio(id: string): void {
     this.espaciosAbiertos.set(false);
     this.empresa.entrar(id);
-    void this.router.navigateByUrl('/app/empresa').then(() => window.scrollTo({ top: 0 }));
+    void this.router.navigateByUrl('/app/empresa').then(() => this.documento.defaultView?.scrollTo({ top: 0 }));
   }
 
   irAPersonal(): void {
@@ -173,8 +227,10 @@ export class SideNavComponent {
   }
 
   iniciales(): string {
-    const nombre = this.user()?.fullName ?? '';
-    return nombre.split(' ').filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase() || 'U';
+    if (this.empresa.enModoEmpresa()) {
+      return this.inicialesDe(this.empresa.empresaActual()?.nombre ?? '');
+    }
+    return this.inicialesDe(this.user()?.fullName ?? '');
   }
 
   subtitulo(): string {

@@ -12,10 +12,14 @@ export class UserProfileService {
   private readonly API = `${environment.apiUrl}/api/users`;
 
   private readonly miAvatar = signal<string | null>(null);
+  private readonly miPortada = signal<string | null>(null);
   private avatarCargado = false;
 
   /** Foto de quien usa la app: la piden el navbar, los comentarios y el modal de compartir. */
   readonly avatar = this.miAvatar.asReadonly();
+
+  /** Portada del perfil propio: se usa como valor inicial al crear un espacio o una landing. */
+  readonly portada = this.miPortada.asReadonly();
 
   getMe(): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.API}/me`);
@@ -64,5 +68,6 @@ export class UserProfileService {
 
   private aplicarAvatar(social: any): void {
     this.miAvatar.set(social?.avatarUrl?.trim() || null);
+    this.miPortada.set(social?.coverUrl?.trim() || null);
   }
 }

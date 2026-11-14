@@ -1,4 +1,4 @@
-<div class="espacio diseno-visita">
+<div class="espacio diseno-visita" [class.espacio--revista]="espacio()?.estilo === 'REVISTA'" [class.espacio--tarjetas]="espacio()?.estilo === 'TARJETAS'">
   @if (espacio(); as esp) {
     <app-espacio-navbar
       [espacio]="espacioNavbar ?? esp"
@@ -8,14 +8,15 @@
     />
 
     <main class="espacio__cuerpo">
-      <section class="hero" id="inicio">
-        <div class="hero__fondo" [style.background-image]="esp.portadaUrl ? 'url(' + esp.portadaUrl + ')' : null"></div>
+      @if (esp.mostrarIdentidad !== false) {
+      <section class="hero" id="inicio" [class.hero--texto-claro]="tonoPortada() === 'claro'">
+        <div class="hero__fondo" [style.background-image]="imagenPortada ? 'url(' + imagenPortada + ')' : null"></div>
         <div class="hero__velo"></div>
 
         <div class="hero__contenido">
           <span class="hero__logo">
-            @if (esp.logoUrl) {
-              <img [src]="esp.logoUrl" [alt]="esp.empresaNombre" />
+            @if (imagenLogo) {
+              <img [src]="imagenLogo" [alt]="esp.empresaNombre" (error)="imagenFallida('logoUrl')" />
             } @else {
               <span>{{ iniciales }}</span>
             }
@@ -41,6 +42,7 @@
           </div>
         </div>
       </section>
+      }
 
       @for (seccion of secciones; track seccion.orden) {
         <section
@@ -48,6 +50,8 @@
           [id]="ancla(seccion)"
           [class.seccion--alta]="altoSeccion(seccion) === 'seccion--alta'"
           [class.seccion--centrada]="centrada(seccion)"
+          [class.seccion--texto-propio]="colorDeSeccion(seccion)"
+          [style]="estiloDeSeccion(seccion)"
         >
           <header class="seccion__cabecera">
             <h2>{{ seccion.titulo || seccion.tipo }}</h2>
@@ -158,8 +162,8 @@
                   <article class="entrada">
                     <header class="entrada__cabecera">
                       <span class="entrada__avatar">
-                        @if (esp.logoUrl) {
-                          <img [src]="esp.logoUrl" [alt]="esp.empresaNombre" />
+                        @if (imagenLogo) {
+                          <img [src]="imagenLogo" [alt]="esp.empresaNombre" (error)="imagenFallida('logoUrl')" />
                         } @else {
                           <span>{{ iniciales }}</span>
                         }

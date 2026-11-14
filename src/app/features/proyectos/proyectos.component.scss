@@ -73,7 +73,6 @@ $border-soft: var(--bg-border);
   .proyectos-header {
     text-align: center;
     margin-bottom: 4rem;
-
     .header-badge {
       display: inline-flex;
       align-items: center;
@@ -660,6 +659,12 @@ $border-soft: var(--bg-border);
     margin-bottom: 0.75rem;
     margin-top: 0;
   }
+}
+
+.tab-contenido--extra {
+  padding: 0 2rem 2rem;
+  color: $text-muted;
+  font-family: 'Inter', sans-serif;
 
   .short-bio-text {
     font-size: 0.85rem;
@@ -1154,5 +1159,204 @@ $border-soft: var(--bg-border);
     padding: 0.15rem;
 
     &:hover { color: var(--text-primary); }
+  }
+}
+@media (max-width: 900px) {
+  .proyectos-contenedor {
+    padding: 1rem 0.85rem;
+
+    .proyectos-header {
+      margin-bottom: 2.5rem;
+
+      h1 {
+        font-size: clamp(1.7rem, 7vw, 2.5rem);
+      }
+
+      p {
+        font-size: 0.95rem;
+      }
+    }
+  }
+
+  .buscador-wrapper {
+    margin-bottom: 2rem;
+  }
+
+  .grid-proyectos {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .cortina-contenido {
+    top: 4vh;
+    width: 94%;
+    max-height: 90dvh;
+  }
+
+  .cortina-header {
+    padding: 0.7rem 0.9rem;
+
+    .cortina-titulo {
+      gap: 0.5rem;
+      min-width: 0;
+
+      .nombre-repo {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .tabs-github {
+    padding: 0 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab {
+      padding: 0.7rem 0.75rem;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+  }
+
+  .tab-contenido {
+    padding: 1.25rem 1rem;
+  }
+
+  .tab-contenido--extra {
+    padding: 0 1rem 1.25rem;
+  }
+
+  .terminal-git {
+    .terminal-header {
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .terminal-body {
+      font-size: 0.78rem;
+      align-items: flex-start;
+
+      .comando {
+        min-width: 0;
+      }
+    }
+  }
+
+  .modal-git {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .proyectos-contenedor {
+    padding: 0.85rem 0.7rem;
+  }
+
+  .acciones-privadas {
+    justify-content: stretch;
+
+    .btn-importar {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .grid-proyectos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tarjeta-proyecto {
+    max-width: none;
+  }
+
+  .tarjeta-meta {
+    flex-wrap: wrap;
+  }
+
+  .meta-home {
+    max-width: 100%;
+  }
+
+  .cortina-contenido {
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .cortina-header {
+    .window-controls {
+      display: none;
+    }
+
+    .separator {
+      display: none;
+    }
+  }
+
+  .tabs-github .tab {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 0.7rem 0.5rem;
+    font-size: 0.76rem;
+  }
+
+  .tab-contenido {
+    padding: 1rem 0.85rem;
+
+    .readme-content {
+      padding: 0.9rem;
+      font-size: 0.85rem;
+    }
+  }
+
+  .tab-contenido--extra {
+    padding: 0 0.85rem 1rem;
+  }
+
+  .meta-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.6rem;
+  }
+
+  .modal-git-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-git {
+    max-width: none;
+    max-height: 92dvh;
+    overflow-y: auto;
+    border-radius: 1rem 1rem 0 0;
+    padding: 1.15rem;
+
+    .modal-actions {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+        min-height: 44px;
+      }
+    }
+  }
+
+  .estado-carga,
+  .estado-error {
+    padding: 3rem 0;
+  }
+
+  .aviso-git {
+    flex-wrap: wrap;
   }
 }

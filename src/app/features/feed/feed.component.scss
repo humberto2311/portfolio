@@ -10,7 +10,15 @@
   flex-direction: column;
   gap: 12px;
   max-width: 620px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
+}
+
+@media (max-width: 560px) {
+  .feed {
+    gap: 10px;
+  }
 }
 
 .loader {

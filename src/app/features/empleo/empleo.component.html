@@ -221,6 +221,14 @@
     </div>
   </section>
 
+  <!-- ============ 3. CHAT CON IA: estadísticas + hoja de vida + vacantes ============ -->
+  <section class="tablero tablero--chat">
+    <app-empleo-chat
+      [grafico]="grafico()"
+      [vacantes]="resultados"
+      [iaDisponible]="iaDisponible()"></app-empleo-chat>
+  </section>
+
   @if (recomendaciones.length) {
     <section class="sugerencias sugerencias--pie">
       <h4><i class="fa-solid fa-lightbulb"></i> Cómo subir tu porcentaje de acierto</h4>

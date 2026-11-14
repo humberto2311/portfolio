@@ -39,7 +39,9 @@ html { scroll-behavior: smooth; }
 .dashboard-container {
   display: flex;
   background: radial-gradient(ellipse at top, var(--bg-hover) 0%, transparent 50%), $bg-dark;
+  min-width: 0;
 }
+
 
 .sidebar {
   width: 260px;

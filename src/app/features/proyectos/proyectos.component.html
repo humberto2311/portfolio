@@ -256,6 +256,9 @@
         </div>
       </div>
 
+    </div>
+
+    <div class="tab-contenido tab-contenido--extra" *ngIf="pestanaActiva === 'codigo'">
       <div class="meta-grid">
         <div class="meta-box">
           <span class="meta-label">Último Commit</span>
@@ -277,7 +280,6 @@
           <span *ngFor="let tech of proyectoActivo.stack" class="tech-badge">{{ tech }}</span>
         </div>
       </div>
-
     </div>
 
     <!-- PESTAÑA GIT -->

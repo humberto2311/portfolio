@@ -136,3 +136,29 @@ button, input, textarea, select {
   font: inherit;
   color: inherit;
 }
+/* Listas desplegables: el navegador las pintaba azul/blanco por defecto. */
+select {
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+}
+
+:root[data-tema='claro'] select {
+  color-scheme: light;
+}
+
+:root[data-tema='claro'] select option,
+:root[data-tema='claro'] select optgroup {
+  background-color: #ffffff;
+  color: var(--text-primary);
+}
+
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

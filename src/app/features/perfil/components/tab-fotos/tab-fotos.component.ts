@@ -9,6 +9,7 @@ import { ResumeService } from '../../../../core/services/resume.service';
 import { ResumeSaveService } from '../../../../core/services/resume-save.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ArchivoService } from '../../../../core/services/archivo.service';
+import { ConfirmationModalService } from '../../../../core/services/confirmation-modal.service';
 import { PostCardComponent } from '../post-card/post-card.component';
 import { PhotoViewerComponent } from '../photo-viewer/photo-viewer.component';
 
@@ -30,6 +31,7 @@ export class TabFotosComponent implements OnChanges {
   private resumeSave = inject(ResumeSaveService);
   private toast = inject(ToastService);
   private archivos = inject(ArchivoService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   fotos = signal<FotoPerfil[]>([]);
   menuAbierto = signal<number | null>(null);
@@ -82,8 +84,11 @@ export class TabFotosComponent implements OnChanges {
     this.ampliada.set(null);
   }
 
-  eliminar(foto: FotoPerfil): void {
+  async eliminar(foto: FotoPerfil): Promise<void> {
     this.menuAbierto.set(null);
+
+    const confirmed = await this.confirmationModal.confirmDelete('esta foto');
+    if (!confirmed) return;
 
     this.fotosSvc.borrar(foto.id).subscribe({
       next: () => {

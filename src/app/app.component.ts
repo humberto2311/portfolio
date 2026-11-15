@@ -4,11 +4,12 @@ import { FooterComponent } from './shared/components/footer/footer.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { CarruselComponent } from './shared/components/carrusel/carrusel.component';
 import { LoginModalComponent } from '../app/shared/components/login-modal/login-modal.component';
+import { ConfirmationModalComponent } from './shared/components/confirmation-modal/confirmation-modal.component';
 import { EmisoraNfcService } from './core/services/emisora-nfc.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CarruselComponent, FooterComponent, RouterOutlet, NavbarComponent, LoginModalComponent],
+  imports: [CarruselComponent, FooterComponent, RouterOutlet, NavbarComponent, LoginModalComponent, ConfirmationModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

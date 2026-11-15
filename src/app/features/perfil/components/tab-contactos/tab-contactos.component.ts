@@ -6,6 +6,7 @@ import { ConnectionService } from '../../../../core/services/connection.service'
 import { ToastService } from '../../../../core/services/toast.service';
 import { SidePanelService } from '../../../../core/services/side-panel.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ConfirmationModalService } from '../../../../core/services/confirmation-modal.service';
 
 @Component({
   selector: 'app-tab-contactos',
@@ -23,6 +24,7 @@ export class TabContactosComponent implements OnInit, OnChanges {
   private router = inject(Router);
   private sidePanel = inject(SidePanelService);
   private auth = inject(AuthService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   activeSubTab: 'seguidos' | 'seguidores' = 'seguidos';
   
@@ -156,8 +158,21 @@ export class TabContactosComponent implements OnInit, OnChanges {
     });
   }
 
-  dejarDeSeguir(c: any) {
+  async dejarDeSeguir(c: any): Promise<void> {
     const otroPersona = this.otro(c);
+
+    const confirmed = await this.confirmationModal.confirm({
+      title: 'Dejar de seguir',
+      message: otroPersona.nombre
+        ? `¿Quieres dejar de seguir a ${otroPersona.nombre}?`
+        : '¿Quieres dejar de seguir a esta persona?',
+      confirmText: 'Dejar de seguir',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: 'fa-solid fa-user-minus',
+    });
+    if (!confirmed) return;
+
     this.connectionService.unfollowUser(otroPersona.id).subscribe({
       next: () => {
         this.yoSigo.delete(otroPersona.id);

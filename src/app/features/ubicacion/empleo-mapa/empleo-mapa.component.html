@@ -94,16 +94,16 @@
                 @if (vacante.salario) {
                   <li><i class="fa-solid fa-money-bill-wave"></i> {{ vacante.salario }}</li>
                 }
-                @if (vacante.coincidencias?.length) {
+                @if (vacante.coincidencias.length) {
                   <li>
                     <i class="fa-solid fa-check"></i>
-                    Ya cumples: {{ vacante.coincidencias?.slice(0, 4)?.join(', ') }}
+                    Ya cumples: {{ vacante.coincidencias.slice(0, 4).join(', ') }}
                   </li>
                 }
-                @if (vacante.faltantes?.length) {
+                @if (vacante.faltantes.length) {
                   <li>
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    Te falta: {{ vacante.faltantes?.slice(0, 4)?.join(', ') }}
+                    Te falta: {{ vacante.faltantes.slice(0, 4).join(', ') }}
                   </li>
                 }
               </ul>

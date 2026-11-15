@@ -14,6 +14,7 @@ import { ArchivoService } from '../../core/services/archivo.service';
 import { FotoPerfil, UserPhotoService } from '../../core/services/user-photo.service';
 import { imagenDePerfilComoDataUrl } from '../../core/utils/imagen.util';
 import { ResumeProfile, ResumeSection } from '../../core/models/resume.model';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 
 /** Una fila clave/valor del JSON que guarda cada item. */
 interface ParContenido {
@@ -59,6 +60,7 @@ export class InformacionPersonalComponent implements OnInit {
   private fotosSvc = inject(UserPhotoService);
   private userProfile = inject(UserProfileService);
   public router = inject(Router);
+  private confirmationModal = inject(ConfirmationModalService);
 
   public loading = true;
   public errorMessage: string | null = null; 
@@ -790,12 +792,14 @@ export class InformacionPersonalComponent implements OnInit {
     });
   }
 
-  eliminarSeccion(seccion: SeccionEditable) {
+  async eliminarSeccion(seccion: SeccionEditable): Promise<void> {
     if (!seccion.id) {
       this.seccionesEditables = this.seccionesEditables.filter(s => s !== seccion);
       return;
     }
-    if (!confirm(`¿Eliminar la sección "${seccion.title}" y todos sus items? No se puede deshacer.`)) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete(`la sección "${seccion.title}" y todos sus items`);
+    if (!confirmed) return;
 
     this.resumeSave.eliminarSeccion(seccion.id).subscribe({
       next: () => {
@@ -907,12 +911,14 @@ export class InformacionPersonalComponent implements OnInit {
     return this.seccionesEditables.some(sec => sec.sectionKey === sectionKey);
   }
 
-  eliminarItem(seccion: SeccionEditable, item: ItemEditable) {
+  async eliminarItem(seccion: SeccionEditable, item: ItemEditable): Promise<void> {
     if (!item.id) {
       seccion.items = seccion.items.filter(i => i !== item);
       return;
     }
-    if (!confirm('¿Eliminar este item?')) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete('este item');
+    if (!confirmed) return;
 
     this.resumeSave.eliminarItem(item.id).subscribe({
       next: () => {

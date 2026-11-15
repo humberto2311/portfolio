@@ -10,6 +10,7 @@ import { ResumeService } from '../../core/services/resume.service';
 import { VcardService } from '../../core/services/vcard.service';
 import { ResumeProfile } from '../../core/models/resume.model';
 import { VCardPayload } from '../../core/models/vcard.model';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 
 @Component({
   selector: 'app-ajustes-seguridad',
@@ -23,6 +24,7 @@ export class AjustesSeguridadComponent implements OnInit {
   private toast = inject(ToastService);
   private resume = inject(ResumeService);
   private vcard = inject(VcardService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   estado: EstadoCuenta | null = null;
   cv: ResumeProfile | null = null;
@@ -37,8 +39,6 @@ export class AjustesSeguridadComponent implements OnInit {
   codigo = '';
   verificando = false;
 
-  /** El primer clic pregunta, el segundo ejecuta: cerrar sesiones no tiene undo. */
-  confirmandoCierre = false;
   cerrandoSesiones = false;
 
   ngOnInit(): void {
@@ -125,13 +125,17 @@ export class AjustesSeguridadComponent implements OnInit {
     });
   }
 
-  cerrarSesiones() {
-    if (!this.confirmandoCierre) {
-      this.confirmandoCierre = true;
-      return;
-    }
+  async cerrarSesiones(): Promise<void> {
+    const confirmed = await this.confirmationModal.confirm({
+      title: 'Cerrar sesión en otros dispositivos',
+      message: 'Se cerrará tu sesión en todos los demás dispositivos. Tendrás que volver a iniciar sesión en ellos.',
+      confirmText: 'Cerrar sesiones',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: 'fa-solid fa-laptop-medical',
+    });
+    if (!confirmed) return;
 
-    this.confirmandoCierre = false;
     this.cerrandoSesiones = true;
 
     this.auth.cerrarSesiones().pipe(finalize(() => (this.cerrandoSesiones = false)))

@@ -17,13 +17,13 @@
     </div>
 
     <div class="head-actions">
-      <button type="button" class="btn ghost" (click)="crearNueva('PERSONAL')">
+      <button type="button" class="btn ghost" appAnimatedButton (click)="crearNueva('PERSONAL')">
         <i class="fa-solid fa-plus"></i> Nueva tarjeta
       </button>
-      <button type="button" class="btn ghost" (click)="abrirCompartir()">
+      <button type="button" class="btn ghost" appAnimatedButton (click)="abrirCompartir()">
         <i class="fa-solid fa-qrcode"></i> Compartir
       </button>
-      <button type="button" class="btn primary" (click)="guardar()" [disabled]="guardando()">
+      <button type="button" class="btn primary" appAnimatedButton (click)="guardar()" [disabled]="guardando()">
         <i class="fa-solid" [class.fa-spinner]="guardando()" [class.fa-spin]="guardando()"
            [class.fa-floppy-disk]="!guardando()"></i>
         {{ guardando() ? 'Guardando...' : 'Guardar tarjeta' }}
@@ -55,7 +55,7 @@
           </button>
           
           <!-- Botón de eliminar -->
-          <button type="button" class="btn-eliminar" (click)="eliminarTarjeta(t, $event)" title="Eliminar tarjeta">
+          <button type="button" class="btn-eliminar" appAnimatedButton (click)="eliminarTarjeta(t, $event)" title="Eliminar tarjeta">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -77,6 +77,7 @@
           @for (p of plantillas; track p.id) {
             <button type="button"
                     class="template"
+                    appAnimatedButton
                     [class.active]="tarjeta().plantilla === p.id"
                     (click)="elegirPlantilla(p.id)">
               <span class="template-icon"><i [class]="p.icono"></i></span>
@@ -164,7 +165,7 @@
                   <input type="text" placeholder="Escribe el valor"
                          [ngModel]="campo.valor" (ngModelChange)="setCampo(campo.clave, $event)" />
                 </label>
-                <button type="button" class="quitar" (click)="quitarCampo(campo.clave)" title="Quitar campo">
+                <button type="button" class="quitar" appAnimatedButton (click)="quitarCampo(campo.clave)" title="Quitar campo">
                   <i class="fa-solid fa-xmark"></i>
                 </button>
               </div>
@@ -175,7 +176,7 @@
 
       <!-- Añadir campos -->
       <div class="panel add-panel">
-        <button type="button" class="btn dashed" (click)="toggleMenu()">
+        <button type="button" class="btn dashed" appAnimatedButton (click)="toggleMenu()">
           <i class="fa-solid" [class.fa-plus]="!menuCampos()" [class.fa-minus]="menuCampos()"></i>
           {{ menuCampos() ? 'Cerrar opciones' : 'Añadir más campos' }}
         </button>
@@ -189,6 +190,7 @@
                   @for (def of grupo.campos; track def.clave) {
                     <button type="button"
                             class="chip-campo"
+                            appAnimatedButton
                             [class.agregado]="tieneCampo(def.clave)"
                             [disabled]="tieneCampo(def.clave)"
                             (click)="agregarCampo(def)">
@@ -291,7 +293,7 @@
 
         <header class="modal-head">
           <h2><i class="fa-solid fa-qrcode"></i> Compartir mi tarjeta</h2>
-          <button type="button" class="modal-close" (click)="cerrarCompartir()">
+          <button type="button" class="modal-close" appAnimatedButton (click)="cerrarCompartir()">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </header>
@@ -310,13 +312,13 @@
 
             <div class="enlace-box">
               <input type="text" [value]="enlacePublico()" readonly />
-              <button type="button" class="btn ghost" (click)="copiarEnlace()">
+              <button type="button" class="btn ghost" appAnimatedButton (click)="copiarEnlace()">
                 <i class="fa-regular fa-copy"></i> Copiar
               </button>
             </div>
 
             <div class="modal-acciones">
-              <button type="button" class="btn primary" (click)="descargarVcf()">
+              <button type="button" class="btn primary" appAnimatedButton (click)="descargarVcf()">
                 <i class="fa-solid fa-address-card"></i> Guardar contacto (.vcf)
               </button>
               <a class="btn ghost" [href]="enlacePublico()" target="_blank" rel="noopener">
@@ -330,7 +332,7 @@
               <i class="fa-solid fa-circle-info"></i>
               Guarda tu tarjeta una vez para generar el enlace y el QR.
             </p>
-            <button type="button" class="btn primary" (click)="guardar()" [disabled]="guardando()">
+            <button type="button" class="btn primary" appAnimatedButton (click)="guardar()" [disabled]="guardando()">
               <i class="fa-solid fa-floppy-disk"></i> Guardar tarjeta
             </button>
           </div>

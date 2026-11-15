@@ -25,6 +25,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ArchivoService } from '../../../../core/services/archivo.service';
+import { ConfirmationModalService } from '../../../../core/services/confirmation-modal.service';
 import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.component';
 import { MencionesDirective } from '../../../../shared/directives/menciones.directive';
 
@@ -52,6 +53,7 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
   private modal = inject(ModalService);
   private toast = inject(ToastService);
   private archivos = inject(ArchivoService);
+  private confirmationModal = inject(ConfirmationModalService);
   private el = inject(ElementRef) as ElementRef<HTMLElement>;
   private scrollPrevio = '';
 
@@ -298,7 +300,10 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
     });
   }
 
-  eliminarComentario(c: Comentario): void {
+  async eliminarComentario(c: Comentario): Promise<void> {
+    const confirmed = await this.confirmationModal.confirmDelete('este comentario');
+    if (!confirmed) return;
+
     this.fotos.borrarComentario(this.foto.id, c.id).subscribe({
       next: () => {
         this.comentarios.update((lista) => lista.filter((item) => item.id !== c.id));
@@ -400,9 +405,12 @@ export class PhotoViewerComponent implements OnInit, OnChanges, AfterViewInit, O
     });
   }
 
-  eliminar(): void {
+  async eliminar(): Promise<void> {
     this.menuFoto.set(false);
     if (!this.puedeEscribir()) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete('esta foto');
+    if (!confirmed) return;
 
     this.fotos.borrar(this.foto.id).subscribe({
       next: () => {

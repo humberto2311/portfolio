@@ -7,6 +7,8 @@ import { VcardService } from '../../core/services/vcard.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { ArchivoService } from '../../core/services/archivo.service';
 import { DisenoService } from '../../core/services/diseno.service';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
+import { AnimatedButtonDirective } from '../../shared/directives/animated-button.directive';
 import {
   CampoExtraVcard,
   CategoriaCampo,
@@ -38,7 +40,7 @@ interface GrupoCampos {
 @Component({
   selector: 'app-portafolio',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AnimatedButtonDirective],
   templateUrl: './portafolio.component.html',
   styleUrls: ['./portafolio.component.scss'],
 })
@@ -48,6 +50,7 @@ export class PortafolioComponent implements OnInit, OnDestroy {
   private empresas = inject(EmpresaService);
   private archivos = inject(ArchivoService);
   private diseno = inject(DisenoService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   constructor() {
     effect(() => {
@@ -386,7 +389,7 @@ export class PortafolioComponent implements OnInit, OnDestroy {
     });
   }
 
-  eliminarTarjeta(t: VCardPayload, event: Event): void {
+  async eliminarTarjeta(t: VCardPayload, event: Event): Promise<void> {
     event.stopPropagation();
 
     if (!t.id) {
@@ -394,13 +397,13 @@ export class PortafolioComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const confirmar = confirm(`¿Estás seguro de que quieres eliminar la tarjeta "${t.nombre || t.slug}"?\nEsta acción no se puede deshacer y el enlace/QR dejará de funcionar.`);
-    if (!confirmar) return;
+    const confirmed = await this.confirmationModal.confirmDelete(t.nombre || t.slug);
+    if (!confirmed) return;
 
     this.vcardService.eliminar(t.id).subscribe({
       next: () => {
         this.tarjetas.update((lista) => lista.filter((x) => x.id !== t.id));
-        
+
         if (this.tarjeta().id === t.id) {
           const restantes = this.tarjetas();
           if (restantes.length > 0) {
@@ -409,7 +412,7 @@ export class PortafolioComponent implements OnInit, OnDestroy {
             this.crearNueva('PERSONAL');
           }
         }
-        
+
         this.mensaje.set('Tarjeta eliminada correctamente.');
       },
       error: () => {

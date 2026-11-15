@@ -369,6 +369,20 @@
                     <strong>{{ publica.empresa.nombre }}</strong>
                     <small>{{ publicacion.creadoEn || 'hace un momento' }}</small>
                   </span>
+                  @if (esMiEmpresa && puedeEditar) {
+                    <div class="entrada__menu">
+                      <button type="button" class="btn-icon" (click)="toggleMenuPublicacion(publicacion, $event)" aria-label="Opciones de publicación">
+                        <i class="fa-solid fa-ellipsis"></i>
+                      </button>
+                      @if (menuPublicacionAbierto() === publicacion.id) {
+                        <div class="entrada__dropdown" role="menu">
+                          <button type="button" class="dropdown-item" role="menuitem" (click)="borrarPublicacion(publicacion); menuPublicacionAbierto.set(null)">
+                            <i class="fa-solid fa-trash"></i> Eliminar publicación
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
                 </header>
                 <p class="entrada__texto">{{ publicacion.contenido }}</p>
                 @if (publicacion.imagenUrl) {
@@ -604,7 +618,7 @@
     </main>
 
     <footer class="red__pie">
-      <span><i class="fa-solid fa-cube"></i> N-soft</span>
+      <span><i class="fa-solid fa-cube"></i> NFSocial</span>
       <span>{{ publica.empresa.nombre }} · {{ tipoEmpresa }}</span>
     </footer>
   } @else if (cargando()) {
@@ -632,7 +646,7 @@
       } @else {
         <h1>Esta empresa no está disponible</h1>
         <p>El enlace no existe o su perfil todavía no se ha publicado.</p>
-        <a class="btn btn--primary" routerLink="/">Ir a N-soft</a>
+        <a class="btn btn--primary" routerLink="/">Ir a NFSocial</a>
       }
     </div>
   }

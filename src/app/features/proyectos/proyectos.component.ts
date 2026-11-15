@@ -5,12 +5,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { ProyectosService } from '../../core/services/proyectos.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
+import { AnimatedButtonDirective } from '../../shared/directives/animated-button.directive';
 import { Proyecto } from '../../core/models/proyecto';
 
 @Component({
   selector: 'app-proyectos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AnimatedButtonDirective],
   templateUrl: './proyectos.component.html',
   styleUrls: ['./proyectos.component.scss']
 })
@@ -21,6 +23,7 @@ export class ProyectosComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private confirmationModal = inject(ConfirmationModalService);
 
   public readonly DEFAULT_GIT_USERNAME = 'humberto2311'; 
 
@@ -459,25 +462,17 @@ export class ProyectosComponent implements OnInit {
     this.editForm = {};
   }
 
-  pedirConfirmarEliminar(id: number, event: Event) {
+  async pedirConfirmarEliminar(proyecto: Proyecto, event: Event): Promise<void> {
     event.stopPropagation();
-    this.confirmandoEliminarId = id;
-  }
-
-  confirmarEliminar(id: number, event: Event) {
-    event.stopPropagation();
-    this.proyectosService.deleteProyecto(id).subscribe({
-      next: () => {
-        this.proyectos = this.proyectos.filter(p => p.id !== id);
-        this.confirmandoEliminarId = null;
-      },
-      error: (err) => console.error('Error eliminando', err)
-    });
-  }
-
-  cancelarEliminar(event: Event) {
-    event.stopPropagation();
-    this.confirmandoEliminarId = null;
+    const confirmed = await this.confirmationModal.confirmDelete(proyecto.name);
+    if (confirmed) {
+      this.proyectosService.deleteProyecto(proyecto.id).subscribe({
+        next: () => {
+          this.proyectos = this.proyectos.filter(p => p.id !== proyecto.id);
+        },
+        error: (err) => console.error('Error eliminando', err)
+      });
+    }
   }
 
   filtrarProyectos() {

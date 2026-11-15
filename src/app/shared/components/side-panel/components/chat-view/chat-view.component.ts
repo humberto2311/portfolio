@@ -13,6 +13,7 @@ import { take } from 'rxjs';
 
 import { SidePanelService } from '../../../../../core/services/side-panel.service';
 import { ChatService } from '../../../../../core/services/chat.service';
+import { ConfirmationModalService } from '../../../../../core/services/confirmation-modal.service';
 import { ChatMessage } from '../../../../../core/models/chat.model';
 import { Contact } from '../../../../../core/models/contact.model';
 
@@ -26,6 +27,7 @@ import { Contact } from '../../../../../core/models/contact.model';
 export class ChatViewComponent {
   svc = inject(SidePanelService);
   private chatService = inject(ChatService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   message = signal('');
   sending = signal(false);
@@ -181,9 +183,12 @@ export class ChatViewComponent {
       });
   }
 
-  remove(msg: ChatMessage): void {
+  async remove(msg: ChatMessage): Promise<void> {
     const contact = this.svc.activeContact();
     if (!msg.id || !contact) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete('este mensaje');
+    if (!confirmed) return;
 
     this.error.set(null);
     this.chatService.borrarMensaje(msg.id)

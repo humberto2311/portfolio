@@ -9,6 +9,7 @@ import { LinkItem, LinkItemPayload } from '../../core/models/LinkItem';
 import { LinkHubService } from '../../core/services/link-hub.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { EmpresaService } from '../../core/services/empresa.service';
+import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 import { Empresa, MiembroEmpresa } from '../../core/models/empresa.model';
 
 @Component({
@@ -23,6 +24,7 @@ export class LinkHubComponent implements OnInit {
   private readonly linkService = inject(LinkHubService);
   private readonly resumeSave = inject(ResumeSaveService);
   private readonly empresas = inject(EmpresaService);
+  private readonly confirmationModal = inject(ConfirmationModalService);
 
   availableIcons = [
     { id: 'globe',  name: 'Web',      class: 'fas fa-globe' },
@@ -298,8 +300,12 @@ export class LinkHubComponent implements OnInit {
   }
 
   // ---------- Eliminar ----------
-  deleteLink(id: string, event?: Event): void {
+  async deleteLink(id: string, event?: Event): Promise<void> {
     if (event) event.stopPropagation();
+
+    const titulo = [...this.links, ...this.enlacesEmpresa].find((l) => l.id === id)?.title;
+    const confirmed = await this.confirmationModal.confirmDelete(titulo ? `el enlace «${titulo}»` : 'este enlace');
+    if (!confirmed) return;
 
     if (this.enEmpresa) {
       if (!this.empresaId) return;

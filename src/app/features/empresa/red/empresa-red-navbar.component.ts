@@ -163,7 +163,7 @@ export class EmpresaRedNavbarComponent implements OnInit {
 
   escribirAMiembro(miembro: MiembroEmpresa): void {
     if (!this.haySesion) {
-      this.toast.show('Entra a N-soft para escribirle');
+      this.toast.show('Entra a NFSocial para escribirle');
       void this.router.navigate(['/acceso']);
       return;
     }
@@ -178,7 +178,7 @@ export class EmpresaRedNavbarComponent implements OnInit {
 
   abrirPropuesta(): void {
     if (!this.haySesion) {
-      this.toast.show('Entra a N-soft para proponer una publicación');
+      this.toast.show('Entra a NFSocial para proponer una publicación');
       void this.router.navigate(['/acceso']);
       return;
     }

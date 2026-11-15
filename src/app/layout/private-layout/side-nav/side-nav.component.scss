@@ -152,6 +152,7 @@
   text-decoration: none;
   color: $text-light;
   transition: background-color 0.15s ease;
+  margin-bottom: 10px;
 
   &:hover {
     background: $bg-hover;
@@ -269,7 +270,7 @@
 
 .rail__cambiar-caja {
   position: relative;
-  margin: 0 6px 8px;
+  margin: 0 6px 20px;
   flex: 0 0 auto;
 
   .rail__cambiar {

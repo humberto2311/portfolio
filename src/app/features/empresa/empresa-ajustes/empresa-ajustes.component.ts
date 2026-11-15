@@ -29,6 +29,7 @@ import {
 } from '../../../core/models/empresa.model';
 import { EmpresaService, mensajeDeError } from '../../../core/services/empresa.service';
 import { DisenoService } from '../../../core/services/diseno.service';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 import {
   PALETA_MARCA,
   ROLES_INFO,
@@ -73,6 +74,7 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
+  private confirmationModal = inject(ConfirmationModalService);
 
   @ViewChild('tabsNav') tabsNav?: ElementRef<HTMLElement>;
 
@@ -87,7 +89,6 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   readonly publicando = signal(false);
   readonly error = signal<string | null>(null);
   readonly aviso = signal<string | null>(null);
-  readonly confirmandoBorrado = signal(false);
 
   readonly paleta = PALETA_MARCA;
 
@@ -100,11 +101,9 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
   invitarRol: RolEmpresa = 'LECTOR';
   invitarPuesto = '';
   invitando = false;
-  confirmarMiembro: string | null = null;
 
   documento: DocumentoEmpresaForm = { ...DOCUMENTO_VACIO };
   subiendoDocumento = false;
-  confirmarDocumento: string | null = null;
 
   disenoAcento = '#2563eb';
   disenoSecundario = '#0ea5e9';
@@ -245,9 +244,6 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
     this.tab.set(tab);
     this.error.set(null);
     this.aviso.set(null);
-    this.confirmarMiembro = null;
-    this.confirmarDocumento = null;
-    this.confirmandoBorrado.set(false);
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -444,19 +440,24 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       });
   }
 
-  pedirQuitar(miembro: MiembroEmpresa): void {
-    if (this.confirmarMiembro === miembro.id) {
-      this.quitarMiembro(miembro);
-      return;
-    }
-    this.confirmarMiembro = miembro.id;
+  async pedirQuitar(miembro: MiembroEmpresa): Promise<void> {
+    const confirmed = await this.confirmationModal.confirm({
+      title: miembro.propio ? 'Salir del equipo' : 'Quitar del equipo',
+      message: miembro.propio
+        ? '¿Seguro que quieres salir del equipo de esta empresa? Perderás el acceso a ella.'
+        : `¿Seguro que quieres quitar a ${miembro.nombre} del equipo? Perderá el acceso a la empresa.`,
+      confirmText: miembro.propio ? 'Salir' : 'Quitar',
+      cancelText: 'Cancelar',
+      type: 'danger',
+      icon: 'fa-solid fa-user-minus',
+    });
+    if (confirmed) this.quitarMiembro(miembro);
   }
 
   quitarMiembro(miembro: MiembroEmpresa): void {
     const empresa = this.actual;
     if (!empresa) return;
 
-    this.confirmarMiembro = null;
     this.empresa.quitar(empresa.id, miembro.id).subscribe({
       next: () => {
         this.empresa.parchearPanel({
@@ -549,19 +550,17 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       });
   }
 
-  pedirBorrarDocumento(documento: DocumentoEmpresa): void {
-    if (this.confirmarDocumento === documento.id) {
-      this.borrarDocumento(documento);
-      return;
-    }
-    this.confirmarDocumento = documento.id;
+  async pedirBorrarDocumento(documento: DocumentoEmpresa): Promise<void> {
+    const confirmed = await this.confirmationModal.confirmDelete(
+      `el documento «${this.etiquetaDocumento(documento.tipo)}»`
+    );
+    if (confirmed) this.borrarDocumento(documento);
   }
 
   borrarDocumento(documento: DocumentoEmpresa): void {
     const empresa = this.actual;
     if (!empresa) return;
 
-    this.confirmarDocumento = null;
     this.empresa.borrarDocumento(empresa.id, documento.id).subscribe({
       next: () => {
         this.empresa.parchearPanel({
@@ -689,23 +688,13 @@ export class EmpresaAjustesComponent implements OnInit, OnDestroy {
       });
   }
 
-  pedirBorrarEmpresa(): void {
-    if (this.confirmandoBorrado()) {
-      this.borrarEmpresa();
-      return;
-    }
-    this.confirmandoBorrado.set(true);
-  }
-
-  cancelarBorrado(): void {
-    this.confirmandoBorrado.set(false);
-  }
-
-  borrarEmpresa(): void {
+  async borrarEmpresa(): Promise<void> {
     const empresa = this.actual;
     if (!empresa || this.acceso?.rol !== 'ADMIN') return;
 
-    this.confirmandoBorrado.set(false);
+    const confirmed = await this.confirmationModal.confirmDelete(`la empresa «${empresa.nombre}»`);
+    if (!confirmed) return;
+
     this.empresa.borrar(empresa.id).subscribe({
       next: () => {
         this.router.navigate(['/app/ajustes/cuenta'], { queryParams: { tab: 'empresas' } });

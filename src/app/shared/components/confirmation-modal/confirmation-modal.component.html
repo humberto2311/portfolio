@@ -1,0 +1,35 @@
+@if (isOpen()) {
+  <div class="confirmation-overlay" (click)="onCancel()" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+    <div class="confirmation-card" (click)="$event.stopPropagation()">
+      <!-- Icon -->
+      <div class="confirmation-icon" [ngClass]="iconTone">
+        <i [class]="iconClass" aria-hidden="true"></i>
+      </div>
+
+      <!-- Content -->
+      <div class="confirmation-content">
+        <h3 id="confirm-title" class="confirmation-title">{{ config()?.title }}</h3>
+        <p id="confirm-message" class="confirmation-message">{{ config()?.message }}</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="confirmation-actions">
+        <button
+          type="button"
+          class="confirmation-btn confirmation-btn--cancel"
+          (click)="onCancel()">
+          {{ config()?.cancelText }}
+        </button>
+        <button
+          type="button"
+          class="confirmation-btn confirmation-btn--confirm"
+          [class.confirmation-btn--danger]="config()?.type === 'danger'"
+          [class.confirmation-btn--warning]="config()?.type === 'warning'"
+          [class.confirmation-btn--info]="config()?.type === 'info'"
+          (click)="onConfirm()">
+          {{ config()?.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

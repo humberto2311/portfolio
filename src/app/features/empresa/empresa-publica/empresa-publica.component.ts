@@ -2,6 +2,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
@@ -27,6 +28,7 @@ import { EmpresaService } from '../../../core/services/empresa.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 import {
   LIENZO_ALTO,
   LIENZO_ANCHO,
@@ -57,6 +59,7 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
   private panelLateral = inject(SidePanelService);
   private toast = inject(ToastService);
   private linkHub = inject(LinkHubService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   @ViewChild('marco') marco?: ElementRef<HTMLElement>;
 
@@ -74,6 +77,7 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
   readonly borrador = signal('');
   readonly publicando = signal(false);
   readonly escala = signal(0.5);
+  readonly menuPublicacionAbierto = signal<string | null>(null);
 
   readonly ancho = LIENZO_ANCHO;
   readonly alto = LIENZO_ALTO;
@@ -452,9 +456,12 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
     });
   }
 
-  borrarPublicacion(publicacion: PublicacionRed): void {
+  async borrarPublicacion(publicacion: PublicacionRed): Promise<void> {
     const empresa = this.empresa;
     if (!empresa || !publicacion) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete('esta publicación de la empresa');
+    if (!confirmed) return;
 
     this.servicio.borrarPublicacionEmpresa(empresa.id, publicacion.id).subscribe({
       next: () => {
@@ -467,6 +474,16 @@ export class EmpresaPublicaComponent implements OnInit, OnDestroy {
       },
       error: () => this.toast.show('No se pudo eliminar la publicación'),
     });
+  }
+
+  toggleMenuPublicacion(publicacion: PublicacionRed, event: Event): void {
+    event.stopPropagation();
+    this.menuPublicacionAbierto.update((id) => (id === publicacion.id ? null : publicacion.id));
+  }
+
+  @HostListener('document:click')
+  onClickFueraPublicacion(): void {
+    this.menuPublicacionAbierto.set(null);
   }
 
   meGusta(publicacion: PublicacionRed): void {

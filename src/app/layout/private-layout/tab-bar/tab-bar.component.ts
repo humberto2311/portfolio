@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UserProfileService } from '../../../core/services/user-profile.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 
 interface Destino {
   label: string;
@@ -26,6 +27,7 @@ export class TabBarComponent {
   private auth = inject(AuthService);
   private perfiles = inject(UserProfileService);
   private mensajes = inject(SidePanelService);
+  private confirmationModal = inject(ConfirmationModalService);
   readonly empresa = inject(EmpresaService);
 
   readonly user = this.auth.currentUser;
@@ -94,7 +96,10 @@ export class TabBarComponent {
     this.router.navigate(['/app']);
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    const confirmed = await this.confirmationModal.confirmLogout();
+    if (!confirmed) return;
+
     this.cerrarHoja();
     this.auth.logout();
     this.router.navigate(['/']);

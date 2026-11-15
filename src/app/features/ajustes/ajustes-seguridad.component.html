@@ -101,9 +101,9 @@
       </p>
 
       <div class="actions">
-        <button type="button" class="btn-danger" [class.pedir]="confirmandoCierre"
+        <button type="button" class="btn-danger"
                 (click)="cerrarSesiones()" [disabled]="cerrandoSesiones">
-          {{ cerrandoSesiones ? 'Cerrando…' : (confirmandoCierre ? '¿Seguro? pulsa otra vez' : 'Cerrar sesión en otros dispositivos') }}
+          {{ cerrandoSesiones ? 'Cerrando…' : 'Cerrar sesión en otros dispositivos' }}
         </button>
       </div>
     </section>

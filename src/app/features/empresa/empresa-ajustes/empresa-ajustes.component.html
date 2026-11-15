@@ -302,7 +302,7 @@
                   Añadir
                 </button>
               </div>
-              <p class="pista">La persona debe tener ya una cuenta en N-soft. Si no existe, pídele que se registre primero.</p>
+              <p class="pista">La persona debe tener ya una cuenta en NFSocial. Si no existe, pídele que se registre primero.</p>
             </div>
           }
 
@@ -356,9 +356,9 @@
                       type="button"
                       class="btn-mini btn-mini--peligro"
                       (click)="pedirQuitar(miembro)"
+                      [title]="miembro.propio ? 'Salir del equipo' : 'Quitar del equipo'"
                     >
-                      @if (confirmarMiembro === miembro.id) { Confirmar }
-                      @else { <i class="fa-solid fa-user-minus"></i> }
+                      <i class="fa-solid fa-user-minus"></i>
                     </button>
                   </div>
                 } @else {
@@ -478,9 +478,8 @@
                     }
                   </div>
                   @if (puedeGestionarDocumentos) {
-                    <button type="button" class="btn-mini btn-mini--peligro" (click)="pedirBorrarDocumento(documento)">
-                      @if (confirmarDocumento === documento.id) { Confirmar }
-                      @else { <i class="fa-solid fa-trash"></i> }
+                    <button type="button" class="btn-mini btn-mini--peligro" (click)="pedirBorrarDocumento(documento)" title="Eliminar documento">
+                      <i class="fa-solid fa-trash"></i>
                     </button>
                   }
                 </li>
@@ -639,17 +638,9 @@
           <p>Borrar la empresa elimina su equipo, documentos y entorno visual. Esta acción no se deshace.</p>
         </div>
         <div class="peligro__acciones">
-          @if (confirmandoBorrado()) {
-            <span class="peligro__aviso">Se borrará «{{ actual.nombre }}» con su equipo, sus documentos y su entorno visual.</span>
-            <button type="button" class="btn-ghost" (click)="cancelarBorrado()">Cancelar</button>
-            <button type="button" class="btn-peligro" (click)="pedirBorrarEmpresa()">
-              <i class="fa-solid fa-trash"></i> Sí, borrar empresa
-            </button>
-          } @else {
-            <button type="button" class="btn-peligro" (click)="pedirBorrarEmpresa()">
-              <i class="fa-solid fa-trash"></i> Borrar empresa
-            </button>
-          }
+          <button type="button" class="btn-peligro" (click)="borrarEmpresa()">
+            <i class="fa-solid fa-trash"></i> Borrar empresa
+          </button>
         </div>
       </section>
     }

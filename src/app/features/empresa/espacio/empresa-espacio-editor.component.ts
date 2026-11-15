@@ -89,7 +89,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   readonly iconos = ICONOS_ESPACIO;
   readonly tiposEnlace: { valor: TipoEnlaceEspacio; etiqueta: string }[] = [
     { valor: 'ANCLA', etiqueta: 'Sección de esta página' },
-    { valor: 'RUTA', etiqueta: 'Página de N-soft' },
+    { valor: 'RUTA', etiqueta: 'Página de NFSocial' },
     { valor: 'EXTERNO', etiqueta: 'Sitio externo' },
   ];
 
@@ -522,7 +522,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       publicado: false,
       estilo: 'CLASICO',
       mostrarIdentidad: true,
-      lema: 'Una página propia dentro de N-soft',
+      lema: 'Una página propia dentro de NFSocial',
       portadaUrl: this.portadaInicial,
       logoUrl: this.logoInicial,
       colorPrincipal: '',

@@ -7,11 +7,13 @@ import { UserProfileService } from '../../../core/services/user-profile.service'
 import { ResumeService } from '../../../core/services/resume.service';
 import { TourService } from '../../../core/services/tour.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
+import { AnimatedButtonDirective } from '../../../shared/directives/animated-button.directive';
 
 @Component({
   selector: 'app-user-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AnimatedButtonDirective],
   templateUrl: './user-menu.component.html',
   styleUrls: ['./user-menu.component.scss']
 })
@@ -23,6 +25,7 @@ export class UserMenuComponent implements OnInit {
   private resumes = inject(ResumeService);
   private tour = inject(TourService);
   private empresas = inject(EmpresaService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   readonly user = this.auth.currentUser;
   readonly menuOpen = signal(false);
@@ -89,9 +92,12 @@ export class UserMenuComponent implements OnInit {
     this.tour.abrir();
   }
 
-  logout() {
-    this.menuOpen.set(false);
-    this.auth.logout();
-    this.router.navigate(['/']);
+  async logout(): Promise<void> {
+    const confirmed = await this.confirmationModal.confirmLogout();
+    if (confirmed) {
+      this.menuOpen.set(false);
+      this.auth.logout();
+      this.router.navigate(['/']);
+    }
   }
 }

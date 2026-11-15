@@ -10,6 +10,7 @@ import { ShareModalComponent } from '../share-modal/share-modal.component';
 import { PostDetalleComponent } from '../post-detalle/post-detalle.component';
 import { MencionesTextoComponent } from '../menciones-texto/menciones-texto.component';
 import { MencionesDirective } from '../../../../shared/directives/menciones.directive';
+import { ConfirmationModalService } from '../../../../core/services/confirmation-modal.service';
 
 @Component({
   selector: 'app-post-card',
@@ -29,10 +30,11 @@ export class PostCardComponent implements OnInit, OnChanges {
   @Input({ required: true }) post!: Publicacion;
   
   private perfilService = inject(PerfilService);
-  private authService = inject(AuthService); 
+  private authService = inject(AuthService);
   private elRef = inject(ElementRef);
   private router = inject(Router);
   private perfiles = inject(UserProfileService);
+  private confirmationModal = inject(ConfirmationModalService);
 
   /** Foto de quien escribe el comentario; sin ella quedan las iniciales. */
   readonly miAvatar = this.perfiles.avatar;
@@ -121,8 +123,12 @@ export class PostCardComponent implements OnInit, OnChanges {
     this.cancelarEdicionComentario();
   }
 
-  eliminarComentario(comentario: Comentario): void {
+  async eliminarComentario(comentario: Comentario): Promise<void> {
     this.comentarioMenu.set(null);
+
+    const confirmed = await this.confirmationModal.confirmDelete('este comentario');
+    if (!confirmed) return;
+
     this.perfilService.borrarComentario(this.post.id as any, comentario.id);
   }
 
@@ -185,11 +191,11 @@ export class PostCardComponent implements OnInit, OnChanges {
   // LÓGICA DE BORRADO
   // ==========================================
 
-  borrarPost(): void {
+  async borrarPost(): Promise<void> {
     this.mostrarMenu.set(false);
-    
-    if (confirm('¿Estás seguro de que quieres borrar esta publicación?')) {
-      // Llamamos al servicio (asegúrate de tener este método en tu PerfilService)
+
+    const confirmed = await this.confirmationModal.confirmDelete('esta publicación');
+    if (confirmed) {
       this.perfilService.borrarPublicacion(this.post.id as any);
     }
   }
@@ -235,10 +241,12 @@ export class PostCardComponent implements OnInit, OnChanges {
       });
   }
 
-  borrarCompartido(): void {
+  async borrarCompartido(): Promise<void> {
     const shareId = this.post.shareId;
     if (!shareId) return;
-    if (!confirm('¿Eliminar la descripción de este compartido?')) return;
+
+    const confirmed = await this.confirmationModal.confirmDelete('la descripción de este compartido');
+    if (!confirmed) return;
 
     this.perfilService
       .actualizarDescripcionCompartido(shareId, this.post.id, null)

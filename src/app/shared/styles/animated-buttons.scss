@@ -1,0 +1,309 @@
+// Animated Button Styles - Import this in your global styles.scss or component styles
+// Provides: press feedback, ripple effect, hover transitions, focus states
+
+$transition-fast: 0.1s ease-out;
+$transition-normal: 0.15s ease-out;
+$transition-smooth: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+// Base button enhancements
+button:not([disabled]),
+a.btn,
+.btn,
+[role='button']:not([disabled]),
+input[type='button']:not([disabled]),
+input[type='submit']:not([disabled]),
+input[type='reset']:not([disabled]) {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform $transition-fast,
+    box-shadow $transition-normal,
+    background-color $transition-normal,
+    border-color $transition-normal,
+    color $transition-normal;
+
+  // Focus visible for accessibility
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  // Disabled state
+  &:disabled,
+  &[disabled],
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    pointer-events: none;
+  }
+}
+
+// Press/active state
+button:active:not([disabled]),
+.btn:active:not([disabled]),
+.btn-pressed {
+  transform: scale(0.97);
+  transition: transform 0.05s ease-out;
+}
+
+// Ripple effect
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: scale(0);
+  opacity: 0.4;
+  background-color: var(--ripple-color, var(--accent));
+  width: 100%;
+  height: 100%;
+  margin-left: -50%;
+  margin-top: -50%;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.3s ease-out;
+
+  &--active {
+    transform: scale(2.5);
+    opacity: 0.3;
+  }
+
+  &--fade {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+// Hover lift effect for cards and buttons
+.btn-lift {
+  transition: transform $transition-smooth, box-shadow $transition-smooth;
+
+  &:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Scale bounce on click
+.btn-bounce {
+  &:active:not([disabled]) {
+    animation: btnBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes btnBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.92); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+// Pulse animation for attention
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.btn-pulse {
+  animation: btnPulse 2s infinite;
+}
+
+// Loading spinner inside button
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    top: 50%;
+    left: 50%;
+    margin: -0.5em 0 0 -0.5em;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: btnSpin 0.6s linear infinite;
+    color: inherit;
+  }
+}
+
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+// Shimmer effect for skeleton/loading buttons
+@keyframes btnShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.btn-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-hover) 25%,
+    var(--bg-elevated) 50%,
+    var(--bg-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: btnShimmer 1.5s infinite;
+  color: transparent;
+  pointer-events: none;
+}
+
+// Icon rotation on click
+.btn-icon-rotate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  > svg:first-child,
+  > i:first-child,
+  > [data-icon]:first-child {
+    transition: transform $transition-normal;
+  }
+
+  &:active > svg:first-child,
+  &:active > i:first-child,
+  &:active > [data-icon]:first-child {
+    transform: rotate(180deg);
+  }
+}
+
+// Badge pulse on hover
+.btn-with-badge {
+  position: relative;
+
+  &::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--danger);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 18px;
+    border-radius: 999px;
+    text-align: center;
+    transform: scale(1);
+    transition: transform $transition-smooth;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  &:hover::after {
+    transform: scale(1.15);
+    animation: badgePulse 0.5s ease-out;
+  }
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1.15); }
+}
+
+// Toggle button styles
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    color: var(--accent);
+  }
+}
+
+// Segmented control
+.btn-segmented {
+  display: inline-flex;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-input);
+
+  > button {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0.5rem 1rem;
+
+    &:first-child { border-radius: 0.375rem 0 0 0.375rem; }
+    &:last-child { border-radius: 0 0.375rem 0.375rem 0; }
+
+    &[aria-selected='true'] {
+      background: var(--accent);
+      color: var(--on-accent);
+      z-index: 1;
+    }
+  }
+}
+
+// Floating action button
+.btn-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform $transition-smooth, box-shadow $transition-smooth;
+
+  &:hover:not([disabled]) {
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active:not([disabled]) {
+    transform: scale(0.95);
+  }
+
+  &.btn-fab--extended {
+    width: auto;
+    padding: 0 1.5rem;
+    border-radius: 28px;
+    gap: 0.5rem;
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .btn,
+  [role='button'],
+  input[type='button'],
+  input[type='submit'] {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .btn-ripple {
+    display: none !important;
+  }
+
+  .btn-pressed {
+    transform: none !important;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  button:focus-visible,
+  .btn:focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}

@@ -12,6 +12,7 @@ import {
 import { EmpresaService, mensajeDeError } from '../../../core/services/empresa.service';
 import { leerJson } from '../empresa-ui';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
+import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 
 type Filtro = 'TODAS' | 'MENU' | 'TARJETA' | 'HTML' | 'OTRAS';
 
@@ -37,6 +38,7 @@ export class EmpresaComponentesComponent implements OnInit {
   private servicio = inject(EmpresaService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private confirmationModal = inject(ConfirmationModalService);
 
   readonly disenos = signal<DisenoCarpeta[]>([]);
   /** Diseños con nombre de la empresa activa (menú, tarjeta, catálogo...). */
@@ -327,12 +329,12 @@ export class EmpresaComponentesComponent implements OnInit {
     void this.router.navigate(['/app/empresa/lienzo'], { queryParams: { diseno: diseno.id } });
   }
 
-  borrarDiseno(diseno: DisenoLienzo): void {
+  async borrarDiseno(diseno: DisenoLienzo): Promise<void> {
     const empresaId = diseno.empresaId || this.empresaActivaId();
     if (!empresaId || this.ocupado()) return;
 
-    const seguro = typeof window === 'undefined' ? true : window.confirm(`¿Borrar el diseño «${diseno.nombre}» y todas sus piezas?`);
-    if (!seguro) return;
+    const confirmed = await this.confirmationModal.confirmDelete(`el diseño «${diseno.nombre}» y todas sus piezas`);
+    if (!confirmed) return;
 
     this.ocupado.set(diseno.id);
 

@@ -1,3 +1,4 @@
-allowBuilds: 
-  "@parcel/watcher": true 
+allowBuilds:
   esbuild: true
+  '@parcel/watcher': false
+  nice-napi: false

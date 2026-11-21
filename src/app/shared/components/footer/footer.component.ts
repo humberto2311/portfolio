@@ -36,9 +36,8 @@ export class FooterComponent {
     {
       titulo: 'La app',
       enlaces: [
-        { etiqueta: 'Qué es', ruta: '/', fragmento: 'que-es' },
+        { etiqueta: 'Qué puedes hacer', ruta: '/', fragmento: 'que-es' },
         { etiqueta: 'Cómo funciona', ruta: '/', fragmento: 'como-funciona' },
-        { etiqueta: 'Versiones', ruta: '/', fragmento: 'versiones' },
         { etiqueta: 'Políticas de datos', ruta: '/politicas' }
       ]
     },

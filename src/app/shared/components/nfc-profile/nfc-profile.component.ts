@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LogoComponent } from '../logo/logo.component';
-import { RouterLink } from '@angular/router';
 import { ModalService } from '../../../core/services/modal.service';
 
 export interface DeveloperProfile {
@@ -14,7 +13,7 @@ export interface DeveloperProfile {
 @Component({
   selector: 'app-nfc-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, LogoComponent],
+  imports: [CommonModule, LogoComponent],
   templateUrl: './nfc-profile.component.html',
   styleUrl: './nfc-profile.component.scss'
 })

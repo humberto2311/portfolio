@@ -9,18 +9,12 @@
         </div>
 
         <h1 class="hero-title">
-          NFSocial: una nueva forma de hacer <span class="gradient-text">networking</span>
+          Tu perfil profesional, listo para <span class="gradient-text">compartir</span>
         </h1>
 
         <p class="hero-subtitle">
-          Tu perfil, tu trabajo y tus contactos, listos para compartir en un toque.
+          Crea tu perfil, reúne lo que haces y compártelo con un enlace, un QR o un toque NFC.
         </p>
-
-        <ul class="hero-puntos">
-          <li><i class="fa-solid fa-id-card-clip"></i> Tu perfil y tus proyectos</li>
-          <li><i class="fa-solid fa-lock-open"></i> Tú decides qué enlaces son públicos</li>
-          <li><i class="fa-solid fa-tower-broadcast"></i> Enlace, QR o toque NFC</li>
-        </ul>
 
         <div class="hero-actions">
           <button type="button" (click)="abrirLogin('register')" class="btn-primary">
@@ -28,9 +22,9 @@
             Crear mi perfil
           </button>
 
-          <button type="button" (click)="scrollToGit()" class="btn-secondary">
-            <i class="fa-solid fa-arrow-down"></i>
-            Ver qué hace la app
+          <button type="button" (click)="abrirLogin('login')" class="btn-secondary">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Ya tengo cuenta
           </button>
         </div>
       </div>
@@ -73,69 +67,57 @@
   </section>
 
   <section id="que-es" class="git-section">
-    <div class="section-header">
-      <div>
-        <span class="section-eyebrow">Qué es NFSocial</span>
-        <h2 class="section-title">Mi marca y una red para toda la comunidad</h2>
-        <p class="section-subtitle">
-          El nombre con el que firmo mi trabajo también es el de la app.
-        </p>
-      </div>
-
-      <button type="button" (click)="abrirLogin('login')" class="github-link">
-        <i class="fa-solid fa-right-to-bracket"></i>
-        Entrar
-      </button>
+    <div class="section-header centered">
+      <span class="section-eyebrow">Lo que puedes hacer hoy</span>
+      <h2 class="section-title">Todo tu perfil en un solo lugar</h2>
     </div>
 
-    <div class="doble-grid">
-      <article class="panel glass-panel">
-        <h3 class="panel-title"><i class="fa-solid fa-globe"></i> La red</h3>
-        <p class="panel-text">
-          Cualquier persona o empresa crea su perfil y reúne en un solo lugar lo que está haciendo.
-        </p>
-        <ul class="pills">
-          <li>Publicaciones y comentarios</li>
-          <li>Compartir con otros perfiles</li>
-          <li>Buscador de personas</li>
-          <li>Enlaces públicos o privados</li>
-        </ul>
+    <div class="que-haces">
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-solid fa-id-card-clip"></i></span>
+        <h3 class="hace__titulo">Tu perfil</h3>
+        <p class="hace__texto">Foto, portada, rol y disponibilidad. Tu enlace propio para compartir.</p>
       </article>
 
-      <article class="panel glass-panel">
-        <h3 class="panel-title"><i class="fa-solid fa-code"></i> El desarrollador</h3>
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-solid fa-comment-dots"></i></span>
+        <h3 class="hace__titulo">Publica y comenta</h3>
+        <p class="hace__texto">Comparte lo que haces, recibe me gusta y responde comentarios.</p>
+      </article>
 
-        <div class="dev">
-          <span class="dev-avatar">HL</span>
-          <div>
-            <p class="dev-name">{{ profile.name }}</p>
-            <p class="dev-role">{{ profile.role }}</p>
-          </div>
-        </div>
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-solid fa-users"></i></span>
+        <h3 class="hace__titulo">Contactos</h3>
+        <p class="hace__texto">Busca personas, agrégalas y habla con ellas desde el chat.</p>
+      </article>
 
-        <p class="panel-text">
-          Escribo el backend y también el front: la web y la app.
-        </p>
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-brands fa-github"></i></span>
+        <h3 class="hace__titulo">Proyectos y hoja de vida</h3>
+        <p class="hace__texto">Suma tus repos de GitHub y tu hoja de vida a tu perfil.</p>
+      </article>
 
-        <ul class="pills">
-          <li>Java &middot; Spring Boot</li>
-          <li>Angular</li>
-          <li>PostgreSQL</li>
-          <li>Capacitor</li>
-        </ul>
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-solid fa-building"></i></span>
+        <h3 class="hace__titulo">Espacio de empresa</h3>
+        <p class="hace__texto">Crea el espacio de tu empresa y publica con su marca.</p>
+      </article>
 
-        <div class="dev-links">
-          <a class="dev-perfil" [routerLink]="['/perfil', profile.username]">
-            <i class="fa-solid fa-id-card-clip"></i> Ver mi perfil en la app
-          </a>
-          <a [href]="profile.github" target="_blank" rel="noopener">
-            <i class="fa-brands fa-github"></i> GitHub
-          </a>
-        </div>
+      <article class="hace glass-panel">
+        <span class="hace__icono"><i class="fa-solid fa-tower-broadcast"></i></span>
+        <h3 class="hace__titulo">Comparte en un toque</h3>
+        <p class="hace__texto">Enlace, código QR o toque NFC entre teléfonos Android.</p>
       </article>
     </div>
+  </section>
 
-    <div id="como-funciona" class="pasos">
+  <section id="como-funciona" class="roadmap-section">
+    <div class="section-header centered">
+      <span class="section-eyebrow">Cómo funciona</span>
+      <h2 class="section-title">Tres pasos y ya</h2>
+    </div>
+
+    <div class="pasos">
       <div class="paso">
         <span class="step-num">01</span>
         <h4>Creas tu perfil</h4>
@@ -150,50 +132,6 @@
         <span class="step-num">03</span>
         <h4>Compartes tu tarjeta</h4>
         <p>Enlace propio, QR o toque NFC.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="versiones" class="roadmap-section">
-    <div class="section-header centered">
-      <span class="section-eyebrow">Hacia dónde va</span>
-      <h2 class="section-title">Versión 1 y versión 2</h2>
-    </div>
-
-    <div class="roadmap-grid">
-      <div class="roadmap-card active glass-panel">
-        <div class="phase-tag active-tag">Versión 1 &middot; Ya funciona</div>
-        <div class="phase-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </div>
-        <h3>Para personas</h3>
-        <ul>
-          <li><span class="check">&#10003;</span> Perfil, portada y disponibilidad</li>
-          <li><span class="check">&#10003;</span> Publicaciones y comentarios</li>
-          <li><span class="check">&#10003;</span> Proyectos de GitHub y hoja de vida</li>
-          <li><span class="check">&#10003;</span> Contactos y buscador de personas</li>
-          <li><span class="check">&#10003;</span> Enlace propio para compartir</li>
-        </ul>
-        <p class="nota">
-          El toque NFC ya funciona entre dos teléfonos Android con la app instalada.
-        </p>
-      </div>
-
-      <div class="roadmap-card glass-panel">
-        <div class="phase-tag">Versión 2 &middot; En camino</div>
-        <div class="phase-icon muted">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
-        </div>
-        <h3>Para empresas</h3>
-        <ul>
-          <li><span class="dash">&#9675;</span> Varias personas en una cuenta</li>
-          <li><span class="dash">&#9675;</span> Tarjetas con el logo de la empresa</li>
-          <li><span class="dash">&#9675;</span> Toque NFC para compartir el perfil</li>
-          <li><span class="dash">&#9675;</span> Métricas por tarjeta y por toque</li>
-        </ul>
-        <p class="nota">
-          Lo mismo de la versión 1, con equipo y marca propios.
-        </p>
       </div>
     </div>
   </section>

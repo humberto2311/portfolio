@@ -31,9 +31,8 @@ export class NavbarComponent {
   readonly urlLanding = '/empresa/n-soft/espacio/mi-espacio';
 
   readonly secciones: SeccionLanding[] = [
-    { id: 'que-es', etiqueta: 'Qué es', detalle: 'La idea detrás de NFSocial', icono: 'fa-solid fa-circle-info' },
-    { id: 'como-funciona', etiqueta: 'Cómo funciona', detalle: 'Del perfil a los contactos', icono: 'fa-solid fa-list-check' },
-    { id: 'versiones', etiqueta: 'Versiones', detalle: 'Qué corre hoy y qué viene', icono: 'fa-solid fa-layer-group' }
+    { id: 'que-es', etiqueta: 'Qué puedes hacer', detalle: 'Lo que ya funciona hoy', icono: 'fa-solid fa-circle-info' },
+    { id: 'como-funciona', etiqueta: 'Cómo funciona', detalle: 'Tres pasos y ya', icono: 'fa-solid fa-list-check' }
   ];
 
   readonly esInicio = signal(this.router.url === '/');

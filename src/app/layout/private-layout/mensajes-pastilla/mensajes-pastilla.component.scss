@@ -129,6 +129,30 @@
   }
 }
 
+.pastilla__accion {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: $text-muted;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+
+  &:hover {
+    background: $bg-hover;
+    color: $accent;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
 .pastilla__solicitudes,
 .pastilla__ver {
   display: grid;
@@ -185,6 +209,12 @@
   .pastilla__avatares,
   .pastilla__ver {
     display: none;
+  }
+
+  .pastilla__accion {
+    width: 38px;
+    height: 38px;
+    font-size: 0.95rem;
   }
 
   .pastilla__chat {

@@ -19,44 +19,57 @@
     <button type="button" class="btn-mini">Gestionar permisos</button>
   </div>
 
-  <section class="metricas">
-    <article class="metrica">
-      <span class="metrica__icono"><i class="fa-solid fa-hand-pointer"></i></span>
-      <div><small>Toques registrados</small><strong>{{ totalToques() }}</strong></div>
-    </article>
-    <article class="metrica">
-      <span class="metrica__icono"><i class="fa-solid fa-user-group"></i></span>
-      <div><small>Conexiones distintas</small><strong>{{ totalPersonas() }}</strong></div>
-    </article>
-    <article class="metrica">
-      <span class="metrica__icono"><i class="fa-solid fa-city"></i></span>
-      <div><small>Ciudades</small><strong>{{ ciudadesDistintas() }}</strong></div>
-    </article>
-    <article class="metrica metrica--personal">
-      <span class="metrica__icono"><i class="fa-solid fa-user"></i></span>
-      <div><small>Conexiones personales</small><strong>{{ conexionesPersonales() }}</strong></div>
-    </article>
-    <article class="metrica metrica--empresarial">
-      <span class="metrica__icono"><i class="fa-solid fa-building"></i></span>
-      <div><small>Conexiones empresariales</small><strong>{{ conexionesEmpresariales() }}</strong></div>
-    </article>
-  </section>
+  <!-- El mapa ocupa todo el bloque y los demás componentes flotan dentro, como parte del mapa. -->
+  <section class="tablero" data-tour="mapa-tablero">
+    <div class="tablero__mapa">
+      <app-mapa-real
+        [altura]="'620px'"
+        [lat]="punto().lat"
+        [lng]="punto().lng"
+        [zoom]="punto().zoom"></app-mapa-real>
+    </div>
 
-  <div class="capas">
-    <button type="button" class="capa capa--personal" [class.capa--off]="!capas().personal" (click)="alternarCapa('personal')">
-      <i class="punto punto--personal"></i> Personal
-    </button>
-    <button type="button" class="capa capa--empresarial" [class.capa--off]="!capas().empresarial" (click)="alternarCapa('empresarial')">
-      <i class="punto punto--empresarial"></i> Empresarial
-    </button>
-    <button type="button" class="capa capa--local" [class.capa--off]="!capas().locales" (click)="alternarCapa('locales')">
-      <i class="punto punto--local"></i> Locales
-    </button>
-    <span class="capas__pista">Toca para mostrar u ocultar · el tamaño del círculo es el número de toques</span>
-  </div>
+    <div class="tablero__velo" aria-hidden="true"></div>
 
-  <section class="mapa">
-    <aside class="mapa__panel">
+    <div class="tablero__metricas">
+      <section class="metricas" data-tour="mapa-metricas">
+        <article class="metrica">
+          <span class="metrica__icono"><i class="fa-solid fa-hand-pointer"></i></span>
+          <div><small>Toques registrados</small><strong>{{ totalToques() }}</strong></div>
+        </article>
+        <article class="metrica">
+          <span class="metrica__icono"><i class="fa-solid fa-user-group"></i></span>
+          <div><small>Conexiones distintas</small><strong>{{ totalPersonas() }}</strong></div>
+        </article>
+        <article class="metrica">
+          <span class="metrica__icono"><i class="fa-solid fa-city"></i></span>
+          <div><small>Ciudades</small><strong>{{ ciudadesDistintas() }}</strong></div>
+        </article>
+        <article class="metrica metrica--personal">
+          <span class="metrica__icono"><i class="fa-solid fa-user"></i></span>
+          <div><small>Conexiones personales</small><strong>{{ conexionesPersonales() }}</strong></div>
+        </article>
+        <article class="metrica metrica--empresarial">
+          <span class="metrica__icono"><i class="fa-solid fa-building"></i></span>
+          <div><small>Conexiones empresariales</small><strong>{{ conexionesEmpresariales() }}</strong></div>
+        </article>
+      </section>
+
+      <div class="capas" data-tour="mapa-capas">
+        <button type="button" class="capa capa--personal" [class.capa--off]="!capas().personal" (click)="alternarCapa('personal')">
+          <i class="punto punto--personal"></i> Personal
+        </button>
+        <button type="button" class="capa capa--empresarial" [class.capa--off]="!capas().empresarial" (click)="alternarCapa('empresarial')">
+          <i class="punto punto--empresarial"></i> Empresarial
+        </button>
+        <button type="button" class="capa capa--local" [class.capa--off]="!capas().locales" (click)="alternarCapa('locales')">
+          <i class="punto punto--local"></i> Locales
+        </button>
+        <span class="capas__pista">Toca para mostrar u ocultar · el tamaño del círculo es el número de toques</span>
+      </div>
+    </div>
+
+    <aside class="tablero__panel" data-tour="mapa-panel">
       <section class="panel-plegable" [class.panel-plegable--abierto]="abierto().locales">
         <header class="panel-plegable__cabecera" (click)="alternar('locales')">
           <h2><i class="fa-solid fa-store"></i> Locales registrados</h2>
@@ -87,6 +100,13 @@
                 <small>{{ local.servicio }}</small>
               </span>
               <span class="toque__ciudad">{{ local.ciudad }}</span>
+              <button
+                type="button"
+                class="toque__ir"
+                title="Ver el local en el mapa"
+                (click)="verLocalEnMapa(local, $event)">
+                <i class="fa-solid fa-location-crosshairs"></i>
+              </button>
             </li>
           } @empty {
             <li class="vacio">No hay locales con ese filtro.</li>
@@ -96,7 +116,7 @@
         }
       </section>
 
-      <section class="panel-plegable" [class.panel-plegable--abierto]="abierto().historial">
+      <section class="panel-plegable" data-tour="mapa-historial" [class.panel-plegable--abierto]="abierto().historial">
         <header class="panel-plegable__cabecera" (click)="alternar('historial')">
           <h2><i class="fa-solid fa-clock-rotate-left"></i> Historial de toques</h2>
           <span class="panel-plegable__cuenta">{{ visibles().length }}</span>
@@ -149,28 +169,12 @@
       </section>
 
       <app-empleo-mapa
+        data-tour="mapa-empleo"
         (ubicar)="ubicarVacante($event)"
         (ubicarTodas)="ubicarVacantes($event)"></app-empleo-mapa>
     </aside>
 
-    <div class="mapa__zona">
-      <div class="mapa__lienzo">
-        <app-mapa-real
-          [altura]="'440px'"
-          [lat]="punto().lat"
-          [lng]="punto().lng"
-          [zoom]="punto().zoom"></app-mapa-real>
-      </div>
-
-      <app-mapillary
-        class="mapa__fotos"
-        [titulo]="'Fotos reales de ' + punto().nombre"
-        [lat]="punto().lat"
-        [lng]="punto().lng"
-        [radio]="150"></app-mapillary>
-    </div>
-
-    <aside class="mapa__ciudades">
+    <aside class="tablero__ciudades" data-tour="mapa-ciudades">
       <h2>Por ciudad</h2>
       <ul>
         @for (ciudad of ciudades; track ciudad.ciudad) {
@@ -182,6 +186,14 @@
         }
       </ul>
     </aside>
+
+    <div class="tablero__fotos" data-tour="mapa-fotos">
+      <app-mapillary
+        [titulo]="'Fotos reales de ' + punto().nombre"
+        [lat]="punto().lat"
+        [lng]="punto().lng"
+        [radio]="150"></app-mapillary>
+    </div>
   </section>
 
   <p class="nota">

@@ -63,11 +63,8 @@
     </button>
   </div>
 } @else {
-  @if (svc.avisoContactos()) {
-    <p class="panel-notice">{{ svc.avisoContactos() }}</p>
-  }
-
-  <div class="list">
+  <div class="bandeja">
+    <!-- "Mensajes" y, a su derecha, las solicitudes pendientes. -->
     <div class="list__cabecera">
       <h3>Mensajes</h3>
       @if (solicitudes.length) {
@@ -77,9 +74,31 @@
       }
     </div>
 
-    @if (chatsPersonales.length > 0) {
+    <!-- Buscador de la bandeja, siempre a la vista. -->
+    <div class="bandeja__buscador">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="text"
+        autocomplete="off"
+        placeholder="Buscar"
+        aria-label="Buscar una conversación"
+        [ngModel]="search()"
+        (ngModelChange)="onSearch($event)" />
+      @if (buscando()) {
+        <span class="bandeja__cargando"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
+      }
+    </div>
+
+    @if (svc.avisoContactos()) {
+      <p class="panel-notice">{{ svc.avisoContactos() }}</p>
+    }
+
+    <div class="list">
       @for (contact of chatsPersonales; track contact.id) {
-        <div class="contact-item" (click)="select(contact)">
+        <div
+          class="contact-item"
+          [class.contact-item--nuevo]="contact.leido === false"
+          (click)="select(contact)">
           <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
             <span class="avatar-marco">
               @if (contact.avatar) {
@@ -88,23 +107,25 @@
                 <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
               }
             </span>
-            <span class="status-dot" [class.online]="contact.status === 'online'"></span>
+            @if (contact.status === 'online') {
+              <span class="status-dot online"></span>
+            }
           </div>
           <div class="info">
             <div class="top-row">
               <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)">{{ contact.name }}</h4>
             </div>
             <p class="preview">
-              {{ contact.lastMsg || contact.statusText }}
+              {{ contact.lastMsg || contact.statusText || 'Empezar la conversación' }}
               @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
             </p>
           </div>
-          <span class="punto" aria-hidden="true"></span>
+          @if (contact.leido === false) {
+            <span class="punto punto--vivo" aria-label="Sin leer"></span>
+          }
         </div>
       }
-    }
 
-    @if (chatsEmpresariales.length > 0 || empresaId) {
       @for (contact of chatsEmpresariales; track contact.id) {
         <div class="contact-item" (click)="select(contact)">
           <div class="avatar-wrap">
@@ -119,13 +140,13 @@
           <div class="info">
             <div class="top-row">
               <h4>{{ contact.name }}</h4>
+              <span class="tag tag--empresa">Empresa</span>
             </div>
             <p class="preview">
               {{ contact.lastMsg || contact.statusText }}
               @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
             </p>
           </div>
-          <span class="punto" aria-hidden="true"></span>
         </div>
       }
 
@@ -134,9 +155,7 @@
           <i class="fa-solid fa-building"></i> Escribir a la empresa
         </button>
       }
-    }
 
-    @if (chatsGrupales.length > 0 || empresaId) {
       @for (contact of chatsGrupales; track contact.id) {
         <div class="contact-item" (click)="select(contact)">
           <div class="avatar-wrap">
@@ -147,13 +166,13 @@
           <div class="info">
             <div class="top-row">
               <h4>{{ contact.name }}</h4>
+              <span class="tag tag--grupo">Equipo</span>
             </div>
             <p class="preview">
               {{ contact.lastMsg || contact.statusText }}
               @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
             </p>
           </div>
-          <span class="punto" aria-hidden="true"></span>
         </div>
       }
 
@@ -162,9 +181,7 @@
           <i class="fa-solid fa-users"></i> Abrir chat del equipo
         </button>
       }
-    }
 
-    @if (sugerencias.length > 0) {
       @for (persona of sugerencias; track persona.id) {
         <div class="contact-item" (click)="seleccionarPersona(persona)">
           <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)" title="Ver perfil">
@@ -182,13 +199,12 @@
             </div>
             <p class="preview">{{ persona.gitUsername ? '@' + persona.gitUsername : 'Iniciar chat' }}</p>
           </div>
-          <span class="punto" aria-hidden="true"></span>
         </div>
       }
-    }
 
-    @if (conversaciones.length === 0 && sugerencias.length === 0 && !buscando() && !svc.cargandoContactos()) {
-      <p class="empty">Sin resultados</p>
-    }
+      @if (conversaciones.length === 0 && sugerencias.length === 0 && !buscando() && !svc.cargandoContactos()) {
+        <p class="empty">Sin resultados</p>
+      }
+    </div>
   </div>
 }

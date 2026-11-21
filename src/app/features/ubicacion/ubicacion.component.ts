@@ -119,6 +119,12 @@ export class UbicacionComponent implements AfterViewInit {
 
   alternarCapa(capa: 'personal' | 'empresarial' | 'locales'): void {
     this.capas.update((actual) => ({ ...actual, [capa]: !actual[capa] }));
+    this.pintarPines();
+  }
+
+  /** Abre el historial (la guía lo muestra cerrado) y lo deja listo para leer. */
+  abrirHistorial(): void {
+    this.abierto.update((actual) => ({ ...actual, historial: true }));
   }
 
   seleccionar(toque: ToqueUbicacion): void {
@@ -128,7 +134,16 @@ export class UbicacionComponent implements AfterViewInit {
 
     if (!mismo) {
       this.punto.set({ lat: toque.latitud, lng: toque.longitud, zoom: 16, nombre: toque.ciudad });
+      this.mapa?.limpiarMarcadores();
       this.mapa?.irA(toque.latitud, toque.longitud, 16);
+      this.mapa?.marcar(
+        toque.latitud,
+        toque.longitud,
+        `<b>${toque.persona}</b><br>${toque.ciudad} · ${toque.toques} toques`,
+        toque.tipo === 'PERSONAL' ? 'personal' : 'empresarial',
+      );
+    } else {
+      this.pintarPines();
     }
   }
 
@@ -138,14 +153,33 @@ export class UbicacionComponent implements AfterViewInit {
     this.localActivo.set(mismo ? null : local);
 
     if (!mismo) {
-      this.punto.set({ lat: local.latitud, lng: local.longitud, zoom: 17, nombre: local.nombre });
-      this.mapa?.irA(local.latitud, local.longitud, 17);
+      this.verLocalEnMapa(local);
     }
+  }
+
+  /** Lleva el mapa al local y lo deja marcado, sin cerrar la ficha. */
+  verLocalEnMapa(local: LocalRegistrado, evento?: Event): void {
+    evento?.stopPropagation();
+
+    this.seleccionado.set(null);
+    this.localActivo.set(local);
+    this.punto.set({ lat: local.latitud, lng: local.longitud, zoom: 17, nombre: local.nombre });
+
+    this.mapa?.limpiarMarcadores();
+    this.mapa?.irA(local.latitud, local.longitud, 17);
+    this.mapa?.marcar(
+      local.latitud,
+      local.longitud,
+      `<b>${local.nombre}</b><br>${local.servicio} · ${local.ciudad}`,
+      'local',
+    );
   }
 
   verPunto(lat: number, lng: number, nombre: string, zoom = 16): void {
     this.punto.set({ lat, lng, zoom, nombre });
     this.mapa?.irA(lat, lng, zoom);
+    this.pintarPines();
+    this.mapa?.marcar(lat, lng, `<b>${nombre}</b>`, 'local');
   }
 
   ubicarVacante(item: VacanteUbicada): void {
@@ -208,24 +242,34 @@ export class UbicacionComponent implements AfterViewInit {
     setTimeout(() => this.pintarPines(), 700);
   }
 
+  /**
+   * Pinta todos los pines del mapa con su color de capa. Va por marcarVarios:
+   * marcar() reutiliza un único marcador y solo dejaba el último punto.
+   */
   private pintarPines(): void {
     if (!this.mapa) return;
 
-    for (const toque of this.visibles()) {
-      this.mapa.marcar(
-        toque.latitud,
-        toque.longitud,
-        `<b>${toque.persona}</b><br>${toque.ciudad} · ${toque.toques} toques`,
-      );
-    }
+    const capas = this.capas();
+    const puntos = [
+      ...this.visibles().map((toque) => ({
+        lat: toque.latitud,
+        lng: toque.longitud,
+        tono: (toque.tipo === 'PERSONAL' ? 'personal' : 'empresarial') as 'personal' | 'empresarial',
+        texto: [`<b>${toque.persona}</b>`, `${toque.ciudad} · ${toque.toques} toques`, toque.lugar]
+          .filter(Boolean)
+          .join('<br>'),
+      })),
+      ...(capas.locales
+        ? this.localesVisibles().map((local) => ({
+            lat: local.latitud,
+            lng: local.longitud,
+            tono: 'local' as const,
+            texto: `<b>${local.nombre}</b><br>${local.servicio} · ${local.ciudad}`,
+          }))
+        : []),
+    ];
 
-    for (const local of this.localesVisibles()) {
-      this.mapa.marcar(
-        local.latitud,
-        local.longitud,
-        `<b>${local.nombre}</b><br>${local.servicio} · ${local.ciudad}`,
-      );
-    }
+    this.mapa.marcarVarios(puntos);
   }
 
   posicionX(longitud: number): number {

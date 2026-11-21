@@ -101,6 +101,15 @@
     transform: translate(-50%, -50%);
   }
 
+  &[data-lugar='libre'] {
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    transition: top 0.24s ease, left 0.24s ease;
+  }
+
   &[data-lugar='fondo'] {
     bottom: calc(56px + var(--safe-bottom) + 12px);
     left: 50%;

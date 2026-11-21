@@ -28,6 +28,15 @@ export class SidePanelService {
 
   readonly isOpen = signal(false);
 
+  /**
+   * Se está en la página de Mensajes a pantalla completa. Ahí el panel flotante
+   * no existe: los chats se abren en la columna derecha, no en un lateral.
+   */
+  readonly enPaginaCompleta = signal(false);
+
+  /** Página donde estaba el usuario al pedir pantalla completa (para volver). */
+  readonly paginaAnterior = signal<string | null>(null);
+
   /** El modal "Importar hoja de vida" está abierto (vive fuera del panel). */
   readonly vistaCvAbierta = signal(false);
 
@@ -53,7 +62,9 @@ export class SidePanelService {
     this.vistaNueva.set(true);
     this.activeView.set('nuevo');
     this.activeContact.set(null);
-    this.isOpen.set(true);
+    if (!this.enPaginaCompleta()) {
+      this.isOpen.set(true);
+    }
     this.busqueda.set('');
     this.cargarConversaciones();
   }
@@ -95,6 +106,15 @@ export class SidePanelService {
     return this.empresa.activaId();
   }
 
+  /** Foto del usuario de la sesión: encabeza el carrusel de notas. */
+  miAvatar(): string {
+    const usuario = this.auth.currentUser() as
+      | { avatarUrl?: string; foto?: string; gitUsername?: string }
+      | null;
+    if (usuario?.avatarUrl || usuario?.foto) return usuario.avatarUrl ?? usuario.foto ?? '';
+    return usuario?.gitUsername ? `https://github.com/${usuario.gitUsername}.png` : '';
+  }
+
   get miId(): string {
     const id = this.auth.currentUser()?.id;
     return id && id !== '0' ? String(id) : '';
@@ -123,14 +143,50 @@ export class SidePanelService {
   );
 
   /**
-   * Cómo se ve el panel cuando está abierto:
-   * - 'ventana': tarjeta flotante abajo a la derecha, la pastilla deja su sitio.
-   * - 'pantalla': ocupa todo el alto (lo pide el usuario con ⤢ o en móvil).
+   * Cómo se ve el panel cuando está abierto. Por defecto, minimizado:
+   * - 'ventana': tarjeta flotante abajo a la derecha (lo normal).
+   * - 'pantalla': lo pide el usuario con ⤢, y entonces se abre el componente
+   *   de Mensajes a página completa (/app/mensajes), no un panel estirado.
    */
-  readonly modoVentana = signal(false);
+  readonly modoVentana = signal(true);
 
+  /** Pantalla completa: navega al componente de Mensajes y aparta el panel. */
+  abrirPantallaCompleta(): void {
+    const actual = this.router.url;
+    if (actual && !actual.startsWith('/app/mensajes')) {
+      this.paginaAnterior.set(actual);
+    }
+    this.modoVentana.set(false);
+    this.isOpen.set(false);
+    this.router.navigate(['/app/mensajes']);
+  }
+
+  /** Volver a la ventana minimizada: la pastilla reaparece donde estaba. */
+  volverAVentana(): void {
+    this.modoVentana.set(true);
+    this.enPaginaCompleta.set(false);
+  }
+
+  /** El componente de Mensajes está en pantalla: el panel flotante no se pinta. */
+  cerrarPanelFlotante(): void {
+    this.isOpen.set(false);
+    this.enPaginaCompleta.set(true);
+  }
+
+  /** Se salió de la página de Mensajes por cualquier vía (riel, atrás, enlaces). */
+  salirDePaginaCompleta(): void {
+    this.enPaginaCompleta.set(false);
+    this.isOpen.set(false);
+    this.modoVentana.set(true);
+  }
+
+  /** Compatibilidad con los botones que ya llamaban a esto. */
   alternarModoVentana(): void {
-    this.modoVentana.update((v) => !v);
+    if (this.modoVentana()) {
+      this.abrirPantallaCompleta();
+    } else {
+      this.volverAVentana();
+    }
   }
 
   /**
@@ -209,7 +265,9 @@ export class SidePanelService {
     this.busqueda.set('');
     this.activeView.set('contacts');
     this.activeContact.set(null);
-    this.isOpen.set(true);
+    if (!this.enPaginaCompleta()) {
+      this.isOpen.set(true);
+    }
     this.cargarConversaciones();
   }
 
@@ -237,7 +295,11 @@ export class SidePanelService {
     this.contacts.update(list =>
       list.map(c => (c.id === definitivo.id ? { ...c, unread: 0, leido: true } : c))
     );
-    this.isOpen.set(true);
+
+    // En la página de Mensajes el hilo vive en su columna: el panel no se abre.
+    if (!this.enPaginaCompleta()) {
+      this.isOpen.set(true);
+    }
 
     // Un perfil puede abrirse sin saber aún que ya existe conversación con esa persona.
     if (!definitivo.conversationId) {

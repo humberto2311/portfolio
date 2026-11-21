@@ -85,6 +85,13 @@ export const routes: Routes = [
       { path: 'portafolio', component: PortafolioComponent }, 
       { path: 'hub', component: LinkHubComponent },
       { path: 'talento', component: TalentoComponent },
+      // Mensajes a página completa (el ⤢ del chat minimizado trae aquí).
+      {
+        path: 'mensajes',
+        loadComponent: () =>
+          import('./features/mensajes/mensajes.component').then((m) => m.MensajesComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
       { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
       { path: 'dashboard', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'personal' } },

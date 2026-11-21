@@ -45,10 +45,10 @@
 .list {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 4px 6px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1px;
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -63,16 +63,20 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-  border: 1px solid var(--bg-border);
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.16s ease;
 
   &:hover {
-    background: var(--bg-hover);
-    border-color: var(--accent-border);
+    background: $bg-hover;
+  }
+
+  /* Sin leer: el nombre en negrita y su punto azul a la derecha. */
+  &--nuevo h4 {
+    font-weight: 800;
   }
 }
 
@@ -443,4 +447,241 @@
   &:focus-visible {
     @include focus-ring;
   }
+}
+
+
+/* ================= Bandeja de Mensajes: buscador, notas y filas limpias ================= */
+
+.bandeja {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--bg-sidebar);
+  color: $text-light;
+}
+
+/* Buscador ancho de la referencia, con la lupa a la izquierda. */
+.bandeja__buscador {
+  position: relative;
+  padding: 10px 12px 8px;
+  flex-shrink: 0;
+
+  i {
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-muted;
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    height: 40px;
+    padding: 0 16px 0 40px;
+    border: none;
+    border-radius: 12px;
+    background: $bg-input;
+    color: $text-light;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 1px $accent-border;
+    }
+  }
+}
+
+.bandeja__cargando {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  font-size: 12px;
+}
+
+/* Carrusel de notas: aros de color con la foto y el nombre debajo. */
+.notas {
+  display: flex;
+  gap: 14px;
+  padding: 6px 12px 12px;
+  overflow-x: auto;
+  flex-shrink: 0;
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+}
+
+.nota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 66px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  cursor: pointer;
+
+  &:hover .nota__aro {
+    transform: scale(1.04);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.nota__aro {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from 210deg, $accent, $accent-strong, $accent);
+  transition: transform 0.16s ease;
+
+  &--tuya {
+    background: $bg-hover;
+    border: 1px dashed $text-faint;
+  }
+}
+
+.nota__foto {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: $bg-elevated;
+  color: $text-light;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid var(--bg-sidebar);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &--tuya {
+    background: $bg-card;
+    color: $accent;
+  }
+}
+
+.nota__nombre {
+  max-width: 100%;
+  font-size: 11px;
+  color: $text-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cabecera de la lista: Mensajes + Solicitudes. */
+.list__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 14px 4px;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: $text-light;
+  }
+}
+
+.list__solicitudes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: $accent;
+    background: $accent-soft;
+  }
+}
+
+.list__contador {
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: $accent;
+  color: var(--on-accent);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Punto azul de "sin leer", alineado a la derecha de la fila. */
+.punto {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: transparent;
+
+  &--vivo {
+    background: $accent;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+}
+
+/* Aro del avatar y hora del último mensaje dentro de la vista previa. */
+.avatar-marco {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatar-marco .avatar-initials {
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-size: 15px;
+}
+
+.preview__hora {
+  color: $text-faint;
 }

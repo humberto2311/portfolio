@@ -60,7 +60,7 @@
 .metricas {
   display: grid;
   gap: .7rem;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   margin-bottom: .9rem;
 }
 
@@ -87,93 +87,198 @@
   strong { font-size: 1.15rem; }
 }
 
-.mapa {
-  display: grid;
-  gap: .9rem;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-  grid-template-areas:
-    "panel zona"
-    "panel ciudades";
-  align-items: start;
+/* Tablero: el mapa ocupa todo el bloque y los paneles flotan encima, como parte de él. */
+.tablero {
+  position: relative;
+  isolation: isolate;
+  --alto-tablero: clamp(520px, 74vh, 780px);
   margin-bottom: .9rem;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: var(--bg-card, #111a2e);
 
-  @media (max-width: 1100px) {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "zona"
-      "panel"
-      "ciudades";
+  &__mapa {
+    position: relative;
+    z-index: 0;
+
+    /* El mapa no lleva su propio marco: el marco es el del tablero. */
+    ::ng-deep .mapa-real {
+      border: 0;
+      border-radius: 0;
+      grid-template-rows: var(--alto-tablero, 620px) auto;
+    }
+
+    ::ng-deep .mapa-real__lienzo {
+      height: var(--alto-tablero, 620px);
+    }
+
+    /* El pie del mapa (Todo el mundo · Colombia) se alinea con el marco del tablero. */
+    ::ng-deep .mapa-real__pie {
+      justify-content: flex-start;
+      padding-left: .7rem;
+    }
+  }
+
+  /* Velo suave arriba y a los lados para que el texto de los paneles se lea sobre el mapa. */
+  &__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(8, 15, 30, .82), rgba(8, 15, 30, .18) 22%, transparent 38%),
+      linear-gradient(90deg, rgba(8, 15, 30, .55), transparent 26%),
+      linear-gradient(270deg, rgba(8, 15, 30, .55), transparent 26%);
+  }
+
+  &__metricas {
+    position: absolute;
+    top: .65rem;
+    left: .65rem;
+    right: .65rem;
+    z-index: 3;
+    display: grid;
+    gap: .5rem;
+  }
+
+  &__panel,
+  &__ciudades,
+  &__fotos {
+    position: absolute;
+    z-index: 3;
+    min-width: 0;
   }
 
   &__panel {
-    grid-area: panel;
+    top: 8.6rem;
+    left: .65rem;
+    width: min(330px, 34%);
+    max-height: calc(var(--alto-tablero, 620px) - 8.6rem - .65rem);
     display: grid;
-    gap: .6rem;
-    min-width: 0;
-    max-height: calc(100vh - 6rem);
+    gap: .5rem;
+    align-content: start;
     overflow-y: auto;
-    padding-right: .15rem;
+    padding-right: .2rem;
+    overscroll-behavior: contain;
 
     &::-webkit-scrollbar { width: 7px; }
     &::-webkit-scrollbar-thumb {
       background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 30%, transparent);
       border-radius: 999px;
     }
-
-    @media (max-width: 1100px) {
-      max-height: none;
-      overflow: visible;
-    }
-  }
-
-  &__zona {
-    grid-area: zona;
-    display: grid;
-    gap: .55rem;
-    min-width: 0;
-  }
-
-  &__fotos {
-    display: block;
-    min-width: 0;
-  }
-
-  &__lienzo {
-    position: relative;
-    min-width: 0;
-    border-radius: 16px;
-    border: 1px solid var(--border-soft, #1e293b);
-    background:
-      radial-gradient(circle at 30% 30%, rgba(56, 189, 248, .12), transparent 60%),
-      var(--bg-card, #111a2e);
-    overflow: hidden;
-  }
-
-  &__fondo {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
   }
 
   &__ciudades {
-    grid-area: ciudades;
-    align-self: start;
-    padding: .8rem;
-    border-radius: 16px;
+    top: 8.6rem;
+    right: .65rem;
+    width: min(250px, 27%);
+    max-height: calc(50% - 8.8rem);
+    overflow-y: auto;
+    padding: .7rem .75rem;
+    border-radius: 14px;
     border: 1px solid var(--border-soft, #1e293b);
-    background: var(--bg-card, #111a2e);
+    background: color-mix(in srgb, var(--bg-elevated, #0f172a) 92%, transparent);
+    backdrop-filter: blur(6px);
 
-    h2 { font-size: .78rem; margin: 0 0 .6rem; color: var(--text-secondary, #94a3b8); }
+    h2 { font-size: .76rem; margin: 0 0 .5rem; color: var(--text-secondary, #94a3b8); }
 
-    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+    ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
 
     li {
       display: grid;
-      grid-template-columns: 66px 1fr 28px;
-      gap: .4rem;
+      grid-template-columns: 62px 1fr 26px;
+      gap: .35rem;
       align-items: center;
-      font-size: .72rem;
+      font-size: .7rem;
+    }
+  }
+
+  /* Fotos reales: pestaña discreta en la esquina; el panel se abre al pasar por encima o al tocarlo. */
+  &__fotos {
+    bottom: .65rem;
+    right: .65rem;
+    width: min(280px, 30%);
+    max-height: 42%;
+    transform: translateY(calc(100% - 2.1rem));
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, #1e293b);
+    background: color-mix(in srgb, var(--bg-elevated, #0f172a) 94%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 14px 34px rgba(2, 6, 23, .42);
+    transition: transform .22s ease;
+
+    &:hover,
+    &:focus-within {
+      transform: translateY(0);
+    }
+  }
+
+  /* Los paneles de dentro se leen sobre el mapa: fondo propio y algo de desenfoque. */
+  .metricas,
+  .capas,
+  .panel-plegable,
+  app-empleo-mapa {
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--border-soft, #1e293b) 90%, transparent);
+    background: color-mix(in srgb, var(--bg-elevated, #0f172a) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 14px 34px rgba(2, 6, 23, .38);
+  }
+
+  .metricas {
+    display: grid;
+    gap: .45rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+    padding: .45rem;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--border-soft, #1e293b) 90%, transparent);
+    background: color-mix(in srgb, var(--bg-elevated, #0f172a) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 14px 34px rgba(2, 6, 23, .38);
+  }
+
+  .capas {
+    justify-self: start;
+    margin: 0;
+    padding: .35rem .5rem;
+    display: inline-flex;
+  }
+
+  .panel-plegable {
+    border-radius: 14px;
+  }
+
+  app-empleo-mapa {
+    display: block;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  @media (max-width: 1100px) {
+    &__metricas { position: static; padding: .55rem .55rem 0; }
+    &__velo { display: none; }
+
+    &__panel,
+    &__ciudades,
+    &__fotos {
+      position: static;
+      width: auto;
+      max-height: none;
+      margin: .55rem;
+      overflow: visible;
+      transform: none;
+      box-shadow: none;
+    }
+
+    &__panel { padding-right: 0; }
+  }
+
+  @media (max-width: 700px) {
+    .metricas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }
@@ -755,14 +860,6 @@
 
   .metricas {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .mapa {
-    gap: .7rem;
-  }
-
-  .mapa__panel {
-    max-height: none;
   }
 
   .aviso {

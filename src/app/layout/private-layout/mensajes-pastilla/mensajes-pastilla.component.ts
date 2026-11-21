@@ -31,6 +31,9 @@ export class MensajesPastillaComponent {
    * vuelve en cuanto se cierra (X, Esc o tocar fuera).
    */
   get visible(): boolean {
+    // En la página de Mensajes a pantalla completa no hay pastilla: el propio
+    // componente trae su botón de contraer.
+    if (this.svc.enPaginaCompleta()) return false;
     return this.svc.pastillaVisible(false) && !this.svc.isOpen();
   }
 
@@ -45,6 +48,18 @@ export class MensajesPastillaComponent {
 
   abrir(): void {
     this.svc.openContacts();
+  }
+
+  /** Lápiz: buscar a alguien y empezar una charla nueva. */
+  nuevoMensaje(evento: Event): void {
+    evento.stopPropagation();
+    this.svc.abrirVistaNueva();
+  }
+
+  /** ⤢: Mensajes a página completa, en su propio componente. */
+  pantallaCompleta(evento: Event): void {
+    evento.stopPropagation();
+    this.svc.abrirPantallaCompleta();
   }
 
   /** Ver todas: abre la bandeja (o la cierra si ya estaba en contactos). */

@@ -119,9 +119,9 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /** Vuela a un punto. No marca nada: el marcador lo pone quien llama, con su tono. */
   irA(lat: number, lng: number, zoom = 12): void {
     this.mapa?.flyTo([lat, lng], zoom, { duration: 1.1 });
-    this.marcar(lat, lng);
   }
 
   marcar(lat: number, lng: number, texto?: string, tono: 'personal' | 'empresarial' | 'local' | 'empleo' = 'empleo'): void {

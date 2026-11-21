@@ -13,7 +13,16 @@
 
     <button type="button" class="tour__saltar" (click)="saltar()">Saltar la guía</button>
 
-    <section class="tour__caja" role="dialog" aria-modal="false" [attr.data-lugar]="posicion()">
+    <section
+      class="tour__caja"
+      role="dialog"
+      aria-modal="false"
+      [attr.data-lugar]="caja() ? 'libre' : posicion()"
+      [style.top.px]="caja()?.top"
+      [style.left.px]="caja()?.left"
+      [style.right]="caja() ? 'auto' : null"
+      [style.bottom]="caja() ? 'auto' : null"
+      [style.transform]="caja() ? 'none' : null">
       <h2>{{ paso()?.titulo }}</h2>
       <p class="tour__bajada">{{ paso()?.bajada }}</p>
 

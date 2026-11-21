@@ -1,45 +1,51 @@
 <!-- Pastilla de Mensajes: esquina inferior derecha, arriba de la tab-bar en móvil. -->
 @if (visible) {
   <div class="pastilla" role="group" aria-label="Mensajes" [class.pastilla--activa]="activa()">
-    <button type="button" class="pastilla__chat" (click)="abrir()" [attr.aria-label]="etiqueta">
+    <!-- Burbuja: abre la bandeja de conversaciones. -->
+    <button type="button" class="pastilla__chat" (click)="abrir()" [attr.aria-label]="etiqueta" title="Mensajes">
       <span class="pastilla__burbuja" aria-hidden="true">
         <i class="fa-solid fa-comment-dots"></i>
-          @if (sinLeer > 0) {
-            <span class="pastilla__badge">{{ sinLeer > 9 ? '9+' : sinLeer }}</span>
-          }
-        </span>
+        @if (sinLeer > 0) {
+          <span class="pastilla__badge">{{ sinLeer > 9 ? '9+' : sinLeer }}</span>
+        }
+      </span>
 
       <span class="pastilla__texto">
-          <strong>Mensajes</strong>
-          <small>{{ svc.chatsActivos().length }} {{ svc.chatsActivos().length === 1 ? 'conversación' : 'conversaciones' }}</small>
+        <strong>Mensajes</strong>
+        <small>{{ svc.chatsActivos().length }} {{ svc.chatsActivos().length === 1 ? 'conversación' : 'conversaciones' }}</small>
+      </span>
+
+      @if (svc.ultimosAvatares().length) {
+        <span class="pastilla__avatares" aria-hidden="true">
+          @for (a of svc.ultimosAvatares(); track a.id) {
+            <span class="pastilla__avatar">
+              @if (a.avatar) {
+                <img [src]="a.avatar" [alt]="a.nombre" />
+              } @else {
+                {{ a.nombre.charAt(0).toUpperCase() }}
+              }
+            </span>
+          }
         </span>
-
-        @if (svc.ultimosAvatares().length) {
-          <span class="pastilla__avatares" aria-hidden="true">
-            @for (a of svc.ultimosAvatares(); track a.id) {
-              <span class="pastilla__avatar">
-                @if (a.avatar) {
-                  <img [src]="a.avatar" [alt]="a.nombre" />
-                } @else {
-                  {{ a.nombre.charAt(0).toUpperCase() }}
-                }
-              </span>
-            }
-          </span>
-        }
-      </button>
-
-      <!-- Solicitudes pendientes: no se pierden aunque no haya mensajes nuevos. -->
-      @if (svc.solicitudes().length) {
-        <button type="button" class="pastilla__solicitudes" (click)="verTodas($event)" title="Solicitudes de chat">
-        <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
-          {{ svc.solicitudes().length }}
-        </button>
       }
+    </button>
 
-    <button type="button" class="pastilla__ver" (click)="verTodas($event)" title="Ver todas las conversaciones" aria-label="Ver todas las conversaciones">
-        <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+    <!-- Lápiz: buscar a alguien y empezar una charla nueva. -->
+    <button type="button" class="pastilla__accion" (click)="nuevoMensaje($event)" title="Buscar a alguien y mandar un mensaje" aria-label="Nuevo mensaje">
+      <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+    </button>
+
+    <!-- Pantalla completa: abre el componente de Mensajes a página entera. -->
+    <button type="button" class="pastilla__accion" (click)="pantallaCompleta($event)" title="Ver Mensajes a pantalla completa" aria-label="Pantalla completa">
+      <i class="fa-solid fa-expand" aria-hidden="true"></i>
+    </button>
+
+    <!-- Solicitudes pendientes: no se pierden aunque no haya mensajes nuevos. -->
+    @if (svc.solicitudes().length) {
+      <button type="button" class="pastilla__solicitudes" (click)="verTodas($event)" title="Solicitudes de chat">
+        <i class="fa-solid fa-user-clock" aria-hidden="true"></i>
+        {{ svc.solicitudes().length }}
       </button>
-
+    }
   </div>
 }

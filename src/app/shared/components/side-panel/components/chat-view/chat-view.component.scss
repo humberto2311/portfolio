@@ -21,6 +21,8 @@
     var(--accent-alt, var(--accent-strong)) 100%
   );
   --ig-radio: 18px;
+  --ig-burbuja-mia: var(--accent);
+  --ig-texto-mio: var(--on-accent);
   --ig-radio-cola: 4px;
   --ig-tipografia: var(--font-main, system-ui, -apple-system, 'Segoe UI', sans-serif);
 
@@ -55,11 +57,15 @@
 /* ---------- Separador de día ---------- */
 
 .dia {
-  margin: 18px 0 12px;
+  align-self: center;
+  margin: 16px 0 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 7%, transparent);
   text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   color: var(--ig-texto-suave);
   text-transform: uppercase;
 }
@@ -70,8 +76,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  margin-bottom: 10px;
+  gap: 3px;
+  margin-bottom: 12px;
 
   &--mine {
     align-items: flex-end;
@@ -89,13 +95,14 @@
 .msg-avatar {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   margin-bottom: 2px;
   border-radius: 50%;
   overflow: hidden;
   background: var(--ig-burbuja-otro);
+  border: 1px solid var(--ig-borde);
   color: var(--ig-texto-otro);
   font-size: 10px;
   font-weight: 700;
@@ -108,6 +115,7 @@
 
   &--hueco {
     background: transparent;
+    border: none;
   }
 }
 
@@ -127,25 +135,27 @@
 .bubble {
   position: relative;
   max-width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: var(--ig-radio);
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 14.5px;
+  line-height: 1.45;
   word-break: break-word;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* Mensaje del otro: gris claro, cola en la esquina inferior izquierda. */
 .msg:not(.msg--mine) .bubble {
   background: var(--ig-burbuja-otro);
   color: var(--ig-texto-otro);
+  border: 1px solid var(--ig-borde);
   border-bottom-left-radius: var(--ig-radio-cola);
 }
 
-/* Mi mensaje: gradiente, texto blanco, cola en la esquina inferior derecha. */
+/* Mi mensaje: color plano del tema, texto de contraste, cola abajo a la derecha. */
 .msg--mine .bubble {
-  background: var(--ig-gradiente);
-  color: var(--on-accent);
+  background: var(--ig-burbuja-mia);
+  color: var(--ig-texto-mio);
   border-bottom-right-radius: var(--ig-radio-cola);
 }
 
@@ -402,7 +412,7 @@
 /* ---------- Composer píldora ---------- */
 
 .composer {
-  padding: 8px 12px calc(10px + var(--safe-bottom));
+  padding: 10px 14px calc(12px + var(--safe-bottom));
   background: var(--ig-fondo);
   border-top: 1px solid var(--ig-borde);
 }
@@ -410,11 +420,18 @@
 .composer__pildora {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  min-height: 44px;
-  padding: 4px 8px;
-  border-radius: 22px;
-  background: var(--ig-burbuja-otro);
+  gap: 4px;
+  min-height: 48px;
+  padding: 5px 6px;
+  border-radius: 24px;
+  background: var(--bg-input, var(--ig-burbuja-otro));
+  border: 1px solid var(--ig-borde);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+
+  &:focus-within {
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+  }
 }
 
 .composer__campo {
@@ -451,8 +468,8 @@
 .composer__icono {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   border: none;
   border-radius: 50%;
@@ -474,18 +491,20 @@
 .composer__enviar {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border: none;
   border-radius: 50%;
-  background: transparent;
-  color: var(--accent);
-  font-size: 17px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 16px;
   cursor: pointer;
+  transition: transform 0.14s ease, background 0.16s ease;
 
   &:hover {
-    background: var(--bg-hover);
+    background: var(--accent-strong);
+    transform: scale(1.04);
   }
 
   &:disabled {

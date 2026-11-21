@@ -22,7 +22,10 @@ interface Hito {
 }
 
 interface Paso {
+  /** Selector que la guía resalta; null deja el cartel centrado. */
   destino: string | null;
+  /** Si el elemento no está en esta página, el paso se omite en vez de romperse. */
+  soloEnMapa?: boolean;
   titulo: string;
   bajada: string;
   hitos: Hito[];
@@ -87,18 +90,133 @@ const EMPLEO: Paso = {
   ],
 };
 
+/**
+ * El mapa de conexiones es ahora un tablero: el mapa ocupa todo el bloque y
+ * las tarjetas flotan encima. Cada paso apunta a una de esas piezas.
+ */
 const MAPA_CONEXIONES: Paso = {
   destino: null,
-  titulo: 'Mapa de conexiones',
-  bajada: 'El mapa real de OpenStreetMap con todo lo que ha pasado alrededor de tus tarjetas.',
+  titulo: 'Mapa de conexiones: un tablero, no un mapa con cosas al lado',
+  bajada: 'El mapa ocupa todo el bloque y todo lo demás flota encima, como parte de él. Las tarjetas se pueden plegar para dejar ver el mapa completo.',
   hitos: [
-    { icono: 'fa-solid fa-user', etiqueta: 'Pines personales y empresariales', detalle: 'cada color es un tipo de conexión; el tamaño del círculo es el número de toques' },
-    { icono: 'fa-solid fa-store', etiqueta: 'Locales registrados', detalle: 'los negocios que escaneaste, con su sector y su ciudad' },
-    { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Historial de toques', detalle: 'quién, dónde y cuándo; filtra por fecha, por NFC o QR' },
+    { icono: 'fa-solid fa-chart-simple', etiqueta: 'Métricas arriba', detalle: 'toques, conexiones, ciudades y el reparto entre personales y empresariales, flotando sobre el mapa' },
+    { icono: 'fa-solid fa-layer-group', etiqueta: 'Tres capas', detalle: 'Personal, Empresarial y Locales: tócalas para mostrar u ocultar sus pines, y el tamaño del círculo es el número de toques' },
+    { icono: 'fa-solid fa-store', etiqueta: 'Locales, a la izquierda', detalle: 'los negocios que escaneaste; el botón de la diana lleva el mapa al local y lo deja marcado' },
+    { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Historial, debajo', detalle: 'quién, dónde y cuándo; filtra por fecha, por NFC o por QR' },
     { icono: 'fa-solid fa-briefcase', etiqueta: 'Empresas que buscan talento', detalle: 'las empresas de tu última búsqueda de empleo, cada una con su botón Ubicación' },
     { icono: 'fa-solid fa-location-crosshairs', etiqueta: 'Botón Ubicación', detalle: 'ubica la empresa en el mapa y abre una ficha con dirección, porcentaje, salario y lo que te falta' },
     { icono: 'fa-solid fa-chart-simple', etiqueta: 'El porcentaje es un botón', detalle: 'tócalo y te lleva al gráfico de esa vacante' },
-    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Fotos del lugar', detalle: 'imágenes reales de Mapillary alrededor del punto que elijas' },
+    { icono: 'fa-solid fa-city', etiqueta: 'Por ciudad, a la derecha', detalle: 'la barra de cada ciudad; tócala para saltar a esa ciudad en el mapa' },
+    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Fotos del lugar', detalle: 'la pestaña de la esquina abre las fotos reales de Mapillary del punto que elijas' },
+  ],
+};
+
+const MAPA_TABLERO: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-tablero"]',
+  titulo: 'Todo esto es el mapa',
+  bajada: 'El mapa ya no es un recuadro con paneles al lado: es el fondo de todo el bloque y las tarjetas flotan sobre él.',
+  hitos: [
+    { icono: 'fa-solid fa-expand', etiqueta: 'Ocupa todo el ancho', detalle: 'el mapa se estira con la ventana y los paneles se acomodan encima' },
+    { icono: 'fa-solid fa-arrows-up-down', etiqueta: 'Más alto', detalle: 'crece con la pantalla, hasta 780 px, para que quepan los pines sin apretar' },
+    { icono: 'fa-solid fa-mobile-screen', etiqueta: 'En el teléfono', detalle: 'las tarjetas bajan y se ponen una debajo de otra, con el mapa arriba' },
+  ],
+};
+
+const MAPA_METRICAS: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-metricas"]',
+  titulo: 'Las métricas flotan arriba',
+  bajada: 'Cinco cifras sobre el mapa, sin taparlo: se leen porque llevan su propio fondo desenfocado.',
+  hitos: [
+    { icono: 'fa-solid fa-hand-pointer', etiqueta: 'Toques registrados', detalle: 'cuántas veces acercaron una tarjeta a tu etiqueta' },
+    { icono: 'fa-solid fa-user-group', etiqueta: 'Conexiones distintas', detalle: 'personas únicas, no toques' },
+    { icono: 'fa-solid fa-city', etiqueta: 'Ciudades', detalle: 'dónde ha pasado todo esto' },
+    { icono: 'fa-solid fa-user', etiqueta: 'Personales y empresariales', detalle: 'el reparto por tipo de tarjeta, con el mismo color de sus pines' },
+  ],
+};
+
+const MAPA_CAPAS: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-capas"]',
+  titulo: 'Las tres capas del mapa',
+  bajada: 'Debajo de las métricas, tres píldoras que encienden y apagan cada tipo de pin.',
+  hitos: [
+    { icono: 'fa-solid fa-user', etiqueta: 'Personal', detalle: 'las tarjetas personales' },
+    { icono: 'fa-solid fa-building', etiqueta: 'Empresarial', detalle: 'las tarjetas de empresa' },
+    { icono: 'fa-solid fa-store', etiqueta: 'Locales', detalle: 'los negocios que escaneaste' },
+    { icono: 'fa-solid fa-circle-info', etiqueta: 'La ayuda de al lado', detalle: 'toca para mostrar u ocultar, y el tamaño del círculo es el número de toques' },
+  ],
+};
+
+const MAPA_PANEL: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-panel"]',
+  titulo: 'La columna de la izquierda',
+  bajada: 'Tres tarjetas apiladas sobre el mapa: locales, historial y las empresas que buscan talento. Se pliegan tocando su cabecera.',
+  hitos: [
+    { icono: 'fa-solid fa-store', etiqueta: 'Locales registrados', detalle: 'con su sector y su ciudad, filtrables por sector' },
+    { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Historial de toques', detalle: 'quién, dónde y cuándo te tocaron la tarjeta' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Empresas que buscan talento', detalle: 'las de tu última búsqueda, con su botón Ubicación' },
+    { icono: 'fa-solid fa-scroll', etiqueta: 'Si crece mucho', detalle: 'la columna tiene su propio scroll: el mapa sigue quieto detrás' },
+  ],
+};
+
+const MAPA_LOCALES: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-panel"]',
+  titulo: 'Locales: el botón de la diana',
+  bajada: 'Toca un local y el mapa vuela hasta él y lo deja marcado, sin cerrar la lista.',
+  hitos: [
+    { icono: 'fa-solid fa-location-crosshairs', etiqueta: 'Ver en el mapa', detalle: 'el botón de la diana, a la derecha de cada local' },
+    { icono: 'fa-solid fa-store', etiqueta: 'El pin del local', detalle: 'sale con el color de la capa Locales y su nombre al pasar por encima' },
+    { icono: 'fa-solid fa-filter', etiqueta: 'Filtro por sector', detalle: 'el desplegable de arriba deja solo los locales del sector que elijas' },
+  ],
+};
+
+const MAPA_HISTORIAL: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-historial"]',
+  titulo: 'Historial de toques',
+  bajada: 'Cada toque con su persona, su lugar y su hora. Toca uno y el mapa va a ese punto.',
+  hitos: [
+    { icono: 'fa-solid fa-toggle-on', etiqueta: 'Por fecha, NFC o QR', detalle: 'los filtros de dentro de la tarjeta' },
+    { icono: 'fa-solid fa-location-dot', etiqueta: 'Un toque, un viaje', detalle: 'al tocarlo, el mapa vuela al punto y abre su ficha' },
+    { icono: 'fa-solid fa-chevron-up', etiqueta: 'Se pliega', detalle: 'toca la cabecera y deja ver el mapa completo' },
+  ],
+};
+
+const MAPA_EMPLEO: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-empleo"]',
+  titulo: 'Empresas que buscan talento',
+  bajada: 'La tercera tarjeta de la columna trae tu última búsqueda de empleo con la ubicación de cada empresa.',
+  hitos: [
+    { icono: 'fa-solid fa-location-crosshairs', etiqueta: 'Botón Ubicación', detalle: 'pone la empresa en el mapa con su puntaje, su salario y lo que te falta' },
+    { icono: 'fa-solid fa-percent', etiqueta: 'El porcentaje es un botón', detalle: 'te lleva al gráfico de esa vacante' },
+    { icono: 'fa-solid fa-briefcase', etiqueta: 'Todas a la vez', detalle: 'el botón de ubicar todo pone los pines de las vacantes y ajusta el zoom para que quepan' },
+  ],
+};
+
+const MAPA_CIUDADES: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-ciudades"]',
+  titulo: 'Por ciudad, a la derecha',
+  bajada: 'Un resumen flotante con la barra de cada ciudad, arriba a la derecha del mapa.',
+  hitos: [
+    { icono: 'fa-solid fa-chart-bar', etiqueta: 'La barra', detalle: 'cuántas conexiones hay en cada ciudad, comparadas entre sí' },
+    { icono: 'fa-solid fa-hand-pointer', etiqueta: 'Tócala', detalle: 'el mapa salta a esa ciudad' },
+  ],
+};
+
+const MAPA_FOTOS: Paso = {
+  soloEnMapa: true,
+  destino: '[data-tour="mapa-fotos"]',
+  titulo: 'Fotos reales, en la esquina',
+  bajada: 'La pestaña de abajo a la derecha abre las fotos de Mapillary del punto que tengas en el mapa.',
+  hitos: [
+    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Pasa el cursor o tócala', detalle: 'el panel sube y muestra las imágenes del lugar' },
+    { icono: 'fa-solid fa-magnifying-glass-location', etiqueta: 'Sigue al punto', detalle: 'cambia el punto en el mapa y las fotos cambian con él' },
   ],
 };
 
@@ -179,7 +297,8 @@ const MAPA: Paso = {
     { icono: 'fa-solid fa-map-location-dot', etiqueta: 'Dónde queda la empresa de una vacante', detalle: 'Mapa de conexiones, botón Ubicación' },
     { icono: 'fa-solid fa-store', etiqueta: 'Los locales que registraste', detalle: 'Mapa de conexiones, panel Locales registrados' },
     { icono: 'fa-solid fa-clock-rotate-left', etiqueta: 'Cuándo y dónde te tocaron la tarjeta', detalle: 'Mapa de conexiones, panel Historial de toques' },
-    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Ver fotos del lugar', detalle: 'Mapa de conexiones, tira de fotos bajo el mapa' },
+    { icono: 'fa-solid fa-camera-retro', etiqueta: 'Ver fotos del lugar', detalle: 'Mapa de conexiones, pestaña de fotos en la esquina del mapa' },
+    { icono: 'fa-solid fa-city', etiqueta: 'Cuántas conexiones por ciudad', detalle: 'Mapa de conexiones, panel Por ciudad a la derecha' },
   ],
 };
 
@@ -200,6 +319,8 @@ export class PrimerIngresoComponent {
 
   readonly pasos = signal<Paso[]>([]);
   readonly marco = signal<{ top: number; left: number; ancho: number; alto: number } | null>(null);
+  /** El recuadro de la guía nunca tapa el elemento que está señalando. */
+  readonly caja = signal<{ top: number; left: number } | null>(null);
   readonly posicion = signal<Posicion>('centro');
 
   readonly paso = computed<Paso | undefined>(() => {
@@ -271,6 +392,11 @@ export class PrimerIngresoComponent {
     });
   }
 
+  /** ¿El tablero del mapa está en esta página? */
+  private enElMapa(): boolean {
+    return this.hayNavegador() && !!document.querySelector('[data-tour="mapa-tablero"]');
+  }
+
   private armar(): void {
     if (!this.hayNavegador()) {
       return;
@@ -278,10 +404,21 @@ export class PrimerIngresoComponent {
 
     const base =
       window.innerWidth >= ESCRITORIO
-        ? [BIENVENIDA, RIEL, PANEL, EMPLEO, MAPA_CONEXIONES, BUSQUEDA, ACCIONES, RIEL_PIE, YO, PUBLICAR, MAPA]
-        : [BIENVENIDA, TABBAR, PANEL, EMPLEO, MAPA_CONEXIONES, BUSQUEDA, ACCIONES, PUBLICAR, MAPA];
+        ? [
+            BIENVENIDA, RIEL, PANEL, EMPLEO, MAPA_CONEXIONES, MAPA_TABLERO, MAPA_METRICAS, MAPA_CAPAS,
+            MAPA_PANEL, MAPA_LOCALES, MAPA_HISTORIAL, MAPA_EMPLEO, MAPA_CIUDADES, MAPA_FOTOS,
+            BUSQUEDA, ACCIONES, RIEL_PIE, YO, PUBLICAR, MAPA,
+          ]
+        : [
+            BIENVENIDA, TABBAR, PANEL, EMPLEO, MAPA_CONEXIONES, MAPA_TABLERO, MAPA_METRICAS, MAPA_CAPAS,
+            MAPA_PANEL, MAPA_LOCALES, MAPA_HISTORIAL, MAPA_EMPLEO, MAPA_CIUDADES, MAPA_FOTOS,
+            BUSQUEDA, ACCIONES, PUBLICAR, MAPA,
+          ];
 
-    const disponibles = base.filter((paso) => !paso.destino || this.visible(paso.destino));
+    // Los pasos del tablero solo salen cuando el tablero está en pantalla.
+    const disponibles = base.filter(
+      (paso) => !paso.destino || (paso.soloEnMapa ? this.visible(paso.destino) : true),
+    );
     const actuales = this.pasos();
 
     if (actuales.length !== disponibles.length || actuales.some((p, i) => p.titulo !== disponibles[i].titulo)) {
@@ -310,6 +447,7 @@ export class PrimerIngresoComponent {
 
     if (!el) {
       this.marco.set(null);
+      this.caja.set(null);
       this.posicion.set('centro');
       return;
     }
@@ -322,6 +460,34 @@ export class PrimerIngresoComponent {
       alto: caja.height + 16,
     });
     this.posicion.set(this.lugar(caja));
+    this.caja.set(this.acomodar(caja));
+  }
+
+  /**
+   * Coloca el cartel junto al elemento señalado sin taparlo: si hay hueco a un
+   * lado lo usa; si el elemento ocupa toda la franja, el cartel baja a la esquina.
+   */
+  private acomodar(caja: DOMRect): { top: number; left: number } {
+    const ancho = window.innerWidth;
+    const alto = window.innerHeight;
+    const anchoCaja = Math.min(430, ancho - 32);
+    const margen = 28;
+    const altoCaja = Math.min(560, alto * 0.72);
+
+    const centrado = Math.min(Math.max(margen, (alto - altoCaja) / 2), alto - altoCaja - margen);
+
+    if (caja.right + margen + anchoCaja <= ancho) {
+      return { top: centrado, left: caja.right + margen };
+    }
+    if (caja.left - margen - anchoCaja >= 0) {
+      return { top: centrado, left: caja.left - margen - anchoCaja };
+    }
+    if (caja.bottom + margen + altoCaja <= alto) {
+      return { top: caja.bottom + margen, left: Math.max(margen, Math.min(caja.left, ancho - anchoCaja - margen)) };
+    }
+
+    // Sin hueco alrededor: esquina inferior, la zona que casi siempre queda libre.
+    return { top: Math.max(margen, alto - altoCaja - margen), left: Math.max(margen, ancho - anchoCaja - margen) };
   }
 
   private lugar(caja: DOMRect): Posicion {

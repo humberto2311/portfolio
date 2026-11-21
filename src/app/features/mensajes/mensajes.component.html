@@ -1,0 +1,97 @@
+<div class="mensajes">
+  <!-- Columna izquierda: el mismo panel de Mensajes, aquí a página completa. -->
+  <aside class="mensajes__lado" [class.mensajes__lado--oculto]="chatAbierto()">
+    <header class="lado__cabecera">
+      <div class="lado__titulo">
+        <h1>Mensajes</h1>
+        <span class="lado__cuenta">tu bandeja</span>
+      </div>
+      <div class="lado__acciones">
+        @if (svc.activeView() === 'nuevo' || svc.activeView() === 'chat') {
+          <!-- Volver a la bandeja sin cerrar Mensajes. -->
+          <button type="button" class="volver-btn" title="Volver a Mensajes" aria-label="Volver a Mensajes" (click)="volverALista()">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            <span>Volver</span>
+          </button>
+        } @else {
+          <button type="button" class="icono-btn" title="Nuevo mensaje" aria-label="Nuevo mensaje" (click)="svc.abrirVistaNueva()">
+            <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+          </button>
+        }
+        <button type="button" class="icono-btn" title="Salir de pantalla completa" aria-label="Salir de pantalla completa" (click)="salir()">
+          <i class="fa-solid fa-compress" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="lado__cuerpo">
+      @if (svc.activeView() === 'nuevo') {
+        <app-contacts-list [modoNuevo]="true" />
+      } @else {
+        <app-contacts-list />
+      }
+    </div>
+  </aside>
+
+  <!-- Columna derecha: la conversación, o el estado vacío de la referencia. -->
+  <section class="mensajes__hilo" [class.mensajes__hilo--abierto]="chatAbierto()">
+    @if (chatAbierto()) {
+      <header class="hilo__cabecera">
+        <button type="button" class="icono-btn" title="Volver a Mensajes" aria-label="Volver a Mensajes" (click)="volver()">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        </button>
+
+        @if (svc.activeContact(); as contacto) {
+          <div class="avatar-wrap" (click)="svc.abrirPerfilDe(contacto)" title="Ver perfil">
+            @if (contacto.avatar) {
+              <img [src]="contacto.avatar" [alt]="contacto.name" />
+            } @else {
+              <span class="avatar-iniciales">{{ iniciales(contacto.name) }}</span>
+            }
+            <span class="status-dot" [class.online]="contacto.status === 'online'" [class.ai]="contacto.isAi"></span>
+          </div>
+
+          <div class="hilo__datos">
+            <div class="hilo__nombre">
+              <h2>{{ contacto.name }}</h2>
+              @if (contacto.isAi) { <span class="ai-badge">IA</span> }
+            </div>
+            <p class="hilo__estado">
+              @if (contacto.isAi) {
+                {{ contacto.statusText }}
+              } @else if (contacto.status === 'online') {
+                Activo ahora
+              } @else {
+                {{ contacto.statusText || 'En línea' }}
+              }
+            </p>
+          </div>
+        }
+
+        <div class="hilo__acciones">
+          <button type="button" class="icono-btn" title="Llamada de voz" aria-label="Llamada de voz">
+            <i class="fa-solid fa-phone" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icono-btn" title="Videollamada" aria-label="Videollamada">
+            <i class="fa-solid fa-video" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icono-btn" title="Información de la conversación" aria-label="Información de la conversación"
+            (click)="svc.abrirPerfilDe(svc.activeContact()!)">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icono-btn" title="Cerrar la conversación" aria-label="Cerrar la conversación" (click)="volver()">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+      </header>
+
+      <app-chat-view />
+    } @else {
+      <div class="vacio">
+        <h2>Tus conversaciones</h2>
+        <p>Habla con las personas que conociste al tocar tu tarjeta NFC, comparte tu enlace o cuéntale a una empresa lo que buscas.</p>
+        <button type="button" class="vacio__cta" (click)="svc.abrirVistaNueva()">Buscar a alguien</button>
+      </div>
+    }
+  </section>
+</div>

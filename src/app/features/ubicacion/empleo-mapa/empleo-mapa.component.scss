@@ -28,11 +28,14 @@
     small { font-size: .64rem; color: var(--text-secondary, #94a3b8); }
   }
 
+  &__cabecera { padding: .1rem .1rem 0; }
+
   &__filtros {
     display: flex;
     flex-wrap: wrap;
     gap: .35rem;
     align-items: center;
+    padding: 0 .1rem;
 
     input[type='search'] {
       flex: 1 1 140px;
@@ -109,10 +112,13 @@
     display: grid;
     gap: .35rem;
     margin: 0;
-    padding: 0;
+    padding: .45rem;
     list-style: none;
-    max-height: 330px;
+    max-height: min(300px, 34vh);
     overflow-y: auto;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--border-soft, #1e293b) 80%, transparent);
+    background: color-mix(in srgb, #0f172a 55%, transparent);
 
     &::-webkit-scrollbar { width: 7px; }
     &::-webkit-scrollbar-thumb {

@@ -254,16 +254,10 @@
         align-items: center;
         gap: 0.55rem;
 
-        .chip-icon {
-          width: 1.9rem;
-          height: 1.9rem;
-          border-radius: 8px;
-          background: $accent-soft;
-          border: 1px solid $accent-border;
-          display: flex;
+        .card-marca {
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          color: $accent;
+          flex-shrink: 0;
         }
 
         .card-label {

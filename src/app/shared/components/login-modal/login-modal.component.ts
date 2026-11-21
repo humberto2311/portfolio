@@ -138,7 +138,9 @@ export class LoginModalComponent implements OnInit {
   }
 
   verificar() {
-    this.auth.verificarCodigo(this.codigo);
+    // verificarCodigo devuelve un Observable: sin subscribe la petición nunca salía
+    // y el botón se quedaba en "Verificando…".
+    this.auth.verificarCodigo(this.codigo).subscribe();
   }
 
   /** La caja de código solo acepta dígitos. */

@@ -5,7 +5,7 @@
   (mouseenter)="alEntrarRiel()"
   (mouseleave)="alSalirRiel($event)">
   <a class="rail__marca" routerLink="/app" [title]="'NFSocial'">
-    <app-logo [alto]="32"/>
+    <app-logo [alto]="32" [partes]="rail.colapsado() ? 'soloMonograma' : 'completo'" />
   </a>
 
   <ul class="rail__lista">

@@ -61,7 +61,9 @@
     <div>
       <h4>Contacto</h4>
       <ul class="contact-list">
-        <li><i class="fa-solid fa-envelope"></i> {{ perfil.contacto.email }}</li>
+          @if (perfil.contacto.email) {
+          <li><i class="fa-solid fa-envelope"></i> {{ perfil.contacto.email }}</li>
+          }
         <li><i class="fa-solid fa-location-dot"></i> {{ perfil.contacto.ubicacion }}</li>
         <li><i class="fa-brands fa-github"></i> {{ perfil.contacto.github }}</li>
       </ul>

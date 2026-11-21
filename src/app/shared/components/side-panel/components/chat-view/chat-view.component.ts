@@ -17,6 +17,13 @@ import { ConfirmationModalService } from '../../../../../core/services/confirmat
 import { ChatMessage } from '../../../../../core/models/chat.model';
 import { Contact } from '../../../../../core/models/contact.model';
 
+/** Mensajes seguidos del mismo remitente (una "pila" de burbujas). */
+interface GrupoMensajes {
+  clave: string;
+  mio: boolean;
+  mensajes: ChatMessage[];
+}
+
 @Component({
   selector: 'app-chat-view',
   standalone: true,
@@ -37,6 +44,120 @@ export class ChatViewComponent {
 
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
 
+  /** Mensaje cuyo timestamp y acciones están a la vista (hover o foco). */
+  readonly abiertoId = signal<string | null>(null);
+
+  /** Reacciones rápidas por mensaje (❤️ al doble tap). Solo en esta sesión. */
+  readonly reacciones = signal<Record<string, string>>({});
+
+  /** ¿Hay texto para enviar? Con texto, el corazón deja paso al botón de enviar. */
+  get textoListo(): boolean {
+    return this.message().trim().length > 0;
+  }
+
+  /** Clave estable por mensaje (los optimistas aún no tienen id). */
+  claveDe(msg: ChatMessage): string {
+    return String(msg.id ?? `${msg.time}-${msg.text}`);
+  }
+
+  reaccionDe(msg: ChatMessage): string | null {
+    return this.reacciones()[this.claveDe(msg)] ?? null;
+  }
+
+  /** Doble tap: pone o quita el ❤️ sobre la burbuja. */
+  alternarReaccion(msg: ChatMessage, evento: Event): void {
+    evento.preventDefault();
+    evento.stopPropagation();
+    const clave = this.claveDe(msg);
+    this.reacciones.update((mapa) => {
+      const copia = { ...mapa };
+      if (copia[clave]) delete copia[clave];
+      else copia[clave] = '❤️';
+      return copia;
+    });
+  }
+
+  iniciales(nombre: string | undefined): string {
+    if (!nombre) return '?';
+    const partes = nombre.trim().split(/\s+/);
+    if (partes.length === 1) return partes[0].charAt(0).toUpperCase();
+    return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
+  }
+
+  abrirCamara(campo?: HTMLTextAreaElement): void {
+    campo?.focus();
+  }
+
+  /** Un corazón "me gusta" como mensaje de una sola emoji. */
+  enviarLike(): void {
+    this.message.set('❤️');
+    this.send();
+  }
+
+  /** El textarea crece hasta 4 líneas y luego hace scroll. */
+  ajustarAlto(evento: Event): void {
+    const campo = evento.target as HTMLTextAreaElement;
+    campo.style.height = 'auto';
+    const maximo = 4 * 20 + 20;
+    campo.style.height = `${Math.min(campo.scrollHeight, maximo)}px`;
+  }
+
+  /** Separa los mensajes por día y, dentro de cada día, por remitente seguido. */
+  get grupos(): Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> {
+    const lista = this.messages;
+    const porDia: Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> = [];
+
+    for (const msg of lista) {
+      const fecha = this.fechaDe(msg);
+      const claveDia = fecha ? fecha.toDateString() : 'sin-fecha';
+      let dia = porDia[porDia.length - 1];
+      if (!dia || dia.clave !== claveDia) {
+        dia = { clave: claveDia, etiqueta: this.etiquetaDia(fecha), grupos: [] };
+        porDia.push(dia);
+      }
+
+      const mio = msg.sender === 'me';
+      let grupo = dia.grupos[dia.grupos.length - 1];
+      if (!grupo || grupo.mio !== mio) {
+        grupo = { clave: `${claveDia}-${dia.grupos.length}`, mio, mensajes: [] };
+        dia.grupos.push(grupo);
+      }
+      grupo.mensajes.push(msg);
+    }
+
+    return porDia;
+  }
+
+  /** Solo el último grupo de mensajes propios lleva la marca de "visto". */
+  ultimoDelHistorial(grupo: GrupoMensajes): boolean {
+    const dias = this.grupos;
+    const ultimoDia = dias[dias.length - 1];
+    const ultimoGrupo = ultimoDia?.grupos[ultimoDia.grupos.length - 1];
+    return ultimoGrupo?.clave === grupo.clave;
+  }
+
+  private fechaDe(msg: ChatMessage): Date | null {
+    const valor = (msg as any).createdAt as string | undefined;
+    if (!valor) return null;
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? null : fecha;
+  }
+
+  private etiquetaDia(fecha: Date | null): string {
+    if (!fecha) return '';
+    const hoy = new Date();
+    const ayer = new Date();
+    ayer.setDate(hoy.getDate() - 1);
+
+    const mismoDia = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+    if (mismoDia(fecha, hoy)) return 'HOY';
+    if (mismoDia(fecha, ayer)) return 'AYER';
+
+    return fecha
+      .toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })
+      .toUpperCase();
+  }
+
   /** Clave de la última carga: evita pedir dos veces la misma conversación. */
   private ultimaCarga = '';
 
@@ -45,6 +166,12 @@ export class ChatViewComponent {
       this.svc.chatHistories();
       this.svc.typing();
       queueMicrotask(() => this.scrollToBottom());
+    });
+
+    // Botón "ir al último mensaje" del panel.
+    effect(() => {
+      this.svc.scrollAlFinal();
+      untracked(() => queueMicrotask(() => this.scrollToBottom()));
     });
 
     effect(() => {
@@ -99,6 +226,9 @@ export class ChatViewComponent {
     // UI optimista
     this.svc.sendMessage(text);
     this.message.set('');
+    // Que el campo vuelva a su altura de una línea.
+    const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
+    if (campo) campo.style.height = 'auto';
     this.error.set(null);
     this.sending.set(true);
 

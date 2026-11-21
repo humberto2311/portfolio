@@ -19,54 +19,102 @@
     </p>
   }
 
-  @for (msg of messages; track trackMsg(msg, $index)) {
-    <div class="msg-row" [class.mine]="msg.sender === 'me'">
-      <div class="bubble"
-        [class.me]="msg.sender === 'me'"
-        [class.ai]="msg.sender === 'them' && svc.activeContact()?.isAi"
-        [class.them]="msg.sender === 'them' && !svc.activeContact()?.isAi"
-        [class.deleted]="msg.deleted">
+  <!-- Un grupo por día, como en Instagram: separador HOY / AYER / fecha. -->
+  @for (grupoDia of grupos; track grupoDia.clave) {
+    <p class="dia">{{ grupoDia.etiqueta }}</p>
 
-        @if (editingId() === msg.id) {
-          <textarea
-            class="edit-input"
-            [ngModel]="message()"
-            (ngModelChange)="message.set($event)"
-            (keydown)="onKeyDown($event)"
-            name="editMessage"></textarea>
-          <div class="edit-actions">
-            <button type="button" class="save" (click)="confirmEdit()">
-              <i class="fa-solid fa-check"></i>
-            </button>
-            <button type="button" class="cancel" (click)="cancelEdit()">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+    @for (grupo of grupoDia.grupos; track grupo.clave) {
+      <div class="msg-grupo" [class.msg-grupo--mine]="grupo.mio">
+        @for (msg of grupo.mensajes; track trackMsg(msg, $index); let ultimo = $last) {
+          <div
+            class="msg"
+            [class.msg--mine]="msg.sender === 'me'"
+            [class.msg--ai]="msg.sender === 'them' && svc.activeContact()?.isAi"
+            [class.msg--deleted]="msg.deleted"
+            [class.msg--abierto]="abiertoId() === claveDe(msg)"
+            (mouseenter)="abiertoId.set(claveDe(msg))"
+            (mouseleave)="abiertoId.set(null)"
+            (dblclick)="alternarReaccion(msg, $event)">
+
+            <!-- Avatar solo en el primer mensaje del grupo, alineado abajo. -->
+            @if (!grupo.mio && ultimo) {
+              <span class="msg-avatar" aria-hidden="true">
+                @if (svc.activeContact()?.avatar) {
+                  <img [src]="svc.activeContact()!.avatar!" [alt]="''" />
+                } @else {
+                  {{ iniciales(svc.activeContact()?.name) }}
+                }
+              </span>
+            } @else if (!grupo.mio) {
+              <span class="msg-avatar msg-avatar--hueco" aria-hidden="true"></span>
+            }
+
+            <div class="msg-col">
+              <div class="bubble">
+                @if (editingId() === msg.id) {
+                  <textarea
+                    class="edit-input"
+                    [ngModel]="message()"
+                    (ngModelChange)="message.set($event)"
+                    (keydown)="onKeyDown($event)"
+                    name="editMessage"></textarea>
+                  <div class="edit-actions">
+                    <button type="button" class="save" aria-label="Guardar cambios" (click)="confirmEdit()">
+                      <i class="fa-solid fa-check" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="cancel" aria-label="Cancelar edición" (click)="cancelEdit()">
+                      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                } @else {
+                  <span class="text">{{ msg.text }}</span>
+                }
+
+                <!-- Hora al pasar el ratón (o al tocar en móvil). -->
+                <span class="bubble__hora">{{ msg.time }}</span>
+              </div>
+
+              <!-- Reacción rápida (doble tap). -->
+              @if (reaccionDe(msg)) {
+                <span class="reaccion" [attr.aria-label]="'Reacción ' + reaccionDe(msg)">{{ reaccionDe(msg) }}</span>
+              }
+
+              @if (msg.edited && !msg.deleted) {
+                <span class="msg-edited">editado</span>
+              }
+            </div>
+
+            <!-- Editar / eliminar: aparecen al pasar el ratón, fuera de la burbuja. -->
+            @if (msg.sender === 'me' && msg.id && !msg.deleted && editingId() !== msg.id) {
+              <div class="msg-acciones">
+                @if (msg.canEdit) {
+                  <button type="button" class="accion" title="Editar" aria-label="Editar mensaje" (click)="startEdit(msg)">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                  </button>
+                }
+                <button type="button" class="accion accion--danger" title="Eliminar" aria-label="Eliminar mensaje" (click)="remove(msg)">
+                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+            }
           </div>
-        } @else {
-          <span class="text">{{ msg.text }}</span>
+        }
+
+        <!-- Visto: el avatar del otro bajo el último mensaje propio. -->
+        @if (grupo.mio && ultimoDelHistorial(grupo)) {
+          <div class="visto">
+            <span class="visto__avatar" aria-hidden="true">
+              @if (svc.activeContact()?.avatar) {
+                <img [src]="svc.activeContact()!.avatar!" alt="" />
+              } @else {
+                {{ iniciales(svc.activeContact()?.name) }}
+              }
+            </span>
+            <span class="visto__texto">Visto</span>
+          </div>
         }
       </div>
-
-      <div class="msg-meta">
-        <span class="msg-time">{{ msg.time }}</span>
-        @if (msg.edited && !msg.deleted) {
-          <span class="msg-edited">editado</span>
-        }
-      </div>
-
-      @if (msg.sender === 'me' && msg.id && !msg.deleted && editingId() !== msg.id) {
-        <div class="msg-actions">
-          @if (msg.canEdit) {
-            <button type="button" class="action" (click)="startEdit(msg)" title="Editar">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-          }
-          <button type="button" class="action danger" (click)="remove(msg)" title="Eliminar">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      }
-    </div>
+    }
   }
 
   @if (!cargando() && messages.length === 0) {
@@ -78,15 +126,23 @@
 
 @if (svc.typing()) {
   <div class="typing">
-    <span>{{ svc.typingName() }}</span> está escribiendo
-    <span class="dots"><span></span><span></span><span></span></span>
+    <span class="typing__avatar" aria-hidden="true">
+      @if (svc.activeContact()?.avatar) {
+        <img [src]="svc.activeContact()!.avatar!" alt="" />
+      } @else {
+        {{ iniciales(svc.activeContact()?.name) }}
+      }
+    </span>
+    <span class="typing__burbuja" aria-label="Escribiendo">
+      <span></span><span></span><span></span>
+    </span>
   </div>
 }
 @if (sending()) {
-  <div class="typing">enviando…</div>
+  <div class="typing typing--aviso">Enviando…</div>
 }
 @if (editingId()) {
-  <div class="typing">editando mensaje…</div>
+  <div class="typing typing--aviso">Editando mensaje…</div>
 }
 
 @if (error()) {
@@ -98,13 +154,47 @@
   </div>
 }
 
-<form class="input-area" (ngSubmit)="send()">
-  <input type="text" autocomplete="off"
-    [placeholder]="puedeEscribir ? 'Escribe un mensaje...' : 'No puedes escribir en esta conversación'"
-    [disabled]="!puedeEscribir || sending()"
-    [ngModel]="message()" (ngModelChange)="message.set($event)"
-    (keydown)="onKeyDown($event)" name="message" />
-  <button type="submit" [disabled]="!puedeEscribir || sending()">
-    <i class="fa-solid" [class.fa-paper-plane]="!editingId()" [class.fa-check]="editingId()"></i>
-  </button>
+<!-- Input píldora: cámara a la izquierda; a la derecha, enviar o el corazón. -->
+<form class="composer" (ngSubmit)="send()">
+  <div class="composer__pildora">
+    @if (puedeEscribir) {
+      <button type="button" class="composer__icono" title="Cámara" aria-label="Adjuntar foto o vídeo" (click)="abrirCamara(campoMensaje)">
+        <i class="fa-solid fa-camera" aria-hidden="true"></i>
+      </button>
+    }
+
+    <textarea
+      #campoMensaje
+      class="composer__campo"
+      rows="1"
+      name="message"
+      autocomplete="off"
+      [placeholder]="puedeEscribir ? 'Envía un mensaje...' : 'No puedes escribir en esta conversación'"
+      [disabled]="!puedeEscribir || sending()"
+      [ngModel]="message()"
+      (ngModelChange)="message.set($event)"
+      (input)="ajustarAlto($event)"
+      (keydown)="onKeyDown($event)"></textarea>
+
+    @if (textoListo) {
+      <button type="submit" class="composer__enviar" [disabled]="sending()" aria-label="Enviar mensaje" title="Enviar">
+        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+      </button>
+    } @else {
+      <div class="composer__extras">
+        <button type="button" class="composer__icono" title="Grabar audio" aria-label="Grabar un mensaje de voz">
+          <i class="fa-solid fa-microphone" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="composer__icono" title="Enviar imagen" aria-label="Enviar una imagen">
+          <i class="fa-regular fa-image" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="composer__icono" title="Stickers" aria-label="Enviar un sticker">
+          <i class="fa-regular fa-face-smile" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="composer__icono" title="Me gusta" aria-label="Enviar un me gusta" (click)="enviarLike()">
+          <i class="fa-regular fa-heart" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+  </div>
 </form>

@@ -1,18 +1,47 @@
+@import '../../../../../shared/styles/variables';
+
+/**
+ * Chat estilo DM de Instagram.
+ * Modo claro, móvil first. Los tokens viven en :host para reutilizarlos.
+ */
+/*
+ * El chat toma TODOS sus colores de los tokens de la app (--accent, --bg-*),
+ * así que sigue cualquier tonalidad o diseño que el usuario elija en Ajustes.
+ */
 :host {
+  --ig-fondo: var(--bg-sidebar);
+  --ig-burbuja-otro: var(--bg-elevated);
+  --ig-texto-otro: var(--text-primary);
+  --ig-texto-suave: var(--text-muted);
+  --ig-borde: var(--bg-border);
+  --ig-gradiente: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    color-mix(in srgb, var(--accent) 65%, var(--accent-alt, var(--accent))) 55%,
+    var(--accent-alt, var(--accent-strong)) 100%
+  );
+  --ig-radio: 18px;
+  --ig-radio-cola: 4px;
+  --ig-tipografia: var(--font-main, system-ui, -apple-system, 'Segoe UI', sans-serif);
+
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  background: var(--ig-fondo);
+  color: var(--ig-texto-otro);
+  font-family: var(--ig-tipografia);
 }
 
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 14px 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--bg-main);
+  gap: 2px;
+  background: var(--ig-fondo);
+  overscroll-behavior: contain;
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -23,299 +52,459 @@
   }
 }
 
-.msg-row {
+/* ---------- Separador de día ---------- */
+
+.dia {
+  margin: 18px 0 12px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ig-texto-suave);
+  text-transform: uppercase;
+}
+
+/* ---------- Grupos y burbujas ---------- */
+
+.msg-grupo {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  position: relative;
+  gap: 2px;
+  margin-bottom: 10px;
 
-  &.mine {
+  &--mine {
     align-items: flex-end;
   }
+}
 
-  &:hover .msg-actions {
-    opacity: 1;
-    pointer-events: auto;
+.msg {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.msg-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ig-burbuja-otro);
+  color: var(--ig-texto-otro);
+  font-size: 10px;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
+
+  &--hueco {
+    background: transparent;
+  }
+}
+
+.msg-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 75%;
+  min-width: 0;
+}
+
+.msg--mine .msg-col {
+  align-items: flex-end;
 }
 
 .bubble {
-  max-width: 85%;
-  padding: 8px 14px;
-  border-radius: 16px;
-  font-size: 13px;
+  position: relative;
+  max-width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--ig-radio);
+  font-size: 15px;
   line-height: 1.4;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   word-break: break-word;
-
-  &.me {
-    background: var(--accent-cyan);
-    color: var(--on-accent);
-    border-bottom-right-radius: 4px;
-  }
-
-  &.them {
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--bg-border);
-    border-bottom-left-radius: 4px;
-  }
-
-  &.ai {
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--text-primary);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    border-bottom-left-radius: 4px;
-  }
-
-  &.deleted {
-    background: color-mix(in srgb, var(--bg-elevated) 90%, transparent) !important;
-    color: var(--text-secondary) !important;
-    font-style: italic;
-    border: 1px dashed color-mix(in srgb, var(--text-muted) 40%, transparent) !important;
-    box-shadow: none;
-  }
-
-  .text {
-    white-space: pre-wrap;
-  }
-
-  .edit-input {
-    width: 100%;
-    min-width: 220px;
-    background: var(--bg-input);
-    border: 1px solid var(--bg-border);
-    border-radius: 8px;
-    padding: 6px 10px;
-    color: var(--text-primary);
-    font-size: 13px;
-    outline: none;
-    resize: vertical;
-    min-height: 40px;
-
-    &:focus {
-      border-color: var(--accent-cyan);
-    }
-  }
-
-  .edit-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 6px;
-    justify-content: flex-end;
-
-    button {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      transition: all 0.2s;
-
-      &.save {
-        background: var(--success);
-        color: var(--on-accent);
-
-        &:hover {
-          background: color-mix(in srgb, var(--success) 85%, #000);
-        }
-      }
-
-      &.cancel {
-        background: var(--bg-border);
-        color: var(--text-primary);
-
-        &:hover {
-          background: var(--bg-hover);
-        }
-      }
-    }
-  }
+  white-space: pre-wrap;
 }
 
-.msg-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  padding: 0 4px;
+/* Mensaje del otro: gris claro, cola en la esquina inferior izquierda. */
+.msg:not(.msg--mine) .bubble {
+  background: var(--ig-burbuja-otro);
+  color: var(--ig-texto-otro);
+  border-bottom-left-radius: var(--ig-radio-cola);
 }
 
-.msg-time {
-  font-size: 9px;
-  color: var(--text-secondary);
+/* Mi mensaje: gradiente, texto blanco, cola en la esquina inferior derecha. */
+.msg--mine .bubble {
+  background: var(--ig-gradiente);
+  color: var(--on-accent);
+  border-bottom-right-radius: var(--ig-radio-cola);
+}
+
+/* Mensajes de IA: se distinguen por el borde, no por el color de texto. */
+.msg--ai .bubble {
+  background: var(--accent-soft);
+  color: var(--ig-texto-otro);
+  border: 1px solid var(--accent-border);
+}
+
+.msg--deleted .bubble {
+  background: transparent !important;
+  color: var(--ig-texto-suave) !important;
+  border: 1px dashed var(--ig-borde);
+  font-style: italic;
+}
+
+/* Timestamp: aparece al pasar el ratón o al tocar el mensaje. */
+.bubble__hora {
+  position: absolute;
+  bottom: 100%;
+  right: 4px;
+  margin-bottom: 2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-primary) 78%, transparent);
+  color: var(--bg-card);
+  font-size: 10px;
+  line-height: 1.6;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+
+.msg:hover .bubble__hora,
+.msg--abierto .bubble__hora {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Reacción rápida (doble tap) ---------- */
+
+.reaccion {
+  margin-top: -8px;
+  margin-right: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--ig-borde);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+  line-height: 1.2;
+  animation: reaccion-entra 0.18s ease;
+}
+
+@keyframes reaccion-entra {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 
 .msg-edited {
-  font-size: 9px;
-  color: var(--text-secondary);
+  margin: 2px 4px 0;
+  font-size: 10px;
+  color: var(--ig-texto-suave);
   font-style: italic;
 }
 
-.msg-actions {
-  position: absolute;
-  top: -8px;
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
+/* ---------- "Visto" con el avatar del otro ---------- */
 
-  .action {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 10px;
-    border: 1px solid var(--bg-border);
-    transition: all 0.15s;
-
-    &:hover {
-      background: var(--accent-cyan);
-      color: var(--on-accent);
-    }
-
-    &.danger:hover {
-      background: var(--danger);
-      border-color: var(--danger);
-      color: var(--on-accent);
-    }
-  }
-}
-
-.msg-row.mine .msg-actions {
-  right: 0;
-}
-
-.msg-row:not(.mine) .msg-actions {
-  left: 0;
-}
-
-.typing {
-  padding: 8px 20px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-style: italic;
+.visto {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: var(--bg-input);
-  border-top: 1px solid var(--bg-border);
+  gap: 6px;
+  margin-top: 2px;
+  padding-right: 2px;
+}
 
-  span:first-child {
-    font-weight: 600;
-    color: var(--text-primary);
+.visto__avatar {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ig-burbuja-otro);
+  font-size: 7px;
+  font-weight: 700;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
+}
 
-  .dots {
-    display: inline-flex;
-    gap: 3px;
-    margin-left: 4px;
+.visto__texto {
+  font-size: 11px;
+  color: var(--ig-texto-suave);
+}
 
-    span {
-      width: 6px;
-      height: 6px;
-      background: var(--text-secondary);
-      border-radius: 50%;
-      animation: bounce 1s infinite;
+/* ---------- Editar / eliminar ---------- */
 
-      &:nth-child(2) {
-        animation-delay: 0.2s;
-      }
-      &:nth-child(3) {
-        animation-delay: 0.4s;
-      }
+.msg-acciones {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .accion {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: var(--ig-burbuja-otro);
+    color: var(--ig-texto-otro);
+    font-size: 11px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bg-hover);
+    }
+
+    &--danger:hover {
+      background: color-mix(in srgb, var(--danger) 18%, transparent);
+      color: var(--danger);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
     }
   }
 }
 
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
+.msg:hover .msg-acciones,
+.msg--abierto .msg-acciones {
+  opacity: 1;
+}
+
+/* ---------- Edición en línea ---------- */
+
+.edit-input {
+  width: 100%;
+  min-width: 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--ig-borde);
+  border-radius: 12px;
+  background: var(--bg-input);
+  color: var(--ig-texto-otro);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
   }
 }
 
-.input-area {
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    font-size: 11px;
+    cursor: pointer;
+
+    &.save {
+      background: var(--accent-strong);
+      color: var(--on-accent);
+    }
+
+    &.cancel {
+      background: color-mix(in srgb, var(--bg-card) 30%, transparent);
+      color: var(--text-primary);
+    }
+  }
+}
+
+/* ---------- Escribiendo: 3 puntos rebotando ---------- */
+
+.typing {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 12px calc(12px + var(--safe-bottom));
-  background: var(--bg-input);
-  border-top: 1px solid var(--bg-border);
+  padding: 4px 16px 10px;
+  background: var(--ig-fondo);
+}
 
-  input {
-    flex: 1;
-    background: var(--bg-input);
-    border: 1px solid var(--bg-border);
-    border-radius: 12px;
-    padding: 10px 16px;
-    color: var(--text-primary);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
+.typing__avatar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ig-burbuja-otro);
+  font-size: 9px;
+  font-weight: 700;
 
-    &::placeholder {
-      color: var(--text-secondary);
-    }
-    &:focus {
-      border-color: var(--accent-cyan);
-    }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.typing__burbuja {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: var(--ig-burbuja-otro);
+
+  span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ig-texto-suave);
+    animation: rebote 1.1s infinite ease-in-out;
+
+    &:nth-child(2) { animation-delay: 0.15s; }
+    &:nth-child(3) { animation-delay: 0.3s; }
+  }
+}
+
+.typing--aviso {
+  padding-left: 16px;
+  font-size: 11px;
+  color: var(--ig-texto-suave);
+}
+
+@keyframes rebote {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.55; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ---------- Composer píldora ---------- */
+
+.composer {
+  padding: 8px 12px calc(10px + var(--safe-bottom));
+  background: var(--ig-fondo);
+  border-top: 1px solid var(--ig-borde);
+}
+
+.composer__pildora {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: 22px;
+  background: var(--ig-burbuja-otro);
+}
+
+.composer__campo {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 96px;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--ig-texto-otro);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 20px;
+  resize: none;
+  overflow-y: auto;
+  outline: none;
+
+  &::placeholder {
+    color: var(--ig-texto-suave);
   }
 
-  button {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    border: none;
-    background: var(--accent-cyan);
-    color: var(--on-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
-
-    &:hover {
-      background: var(--accent-strong);
-      transform: translateY(-1px);
-    }
-    &:active {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-  }
-
-  input:disabled {
-    opacity: 0.6;
+  &:disabled {
     cursor: not-allowed;
   }
 }
 
+.composer__extras {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.composer__icono {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ig-texto-otro);
+  font-size: 17px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-hover);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/* Con texto, el corazón desaparece y entra el botón de enviar. */
+.composer__enviar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent);
+  font-size: 17px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-hover);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/* ---------- Estados ---------- */
+
 .chat-status {
+  margin: 12px 0;
   text-align: center;
   font-size: 12px;
-  color: var(--text-secondary);
-  margin: 8px 0;
+  color: var(--ig-texto-suave);
 
   &.closed {
     color: var(--danger);
@@ -323,13 +512,13 @@
 }
 
 .solicitud {
-  text-align: center;
   padding: 14px;
   border-radius: 16px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  color: var(--text-primary);
-  font-size: 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--ig-texto-otro);
+  font-size: 13px;
+  text-align: center;
 
   p {
     margin: 0 0 10px;
@@ -342,29 +531,21 @@
 
     button {
       padding: 7px 16px;
-      border-radius: 10px;
       border: none;
-      font-size: 12px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
 
       &.accept {
-        background: var(--accent-cyan);
+        background: var(--accent);
         color: var(--on-accent);
-
-        &:hover {
-          background: var(--accent-strong);
-        }
       }
 
       &.deny {
-        background: var(--bg-border);
-        color: var(--text-primary);
-
-        &:hover {
-          background: var(--bg-hover);
-        }
+        background: var(--bg-hover);
+        color: var(--ig-texto-otro);
       }
     }
   }
@@ -376,36 +557,54 @@
   justify-content: space-between;
   gap: 10px;
   padding: 10px 16px;
-  font-size: 12px;
-  color: var(--danger);
+  border-top: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
   background: color-mix(in srgb, var(--danger) 12%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+  color: var(--danger);
+  font-size: 12px;
 
   button {
-    background: transparent;
-    border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
-    color: var(--danger);
-    border-radius: 8px;
+    flex-shrink: 0;
     padding: 4px 10px;
+    border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--danger);
+    font-family: inherit;
     font-size: 11px;
     cursor: pointer;
-    flex-shrink: 0;
 
     &:hover {
-      background: color-mix(in srgb, var(--danger) 20%, transparent);
+      background: color-mix(in srgb, var(--danger) 18%, transparent);
     }
   }
 }
+
 .chat-etiqueta {
-  font-size: .55rem;
-  font-weight: 800;
-  letter-spacing: .05em;
-  text-transform: uppercase;
   padding: 2px 6px;
   border-radius: 999px;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, .16);
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
 
-  &--empresa { color: #c084fc; background: rgba(168, 85, 247, .18); }
-  &--grupo { color: #22c55e; background: rgba(34, 197, 94, .18); }
+  &--empresa { color: var(--accent-alt, var(--accent)); background: var(--accent-soft); }
+  &--grupo { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); }
+}
+
+/* ---------- Desktop: burbujas algo más estrechas y composer con más aire ---------- */
+
+@media (min-width: $bp-desktop) {
+  .msg-col {
+    max-width: 60%;
+  }
+
+  .messages {
+    padding: 18px 24px 10px;
+  }
+
+  .composer {
+    padding: 10px 16px 14px;
+  }
 }

@@ -177,3 +177,84 @@
     white-space: nowrap;
   }
 }
+
+/* ---------- Modo riel: la campana es una fila más del menú lateral ---------- */
+
+.notif-wrapper--riel {
+  width: 100%;
+}
+
+.notif-wrapper--riel .rail-notif {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &.activo {
+    background: $bg-hover;
+    color: $text-light;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.notif-wrapper--riel .rail-notif__icon {
+  width: 20px;
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.notif-wrapper--riel .rail-notif__texto {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notif-wrapper--riel .rail-notif__badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: $danger;
+  color: #fff;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* El panel de notificaciones vuela al costado del riel cuando viene del menú lateral. */
+.notif-wrapper--riel .panel {
+  position: fixed;
+  top: 96px;
+  left: calc(#{$rail-mini} + 12px);
+  right: auto;
+  z-index: 960;
+}
+
+/* En miniatura el riel solo enseña iconos. */
+:host-context(.rail--mini) .rail-notif__texto {
+  display: none;
+}
+
+:host-context(.rail--mini) .rail-notif {
+  justify-content: center;
+  padding: 0;
+}

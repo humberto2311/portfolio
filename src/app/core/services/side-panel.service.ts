@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Injectable, computed, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
@@ -27,6 +27,59 @@ export class SidePanelService {
   private empresa = inject(EmpresaService);
 
   readonly isOpen = signal(false);
+
+  /** El modal "Importar hoja de vida" está abierto (vive fuera del panel). */
+  readonly vistaCvAbierta = signal(false);
+
+  /** El buscador de la bandeja nace plegado: la lupa de la cabecera lo abre. */
+  readonly buscadorAbierto = signal(false);
+
+  /** Hilo de búsqueda: se limpia al plegar, para que no quede un filtro fantasma. */
+  readonly busqueda = signal('');
+
+  alternarBuscador(): void {
+    const abriendo = !this.buscadorAbierto();
+    this.buscadorAbierto.set(abriendo);
+    if (!abriendo) this.busqueda.set('');
+  }
+
+  /**
+   * Vista "Nuevo mensaje" (el lápiz de la cabecera, como en Instagram): título,
+   * buscador integrado y la lista de contactos. Al elegir uno se abre su chat.
+   */
+  readonly vistaNueva = signal(false);
+
+  abrirVistaNueva(): void {
+    this.vistaNueva.set(true);
+    this.activeView.set('nuevo');
+    this.activeContact.set(null);
+    this.isOpen.set(true);
+    this.busqueda.set('');
+    this.cargarConversaciones();
+  }
+
+  /** Cancelar / volver desde "Nuevo mensaje" a la bandeja. */
+  cerrarVistaNueva(): void {
+    this.vistaNueva.set(false);
+    this.busqueda.set('');
+    this.activeView.set('contacts');
+  }
+
+  /** Chips de destinatarios elegidos en "Nuevo mensaje" (aún no usados por el backend). */
+  readonly destinatarios = signal<Array<{ id: string; name: string; avatar?: string }>>([]);
+
+  alternarDestinatario(persona: { id: string; name: string; avatar?: string }): void {
+    this.destinatarios.update((lista) =>
+      lista.some((p) => p.id === persona.id)
+        ? lista.filter((p) => p.id !== persona.id)
+        : [...lista, persona],
+    );
+  }
+
+  quitarDestinatario(id: string): void {
+    this.destinatarios.update((lista) => lista.filter((p) => p.id !== id));
+  }
+
   readonly activeView = signal<ActiveView>('contacts');
   readonly activeContact = signal<Contact | null>(null);
   readonly typing = signal(false);
@@ -47,27 +100,142 @@ export class SidePanelService {
     return id && id !== '0' ? String(id) : '';
   }
 
+  /** Conversaciones con algún mensaje: no cuentan las solicitudes pendientes ni los rechazos. */
+  readonly chatsActivos = computed(() =>
+    this.contacts().filter((c) => !c.esSolicitud && c.estado !== 'RECHAZADA'),
+  );
+
+  /** Solicitudes de chat sin aceptar (se muestran en la pastilla para que no se pierdan). */
+  readonly solicitudes = computed(() =>
+    this.contacts().filter((c) => c.esSolicitud && c.estado !== 'RECHAZADA' && c.estado !== 'ACEPTADA'),
+  );
+
+  /** Cuántas van sin abrir: el badge de la pastilla de Mensajes. */
+  readonly sinLeer = computed(() =>
+    this.contacts().filter((c) => !c.esSolicitud && c.estado !== 'RECHAZADA' && c.leido === false).length,
+  );
+
+  /** Avatares de las últimas conversaciones, para la pastilla (estilo Instagram). */
+  readonly ultimosAvatares = computed(() =>
+    this.chatsActivos()
+      .slice(0, 3)
+      .map((c) => ({ id: c.id, nombre: c.name, avatar: c.avatar })),
+  );
+
+  /**
+   * Cómo se ve el panel cuando está abierto:
+   * - 'ventana': tarjeta flotante abajo a la derecha, la pastilla deja su sitio.
+   * - 'pantalla': ocupa todo el alto (lo pide el usuario con ⤢ o en móvil).
+   */
+  readonly modoVentana = signal(false);
+
+  alternarModoVentana(): void {
+    this.modoVentana.update((v) => !v);
+  }
+
+  /**
+   * La pastilla de Mensajes no tiene botón de ocultar: siempre está, salvo en
+   * modo empresa (ahí vive dentro de la barra de la empresa).
+   */
+  pastillaVisible(enEmpresa: boolean): boolean {
+    return !enEmpresa;
+  }
+
+  /** Borra la marca antigua (versiones previas) que escondía la pastilla entre recargas. */
+  limpiarPreferenciaAntigua(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      localStorage.removeItem('nfc-pastilla-mensajes');
+    } catch {
+      /* modo privado: nada que limpiar */
+    }
+  }
+
+  private leerPreferencia(clave: string): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    try {
+      return localStorage.getItem(clave);
+    } catch {
+      return null;
+    }
+  }
+
+  private guardarPreferencia(clave: string, valor: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      localStorage.setItem(clave, valor);
+    } catch {
+      /* modo privado o cuota llena: no pasa nada */
+    }
+  }
+
+  /**
+   * true si el modal de importar CV está abierto. NO depende de que el panel de
+   * Mensajes esté abierto: el modal vive fuera del panel desde que se movió.
+   */
+  importandoCv(): boolean {
+    return this.vistaCvAbierta();
+  }
+
+  /** true si el panel está abierto justo en la vista de contactos. */
+  enContactos(): boolean {
+    return this.isOpen() && this.activeView() === 'contacts';
+  }
+
+  /** Llevar la conversación al fondo cada vez que se abre. */
+  readonly scrollAlFinal = signal(0);
+
+  /**
+   * Botón de Mensajes de la barra: abre la bandeja o la cierra si ya estaba
+   * abierta. Siempre vuelve a la lista de conversaciones (nunca deja el panel
+   * en la vista de PDF, que era lo que hacía que "Mensajes" pareciera no abrir nada).
+   */
+  alternarMensajes(): void {
+    if (this.enContactos()) {
+      this.close();
+      return;
+    }
+    this.openContacts();
+  }
+
+  /** Dentro de un chat: lleva el hilo al último mensaje (si no, se queda arriba). */
+  irAlFinal(): void {
+    this.scrollAlFinal.update((n) => n + 1);
+  }
+
   openContacts(): void {
+    this.buscadorAbierto.set(false);
+    this.vistaNueva.set(false);
+    this.busqueda.set('');
     this.activeView.set('contacts');
     this.activeContact.set(null);
     this.isOpen.set(true);
     this.cargarConversaciones();
   }
 
+  /** Importar hoja de vida: ahora es un modal, no una vista del panel de Mensajes. */
   openPdf(): void {
-    this.activeView.set('pdf');
+    this.isOpen.set(false);
     this.activeContact.set(null);
-    this.isOpen.set(true);
+    this.vistaCvAbierta.set(true);
+  }
+
+  cerrarPdf(): void {
+    this.vistaCvAbierta.set(false);
+    this.activeView.set('contacts');
   }
 
   openChat(contact: Contact): void {
+    this.buscadorAbierto.set(false);
+    this.vistaNueva.set(false);
+    this.busqueda.set('');
     this.activeView.set('chat');
     const definitivo = this.preservarConversacion(contact);
     this.upsertContact(definitivo);
     this.activeContact.set(definitivo);
 
     this.contacts.update(list =>
-      list.map(c => (c.id === definitivo.id ? { ...c, unread: 0 } : c))
+      list.map(c => (c.id === definitivo.id ? { ...c, unread: 0, leido: true } : c))
     );
     this.isOpen.set(true);
 
@@ -90,6 +258,7 @@ export class SidePanelService {
 
   close(): void {
     this.isOpen.set(false);
+    this.vistaCvAbierta.set(false);
   }
 
   /**

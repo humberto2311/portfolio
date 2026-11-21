@@ -6,6 +6,7 @@ import {
   OnInit,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -31,6 +32,9 @@ interface SeguidorVm {
   styleUrls: ['./notificaciones.component.scss'],
 })
 export class NotificacionesComponent implements OnInit, OnDestroy {
+  /** 'barra' (icono suelto) o 'riel' (fila del menú lateral). */
+  readonly modo = input<'barra' | 'riel'>('barra');
+
   private shareService = inject(ShareService);
   private connectionService = inject(ConnectionService);
   private toast = inject(ToastService);

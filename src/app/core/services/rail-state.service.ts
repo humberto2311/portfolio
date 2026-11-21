@@ -6,21 +6,38 @@ function hayAlmacenamiento(): boolean {
   return typeof localStorage !== 'undefined';
 }
 
+/**
+ * El riel arranca en miniatura y se abre al acercar el ratón (estilo Instagram).
+ * El hover NO toca localStorage: solo el botón de plegar guarda la preferencia.
+ */
 @Injectable({ providedIn: 'root' })
 export class RailStateService {
-  readonly colapsado = signal(
-    hayAlmacenamiento() ? localStorage.getItem(CLAVE) === '1' : this.pantallaEstrecha(),
-  );
+  readonly colapsado = signal<boolean>(true);
 
-  private pantallaEstrecha(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth < 1180;
+  /** Abre el riel (hover o clic en la hamburguesa). */
+  expandir(): void {
+    if (!this.colapsado()) return;
+    this.colapsado.set(false);
+  }
+
+  /** Vuelve a la miniatura al alejar el ratón. */
+  contraer(): void {
+    if (this.colapsado()) return;
+    this.colapsado.set(true);
   }
 
   alternar(): void {
     const siguiente = !this.colapsado();
     this.colapsado.set(siguiente);
-    if (hayAlmacenamiento()) {
-      localStorage.setItem(CLAVE, siguiente ? '1' : '0');
+    this.guardar(siguiente);
+  }
+
+  private guardar(colapsado: boolean): void {
+    if (!hayAlmacenamiento()) return;
+    try {
+      localStorage.setItem(CLAVE, colapsado ? '1' : '0');
+    } catch {
+      /* modo privado o cuota llena: no pasa nada */
     }
   }
 }

@@ -1,4 +1,4 @@
-export type ActiveView = 'contacts' | 'chat' | 'pdf';
+export type ActiveView = 'contacts' | 'chat' | 'nuevo' | 'pdf';
 
 export type EstadoConversacion = 'PENDIENTE' | 'ACEPTADA' | 'RECHAZADA' | 'REPORTADA';
 
@@ -11,6 +11,8 @@ export interface Contact {
   lastMsg: string;
   time: string;
   unread: number;
+  /** Lo pone en false cualquier chat con algo nuevo sin ver (backend); el badge vive de aquí. */
+  leido?: boolean;
   isAi?: boolean;
   responses?: string[];
   fotoUrl?: string;

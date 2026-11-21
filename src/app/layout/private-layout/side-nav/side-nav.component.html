@@ -1,20 +1,47 @@
-<nav class="rail" [class.rail--mini]="rail.colapsado()" aria-label="Navegación principal">
+<nav
+  class="rail"
+  [class.rail--mini]="rail.colapsado()"
+  aria-label="Navegación principal"
+  (mouseenter)="alEntrarRiel()"
+  (mouseleave)="alSalirRiel($event)">
   <a class="rail__marca" routerLink="/app" [title]="'NFSocial'">
-    <app-logo [nombre]="!rail.colapsado()" [alto]="40"/>
+    <app-logo [alto]="32"/>
   </a>
 
   <ul class="rail__lista">
     @for (item of navegacion; track item.label) {
       <li>
-        @if (item.accion === 'mensajes') {
-          <button type="button" class="rail__item" [class.activo]="mensajes.isOpen()" [title]="item.label" (click)="abrirMensajes()">
-            <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
-            <span class="rail__etiqueta">{{ item.label }}</span>
-          </button>
+        @if (item.grupo) {
+          <div class="rail__grupo" [class.rail__grupo--abierto]="grupoAbierto() === item.grupo">
+            <button
+              type="button"
+              class="rail__item"
+              [class.activo]="grupoAbierto() === item.grupo"
+              [attr.data-tip]="item.label"
+              [attr.aria-expanded]="grupoAbierto() === item.grupo"
+              (click)="alternarGrupo(item.grupo)">
+              <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+              <span class="rail__etiqueta">{{ item.label }}</span>
+              <i class="rail__grupo-flecha fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </button>
+
+            @if (grupoAbierto() === item.grupo) {
+              <ul class="rail__submenu">
+                @for (hijo of hijos(item.grupo); track hijo.label) {
+                  <li>
+                    <a class="rail__subitem" [routerLink]="hijo.ruta" routerLinkActive="activo" [attr.data-tip]="hijo.label" (click)="cerrarGrupo()">
+                      <i [class]="hijo.icon" aria-hidden="true"></i>
+                      <span class="rail__etiqueta">{{ hijo.label }}</span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         } @else {
           <a
             class="rail__item"
-            [title]="item.label"
+            [attr.data-tip]="item.label"
             [routerLink]="item.ruta"
             routerLinkActive="activo"
             [routerLinkActiveOptions]="{ exact: !!item.exacto }">
@@ -24,7 +51,71 @@
         }
       </li>
     }
+
+    <!-- Importar hoja de vida: cierra el menú, justo debajo de Proyectos. -->
+    @if (!empresa.enModoEmpresa()) {
+      <li>
+        <button
+          type="button"
+          class="rail__item"
+          [class.activo]="mensajes.importandoCv()"
+          data-tip="Importar hoja de vida"
+          (click)="importarCv()">
+          <i class="rail__icon fa-solid fa-file-arrow-up" aria-hidden="true"></i>
+          <span class="rail__etiqueta">Importar hoja de vida</span>
+        </button>
+      </li>
+    }
   </ul>
+
+  <div class="rail__empuje"></div>
+
+  <!-- "Más": como en Instagram, lo que no cabe en el riel. -->
+  <div class="rail__mas" [class.rail__mas--abierto]="masAbierto()">
+    <button type="button" class="rail__item" [class.activo]="masAbierto()" data-tip="Más" (click)="alternarMas()">
+      <i class="rail__icon fa-solid fa-bars" aria-hidden="true"></i>
+      <span class="rail__etiqueta">Más</span>
+      <!-- Aviso de conversaciones sin abrir, para que esconder la pastilla no oculte el aviso. -->
+      @if (mensajes.sinLeer() > 0) {
+        <span class="rail__punto" aria-hidden="true"></span>
+      }
+    </button>
+
+    @if (masAbierto()) {
+      <div class="rail__hoja" role="menu" aria-label="Más opciones">
+        <ul class="rail__hoja-lista">
+          @for (extra of mas; track extra.label) {
+            <li>
+              @if (extra.accion === 'guia') {
+                <button type="button" class="rail__hoja-item rail__hoja-item--guia" (click)="abrirGuia()">
+                  <i [class]="extra.icon" aria-hidden="true"></i>
+                  <span>{{ extra.label }}</span>
+                </button>
+              } @else {
+                <a class="rail__hoja-item" [routerLink]="extra.ruta" routerLinkActive="activo" (click)="cerrarMas()">
+                  <i [class]="extra.icon" aria-hidden="true"></i>
+                  <span>{{ extra.label }}</span>
+                </a>
+              }
+            </li>
+          }
+
+          <!-- Con la pastilla oculta, el acceso a Mensajes sigue aquí. -->
+          @if (!mensajes.pastillaVisible(empresa.enModoEmpresa())) {
+            <li>
+              <button type="button" class="rail__hoja-item" (click)="abrirMensajes()">
+                <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+                <span>Mensajes</span>
+                @if (mensajes.sinLeer() > 0) {
+                  <span class="rail__hoja-badge">{{ mensajes.sinLeer() }}</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
 
   <div class="rail__empuje"></div>
 
@@ -32,12 +123,12 @@
     @for (item of salida; track item.label) {
       <li>
         @if (item.accion === 'ajustes') {
-          <button type="button" class="rail__item" [title]="item.label" (click)="abrirAjustes()">
+          <button type="button" class="rail__item" [attr.data-tip]="item.label" (click)="abrirAjustes()">
             <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
             <span class="rail__etiqueta">{{ item.label }}</span>
           </button>
         } @else {
-          <a class="rail__item" [title]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
+          <a class="rail__item" [attr.data-tip]="item.label" [routerLink]="item.ruta" routerLinkActive="activo">
             <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
             <span class="rail__etiqueta">{{ item.label }}</span>
           </a>
@@ -46,24 +137,11 @@
     }
   </ul>
 
-  <button
-    type="button"
-    class="rail__colapsar"
-    (click)="rail.alternar()"
-    [attr.aria-expanded]="!rail.colapsado()"
-    [title]="rail.colapsado() ? 'Expandir menú' : 'Colapsar menú'">
-    <i
-      class="rail__icon"
-      [class]="rail.colapsado() ? 'fa-solid fa-angles-right' : 'fa-solid fa-angles-left'"
-      aria-hidden="true"></i>
-    <span>Colapsar</span>
-  </button>
-
   <a
     class="rail__yo"
     [routerLink]="empresa.enModoEmpresa() ? '/app/empresa' : '/app/perfil'"
     routerLinkActive="activo"
-    [title]="tituloCuenta">
+    [attr.data-tip]="empresa.enModoEmpresa() ? 'Perfil de la empresa' : 'Mi perfil'">
     <span class="rail__avatar">
       @if (fotoCuenta) {
         <img [src]="fotoCuenta" [alt]="tituloCuenta" (error)="fotoCuentaFallida($event)" />
@@ -77,81 +155,89 @@
     </span>
   </a>
 
+
   <div class="rail__cambiar-caja">
-      <button
-        type="button"
-        class="rail__cambiar"
-        (click)="alternarEspacios()"
-        [attr.aria-expanded]="espaciosAbiertos()"
-        [title]="tituloCuenta + ' · cambiar de espacio'">
-        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-        <span class="rail__etiqueta">Cambiar de espacio</span>
-      </button>
+    <button
+      type="button"
+      class="rail__cambiar"
+      (click)="alternarEspacios()"
+      [attr.aria-expanded]="espaciosAbiertos()"
+      [attr.data-tip]="tituloCuenta + ' · cambiar de espacio'">
+      <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+      <span class="rail__etiqueta">Cambiar de espacio</span>
+      <i class="rail__flecha fa-solid fa-chevron-down" aria-hidden="true"></i>
+    </button>
 
-      @if (espaciosAbiertos()) {
-        <div class="rail__espacios" role="menu" aria-label="Ir a otro espacio">
-          <p class="rail__espacios-titulo">Ir a otro espacio</p>
+    @if (espaciosAbiertos()) {
+      <div class="rail__espacios" role="menu" aria-label="Ir a otro espacio">
+        <p class="rail__espacios-titulo">Ir a otro espacio</p>
 
-          @if (espacioActual; as actual) {
-            <span class="rail__espacio rail__espacio--actual">
+        @if (espacioActual; as actual) {
+          <span class="rail__espacio rail__espacio--actual">
+            <span class="rail__espacio-avatar">
+              @if (actual.logoUrl) {
+                <img [src]="actual.logoUrl" [alt]="actual.nombre" (error)="fotoCuentaFallida($event)" />
+              } @else {
+                {{ inicialesDe(actual.nombre) }}
+              }
+            </span>
+            <span class="rail__espacio-datos">
+              <strong>{{ actual.nombre }}</strong>
+              <small>{{ actual.rol }} · aquí estás</small>
+            </span>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          </span>
+        } @else {
+          <span class="rail__espacio rail__espacio--actual">
+            <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+            <span class="rail__espacio-datos">
+              <strong>Mi perfil personal</strong>
+              <small>aquí estás</small>
+            </span>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          </span>
+        }
+
+        @for (espacio of misEspacios; track espacio.id) {
+          @if (espacio.id !== espacioActual?.id) {
+            <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
               <span class="rail__espacio-avatar">
-                @if (actual.logoUrl) {
-                  <img [src]="actual.logoUrl" [alt]="actual.nombre" (error)="fotoCuentaFallida($event)" />
+                @if (logoDe(espacio); as logoEspacio) {
+                  <img [src]="logoEspacio" [alt]="espacio.nombre" (error)="fotoCuentaFallida($event)" />
                 } @else {
-                  {{ inicialesDe(actual.nombre) }}
+                  {{ inicialesDe(espacio.nombre) }}
                 }
               </span>
               <span class="rail__espacio-datos">
-                <strong>{{ actual.nombre }}</strong>
-                <small>{{ actual.rol }} · aquí estás</small>
-              </span>
-              <i class="fa-solid fa-check" aria-hidden="true"></i>
-            </span>
-          } @else {
-            <span class="rail__espacio rail__espacio--actual">
-              <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
-              <span class="rail__espacio-datos">
-                <strong>Mi perfil personal</strong>
-                <small>aquí estás</small>
-              </span>
-              <i class="fa-solid fa-check" aria-hidden="true"></i>
-            </span>
-          }
-
-          @for (espacio of misEspacios; track espacio.id) {
-            @if (espacio.id !== espacioActual?.id) {
-              <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
-                <span class="rail__espacio-avatar">
-                  @if (logoDe(espacio); as logoEspacio) {
-                    <img [src]="logoEspacio" [alt]="espacio.nombre" (error)="fotoCuentaFallida($event)" />
-                  } @else {
-                    {{ inicialesDe(espacio.nombre) }}
-                  }
-                </span>
-                <span class="rail__espacio-datos">
-                  <strong>{{ espacio.nombre }}</strong>
-                  <small>{{ espacio.rol }}</small>
-                </span>
-                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-              </button>
-            }
-          } @empty {
-            <p class="rail__espacios-vacio">No tienes otra empresa todavía.</p>
-          }
-
-          <!-- El perfil personal ya aparece arriba como "aquí estás" cuando no hay empresa activa;
-               este botón solo existe para volver a él desde una empresa. -->
-          @if (espacioActual) {
-            <button type="button" class="rail__espacio rail__espacio--personal" (click)="irAPersonal()">
-              <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
-              <span class="rail__espacio-datos">
-                <strong>Mi perfil personal</strong>
-                <small>Salir del modo empresa</small>
+                <strong>{{ espacio.nombre }}</strong>
+                <small>{{ espacio.rol }}</small>
               </span>
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </button>
           }
-        </div>
-      }
-    </div>
-  </nav>
+        } @empty {
+          <p class="rail__espacios-vacio">No tienes otra empresa todavía.</p>
+        }
+
+        @if (espacioActual) {
+          <button type="button" class="rail__espacio rail__espacio--personal" (click)="irAPersonal()">
+            <span class="rail__espacio-avatar"><i class="fa-solid fa-user" aria-hidden="true"></i></span>
+            <span class="rail__espacio-datos">
+              <strong>Mi perfil personal</strong>
+              <small>Salir del modo empresa</small>
+            </span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    }
+  </div>
+  <!-- Cerrar sesión: última fila, y solo con el riel abierto. -->
+  @if (!rail.colapsado()) {
+    <button type="button" class="rail__item rail__item--salir" (click)="cerrarSesion()">
+      <i class="rail__icon fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+      <span class="rail__etiqueta">Cerrar sesión</span>
+    </button>
+  }
+
+</nav>

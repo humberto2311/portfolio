@@ -1,10 +1,21 @@
-<div class="notif-wrapper">
-  <button class="notif-btn" (click)="toggle()" aria-label="Notificaciones">
-    <i class="fa-solid fa-bell"></i>
-    @if (totalNotificaciones() > 0) {
-      <span class="badge">{{ totalNotificaciones() }}</span>
-    }
-  </button>
+<div class="notif-wrapper" [class.notif-wrapper--riel]="modo() === 'riel'">
+  @if (modo() === 'riel') {
+    <!-- Fila del riel: mismo panel, con la forma de un ítem del menú lateral. -->
+    <button type="button" class="rail-notif" [class.activo]="abierto()" data-tip="Notificaciones" (click)="toggle()">
+      <i class="rail-notif__icon fa-solid fa-bell" aria-hidden="true"></i>
+      <span class="rail-notif__texto">Notificaciones</span>
+      @if (totalNotificaciones() > 0) {
+        <span class="rail-notif__badge">{{ totalNotificaciones() }}</span>
+      }
+    </button>
+  } @else {
+    <button class="notif-btn" (click)="toggle()" aria-label="Notificaciones">
+      <i class="fa-solid fa-bell"></i>
+      @if (totalNotificaciones() > 0) {
+        <span class="badge">{{ totalNotificaciones() }}</span>
+      }
+    </button>
+  }
 
   @if (abierto()) {
     <div class="panel" (click)="$event.stopPropagation()">

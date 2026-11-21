@@ -1,25 +1,43 @@
-<app-floating-buttons />
+<!-- Los botones flotantes se retiraron: Mensajes y "Importar CV (PDF)" viven en la barra superior. -->
 
 <div class="side-backdrop" [class.active]="svc.isOpen()" (click)="svc.close()"></div>
 
-<aside class="side-panel" [class.open]="svc.isOpen()">
+<aside
+  class="side-panel"
+  [class.open]="svc.isOpen()"
+  [class.side-panel--ampliado]="ampliado"
+  [class.side-panel--bandeja]="false">
   <!-- Header -->
   <header class="panel-header">
     @if (svc.activeView() === 'contacts') {
-      <div class="header-inner">
-        <div class="icon-box indigo"><i class="fa-solid fa-address-book"></i></div>
-        <div>
-          <h3>Contactos</h3>
-          <p>{{ svc.contacts().length }} contactos</p>
+      <div class="header-inner header-bandeja">
+        <div class="header-datos header-titulo">
+          <h3>Mensajes</h3>
+          @if (sinLeer > 0) {
+            <span class="header-contador">{{ sinLeer }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Vista "Nuevo mensaje": título y Cancelar, como en Instagram. -->
+    @if (svc.activeView() === 'nuevo') {
+      <div class="header-inner header-bandeja">
+        <button type="button" class="back-btn" aria-label="Volver a Mensajes" title="Volver a Mensajes" (click)="svc.cerrarVistaNueva()">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        </button>
+        <div class="header-datos header-titulo">
+          <h3>Nuevo mensaje</h3>
         </div>
       </div>
     }
 
     @if (svc.activeView() === 'chat') {
       @if (svc.activeContact(); as contact) {
-        <div class="header-inner">
-          <button class="back-btn" (click)="svc.backToContacts()">
-            <i class="fa-solid fa-arrow-left"></i>
+        <!-- Header de DM: atrás, avatar 40px, nombre + estado, y llamada/vídeo/info. -->
+        <div class="header-inner header-dm">
+          <button type="button" class="back-btn" aria-label="Volver a Mensajes" title="Volver a Mensajes" (click)="svc.backToContacts()">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
           <div class="avatar-wrap clickable" (click)="svc.abrirPerfilDe(contact)" title="Ver perfil">
             @if (contact.avatar) {
@@ -29,33 +47,62 @@
             }
             <span class="status-dot" [class.online]="contact.status === 'online'" [class.ai]="contact.isAi"></span>
           </div>
-          <div>
+          <div class="header-datos">
             <div class="name-row">
               <h3 class="clickable" (click)="svc.abrirPerfilDe(contact)" title="Ver perfil">{{ contact.name }}</h3>
               @if (contact.isAi) { <span class="ai-badge">IA</span> }
             </div>
-            <p [class.ai-text]="contact.isAi">{{ contact.statusText }}</p>
+            <p class="header-estado" [class.ai-text]="contact.isAi">
+              @if (contact.isAi) {
+                {{ contact.statusText }}
+              } @else if (contact.status === 'online') {
+                Activo ahora
+              } @else {
+                {{ contact.statusText || 'En línea' }}
+              }
+            </p>
           </div>
         </div>
       }
     }
 
 
-    @if (svc.activeView() === 'pdf') {
-      <div class="header-inner">
-        <div class="icon-box" style="background: color-mix(in srgb, var(--danger) 20%, transparent); color: var(--danger);">
-          <i class="fa-solid fa-file-pdf"></i>
-        </div>
-        <div>
-          <h3>Importar Hoja de Vida</h3>
-          <p>Lectura con Inteligencia Artificial</p>
-        </div>
-      </div>
-    }
+    <div class="panel-acciones">
+      <!-- ⤢: ventana flotante ↔ pantalla completa. -->
+      <button
+        type="button"
+        class="close-btn"
+        [title]="ampliado ? 'Contraer el panel' : 'Expandir a pantalla completa'"
+        [attr.aria-label]="ampliado ? 'Contraer el panel' : 'Expandir a pantalla completa'"
+        [attr.aria-pressed]="ampliado"
+        (click)="alternarAmpliado()">
+        <i class="fa-solid" [class.fa-expand]="!ampliado" [class.fa-compress]="ampliado" aria-hidden="true"></i>
+      </button>
 
-    <button class="close-btn" (click)="svc.close()">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
+      <!-- Bandeja y Nuevo mensaje: X para cerrar el panel (la pastilla vuelve). -->
+      @if (svc.activeView() === 'contacts' || svc.activeView() === 'nuevo') {
+        <button type="button" class="close-btn" title="Cerrar" aria-label="Cerrar Mensajes" (click)="svc.close()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      }
+
+      <!-- Dentro de un chat: llamada, videollamada e info, como en Instagram. -->
+      @if (svc.activeView() === 'chat') {
+        <button type="button" class="close-btn" title="Llamada de voz" aria-label="Iniciar llamada de voz">
+          <i class="fa-solid fa-phone" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="close-btn" title="Videollamada" aria-label="Iniciar videollamada">
+          <i class="fa-solid fa-video" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="close-btn" title="Información de la conversación" aria-label="Información de la conversación"
+          (click)="svc.abrirPerfilDe(svc.activeContact()!)">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="close-btn" title="Ir al último mensaje" aria-label="Ir al último mensaje" (click)="svc.irAlFinal()">
+          <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
   </header>
 
   <!-- Body -->
@@ -66,9 +113,9 @@
     @if (svc.activeView() === 'chat') {
       <app-chat-view />
     }
-    
-    @if (svc.activeView() === 'pdf') {
-      <app-pdf-upload />
+    @if (svc.activeView() === 'nuevo') {
+      <app-contacts-list [modoNuevo]="true" />
     }
+
   </div>
 </aside>

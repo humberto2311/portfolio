@@ -1,8 +1,25 @@
-<div class="shell" [class.shell--rail-mini]="rail.colapsado()">
+<div class="shell" [class.shell--rail-mini]="rail.colapsado()" [class.shell--empresa]="empresa.enModoEmpresa()">
   <app-side-nav />
 
   <div class="shell__body">
     <app-private-navbar />
+
+    <!-- Aviso de cuenta: deja claro en qué cuenta estás y permite cambiar sin buscar menús. -->
+    <div class="shell__cuenta" role="status">
+      <span class="shell__cuenta-icono">
+        <i [class]="empresa.enModoEmpresa() ? 'fa-solid fa-building' : 'fa-solid fa-user'" aria-hidden="true"></i>
+      </span>
+      <span class="shell__cuenta-texto">
+        @if (empresa.enModoEmpresa()) {
+          Estás en <strong>{{ empresa.empresaActual()?.nombre ?? 'tu empresa' }}</strong>
+        } @else {
+          Estás en <strong>tu perfil personal</strong>
+        }
+      </span>
+      <button type="button" class="shell__cuenta-boton" (click)="alternarCuenta()">
+        {{ empresa.enModoEmpresa() ? 'Volver a personal' : 'Cambiar a empresa' }}
+      </button>
+    </div>
 
     <main class="shell__main" [class.shell__main--full]="anchoCompleto()">
       <router-outlet />
@@ -13,5 +30,9 @@
 
   <app-tab-bar />
   <app-side-panel />
+  <!-- Después del panel: la pastilla/burbuja de Mensajes va siempre por encima. -->
+  <app-mensajes-pastilla />
+  <!-- Importar hoja de vida: modal centrado, fuera del panel de Mensajes. -->
+  <app-importar-cv />
   <app-primer-ingreso />
 </div>

@@ -37,7 +37,7 @@
 
 @media (min-width: $bp-desktop) {
   .shell__body {
-    padding-left: $rail-collapsed;
+    padding-left: $rail-mini;
   }
 
   .shell__main {
@@ -52,7 +52,7 @@
   }
 
   .shell--rail-mini .shell__body {
-    padding-left: $rail-collapsed;
+    padding-left: $rail-mini;
   }
 }
 
@@ -92,5 +92,80 @@
 
   .shell__main--full {
     padding: 8px 8px calc(#{$tabbar-height} + 20px + var(--safe-bottom));
+  }
+}
+
+/* ---------- Aviso de cuenta activa (personal / empresa) ---------- */
+
+.shell__cuenta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 14px 0;
+  padding: 6px 8px 6px 10px;
+  border: 1px solid $bg-border;
+  border-radius: 12px;
+  background: $bg-card;
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+.shell__cuenta-icono {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: $accent-soft;
+  color: $accent;
+  font-size: 0.72rem;
+}
+
+.shell__cuenta-texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  strong {
+    color: $text-light;
+    font-weight: 600;
+  }
+}
+
+.shell__cuenta-boton {
+  @include touch-target(32px);
+  flex-shrink: 0;
+  padding: 0 10px;
+  border: 1px solid $bg-border;
+  border-radius: 999px;
+  background: transparent;
+  color: $text-light;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $accent;
+    color: $accent;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/* En modo empresa el aviso se tiñe para no confundir las dos cuentas. */
+.shell--empresa .shell__cuenta {
+  border-color: var(--accent-cyan);
+}
+
+@media (min-width: $bp-desktop) {
+  .shell__cuenta {
+    margin: 10px 24px 0;
+    font-size: 0.8rem;
   }
 }

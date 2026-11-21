@@ -1,120 +1,194 @@
-<div class="search-wrap">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="text" placeholder="Buscar contacto o persona..."
-    [ngModel]="search()" (ngModelChange)="onSearch($event)" />
-  @if (buscando()) {
-    <span class="search-loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
-  }
-</div>
+@if (modoNuevo) {
+  <div class="nuevo">
+    <div class="nuevo__buscador">
+      <h4>Para:</h4>
+      <input
+        #campoBusqueda
+        type="text"
+        autocomplete="off"
+        placeholder="Busca..."
+        aria-label="Buscar a alguien para enviarle un mensaje"
+        [ngModel]="svc.busqueda()"
+        (ngModelChange)="onSearch($event)" />
+      @if (buscando()) {
+        <span class="nuevo__cargando"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
+      }
+    </div>
 
-@if (svc.avisoContactos()) {
-  <p class="panel-notice">{{ svc.avisoContactos() }}</p>
+    <div class="nuevo__lista">
+      @if (svc.cargandoContactos() && conversaciones.length === 0) {
+        <p class="nuevo__aviso"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Cargando…</p>
+      }
+
+      @for (contacto of contactosNuevo; track contacto.id) {
+        <div class="fila" [class.fila--elegida]="estaElegido(contacto.id)">
+          <button type="button" class="fila__persona" (click)="select(contacto)">
+            <span class="fila__avatar">
+              @if (contacto.avatar) {
+                <img [src]="contacto.avatar" [alt]="contacto.name" />
+              } @else {
+                <span class="fila__iniciales">{{ iniciales(contacto.name) }}</span>
+              }
+            </span>
+            <span class="fila__datos">
+              <strong>{{ contacto.name }}</strong>
+              <small>{{ contacto.statusText || (contacto.lastMsg ? contacto.lastMsg : 'Iniciar chat') }}</small>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="fila__marca"
+            [attr.aria-pressed]="estaElegido(contacto.id)"
+            [attr.aria-label]="'Elegir a ' + contacto.name"
+            (click)="svc.alternarDestinatario({ id: contacto.id, name: contacto.name, avatar: contacto.avatar })">
+            @if (estaElegido(contacto.id)) {
+              <i class="fa-solid fa-check" aria-hidden="true"></i>
+            }
+          </button>
+        </div>
+      }
+
+      @if (contactosNuevo.length === 0 && !buscando() && !svc.cargandoContactos()) {
+        <p class="nuevo__aviso">No encontramos a nadie con ese nombre.</p>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="nuevo__cta"
+      [disabled]="!svc.destinatarios().length"
+      (click)="abrirChatElegido()">
+      Chat
+    </button>
+  </div>
+} @else {
+  @if (svc.avisoContactos()) {
+    <p class="panel-notice">{{ svc.avisoContactos() }}</p>
+  }
+
+  <div class="list">
+    <div class="list__cabecera">
+      <h3>Mensajes</h3>
+      @if (solicitudes.length) {
+        <button type="button" class="list__solicitudes" (click)="verSolicitudes()">
+          Solicitudes <span class="list__contador">{{ solicitudes.length }}</span>
+        </button>
+      }
+    </div>
+
+    @if (chatsPersonales.length > 0) {
+      @for (contact of chatsPersonales; track contact.id) {
+        <div class="contact-item" (click)="select(contact)">
+          <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
+            <span class="avatar-marco">
+              @if (contact.avatar) {
+                <img [src]="contact.avatar" [alt]="contact.name" />
+              } @else {
+                <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
+              }
+            </span>
+            <span class="status-dot" [class.online]="contact.status === 'online'"></span>
+          </div>
+          <div class="info">
+            <div class="top-row">
+              <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)">{{ contact.name }}</h4>
+            </div>
+            <p class="preview">
+              {{ contact.lastMsg || contact.statusText }}
+              @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
+            </p>
+          </div>
+          <span class="punto" aria-hidden="true"></span>
+        </div>
+      }
+    }
+
+    @if (chatsEmpresariales.length > 0 || empresaId) {
+      @for (contact of chatsEmpresariales; track contact.id) {
+        <div class="contact-item" (click)="select(contact)">
+          <div class="avatar-wrap">
+            <span class="avatar-marco">
+              @if (contact.avatar) {
+                <img [src]="contact.avatar" [alt]="contact.name" />
+              } @else {
+                <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
+              }
+            </span>
+          </div>
+          <div class="info">
+            <div class="top-row">
+              <h4>{{ contact.name }}</h4>
+            </div>
+            <p class="preview">
+              {{ contact.lastMsg || contact.statusText }}
+              @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
+            </p>
+          </div>
+          <span class="punto" aria-hidden="true"></span>
+        </div>
+      }
+
+      @if (chatsEmpresariales.length === 0 && empresaId) {
+        <button type="button" class="nuevo-chat" (click)="abrirChatEmpresa()">
+          <i class="fa-solid fa-building"></i> Escribir a la empresa
+        </button>
+      }
+    }
+
+    @if (chatsGrupales.length > 0 || empresaId) {
+      @for (contact of chatsGrupales; track contact.id) {
+        <div class="contact-item" (click)="select(contact)">
+          <div class="avatar-wrap">
+            <span class="avatar-marco">
+              <span class="avatar-initials"><i class="fa-solid fa-users"></i></span>
+            </span>
+          </div>
+          <div class="info">
+            <div class="top-row">
+              <h4>{{ contact.name }}</h4>
+            </div>
+            <p class="preview">
+              {{ contact.lastMsg || contact.statusText }}
+              @if (contact.time) { <span class="preview__hora">· {{ contact.time }}</span> }
+            </p>
+          </div>
+          <span class="punto" aria-hidden="true"></span>
+        </div>
+      }
+
+      @if (chatsGrupales.length === 0 && empresaId) {
+        <button type="button" class="nuevo-chat" (click)="abrirGrupoEmpresa()">
+          <i class="fa-solid fa-users"></i> Abrir chat del equipo
+        </button>
+      }
+    }
+
+    @if (sugerencias.length > 0) {
+      @for (persona of sugerencias; track persona.id) {
+        <div class="contact-item" (click)="seleccionarPersona(persona)">
+          <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)" title="Ver perfil">
+            <span class="avatar-marco">
+              @if (persona.avatarUrl) {
+                <img [src]="persona.avatarUrl" [alt]="persona.fullName" />
+              } @else {
+                <span class="avatar-initials">{{ iniciales(persona.fullName) }}</span>
+              }
+            </span>
+          </div>
+          <div class="info">
+            <div class="top-row">
+              <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)">{{ persona.fullName }}</h4>
+            </div>
+            <p class="preview">{{ persona.gitUsername ? '@' + persona.gitUsername : 'Iniciar chat' }}</p>
+          </div>
+          <span class="punto" aria-hidden="true"></span>
+        </div>
+      }
+    }
+
+    @if (conversaciones.length === 0 && sugerencias.length === 0 && !buscando() && !svc.cargandoContactos()) {
+      <p class="empty">Sin resultados</p>
+    }
+  </div>
 }
-
-<div class="list">
-  @if (chatsPersonales.length > 0) {
-    <h5 class="section-title">Chats personales</h5>
-    @for (contact of chatsPersonales; track contact.id) {
-      <div class="contact-item" (click)="select(contact)">
-        <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
-          @if (contact.avatar) {
-            <img [src]="contact.avatar" [alt]="contact.name" />
-          } @else {
-            <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
-          }
-          <span class="status-dot" [class.online]="contact.status === 'online'"></span>
-        </div>
-        <div class="info">
-          <div class="top-row">
-            <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)">{{ contact.name }}</h4>
-            <span class="time">{{ contact.time }}</span>
-          </div>
-          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
-        </div>
-        <span class="tag tag--personal">Personal</span>
-      </div>
-    }
-  }
-
-  @if (chatsEmpresariales.length > 0 || empresaId) {
-    <h5 class="section-title">Empresarial</h5>
-
-    @for (contact of chatsEmpresariales; track contact.id) {
-      <div class="contact-item" (click)="select(contact)">
-        <div class="avatar-wrap">
-          @if (contact.avatar) {
-            <img [src]="contact.avatar" [alt]="contact.name" />
-          } @else {
-            <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
-          }
-        </div>
-        <div class="info">
-          <div class="top-row">
-            <h4>{{ contact.name }}</h4>
-            <span class="time">{{ contact.time }}</span>
-          </div>
-          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
-        </div>
-        <span class="tag tag--empresa">Empresarial</span>
-      </div>
-    }
-
-    @if (chatsEmpresariales.length === 0 && empresaId) {
-      <button type="button" class="nuevo-chat" (click)="abrirChatEmpresa()">
-        <i class="fa-solid fa-building"></i> Escribir a la empresa
-      </button>
-    }
-  }
-
-  @if (chatsGrupales.length > 0 || empresaId) {
-    <h5 class="section-title">Grupal</h5>
-
-    @for (contact of chatsGrupales; track contact.id) {
-      <div class="contact-item" (click)="select(contact)">
-        <div class="avatar-wrap">
-          <span class="avatar-initials"><i class="fa-solid fa-users"></i></span>
-        </div>
-        <div class="info">
-          <div class="top-row">
-            <h4>{{ contact.name }}</h4>
-            <span class="time">{{ contact.time }}</span>
-          </div>
-          <p class="preview">{{ contact.lastMsg || contact.statusText }}</p>
-        </div>
-        <span class="tag tag--grupo">Grupal</span>
-      </div>
-    }
-
-    @if (chatsGrupales.length === 0 && empresaId) {
-      <button type="button" class="nuevo-chat" (click)="abrirGrupoEmpresa()">
-        <i class="fa-solid fa-users"></i> Abrir chat del equipo
-      </button>
-    }
-  }
-
-  @if (sugerencias.length > 0) {
-    <h5 class="section-title">Personas</h5>
-    @for (persona of sugerencias; track persona.id) {
-      <div class="contact-item" (click)="seleccionarPersona(persona)">
-        <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)" title="Ver perfil">
-          @if (persona.avatarUrl) {
-            <img [src]="persona.avatarUrl" [alt]="persona.fullName" />
-          } @else {
-            <span class="avatar-initials">{{ iniciales(persona.fullName) }}</span>
-          }
-        </div>
-        <div class="info">
-          <div class="top-row">
-            <h4 class="clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(persona)">{{ persona.fullName }}</h4>
-          </div>
-          <p class="preview">{{ persona.gitUsername ? '@' + persona.gitUsername : 'Iniciar chat' }}</p>
-        </div>
-        <span class="new-chat"><i class="fa-regular fa-paper-plane"></i></span>
-      </div>
-    }
-  }
-
-  @if (conversaciones.length === 0 && sugerencias.length === 0 && !buscando() && !svc.cargandoContactos()) {
-    <p class="empty">Sin resultados</p>
-  }
-</div>

@@ -1,0 +1,265 @@
+@import '../../../shared/styles/variables';
+
+/* Pastilla flotante de Mensajes: burbuja + contador + últimos avatares.
+   Vive por encima de todo (también del panel), así Mensajes nunca se pierde. */
+.pastilla {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + var(--safe-bottom));
+  z-index: 9998;
+
+  &--activa {
+    border-color: $accent-border;
+
+    .pastilla__burbuja {
+      background: $accent;
+      color: var(--on-accent);
+    }
+  }
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px 6px 6px;
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid $bg-border;
+  border-radius: 999px;
+  box-shadow: 0 14px 34px -14px rgba(0, 0, 0, 0.75);
+  animation: pastilla-entra 0.22s ease;
+}
+
+@keyframes pastilla-entra {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pastilla__chat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 4px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: $text-light;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: $bg-hover;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.pastilla__burbuja {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: $accent-soft;
+  color: $accent;
+  font-size: 1rem;
+}
+
+.pastilla__badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: $danger;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px $bg-card;
+}
+
+.pastilla__texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+
+  strong {
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  small {
+    font-size: 0.68rem;
+    color: $text-faint;
+  }
+}
+
+.pastilla__avatares {
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+}
+
+.pastilla__avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid $bg-card;
+  background: $bg-elevated;
+  color: $text-muted;
+  font-size: 0.66rem;
+  font-weight: 700;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.pastilla__solicitudes,
+.pastilla__ver {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: $text-muted;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-light;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+.pastilla__solicitudes {
+  width: auto;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: $accent-soft;
+  color: $accent;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* En escritorio se queda a la derecha, sobre el borde del contenido. */
+@media (min-width: $bp-desktop) {
+  .pastilla {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+
+/* En móvil queda por encima de la tab-bar, pegada a la derecha y solo con iconos. */
+@media (max-width: #{$bp-desktop - 0.02px}) {
+  .pastilla {
+    right: 12px;
+    bottom: calc(#{$tabbar-height} + 12px + var(--safe-bottom));
+    padding: 5px;
+    gap: 0;
+  }
+
+  .pastilla__texto,
+  .pastilla__avatares,
+  .pastilla__ver {
+    display: none;
+  }
+
+  .pastilla__chat {
+    padding: 0;
+  }
+
+  .pastilla__burbuja {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  .pastilla__solicitudes {
+    margin-left: 4px;
+  }
+}
+
+/* La burbuja suelta ya no se usa: la pastilla se queda siempre en su sitio. */
+
+.burbuja {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + var(--safe-bottom));
+  z-index: 9996;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid $accent-border;
+  border-radius: 50%;
+  background: $bg-card;
+  color: $accent;
+  font-size: 1.05rem;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.7);
+
+  &:hover {
+    background: $accent-soft;
+  }
+
+  &--activa {
+    background: $accent;
+    color: var(--on-accent);
+    border-color: $accent;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+@media (min-width: $bp-desktop) {
+  .burbuja {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+
+/* En móvil, sobre el panel (que ocupa toda la pantalla) y por encima de la tab-bar. */
+@media (max-width: #{$bp-desktop - 0.02px}) {
+  .burbuja {
+    right: 12px;
+    bottom: calc(#{$tabbar-height} + 12px + var(--safe-bottom));
+    z-index: 9997;
+  }
+}
+
+/* Con el panel abierto en pantalla completa, la pastilla se aparta a la izquierda del panel. */
+.pastilla--activa {
+  right: calc(min(402px, 100vw) + 16px);
+}
+
+@media (max-width: #{$bp-desktop - 0.02px}) {
+  .pastilla--activa {
+    right: 12px;
+    bottom: calc(#{$tabbar-height} + 12px + var(--safe-bottom));
+  }
+}

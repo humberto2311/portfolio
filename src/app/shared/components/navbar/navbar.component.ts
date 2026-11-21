@@ -27,10 +27,7 @@ export class NavbarComponent {
   private readonly plataforma = inject(PLATFORM_ID);
   readonly tema = inject(TemaService);
 
-  /**
-   * Landing pública de la empresa: es la página a la que entra el visitante
-   * desde el navbar cuando todavía no ha iniciado sesión.
-   */
+ 
   readonly urlLanding = '/empresa/n-soft/espacio/mi-espacio';
 
   readonly secciones: SeccionLanding[] = [

@@ -1,10 +1,11 @@
 @import '../../styles/variables';
 
 .side-backdrop {
+
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 9994;
+  z-index: 9000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
@@ -20,19 +21,68 @@
   top: 0;
   right: 0;
   height: 100dvh;
-  width: 100%;
-  max-width: 420px;
-  z-index: 9995;
+  width: min(402px, 100%);
+  z-index: 9001;
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.28s ease-out;
+  transition: transform 0.28s ease-out, width 0.22s ease, border-radius 0.2s ease;
   background: $bg-sidebar;
   border-left: 1px solid $bg-border;
   box-shadow: -16px 0 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 
   &.open {
     transform: translateX(0);
+  }
+}
+
+/*
+ * Instagram: el panel es una tarjeta flotante abajo a la derecha, no una hoja
+ * que cruza la página de arriba abajo. Solo en escritorio; en móvil manda el
+ * bloque de @media de abajo.
+ */
+@media (min-width: 768px) {
+  .side-panel:not(.side-panel--ampliado) {
+    top: auto;
+    bottom: 24px;
+    height: min(640px, calc(100dvh - #{$topbar-height} - 48px));
+    border: 1px solid $bg-border;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.65);
+  }
+}
+
+/* Pantalla completa: el fondo desaparece y el panel toma todo el alto y ancho. */
+.side-panel--ampliado {
+  width: 100%;
+  max-width: 100%;
+  border-left: none;
+  box-shadow: none;
+}
+
+/* La X solo cierra el chat/PDF (nunca la bandeja), así que aquí no hay salida perdida. */
+.panel-acciones {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.close-btn.activo {
+  background: $accent-soft;
+  color: $accent;
+}
+
+.header-datos {
+  min-width: 0;
+
+  h3,
+  p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -65,6 +115,148 @@
     font-size: 0.78rem;
     color: $text-muted;
     margin: 0;
+  }
+}
+
+/* ---------- Bandeja y "Nuevo mensaje": misma piel clara que el chat ---------- */
+
+.header-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-contador {
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: $danger;
+  color: $on-accent;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.header-bandeja {
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: $text-light;
+  }
+
+  p {
+    font-size: 12px;
+    color: $text-muted;
+  }
+}
+
+.panel-header:has(.header-bandeja) {
+  background: $bg-sidebar;
+  border-bottom: 1px solid $bg-border;
+}
+
+.panel-header:has(.header-bandeja) .back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: $text-light;
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+.panel-header:has(.header-bandeja) .close-btn {
+  color: $text-light;
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+/* Cancelar de "Nuevo mensaje": texto azul, sin caja. */
+.btn-cancelar {
+  flex-shrink: 0;
+  padding: 6px 4px;
+  border: none;
+  background: transparent;
+  color: $accent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: $accent-strong;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/* ---------- Header de DM, estilo Instagram (modo claro) ---------- */
+
+.header-dm {
+  gap: 10px;
+
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-light;
+  }
+
+  .header-estado {
+    font-size: 12px;
+    color: $text-muted;
+  }
+
+  .avatar-wrap img {
+    width: 40px;
+    height: 40px;
+    border: none;
+  }
+
+  .ai-badge {
+    background: $accent-soft;
+    color: $accent;
+  }
+
+  .avatar-wrap .avatar-initials {
+    @include avatar-base(40px, 0.9rem);
+    background: $bg-hover;
+    color: $text-light;
+  }
+
+  .status-dot {
+    border-color: $bg-sidebar;
+  }
+}
+
+.panel-header:has(.header-dm) {
+  background: $bg-sidebar;
+  border-bottom: 1px solid $bg-border;
+}
+
+.panel-header:has(.header-dm) .close-btn {
+  color: $text-light;
+
+  &:hover {
+    background: $bg-hover;
+  }
+}
+
+.panel-header:has(.header-dm) .back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: $text-light;
+
+  &:hover {
+    background: $bg-hover;
   }
 }
 
@@ -133,6 +325,74 @@
 }
 
 .back-btn,
+.panel-header__acciones {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* Deja la pastilla de Mensajes a mano cuando el panel está abierto. */
+.bubble-btn {
+  @include touch-target(34px);
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: $accent;
+  cursor: pointer;
+
+  &:hover {
+    background: $accent-soft;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/* Barra fina sobre el hilo del chat. */
+.panel-chat-barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid $bg-border;
+  background: $bg-card;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid $bg-border;
+    border-radius: 999px;
+    background: transparent;
+    color: $text-muted;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      color: $accent;
+      border-color: $accent-border;
+      background: $accent-soft;
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+
+  &__abajo {
+    width: 30px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
 .close-btn {
   @include touch-target(34px);
   border-radius: 50%;
@@ -172,5 +432,29 @@
 
   .panel-header {
     padding: 10px 12px;
+  }
+}
+
+/* ---------- Móvil: el chat no toma la pantalla, la bandeja sí ---------- */
+
+@media (max-width: 767.98px) {
+  /* Ventana de chat: del alto de la tab-bar hacia arriba, nunca pantalla completa. */
+  .side-panel.open:not(.side-panel--ampliado) {
+    top: 12px;
+    height: calc(100dvh - #{$tabbar-height} - 24px - var(--safe-bottom));
+    border-radius: 18px 0 0 18px;
+    border-top: 1px solid $bg-border;
+    border-bottom: 1px solid $bg-border;
+  }
+
+  /* La bandeja de Mensajes sí ocupa todo: es una pantalla, no una ventana. */
+  .side-panel.open.side-panel--bandeja:not(.side-panel--ampliado) {
+    top: 0;
+    height: calc(100dvh - #{$tabbar-height} - var(--safe-bottom));
+    border-radius: 0;
+  }
+
+  .panel-header {
+    min-height: 56px;
   }
 }

@@ -1,9 +1,18 @@
 <header class="topbar">
   <a class="topbar__marca" routerLink="/app" aria-label="Inicio">
-    <app-logo />
+    <app-logo [alto]="28" [nombre]="true" />
   </a>
 
-  <div class="topbar__busqueda">
+  <!-- Buscador: en escritorio ocupa el centro; en móvil se abre a pantalla completa con la lupa. -->
+  <div class="topbar__busqueda" [class.topbar__busqueda--abierta]="buscadorAbierto()">
+    <button
+      type="button"
+      class="topbar__lupa"
+      aria-label="Buscar"
+      (click)="abrirBuscador(campo)">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </button>
+
     <div class="campo">
       <i class="fa-solid fa-magnifying-glass campo__icono" aria-hidden="true"></i>
       <input
@@ -21,6 +30,10 @@
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
       }
+      <!-- Solo en móvil: cierra el buscador a pantalla completa. -->
+      <button type="button" class="campo__cancelar" aria-label="Cerrar búsqueda" (click)="cerrarBuscador(campo)">
+        Cancelar
+      </button>
     </div>
 
     @if (mostrarRed()) {
@@ -113,8 +126,96 @@
     }
   </div>
 
+  <!-- Acciones de la barra: Notificaciones y cuenta. Mensajes vive fuera, en su pastilla. -->
   <div class="topbar__acciones">
     <app-notificaciones />
+
+    <!-- En modo empresa el disparador muestra el logo de la empresa. -->
     <app-user-menu />
   </div>
+
+  <!-- Panel del menú móvil. En escritorio no se muestra (display: none). -->
+  <nav id="menu-principal" class="topbar__nav" [class.topbar__nav--abierto]="menuAbierto()" aria-label="Secciones">
+    <p class="topbar__nav-titulo">{{ enEmpresa() ? 'Mi empresa' : 'Mi cuenta' }}</p>
+
+    <!-- Modo personal / empresa: siempre la primera opción, nunca se pierde. -->
+    <button
+      type="button"
+      class="nav-item nav-item--cuenta"
+      [title]="etiquetaCuenta()"
+      (click)="alternarCuenta()">
+      <i [class]="iconoCuenta()" aria-hidden="true"></i>
+      <span class="nav-item__texto">
+        <strong>{{ etiquetaCuenta() }}</strong>
+        <small>{{ enEmpresa() ? 'Salir del modo empresa' : 'Modo empresa' }}</small>
+      </span>
+      <i class="fa-solid fa-arrows-rotate nav-item__extra" aria-hidden="true"></i>
+    </button>
+
+    @for (item of menu(); track item.label) {
+      <a
+        class="nav-item"
+        [routerLink]="item.ruta"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: !!item.exacto }"
+        [title]="item.label"
+        (click)="menuAbierto.set(false)">
+        <i [class]="item.icon" aria-hidden="true"></i>
+        <span class="nav-item__texto">
+          <strong>{{ item.label }}</strong>
+          @if (item.nota) {
+            <small>{{ item.nota }}</small>
+          }
+        </span>
+      </a>
+    }
+
+    <!-- Carta de presentación: Portafolio + Enlaces (o Equipo: enlaces + tarjetas) -->
+    <details class="nav-cv">
+      <summary class="nav-item" [title]="tituloCv()">
+        <i [class]="iconoCv()" aria-hidden="true"></i>
+        <span class="nav-item__texto">
+          <strong>{{ tituloCv() }}</strong>
+          <small>{{ notaCv() }}</small>
+        </span>
+        <i class="fa-solid fa-chevron-down nav-cv__flecha" aria-hidden="true"></i>
+      </summary>
+
+      <div class="nav-cv__panel">
+        @for (item of menuCv(); track item.label) {
+          <a class="nav-cv__item" [routerLink]="item.ruta" (click)="menuAbierto.set(false)">
+            <i [class]="item.icon" aria-hidden="true"></i>
+            <span class="nav-item__texto">
+              <strong>{{ item.label }}</strong>
+              @if (item.nota) {
+                <small>{{ item.nota }}</small>
+              }
+            </span>
+          </a>
+        }
+      </div>
+    </details>
+
+    <!-- Cerrar la bandeja: al final del menú y solo al pasar el ratón por la barra. -->
+    @if (mensajes.isOpen()) {
+      <button type="button" class="nav-item nav-item--cerrar" title="Cerrar Mensajes" (click)="mensajes.close()">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        <span class="nav-item__texto">
+          <strong>Cerrar</strong>
+          <small>Volver a la app</small>
+        </span>
+      </button>
+    }
+
+    <button type="button" class="nav-item" [class.activo]="mensajes.enContactos()" title="Mensajes" (click)="abrirMensajes()">
+      <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+      <span class="nav-item__texto">
+        <strong>Mensajes</strong>
+        <small>{{ mensajes.chatsActivos().length }} conversaciones</small>
+      </span>
+      @if (mensajes.sinLeer() > 0) {
+        <span class="nav-item__badge">{{ mensajes.sinLeer() }}</span>
+      }
+    </button>
+  </nav>
 </header>

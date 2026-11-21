@@ -23,6 +23,7 @@ import {
   DisenoEmpresa,
   Empresa,
   MenuGrupo,
+  MenuItem,
   PanelEmpresa,
   TipoComponente,
 } from '../../../core/models/empresa.model';
@@ -81,6 +82,8 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
   private platformId = inject(PLATFORM_ID);
 
   @ViewChild('marco') marco?: ElementRef<HTMLElement>;
+  /** Cuadro de texto del inspector: es donde se escribe el contenido de una pieza de texto. */
+  @ViewChild('campoTexto') campoTexto?: ElementRef<HTMLTextAreaElement>;
 
   readonly panel = this.empresaSvc.panel;
   readonly ancho = LIENZO_ANCHO;
@@ -636,6 +639,21 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.inspectorPlegado()) this.inspectorPlegado.set(false);
   }
 
+  /**
+   * Deja el cursor en el cuadro de texto de la pieza recién añadida, con el
+   * texto marcado: así el usuario solo tiene que escribir para reemplazarlo.
+   */
+  private enfocarTexto(): void {
+    if (typeof document === 'undefined') return;
+
+    setTimeout(() => {
+      const campo = this.campoTexto?.nativeElement;
+      if (!campo) return;
+      campo.focus();
+      campo.select();
+    }, 90);
+  }
+
   deseleccionar(): void {
     this.seleccionClave.set(null);
     this.borradorContenido = {};
@@ -684,6 +702,9 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
     this.sentarComponente(componente);
     this.empujarHistorial();
     this.error.set(null);
+
+    // Si la pieza es un texto, el cursor queda listo para escribir.
+    if (tipo === 'TEXTO') this.enfocarTexto();
   }
 
   agregarImagen(url: string): void {
@@ -867,6 +888,63 @@ export class EmpresaLienzoComponent implements OnInit, AfterViewInit, OnDestroy 
       .map((item) => item.trim())
       .filter((item) => Boolean(item));
     this.asignar('items', items);
+  }
+
+  /** Un número del contenido (tamaño de letra, etc.) siempre se guarda como número. */
+  asignarNumeroContenido(campo: string, valor: any, defecto: number): void {
+    const numero = Number(valor);
+    this.asignar(campo, Number.isFinite(numero) && numero > 0 ? numero : defecto);
+  }
+
+  /** Las secciones del menú: siempre una lista, aunque el dato venga incompleto. */
+  gruposDe(): MenuGrupo[] {
+    return this.menu?.grupos ?? [];
+  }
+
+  /** Los platos de una sección del menú: siempre una lista, aunque el dato venga incompleto. */
+  itemsDe(grupo: MenuGrupo): MenuItem[] {
+    return grupo?.items ?? [];
+  }
+
+  /** Cambia el título de una sección del menú. */
+  cambiarGrupo(indice: number, campo: string, valor: any): void {
+    const grupos = Array.isArray(this.borradorContenido?.grupos) ? this.borradorContenido.grupos : [];
+    const grupo = grupos[indice];
+    if (!grupo) return;
+    grupo[campo] = valor;
+    this.asignar('grupos', grupos);
+  }
+
+  /** Cambia un plato (nombre, precio o descripción) del menú. */
+  cambiarPlato(indiceGrupo: number, indicePlato: number, campo: string, valor: any): void {
+    const grupos = Array.isArray(this.borradorContenido?.grupos) ? this.borradorContenido.grupos : [];
+    const plato = grupos[indiceGrupo]?.items?.[indicePlato];
+    if (!plato) return;
+    plato[campo] = valor;
+    this.asignar('grupos', grupos);
+  }
+
+  /** Cambia una fila del horario (días u hora). */
+  cambiarFilaHorario(indice: number, campo: string, valor: any): void {
+    const filas = Array.isArray(this.borradorContenido?.filas) ? this.borradorContenido.filas : [];
+    const fila = filas[indice];
+    if (!fila) return;
+    fila[campo] = valor;
+    this.asignar('filas', filas);
+  }
+
+  /** Las imágenes de la galería se editan como una lista de URLs, una por línea. */
+  get galeriaTexto(): string {
+    const imagenes = Array.isArray(this.borradorContenido?.imagenes) ? this.borradorContenido.imagenes : [];
+    return imagenes.join('\n');
+  }
+
+  asignarGaleria(valor: string): void {
+    const imagenes = (valor ?? '')
+      .split('\n')
+      .map((linea) => linea.trim())
+      .filter(Boolean);
+    this.asignar('imagenes', imagenes);
   }
 
   agregarGrupoMenu(): void {

@@ -9,6 +9,7 @@ import { RailStateService } from '../../../core/services/rail-state.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { Empresa } from '../../../core/models/empresa.model';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { esSinImagen } from '../../../features/empresa/espacio/espacio-ui';
 
 interface RailItem {
   label: string;
@@ -145,6 +146,13 @@ export class SideNavComponent {
     const partes = limpio.split(/\s+/).filter(Boolean);
     if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
     return (partes[0][0] + partes[1][0]).toUpperCase();
+  }
+
+  /** Logo del espacio: si el usuario lo quitó, se muestran las iniciales. */
+  logoDe(espacio: { logoUrl?: string | null } | null): string | null {
+    const valor = (espacio?.logoUrl ?? '').trim();
+    if (!valor || esSinImagen(valor)) return null;
+    return valor;
   }
 
   readonly espaciosAbiertos = signal(false);

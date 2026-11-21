@@ -238,6 +238,22 @@
               <section class="panel__bloque" id="identidad-espacio">
                 <h2>Identidad del espacio</h2>
 
+                <div class="campo campo--interruptor">
+                  <label>
+                    <input
+                      type="checkbox"
+                      [checked]="form.mostrarIdentidad !== false"
+                      (change)="cambiarIdentidad($any($event.target).checked)"
+                    />
+                    <span>Mostrar la portada con la imagen y el nombre de la empresa</span>
+                  </label>
+                  <p class="campo__ayuda">
+                    Este bloque es opcional. Si lo desactivas, la landing se publica sin la
+                    portada, la imagen ni el nombre de la empresa: la página empieza directamente
+                    con las secciones. Puedes volver a encenderlo cuando quieras.
+                  </p>
+                </div>
+
                 @if (imagenDanada) {
                   <p class="campo__aviso">
                     <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
@@ -289,7 +305,14 @@
                       }
                     </div>
                   </div>
-                  <input type="text" class="campo__texto" [(ngModel)]="form.portadaUrl" placeholder="https://… (opcional)" title="Enlace o URL de la imagen" />
+                  <input
+                    type="text"
+                    class="campo__texto"
+                    [(ngModel)]="form.portadaUrl"
+                    (ngModelChange)="editarImagen('portadaUrl', $event)"
+                    placeholder="https://… (opcional)"
+                    title="Enlace o URL de la imagen"
+                  />
                 </div>
 
                 <div class="campo">
@@ -311,14 +334,21 @@
                       <button type="button" class="btn-mini" (click)="usarImagenDeLaEmpresa('logoUrl')">
                         <i class="fa-solid fa-building" aria-hidden="true"></i> Usar el de la empresa
                       </button>
-                      @if (form.logoUrl) {
+                      @if (imagenLogo) {
                         <button type="button" class="btn-mini btn-mini--quitar" (click)="quitarImagen('logoUrl')">
                           <i class="fa-solid fa-xmark" aria-hidden="true"></i> Quitar
                         </button>
                       }
                     </div>
                   </div>
-                  <input type="text" class="campo__texto" [(ngModel)]="form.logoUrl" placeholder="Se usa el logo de la empresa" title="Enlace o URL del logo" />
+                  <input
+                    type="text"
+                    class="campo__texto"
+                    [(ngModel)]="form.logoUrl"
+                    (ngModelChange)="editarImagen('logoUrl', $event)"
+                    placeholder="Se usa el logo de la empresa"
+                    title="Enlace o URL del logo"
+                  />
                 </div>
 
                 <label class="campo">
@@ -723,6 +753,15 @@
               [puedeEditar]="true"
             />
 
+            @if (form.mostrarIdentidad === false) {
+              <div class="marco-vista__oculto">
+                <i class="fa-solid fa-eye-slash"></i>
+                La portada con la imagen y el nombre de la empresa está oculta: no se verá en la landing.
+                <button type="button" class="boton-mini" (click)="cambiarIdentidad(true)">
+                  <i class="fa-solid fa-eye"></i> Mostrar
+                </button>
+              </div>
+            } @else {
             <div class="lienzo__hero" id="inicio">
               <div class="lienzo__fondo" [style.background-image]="imagenPortada ? 'url(' + imagenPortada + ')' : null"></div>
               <div class="lienzo__velo"></div>
@@ -741,6 +780,7 @@
                 }
               </div>
             </div>
+            }
 
             <div class="lienzo__secciones">
               @for (seccion of espacioVista.secciones; track $index) {

@@ -13,6 +13,18 @@ export interface CatalogoSeccion {
   descripcion: string;
 }
 
+/**
+ * Valor con el que se guarda una imagen que el usuario quitó a propósito.
+ * No es una URL, así que la landing se publica sin esa imagen en vez de
+ * volver a mostrar la de la empresa.
+ */
+export const SIN_IMAGEN = 'sin-imagen';
+
+/** ¿El valor guardado significa "esta imagen no se publica"? */
+export function esSinImagen(valor: string | null | undefined): boolean {
+  return (valor ?? '').trim().toLowerCase() === SIN_IMAGEN;
+}
+
 export const CATALOGO_SECCIONES: CatalogoSeccion[] = [
   {
     tipo: 'PRESENTACION',

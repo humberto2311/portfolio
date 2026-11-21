@@ -20,7 +20,7 @@ import { SidePanelService } from '../../../core/services/side-panel.service';
 import { TemaService } from '../../../core/services/tema.service';
 import { EmpresaComponenteVistaComponent } from '../componente-vista/empresa-componente-vista.component';
 import { EspacioNavbarComponent } from './espacio-navbar.component';
-import { anclaSeccion, urlRed } from './espacio-ui';
+import { anclaSeccion, esSinImagen, urlRed } from './espacio-ui';
 
 interface BloqueTexto {
   titulo: string;
@@ -78,6 +78,8 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
 
   get imagenLogo(): string | null {
     const esp = this.espacio();
+    // El espacio puede guardar la imagen como "quitada": entonces no se cae a la de la empresa.
+    if (esSinImagen(esp?.logoUrl)) return null;
     if (!this.rotas().logoUrl) {
       const propio = esp?.logoUrl?.trim();
       if (propio) return propio;
@@ -87,6 +89,7 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
 
   get imagenPortada(): string | null {
     const esp = this.espacio();
+    if (esSinImagen(esp?.portadaUrl)) return null;
     if (!this.rotas().portadaUrl) {
       const propia = esp?.portadaUrl?.trim();
       if (propia) return propia;
@@ -195,7 +198,7 @@ export class EspacioPublicoComponent implements OnInit, OnDestroy {
 
       this.espacio.set(espacio);
       this.aplicarColores(espacio);
-      this.medirPortada(espacio.portadaUrl ?? null);
+      this.medirPortada(esSinImagen(espacio.portadaUrl) ? null : (espacio.portadaUrl ?? null));
       this.cargarRed(espacio);
       this.cargarLienzo(espacio);
     });

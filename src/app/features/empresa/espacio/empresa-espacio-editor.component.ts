@@ -24,7 +24,9 @@ import {
   CATALOGO_SECCIONES,
   ESTILOS_ESPACIO,
   ICONOS_ESPACIO,
+  SIN_IMAGEN,
   anclaSeccion,
+  esSinImagen,
   etiquetaSeccion,
   iconoSeccion,
   navbarInicial,
@@ -162,6 +164,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     }
 
     this.form[campo] = valor;
+    this.marcarImagenEditable(campo);
     this.cambiosSinGuardar.set(true);
     this.toast.show('Imagen copiada de la empresa. Puedes cambiarla sin tocar la empresa');
   }
@@ -175,6 +178,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     leerImagen(archivo, 1_400_000).then(
       (url) => {
         this.form[campo] = url;
+        this.marcarImagenEditable(campo);
         this.cambiosSinGuardar.set(true);
         this.toast.show('Imagen cargada. Guarda el espacio para conservarla');
       },
@@ -182,9 +186,34 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Quita la imagen del espacio. A diferencia de vaciar el campo, aquí sí se deja de
+   * mostrar la imagen de la empresa: la portada o el logo quedan sin poner.
+   */
   quitarImagen(campo: 'logoUrl' | 'portadaUrl'): void {
     this.form[campo] = '';
+    this.quitadas.update((valor) => ({ ...valor, [campo]: true }));
     this.cambiosSinGuardar.set(true);
+    this.toast.show(
+      campo === 'logoUrl'
+        ? 'Quitaste el logo: la landing se publicará sin imagen.'
+        : 'Quitaste la portada: la landing se publicará sin imagen.',
+    );
+  }
+
+  /** El usuario volvió a tocar la imagen: deja de estar "quitada". */
+  marcarImagenEditable(campo: 'logoUrl' | 'portadaUrl'): void {
+    if (!this.quitadas()[campo]) return;
+    this.quitadas.update((valor) => ({ ...valor, [campo]: false }));
+  }
+
+  /**
+   * El usuario escribió una URL a mano. Si deja el campo vacío, la imagen
+   * se queda quitada: la landing se publica sin ella.
+   */
+  editarImagen(campo: 'logoUrl' | 'portadaUrl', valor: string): void {
+    const hay = (valor ?? '').trim().length > 0;
+    this.quitadas.update((actual) => ({ ...actual, [campo]: !hay }));
   }
 
   /** Imágenes que no se pudieron cargar (por ejemplo, un base64 guardado a medias). */
@@ -193,7 +222,15 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
     logoUrl: false,
   });
 
+  /** Imágenes que el usuario quitó a propósito: ya no se vuelve a la de la empresa. */
+  readonly quitadas = signal<Record<'portadaUrl' | 'logoUrl', boolean>>({
+    portadaUrl: false,
+    logoUrl: false,
+  });
+
   get imagenPortada(): string | null {
+    if (this.quitadas().portadaUrl) return null;
+
     if (!this.rotas().portadaUrl) {
       const valor = (this.form.portadaUrl ?? '').trim();
       if (valor) return valor;
@@ -202,6 +239,8 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   }
 
   get imagenLogo(): string | null {
+    if (this.quitadas().logoUrl) return null;
+
     if (!this.rotas().logoUrl) {
       const propio = (this.form.logoUrl ?? '').trim();
       if (propio) return propio;
@@ -469,8 +508,8 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       estilo: (this.form.estilo as EspacioEmpresa['estilo']) ?? 'CLASICO',
       mostrarIdentidad: this.form.mostrarIdentidad !== false,
       lema: this.form.lema ?? null,
-      portadaUrl: this.form.portadaUrl ?? null,
-      logoUrl: this.form.logoUrl ?? empresaActual?.logoUrl ?? null,
+      portadaUrl: this.imagenPortada,
+      logoUrl: this.imagenLogo,
       colorPrincipal: this.form.colorPrincipal ?? null,
       colorSecundario: this.form.colorSecundario ?? null,
       pie: this.form.pie ?? null,
@@ -485,6 +524,12 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   abrir(espacio: EspacioEmpresa): void {
     this.actual.set(espacio);
+
+    // Una imagen guardada como "sin imagen" vuelve a estar quitada, no vacía.
+    const logoQuitada = esSinImagen(espacio.logoUrl);
+    const portadaQuitada = esSinImagen(espacio.portadaUrl);
+    this.quitadas.set({ logoUrl: logoQuitada, portadaUrl: portadaQuitada });
+
     this.form = {
       nombre: espacio.nombre,
       slug: espacio.slug,
@@ -493,8 +538,8 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
       estilo: espacio.estilo,
       mostrarIdentidad: espacio.mostrarIdentidad !== false,
       lema: espacio.lema ?? '',
-      portadaUrl: espacio.portadaUrl ?? '',
-      logoUrl: espacio.logoUrl ?? '',
+      portadaUrl: portadaQuitada ? '' : (espacio.portadaUrl ?? ''),
+      logoUrl: logoQuitada ? '' : (espacio.logoUrl ?? ''),
       colorPrincipal: espacio.colorPrincipal ?? '',
       colorSecundario: espacio.colorSecundario ?? '',
       pie: espacio.pie ?? '',
@@ -515,6 +560,7 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
   prepararNuevo(): void {
     this.actual.set(null);
+    this.quitadas.set({ portadaUrl: false, logoUrl: false });
     this.form = {
       nombre: 'Mi espacio',
       slug: 'mi-espacio',
@@ -684,6 +730,9 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
 
     const payload: EspacioForm = {
       ...this.form,
+      // Una imagen quitada a propósito se guarda marcada para no volver a la de la empresa.
+      logoUrl: this.quitadas().logoUrl ? SIN_IMAGEN : this.form.logoUrl,
+      portadaUrl: this.quitadas().portadaUrl ? SIN_IMAGEN : this.form.portadaUrl,
       mostrarIdentidad: this.form.mostrarIdentidad !== false,
       navbar: this.navbar,
       secciones: this.secciones.map((seccion, indice) => ({
@@ -831,6 +880,12 @@ export class EmpresaEspacioEditorComponent implements OnInit, OnDestroy {
   /** Deja la portada (la identidad del espacio) visible u oculta en la landing. */
   alternarIdentidad(): void {
     this.form.mostrarIdentidad = this.form.mostrarIdentidad === false;
+    this.cambiosSinGuardar.set(true);
+  }
+
+  /** Interruptor de Ajustes: enciende o apaga la identidad del espacio. */
+  cambiarIdentidad(valor: boolean): void {
+    this.form.mostrarIdentidad = valor;
     this.cambiosSinGuardar.set(true);
   }
 

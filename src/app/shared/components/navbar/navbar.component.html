@@ -26,10 +26,10 @@
     }
 
     <div class="pub__acciones">
-      <a class="pub__creador" [routerLink]="['/perfil', usuarioCreador]" (click)="cerrarMenu()"
-         title="Hoja de vida y perfil profesional del creador">
-        <i class="fa-solid fa-id-card"></i>
-        <span>Sobre el creador</span>
+      <a class="pub__creador" [routerLink]="urlLanding" (click)="cerrarMenu()"
+         title="Conoce N-Soft: quiénes somos y qué hacemos">
+        <i class="fa-solid fa-building"></i>
+        <span>Sobre nosotros</span>
       </a>
 
       <button type="button" class="pub__tema" (click)="alternarTema()"
@@ -76,11 +76,11 @@
         </a>
       }
 
-      <a class="pub__fila" [routerLink]="['/perfil', usuarioCreador]" (click)="cerrarMenu()">
-        <span class="pub__fila-icono"><i class="fa-solid fa-id-card"></i></span>
+      <a class="pub__fila" [routerLink]="urlLanding" (click)="cerrarMenu()">
+        <span class="pub__fila-icono"><i class="fa-solid fa-building"></i></span>
         <span class="pub__fila-texto">
-          <strong>Sobre el creador</strong>
-          <small>Su perfil profesional y sus proyectos</small>
+          <strong>Sobre nosotros</strong>
+          <small>Quiénes somos y qué hacemos</small>
         </span>
         <i class="fa-solid fa-chevron-right pub__fila-flecha"></i>
       </a>

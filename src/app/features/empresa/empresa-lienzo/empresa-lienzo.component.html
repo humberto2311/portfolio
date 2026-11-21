@@ -363,6 +363,427 @@
                       <a class="icono" [routerLink]="enlaceDe(componente)" target="_blank" rel="noopener" title="Abrir"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                   }
+                  @if (componente.tipo !== 'HTML') {
+                    <section class="bloque">
+                      <h4><i class="fa-solid fa-pen-to-square"></i> Contenido de la pieza</h4>
+                      <p class="pista">
+                        Escribe aquí lo que se verá. Lo que cambias se ve al instante en el lienzo.
+                      </p>
+
+                      @switch (componente.tipo) {
+                        @case ('TEXTO') {
+                          <label class="campo">
+                            <span>Tu texto</span>
+                            <textarea
+                              #campoTexto
+                              rows="5"
+                              [ngModel]="borradorContenido.texto ?? ''"
+                              (ngModelChange)="asignar('texto', $event)"
+                              placeholder="Escribe aquí el mensaje de tu empresa"
+                            ></textarea>
+                          </label>
+
+                          <div class="rejilla-dos">
+                            <label class="campo">
+                              <span>Tamaño</span>
+                              <input
+                                type="number"
+                                min="8"
+                                max="120"
+                                [ngModel]="borradorContenido.tamano ?? 30"
+                                (ngModelChange)="asignarNumeroContenido('tamano', $event, 30)"
+                              />
+                            </label>
+                            <label class="campo">
+                              <span>Alineación</span>
+                              <select
+                                [ngModel]="borradorContenido.alineacion ?? 'left'"
+                                (ngModelChange)="asignar('alineacion', $event)"
+                              >
+                                <option value="left">Izquierda</option>
+                                <option value="center">Centrado</option>
+                                <option value="right">Derecha</option>
+                              </select>
+                            </label>
+                          </div>
+
+                          <label class="campo">
+                            <span>Color del texto</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.color ?? ''"
+                              (ngModelChange)="asignar('color', $event)"
+                              placeholder="#111827"
+                            />
+                          </label>
+                        }
+
+                        @case ('IMAGEN') {
+                          <div class="fila-acciones">
+                            <label class="btn-mini">
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                hidden
+                                (change)="imagenComponenteDesdeArchivo($any($event.target))"
+                                [disabled]="!puedeTocar(componente)"
+                              />
+                              <i class="fa-solid fa-upload"></i> Subir imagen
+                            </label>
+                          </div>
+
+                          <label class="campo">
+                            <span>Enlace de la imagen</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.url ?? ''"
+                              (ngModelChange)="asignar('url', $event)"
+                              placeholder="https://…"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Texto alternativo</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.alter ?? ''"
+                              (ngModelChange)="asignar('alter', $event)"
+                              placeholder="Lo que leen los que no ven la imagen"
+                            />
+                          </label>
+                        }
+
+                        @case ('BOTON') {
+                          <label class="campo">
+                            <span>Texto del botón</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.texto ?? ''"
+                              (ngModelChange)="asignar('texto', $event)"
+                              placeholder="Conócenos"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>A dónde lleva</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.enlace ?? ''"
+                              (ngModelChange)="asignar('enlace', $event)"
+                              placeholder="https://… o /empresa/n-soft"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Color del botón</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.color ?? ''"
+                              (ngModelChange)="asignar('color', $event)"
+                              placeholder="#2563eb"
+                            />
+                          </label>
+                        }
+
+                        @case ('LISTA') {
+                          <label class="campo">
+                            <span>Título de la lista</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.titulo ?? ''"
+                              (ngModelChange)="asignar('titulo', $event)"
+                              placeholder="Lo que ofrecemos"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Elementos (uno por línea)</span>
+                            <textarea
+                              rows="5"
+                              [ngModel]="textoLista"
+                              (ngModelChange)="cambiarLista($event)"
+                              placeholder="Atención personalizada&#10;Productos de calidad"
+                            ></textarea>
+                          </label>
+                        }
+
+                        @case ('MENU') {
+                          <label class="campo">
+                            <span>Título del menú</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.titulo ?? ''"
+                              (ngModelChange)="asignar('titulo', $event)"
+                              placeholder="Nuestro menú"
+                            />
+                          </label>
+
+                          @for (grupo of gruposDe(); track grupo; let indiceGrupo = $index) {
+                            <div class="subbloque">
+                              <div class="subbloque__cabecera">
+                                <input
+                                  type="text"
+                                  [ngModel]="grupo.titulo || ''"
+                                  (ngModelChange)="cambiarGrupo(indiceGrupo, 'titulo', $event)"
+                                  placeholder="Nombre de la sección"
+                                />
+                                <button
+                                  type="button"
+                                  class="icono icono--peligro"
+                                  (click)="quitarGrupoMenu(indiceGrupo)"
+                                  title="Quitar esta sección"
+                                >
+                                  <i class="fa-solid fa-trash"></i>
+                                </button>
+                              </div>
+
+                              @for (plato of itemsDe(grupo); track plato; let indicePlato = $index) {
+                                <div class="plato">
+                                  <input
+                                    type="text"
+                                    [ngModel]="plato.nombre || ''"
+                                    (ngModelChange)="cambiarPlato(indiceGrupo, indicePlato, 'nombre', $event)"
+                                    placeholder="Nombre del plato"
+                                  />
+                                  <input
+                                    type="text"
+                                    [ngModel]="plato.precio ?? ''"
+                                    (ngModelChange)="cambiarPlato(indiceGrupo, indicePlato, 'precio', $event)"
+                                    placeholder="Precio"
+                                  />
+                                  <input
+                                    type="text"
+                                    [ngModel]="plato.descripcion ?? ''"
+                                    (ngModelChange)="cambiarPlato(indiceGrupo, indicePlato, 'descripcion', $event)"
+                                    placeholder="Descripción"
+                                  />
+                                  <div class="plato__acciones">
+                                    <label class="check">
+                                      <input
+                                        type="checkbox"
+                                        [checked]="plato.destacado === true"
+                                        (change)="cambiarPlato(indiceGrupo, indicePlato, 'destacado', $any($event.target).checked)"
+                                      />
+                                      <span>Destacado</span>
+                                    </label>
+                                    <button
+                                      type="button"
+                                      class="icono icono--peligro"
+                                      (click)="quitarPlato(grupo, indicePlato)"
+                                      title="Quitar este plato"
+                                    >
+                                      <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                  </div>
+                                </div>
+                              }
+
+                              <button type="button" class="btn-mini" (click)="agregarPlato(grupo)">
+                                <i class="fa-solid fa-plus"></i> Añadir plato
+                              </button>
+                            </div>
+                          }
+
+                          <button type="button" class="btn-mini ancho" (click)="agregarGrupoMenu()">
+                            <i class="fa-solid fa-plus"></i> Añadir sección del menú
+                          </button>
+                        }
+
+                        @case ('PRODUCTO') {
+                          <label class="campo">
+                            <span>Nombre</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.nombre ?? ''"
+                              (ngModelChange)="asignar('nombre', $event)"
+                              placeholder="Producto destacado"
+                            />
+                          </label>
+
+                          <div class="rejilla-dos">
+                            <label class="campo">
+                              <span>Precio</span>
+                              <input
+                                type="text"
+                                [ngModel]="borradorContenido.precio ?? ''"
+                                (ngModelChange)="asignar('precio', $event)"
+                                placeholder="$99.000"
+                              />
+                            </label>
+                            <label class="campo">
+                              <span>Enlace</span>
+                              <input
+                                type="text"
+                                [ngModel]="borradorContenido.enlace ?? ''"
+                                (ngModelChange)="asignar('enlace', $event)"
+                                placeholder="https://…"
+                              />
+                            </label>
+                          </div>
+
+                          <label class="campo">
+                            <span>Descripción</span>
+                            <textarea
+                              rows="3"
+                              [ngModel]="borradorContenido.descripcion ?? ''"
+                              (ngModelChange)="asignar('descripcion', $event)"
+                              placeholder="Qué lo hace especial"
+                            ></textarea>
+                          </label>
+
+                          <div class="fila-acciones">
+                            <label class="btn-mini">
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                hidden
+                                (change)="imagenProductoDesdeArchivo($any($event.target))"
+                                [disabled]="!puedeTocar(componente)"
+                              />
+                              <i class="fa-solid fa-upload"></i> Subir foto
+                            </label>
+                          </div>
+
+                          <label class="campo">
+                            <span>Foto (enlace)</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.imagen ?? ''"
+                              (ngModelChange)="asignar('imagen', $event)"
+                              placeholder="https://…"
+                            />
+                          </label>
+                        }
+
+                        @case ('GALERIA') {
+                          <label class="campo">
+                            <span>Título de la galería</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.titulo ?? ''"
+                              (ngModelChange)="asignar('titulo', $event)"
+                              placeholder="Galería"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Imágenes (una URL por línea)</span>
+                            <textarea
+                              rows="4"
+                              [ngModel]="galeriaTexto"
+                              (ngModelChange)="asignarGaleria($event)"
+                              placeholder="https://…"
+                            ></textarea>
+                          </label>
+
+                          <div class="fila-acciones">
+                            <label class="btn-mini">
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                hidden
+                                (change)="imagenGaleriaDesdeArchivo($any($event.target))"
+                                [disabled]="!puedeTocar(componente)"
+                              />
+                              <i class="fa-solid fa-upload"></i> Subir imagen
+                            </label>
+                          </div>
+
+                          @if ((borradorContenido.imagenes ?? []).length) {
+                            <div class="galeria-mini">
+                              @for (foto of borradorContenido.imagenes; track $index) {
+                                <div class="galeria-mini__foto">
+                                  <img [src]="foto" alt="Foto de la galería" />
+                                  <button type="button" (click)="quitarImagenGaleria($index)" title="Quitar">
+                                    <i class="fa-solid fa-xmark"></i>
+                                  </button>
+                                </div>
+                              }
+                            </div>
+                          }
+                        }
+
+                        @case ('CONTACTO') {
+                          <label class="campo">
+                            <span>Teléfono</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.telefono ?? ''"
+                              (ngModelChange)="asignar('telefono', $event)"
+                              placeholder="+57 300 000 0000"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>WhatsApp</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.whatsapp ?? ''"
+                              (ngModelChange)="asignar('whatsapp', $event)"
+                              placeholder="+57 300 000 0000"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Correo</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.correo ?? ''"
+                              (ngModelChange)="asignar('correo', $event)"
+                              placeholder="hola@tuempresa.com"
+                            />
+                          </label>
+
+                          <label class="campo">
+                            <span>Dirección</span>
+                            <textarea
+                              rows="2"
+                              [ngModel]="borradorContenido.direccion ?? ''"
+                              (ngModelChange)="asignar('direccion', $event)"
+                              placeholder="Calle 123 #45-67, Bogotá"
+                            ></textarea>
+                          </label>
+                        }
+
+                        @case ('HORARIO') {
+                          <label class="campo">
+                            <span>Título del horario</span>
+                            <input
+                              type="text"
+                              [ngModel]="borradorContenido.titulo ?? ''"
+                              (ngModelChange)="asignar('titulo', $event)"
+                              placeholder="Horario de atención"
+                            />
+                          </label>
+
+                          @for (fila of borradorContenido.filas ?? []; track fila) {
+                            <div class="fila-horario">
+                              <input
+                                type="text"
+                                [ngModel]="fila.dias || ''"
+                                (ngModelChange)="cambiarFilaHorario($index, 'dias', $event)"
+                                placeholder="Lunes a viernes"
+                              />
+                              <input
+                                type="text"
+                                [ngModel]="fila.hora || ''"
+                                (ngModelChange)="cambiarFilaHorario($index, 'hora', $event)"
+                                placeholder="9:00 a. m. - 6:00 p. m."
+                              />
+                              <button type="button" (click)="quitarFilaHorario($index)" title="Quitar">
+                                <i class="fa-solid fa-xmark"></i>
+                              </button>
+                            </div>
+                          }
+
+                          <button type="button" class="btn-mini ancho" (click)="agregarFilaHorario()">
+                            <i class="fa-solid fa-plus"></i> Añadir día
+                          </button>
+                        }
+                      }
+                    </section>
+                  }
+
                   <div class="rejilla-dos">
                     <label class="campo"><span>X</span><input type="number" [value]="componente.x" (change)="cambiarGeometria('x', $any($event.target).value)" /></label>
                     <label class="campo"><span>Y</span><input type="number" [value]="componente.y" (change)="cambiarGeometria('y', $any($event.target).value)" /></label>
@@ -373,6 +794,7 @@
                     <label class="campo"><span>Color</span><input type="text" [ngModel]="borradorEstilo.color" (ngModelChange)="asignarEstilo('color', $event)" placeholder="#111827" /></label>
                     <label class="campo"><span>Fondo</span><input type="text" [ngModel]="borradorEstilo.fondo" (ngModelChange)="asignarEstilo('fondo', $event)" placeholder="transparente" /></label>
                   </div>
+
                   @if (componente.tipo === 'HTML') {
                     <section class="bloque-html">
                       <h4><i class="fa-solid fa-code"></i> HTML de esta pieza</h4>

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { EnlaceEspacio, EspacioEmpresa } from '../../../core/models/empresa.model';
 import { TemaService } from '../../../core/services/tema.service';
-import { anclasDe, esExterno, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
+import { anclasDe, esExterno, esSinImagen, tieneDestino, urlEnlace, urlRed } from '../espacio/espacio-ui';
 
 @Component({
   selector: 'app-espacio-navbar',
@@ -29,6 +29,8 @@ export class EspacioNavbarComponent {
 
   get imagenLogo(): string | null {
     if (this.logoFallido) return null;
+    // El espacio puede guardar el logo como "quitado": entonces se muestran las iniciales.
+    if (esSinImagen(this.espacio?.logoUrl)) return null;
     return this.espacio?.logoUrl?.trim() || null;
   }
 

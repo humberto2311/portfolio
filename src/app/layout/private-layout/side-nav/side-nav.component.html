@@ -122,8 +122,8 @@
             @if (espacio.id !== espacioActual?.id) {
               <button type="button" class="rail__espacio" (click)="irAEspacio(espacio.id)">
                 <span class="rail__espacio-avatar">
-                  @if (espacio.logoUrl) {
-                    <img [src]="espacio.logoUrl" [alt]="espacio.nombre" (error)="fotoCuentaFallida($event)" />
+                  @if (logoDe(espacio); as logoEspacio) {
+                    <img [src]="logoEspacio" [alt]="espacio.nombre" (error)="fotoCuentaFallida($event)" />
                   } @else {
                     {{ inicialesDe(espacio.nombre) }}
                   }

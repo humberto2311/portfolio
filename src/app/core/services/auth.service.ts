@@ -6,6 +6,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthUser } from '../models/AuthUser';
 import { ModalService } from './modal.service';
+import { Sesion, TokenService } from './token.service';
 import { environment } from '../../../environments/environment';
 
 /** Lo que /api/cuenta/estado dice de la cuenta conectada. */
@@ -38,6 +39,7 @@ export class AuthService {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private modal = inject(ModalService);
+  private sesion = inject(TokenService);
 
   private readonly API_URL = `${environment.apiUrl}/api/auth`;
   private readonly CUENTA_URL = `${environment.apiUrl}/api/cuenta`;
@@ -53,25 +55,28 @@ export class AuthService {
   /** Solo cuando el backend no tiene SMTP: dice dónde leer el código. */
   readonly pistaDesarrollo = signal<string | null>(null);
 
+  /**
+   * Al abrir la app no hay token en ningún almacenamiento del navegador: se
+   * recupera la sesión con el refresh (cookie HttpOnly) y, si no hay, se sigue
+   * como anónimo sin bloquear el arranque.
+   */
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          this.currentUser.set({
-            id: payload.id ? String(payload.id) : '0',
-            fullName: payload.fullName || 'Usuario', 
-            email: payload.sub,
-            role: payload.role || 'ROLE_USER'
-          });
+      this.sesion.arrancar().subscribe((haySesion) => {
+        const usuario = this.sesion.usuario();
+        if (haySesion && usuario) {
+          this.currentUser.set(usuario as unknown as AuthUser);
           this.isAuthenticated.set(true);
-        } catch (e) {
-          localStorage.removeItem('token');
         }
-      }
+        this.listo.set(true);
+      });
+    } else {
+      this.listo.set(true);
     }
   }
+
+  /** true cuando ya se intentó recuperar la sesión (evita parpadeos en los guards). */
+  readonly listo = signal(false);
 
   loginWithProvider(provider: 'github' | 'google' | 'microsoft') {
     window.location.href = `${environment.apiUrl}/oauth2/authorization/${provider}`;
@@ -81,7 +86,7 @@ export class AuthService {
   login(email: string, password: string) {
     this.isLoading.set(true);
     this.error.set(null);
-    this.http.post<{ token: string; user: AuthUser }>(`${this.API_URL}/login`, { email, password })
+    this.http.post<Sesion>(`${this.API_URL}/login`, { email, password }, { withCredentials: true })
       .subscribe({
         next: (res) => this.handleSuccess(res),
         error: (err) => {
@@ -142,13 +147,13 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
 
-    return this.http.post<{ token: string; user: AuthUser }>(`${this.API_URL}/verificar`, { email, codigo })
+    return this.http.post<Sesion>(`${this.API_URL}/verificar`, { email, codigo }, { withCredentials: true })
       .pipe(
         map((res) => {
           this.pendiente.set(null);
           this.guardarSesion(res);
           if (redirigir) this.router.navigate(['/app']);
-          return res.user;
+          return res.user as unknown as AuthUser;
         }),
         catchError((err) => {
           this.error.set(err.error?.message ?? 'El código no es válido o venció');
@@ -214,57 +219,46 @@ export class AuthService {
   }
 
   // ---- OAuth Success Callback ----
-  handleOAuthSuccess(token: string) {
+  /**
+   * El backend ya dejó el refresh en su cookie HttpOnly; aquí se cambia el
+   * access token de un solo uso por el par completo y se entra a la app.
+   */
+  handleOAuthSuccess(_token: string) {
     this.isLoading.set(true);
-    
-    // Verificamos que estemos en el navegador
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('token', token);
-    }
-    
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      
-      const user: AuthUser = {
-        id: payload.id ? String(payload.id) : '0',
-        fullName: payload.fullName || payload.sub, // Si no hay fullName, usa el email
-        email: payload.sub,
-        role: payload.role || 'ROLE_USER'
-      };
 
-      this.currentUser.set(user);
-      this.isAuthenticated.set(true);
-      this.isLoading.set(false);
-      
-      this.router.navigate(['/app']); 
-    } catch (e) {
-      this.error.set('Error al procesar el token de autenticación');
-      this.isLoading.set(false);
-      this.router.navigate(['/']); 
-    }
+    this.sesion.renovar().subscribe({
+      next: (sesion) => {
+        this.currentUser.set(sesion.user as unknown as AuthUser);
+        this.isAuthenticated.set(true);
+        this.isLoading.set(false);
+        this.router.navigate(['/app']);
+      },
+      error: () => {
+        this.error.set('No pudimos abrir tu sesión. Intenta entrar otra vez.');
+        this.isLoading.set(false);
+        this.router.navigate(['/']);
+      }
+    });
   }
 
-  private handleSuccess(res: { token: string; user: AuthUser }) {
+  private handleSuccess(res: Sesion) {
     this.guardarSesion(res);
     this.router.navigate(['/app']);
   }
 
   /** Guarda token y usuario en la sesión local y baja el modal; no mueve a nadie de pantalla. */
-  private guardarSesion(res: { token: string; user: AuthUser }) {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('token', res.token);
-    }
+  private guardarSesion(res: Sesion) {
+    this.sesion.guardar(res);
 
     this.modal.closeLogin();
-    this.currentUser.set(res.user);
+    this.currentUser.set(res.user as unknown as AuthUser);
     this.isAuthenticated.set(true);
     this.isLoading.set(false);
   }
 
   logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('token');
-    }
+    // El servidor revoca el refresh y borra su cookie; aquí se limpia la memoria.
+    this.sesion.cerrarSesion().subscribe();
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
     this.pendiente.set(null);
@@ -272,5 +266,12 @@ export class AuthService {
   }
   isLoggedIn(): boolean {
     return this.isAuthenticated();
+  }
+
+  /** Espera a saber si el refresh token da una sesión viva (una sola vez). */
+  sesionLista() {
+    return this.listo()
+      ? of(this.isAuthenticated())
+      : this.sesion.arrancar().pipe(map((hay) => hay || this.isAuthenticated()));
   }
 }

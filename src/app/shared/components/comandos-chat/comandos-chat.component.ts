@@ -2,8 +2,11 @@ import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { BotComando, RespuestaComando } from '../../../core/models/comando.model';
 import { ComandosService } from '../../../core/services/comandos.service';
+import { ToqueNfcService } from '../../../core/services/toque-nfc.service';
+import { EstadoNfc } from '../../../core/models/nfc-estado.model';
 
 interface MensajeComando {
   autor: 'yo' | 'sistema' | 'ia';
@@ -11,6 +14,7 @@ interface MensajeComando {
   comando?: string | null;
   ejemplo?: string;
   confirmacion?: RespuestaComando;
+  nfc?: EstadoNfc;
 }
 
 @Component({
@@ -25,6 +29,8 @@ export class ComandosChatComponent implements OnInit {
   @Input() compacto = false;
 
   private comandos = inject(ComandosService);
+  private toques = inject(ToqueNfcService);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   readonly mensajes = signal<MensajeComando[]>([]);
@@ -36,6 +42,7 @@ export class ComandosChatComponent implements OnInit {
   readonly modoIa = signal(false);
   readonly pendiente = signal<RespuestaComando | null>(null);
   readonly copiado = signal<string | null>(null);
+  readonly estadoNfc = signal<EstadoNfc | null>(null);
 
   readonly hayPendiente = computed(() => this.pendiente() !== null);
   readonly modoTraduciendo = computed(() => this.modoIa() && this.enviando());
@@ -162,15 +169,45 @@ export class ComandosChatComponent implements OnInit {
     this.enviando.set(false);
     this.pendiente.set(respuesta.requiereConfirmacion ? respuesta : null);
 
+    const esNfc = respuesta.comando === '/nfc-estado';
+
     this.mensajes.update((lista) => [
       ...lista,
       {
         autor: 'sistema',
         texto: respuesta.mensaje,
         comando: respuesta.comando,
-        confirmacion: respuesta.requiereConfirmacion ? respuesta : undefined
+        confirmacion: respuesta.requiereConfirmacion ? respuesta : undefined,
+        nfc: esNfc ? this.estadoNfc() ?? undefined : undefined
       }
     ]);
+
+    if (esNfc) this.cargarEstadoNfc();
+  }
+
+  private cargarEstadoNfc(): void {
+    this.toques.estado()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (estado) => {
+          this.estadoNfc.set(estado);
+          this.mensajes.update((lista) => {
+            const copia = [...lista];
+            const ultimo = copia.length - 1;
+
+            if (ultimo >= 0 && copia[ultimo].comando === '/nfc-estado') {
+              copia[ultimo] = { ...copia[ultimo], nfc: estado };
+            }
+
+            return copia;
+          });
+        },
+        error: () => this.estadoNfc.set(null)
+      });
+  }
+
+  activarEmision(): void {
+    void this.router.navigate(['/app/emisora'], { queryParams: { activar: '1' } });
   }
 
   private cargarBots(): void {

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, firstValueFrom, map, of } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 import { environment } from '../../../environments/environment';
+import { EstadoNfc } from '../models/nfc-estado.model';
 
 export type OrigenToque = 'EMISION' | 'ETIQUETA' | 'NAVEGADOR' | 'QR';
 
@@ -163,5 +164,9 @@ export class ToqueNfcService {
         { enableHighAccuracy: false, timeout: 4000, maximumAge: 300000 },
       );
     });
+  }
+
+  estado(): Observable<EstadoNfc> {
+    return this.http.get<EstadoNfc>(`${this.base}/estado`);
   }
 }

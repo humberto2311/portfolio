@@ -86,6 +86,31 @@
             </div>
           }
 
+          @if (mensaje.nfc; as nfc) {
+            <div class="nfc-tarjeta">
+              <p class="nfc-tarjeta__titulo">
+                <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
+                Emisión NFC
+                <span class="nfc-tarjeta__estado" [class.activa]="nfc.emisionActiva">
+                  {{ nfc.emisionActiva ? 'Activa' : 'Inactiva' }}
+                </span>
+              </p>
+
+              <div class="nfc-tarjeta__datos">
+                <span><strong>{{ nfc.toquesHoy }}</strong> toques hoy</span>
+                <span><strong>{{ nfc.toquesTotales }}</strong> en total</span>
+                <span><strong>{{ nfc.nombreTarjeta || nfc.tarjetaActiva }}</strong> tarjeta activa</span>
+              </div>
+
+              @if (!nfc.emisionActiva) {
+                <button type="button" class="nfc-tarjeta__accion" (click)="activarEmision()">
+                  <i class="fa-solid fa-play" aria-hidden="true"></i>
+                  Activar emisión
+                </button>
+              }
+            </div>
+          }
+
           @if (mensaje.confirmacion) {
             <div class="confirmacion">
               <p class="confirmacion__titulo">

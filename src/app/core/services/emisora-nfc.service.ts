@@ -20,7 +20,18 @@ export interface InfoDispositivo {
   emulacionDisponible: boolean;
   emitiendo: boolean;
   enlace: string;
+  emisionActiva?: boolean;
+  reanudarAlReiniciar?: boolean;
+  tarjetaActiva?: string;
+  nombreActivo?: string;
   permisos: Record<string, boolean>;
+}
+
+export interface PreferenciasNfc {
+  reanudarAlReiniciar: boolean;
+  emisionActiva: boolean;
+  tarjetaActiva: string;
+  nombreActivo: string;
 }
 
 export interface ToqueLeido {
@@ -38,6 +49,7 @@ export interface AvisoEmision {
   bytes: number;
   emulacionDisponible: boolean;
   sinEnlace?: boolean;
+  requiereConsulta?: boolean;
 }
 
 export interface Transmision {
@@ -76,6 +88,8 @@ interface PilaNfc {
   empezarLectura(pedido?: { segundos?: number }): Promise<{ leyendo: boolean; segundos: number }>;
   pararLectura(): Promise<void>;
   rutaPendiente(): Promise<{ ruta?: string }>;
+  preferencias(): Promise<PreferenciasNfc>;
+  guardarPreferencias(pedido: { reanudarAlReiniciar: boolean }): Promise<PreferenciasNfc>;
   addListener(evento: 'toque', callback: (toque: ToqueLeido) => void): Promise<{ remove(): Promise<void> }>;
   addListener(evento: 'enlace', callback: (aviso: { ruta?: string }) => void): Promise<{ remove(): Promise<void> }>;
   addListener(evento: 'lecturaCerrada', callback: (aviso: { motivo?: string }) => void): Promise<{ remove(): Promise<void> }>;
@@ -154,6 +168,26 @@ export class EmisoraNfcService {
       await this.pedirEstado();
     } catch {
       return;
+    }
+  }
+
+  async preferencias(): Promise<PreferenciasNfc | null> {
+    if (!this.esNativa) return null;
+
+    try {
+      return await this.nativa().preferencias();
+    } catch {
+      return null;
+    }
+  }
+
+  async guardarPreferencias(reanudarAlReiniciar: boolean): Promise<PreferenciasNfc | null> {
+    if (!this.esNativa) return null;
+
+    try {
+      return await this.nativa().guardarPreferencias({ reanudarAlReiniciar });
+    } catch {
+      return null;
     }
   }
 

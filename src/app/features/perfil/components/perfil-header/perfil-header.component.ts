@@ -11,6 +11,7 @@ import { SidePanelService } from '../../../../core/services/side-panel.service';
 import { FotoPerfil, UserPhotoService } from '../../../../core/services/user-photo.service';
 import { imagenDePerfilComoDataUrl } from '../../../../core/utils/imagen.util';
 import { PhotoViewerComponent } from '../photo-viewer/photo-viewer.component';
+import { SpotifyWidgetComponent } from '../../../../shared/components/spotify-widget/spotify-widget.component';
 
 interface CambiosPerfilSocial {
   role?: string;
@@ -23,7 +24,7 @@ interface CambiosPerfilSocial {
 @Component({
   selector: 'app-perfil-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, PhotoViewerComponent],
+  imports: [CommonModule, FormsModule, PhotoViewerComponent, SpotifyWidgetComponent],
   templateUrl: './perfil-header.component.html',
   styleUrls: ['./perfil-header.component.scss']
 })

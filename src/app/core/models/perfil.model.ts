@@ -93,6 +93,8 @@ export interface PerfilData {
   disenoFondoUrl?: string;
   disenoCss?: string;
   disenoActivo?: boolean;
+  gitUsername?: string;
+  spotifyPublico?: boolean;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa' | 'enlaces';

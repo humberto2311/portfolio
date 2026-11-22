@@ -403,6 +403,8 @@ export class PerfilService {
       disenoFondoUrl: data.disenoFondoUrl || undefined,
       disenoCss: data.disenoCss || undefined,
       disenoActivo: Boolean(data.disenoActivo),
+      gitUsername: data.gitUsername || undefined,
+      spotifyPublico: data.spotifyPublico !== false,
     };
   }
 

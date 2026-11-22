@@ -105,6 +105,12 @@
           </span>
         }
       </div>
+
+      <app-spotify-widget
+        [isOwner]="esMiPerfil"
+        [username]="perfil.gitUsername ?? null"
+        [modoPublico]="perfil.spotifyPublico !== false"
+        [compacto]="true" />
     </div>
 
     <!-- ACCIONES -->

@@ -403,7 +403,9 @@
           <div class="readme-content markdown" *ngIf="!editandoDescripcion && descripcionHtml"
                [innerHTML]="descripcionHtml"></div>
           <div class="readme-content" *ngIf="!editandoDescripcion && !descripcionHtml">
-            Sin descripción detallada.
+            Este proyecto todavía no tiene descripción.@if (modoPrivado) {
+              Pulsa "Editar descripción" para escribir una; acepta Markdown (## título, **negrita**, - lista).
+            }
           </div>
         </div>
 

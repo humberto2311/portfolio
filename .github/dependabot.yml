@@ -1,0 +1,15 @@
+# Dependabot abre un PR cuando sale una versión nueva de una dependencia. Si la versión
+# actual tiene una vulnerabilidad conocida, el PR llega como "security update".
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Angular se actualiza en bloque: sus paquetes tienen que ir en la misma versión.
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"

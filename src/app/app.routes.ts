@@ -113,6 +113,12 @@ export const routes: Routes = [
       { path: 'empleo', component: EmpleoComponent, data: { anchoCompleto: true } },
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
+      {
+        path: 'empresa/pos',
+        loadComponent: () =>
+          import('./features/pos/pos-panel.component').then((m) => m.PosPanelComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
       { path: 'empresa/espacio', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true } },
       { path: 'empresa/espacio/vista', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true, modo: 'vista' } },

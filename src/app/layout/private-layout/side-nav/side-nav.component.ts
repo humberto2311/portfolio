@@ -52,6 +52,7 @@ const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
   { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+  { label: 'Punto de venta', icon: 'fa-solid fa-cash-register', ruta: '/app/empresa/pos', nota: 'Ventas y catálogo' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
   { label: 'Enlaces', icon: 'fa-solid fa-link', accion: 'grupo', grupo: 'equipo', nota: 'Enlaces y tarjetas del equipo' },
 ];

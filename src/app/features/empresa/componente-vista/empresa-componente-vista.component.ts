@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 import {
   ComponenteLienzo,
@@ -266,7 +267,11 @@ export class EmpresaComponenteVistaComponent implements OnChanges {
       table { width: 100%; border-collapse: collapse; }
     `;
 
-    this.sombra.innerHTML = `<style>${estilosExtra}</style>${html}`;
+    // El Shadow DOM no aísla scripts: un manejador on* que llegue aquí corre con la sesión del
+    // visitante. El back ya limpia al guardar, pero el HTML guardado antes de ese arreglo no pasó
+    // por ahí, así que se vuelve a limpiar con DOMPurify (usa el parser del propio navegador).
+    const seguro = DOMPurify.sanitize(html, { FORCE_BODY: true, ADD_TAGS: ['style'] });
+    this.sombra.innerHTML = `<style>${estilosExtra}</style>${seguro}`;
   }
 
   get htmlRespaldo(): string {

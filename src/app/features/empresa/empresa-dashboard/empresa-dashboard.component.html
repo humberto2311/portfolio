@@ -71,7 +71,7 @@
           <div class="cabecera__titulo">
             <h1>{{ actual.nombre }}</h1>
             @if (actual.certificada) {
-              <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Certificada</span>
+              <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Documentos completos</span>
             } @else if (!esPersonal) {
               <span class="sello sello--pendiente"><i class="fa-solid fa-hourglass-half"></i> Sin certificar</span>
             } @else {
@@ -167,8 +167,8 @@
       <article class="metrica">
         <span class="metrica__icono"><i class="fa-solid fa-circle-check"></i></span>
         <div>
-          <strong>{{ esPersonal ? 'No aplica' : (actual.certificada ? 'Certificada' : 'Pendiente') }}</strong>
-          <span>certificación</span>
+          <strong>{{ esPersonal ? 'No aplica' : (actual.certificada ? 'Completos' : 'Pendientes') }}</strong>
+          <span>documentos</span>
         </div>
       </article>
     </section>
@@ -270,16 +270,16 @@
         </div>
 
         @if (documentosPendientes.length) {
-          <p class="descripcion">Faltan estos documentos para certificar la empresa:</p>
+          <p class="descripcion">Faltan estos documentos:</p>
           <div class="chips">
             @for (documento of documentosPendientes; track documento) {
               <span class="chip chip--pendiente"><i class="fa-solid fa-circle-exclamation"></i> {{ documento }}</span>
             }
           </div>
         } @else if (actual.certificada) {
-          <p class="descripcion bien"><i class="fa-solid fa-circle-check"></i> La empresa ya está certificada.</p>
+          <p class="descripcion bien"><i class="fa-solid fa-circle-check"></i> La empresa tiene todos sus documentos cargados.</p>
         } @else {
-          <p class="descripcion">Los documentos están validados; la certificación se actualiza sola.</p>
+          <p class="descripcion">Los documentos están cargados; el estado se actualiza solo.</p>
         }
       </section>
     }

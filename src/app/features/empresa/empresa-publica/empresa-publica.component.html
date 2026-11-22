@@ -32,7 +32,7 @@
               <span class="sello">{{ sectorEmpresa }}</span>
             }
             @if (publica.empresa.certificada) {
-              <span class="sello sello--ok"><i class="fa-solid fa-circle-check"></i> Certificada</span>
+              <span class="sello sello--ok" title="La empresa cargó sus documentos legales; nadie los ha revisado todavía."><i class="fa-solid fa-file-circle-check"></i> Documentos completos</span>
             }
             @if (ubicacion) {
               <span class="sello"><i class="fa-solid fa-location-dot"></i> {{ ubicacion }}</span>

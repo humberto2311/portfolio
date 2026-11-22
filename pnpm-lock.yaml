@@ -212,8 +212,8 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3(@capacitor/core@8.6.2)
       '@capgo/capacitor-nfc':
-        specifier: ^8.3.6
-        version: 8.3.10(@capacitor/core@8.6.2)
+        specifier: ^8.3.11
+        version: 8.3.11(@capacitor/core@8.6.2)
       '@fortawesome/fontawesome-free':
         specifier: ^7.3.1
         version: 7.3.1
@@ -1013,8 +1013,8 @@ packages:
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
 
-  '@capgo/capacitor-nfc@8.3.10':
-    resolution: {integrity: sha512-C7rNwTTQgPnMNjXM2FGzVfvMniM+eJ8fO7xlKrp4jvPYolQv8t8cZ3y2upnBs1qsHBrfRf8xf4eJbq5ZeoQjiA==}
+  '@capgo/capacitor-nfc@8.3.11':
+    resolution: {integrity: sha512-wjRSJIFGHmkLoUNTYItfzqICE6Eync8okZS56EQ/OjW84SwtkycTTidGtQCR2A6kogEe4Iykml2jyAuW8m0HaQ==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -5837,7 +5837,7 @@ snapshots:
 
   '@capacitor/synapse@1.0.4': {}
 
-  '@capgo/capacitor-nfc@8.3.10(@capacitor/core@8.6.2)':
+  '@capgo/capacitor-nfc@8.3.11(@capacitor/core@8.6.2)':
     dependencies:
       '@capacitor/core': 8.6.2
 

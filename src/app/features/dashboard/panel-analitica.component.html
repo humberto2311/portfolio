@@ -1,0 +1,103 @@
+<div class="panel">
+  <header class="panel__cabecera">
+    <div class="panel__identidad">
+      <span class="panel__avatar">
+        <i class="fa-solid" [class.fa-user]="contexto() === 'personal'" [class.fa-building]="contexto() === 'empresa'" aria-hidden="true"></i>
+      </span>
+
+      <div class="panel__texto">
+        <button type="button" class="selector" (click)="alternarSelector()">
+          <strong>{{ datos().titulo }}</strong>
+          <i class="fa-solid" [class.fa-chevron-down]="!selectorAbierto()" [class.fa-chevron-up]="selectorAbierto()" aria-hidden="true"></i>
+        </button>
+        <small>{{ datos().subtitulo }}</small>
+
+        @if (selectorAbierto()) {
+          <ul class="selector__lista">
+            <li>
+              <button type="button" [class.activa]="contexto() === 'personal'" (click)="cambiarContexto('personal')">
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                <span>
+                  <strong>Mi panel</strong>
+                  <small>Solo tus datos</small>
+                </span>
+              </button>
+            </li>
+
+            @for (empresa of empresasDisponibles(); track empresa.id) {
+              <li>
+                <button type="button" [class.activa]="contexto() === 'empresa'" (click)="cambiarContexto('empresa')">
+                  <i class="fa-solid fa-building" aria-hidden="true"></i>
+                  <span>
+                    <strong>Panel de {{ empresa.nombre }}</strong>
+                    <small>{{ empresa.rolEtiqueta || empresa.rolPropio }}</small>
+                  </span>
+                </button>
+              </li>
+            } @empty {
+              <li class="selector__vacio">No administras ninguna empresa todavía.</li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <div class="panel__acciones">
+      <input type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)" aria-label="Desde" />
+      <input type="date" [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" aria-label="Hasta" />
+      <button type="button" class="boton" (click)="cargar()">
+        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+        Aplicar
+      </button>
+      <button type="button" class="boton boton--exportar" [disabled]="exportando()" (click)="exportar()">
+        <i class="fa-solid fa-file-export" aria-hidden="true"></i>
+        Exportar contactos
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="aviso aviso--error">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando datos…</p>
+  }
+
+  @if (exportado(); as hoja) {
+    <div class="exportado">
+      <p>
+        <i class="fa-solid fa-table" aria-hidden="true"></i>
+        {{ hoja.titulo }}: {{ hoja.total }} filas listas.
+      </p>
+      <button type="button" class="boton" (click)="descargarCsv()">
+        <i class="fa-solid fa-download" aria-hidden="true"></i>
+        Descargar CSV
+      </button>
+    </div>
+  }
+
+  <div class="metricas">
+    @for (metrica of datos().metricas; track metrica.clave) {
+      <article class="metrica">
+        <i [class]="metrica.icono" aria-hidden="true"></i>
+        <span class="metrica__valor">{{ metrica.valor }}</span>
+        <span class="metrica__etiqueta">{{ metrica.etiqueta }}</span>
+      </article>
+    }
+  </div>
+
+  <div class="graficos">
+    @for (tarjeta of datos().tarjetas; track tarjeta.id) {
+      <article class="grafico">
+        <h3>{{ tarjeta.titulo }}</h3>
+        <p>{{ tarjeta.descripcion }}</p>
+        <app-dashboard-grafico [series]="tarjeta.series" [tipo]="tarjeta.tipoGrafico" [permitidos]="tarjeta.permitidos" />
+      </article>
+    } @empty {
+      @if (!cargando()) {
+        <p class="aviso">Todavía no hay eventos en este periodo.</p>
+      }
+    }
+  </div>
+</div>

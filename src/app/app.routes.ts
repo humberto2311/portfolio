@@ -101,6 +101,12 @@ export const routes: Routes = [
         data: { anchoCompleto: true },
       },
       { path: 'dashboard', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'personal' } },
+      {
+        path: 'panel',
+        loadComponent: () =>
+          import('./features/dashboard/panel-analitica.component').then((m) => m.PanelAnaliticaComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'dashboard/empresa', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa' } },
       { path: 'dashboard/empresa/mi-actividad', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa-personal' } },
       { path: 'ubicacion', component: UbicacionComponent, data: { anchoCompleto: true } },

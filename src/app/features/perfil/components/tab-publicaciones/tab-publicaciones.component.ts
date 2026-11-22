@@ -37,13 +37,15 @@ export class TabPublicacionesComponent {
 
   constructor() {
     // cuando el perfil se cargue, pedimos su feed y el resumen del CV
+    // cargarResumenCv escribe resumenCv al empezar: sin allowSignalWrites, Angular 17 lanza NG0600
+    // y corta el effect, así que el resumen del CV no cargaba.
     effect(() => {
       const p = this.perfilService.perfil();
       if (!p?.id) return;
 
       this.perfilService.cargarPublicaciones(p.id);
       this.cargarResumenCv(p.id);
-    });
+    }, { allowSignalWrites: true });
   }
 
   private cargarResumenCv(userId: string): void {

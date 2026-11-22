@@ -96,10 +96,11 @@ export class SideNavComponent {
     this.escucharClicFuera();
     this.destruir.onDestroy(() => this.quitarOyentes.splice(0).forEach((quitar) => quitar()));
 
+    // Escribe una señal dentro del effect: en Angular 17 eso exige allowSignalWrites (si no, NG0600).
     effect(() => {
       this.empresa.enModoEmpresa();
       this.espaciosAbiertos.set(false);
-    });
+    }, { allowSignalWrites: true });
   }
 
   get navegacion(): RailItem[] {

@@ -1,0 +1,78 @@
+<div class="visor" role="dialog" aria-modal="true" aria-label="Estado">
+  <div class="visor__progreso">
+    @for (estado of grupo().estados; track estado.id; let i = $index) {
+      <span class="barra">
+        <span
+          class="barra__relleno"
+          [style.width.%]="i < indice() ? 100 : (i === indice() ? progreso() : 0)"></span>
+      </span>
+    }
+  </div>
+
+  <header class="visor__cabecera">
+    <div class="visor__autor">
+      @if (grupo().avatar) {
+        <img [src]="grupo().avatar" [alt]="grupo().nombre" />
+      } @else {
+        <span class="visor__iniciales">{{ grupo().nombre.slice(0, 2).toUpperCase() }}</span>
+      }
+      <div class="visor__datos">
+        <strong>{{ grupo().nombre }}</strong>
+        <span>{{ actual()?.creadoEn | date: 'HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="visor__acciones">
+      @if (actual()?.propio) {
+        <button type="button" (click)="eliminar()" aria-label="Eliminar estado">
+          <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+        </button>
+      }
+      <button type="button" (click)="cerrar.emit()" aria-label="Cerrar">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="visor__lienzo" [style.background]="actual()?.tipo === 'TEXTO' ? (actual()?.fondo || '#0d1117') : '#000'">
+    @if (actual(); as estado) {
+      @if (estado.tipo === 'FOTO' && estado.contenidoUrl) {
+        <img class="visor__imagen" [src]="estado.contenidoUrl" alt="Estado" />
+      }
+
+      @if (estado.texto) {
+        <p class="visor__texto">{{ estado.texto }}</p>
+      }
+
+      <div class="visor__stickers">
+        @for (sticker of estado.stickers; track $index) {
+          <span class="visor__sticker">{{ sticker }}</span>
+        }
+      </div>
+
+      @if (estado.musicaTitulo) {
+        <div class="visor__musica">
+          <i class="fa-solid fa-music" aria-hidden="true"></i>
+          <div>
+            <strong>{{ estado.musicaTitulo }}</strong>
+            <span>{{ estado.musicaArtista }}</span>
+          </div>
+        </div>
+      }
+
+      @if (estado.propio) {
+        <span class="visor__vistas">
+          <i class="fa-regular fa-eye" aria-hidden="true"></i>
+          {{ estado.vistas }}
+        </span>
+      }
+    }
+  </div>
+
+  <button type="button" class="zona zona--izquierda" (click)="retroceder()" aria-label="Anterior"></button>
+  <button type="button" class="zona zona--derecha" (click)="avanzar()" aria-label="Siguiente"></button>
+
+  <button type="button" class="visor__pausa" (click)="alternarPausa()" [attr.aria-label]="pausado() ? 'Reanudar' : 'Pausar'">
+    <i class="fa-solid" [class.fa-play]="pausado()" [class.fa-pause]="!pausado()" aria-hidden="true"></i>
+  </button>
+</div>

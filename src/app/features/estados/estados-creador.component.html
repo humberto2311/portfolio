@@ -1,0 +1,128 @@
+<div class="creador" role="dialog" aria-modal="true" aria-label="Crear estado">
+  <header class="creador__barra">
+    <button type="button" class="icono" (click)="cerrar.emit()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <span class="creador__titulo">Nuevo estado</span>
+    <button type="button" class="publicar" [disabled]="!puedePublicar() || guardando()" (click)="publicar()">
+      {{ guardando() ? 'Publicando…' : 'Publicar' }}
+    </button>
+  </header>
+
+  <div class="creador__lienzo" [style.background]="tipo() === 'TEXTO' ? fondo() : '#000'">
+    @if (tipo() === 'FOTO' && imagen()) {
+      <img class="lienzo__imagen" [src]="imagen()" alt="Fondo del estado" />
+    }
+
+    @if (texto()) {
+      <p class="lienzo__texto">{{ texto() }}</p>
+    }
+
+    <div class="lienzo__stickers">
+      @for (sticker of stickersPuestos(); track $index) {
+        <button type="button" class="sticker" (click)="quitarSticker($index)" [title]="'Quitar ' + sticker">
+          {{ sticker }}
+        </button>
+      }
+    </div>
+
+    @if (musica(); as pista) {
+      <div class="widget-musica">
+        <i class="fa-solid fa-music" aria-hidden="true"></i>
+        <div class="widget-musica__datos">
+          <strong>{{ pista.titulo }}</strong>
+          <span>{{ pista.artista }}</span>
+        </div>
+        <button type="button" class="widget-musica__quitar" (click)="quitarMusica()" aria-label="Quitar música">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+
+    @if (imagen()) {
+      <button type="button" class="lienzo__quitar-imagen" (click)="quitarImagen()">Quitar foto</button>
+    }
+  </div>
+
+  <div class="creador__texto">
+    <input
+      type="text"
+      placeholder="Escribe algo…"
+      maxlength="120"
+      [ngModel]="texto()"
+      (ngModelChange)="texto.set($event)" />
+  </div>
+
+  <div class="herramientas">
+    <button type="button" class="herramienta" (click)="elegirTipo('FOTO')">
+      <i class="fa-solid fa-image" aria-hidden="true"></i>
+      Foto
+    </button>
+
+    <label class="herramienta">
+      <i class="fa-solid fa-upload" aria-hidden="true"></i>
+      Subir
+      <input type="file" accept="image/*" hidden (change)="elegirImagen($event)" />
+    </label>
+
+    <button type="button" class="herramienta" (click)="buscadorMusica.set(!buscadorMusica())">
+      <i class="fa-solid fa-music" aria-hidden="true"></i>
+      Música
+    </button>
+
+    <label class="herramienta herramienta--rango">
+      <i class="fa-regular fa-clock" aria-hidden="true"></i>
+      {{ duracion() }}s
+      <input type="range" min="5" max="15" [ngModel]="duracion()" (ngModelChange)="duracion.set($event)" />
+    </label>
+  </div>
+
+  <div class="paleta">
+    @for (color of fondos; track color) {
+      <button
+        type="button"
+        class="paleta__color"
+        [style.background]="color"
+        [class.paleta__color--activo]="fondo() === color && tipo() === 'TEXTO'"
+        (click)="elegirFondo(color)"
+        [attr.aria-label]="'Fondo ' + color"></button>
+    }
+  </div>
+
+  <div class="barra-stickers">
+    @for (sticker of stickers; track sticker) {
+      <button type="button" class="barra-stickers__item" (click)="anadirSticker(sticker)">{{ sticker }}</button>
+    }
+  </div>
+
+  @if (buscadorMusica()) {
+    <div class="buscador">
+      <input
+        type="search"
+        placeholder="Buscar canción o artista"
+        [ngModel]="consultaMusica()"
+        (ngModelChange)="buscar($event)" />
+
+      <ul class="buscador__lista">
+        @for (pista of resultados(); track pista.id) {
+          <li>
+            <button type="button" (click)="elegirMusica(pista)">
+              <i class="fa-solid fa-music" aria-hidden="true"></i>
+              <span>
+                <strong>{{ pista.titulo }}</strong>
+                <em>{{ pista.artista }}</em>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="buscador__vacio">Sin resultados. Prueba otro nombre.</li>
+        }
+      </ul>
+      <p class="buscador__nota">Catálogo de demostración: aquí se conectará tu proveedor de música.</p>
+    </div>
+  }
+
+  @if (error()) {
+    <p class="creador__error">{{ error() }}</p>
+  }
+</div>

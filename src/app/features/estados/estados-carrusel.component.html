@@ -1,0 +1,32 @@
+<section class="estados" aria-label="Estados de tus contactos">
+  <div class="estados__fila">
+    <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="verMio()" (dblclick)="crear()">
+      <span class="anillo anillo--crear">
+        @if (mio()?.avatar) {
+          <img [src]="mio()?.avatar" alt="Tu estado" />
+        } @else {
+          <span class="anillo__iniciales">{{ iniciales() }}</span>
+        }
+        <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+      </span>
+      <span class="estado-tarjeta__nombre">{{ mio() ? 'Tu estado' : 'Crear estado' }}</span>
+    </button>
+
+    @for (grupo of otros(); track grupo.usuarioId) {
+      <button type="button" class="estado-tarjeta" (click)="ver(grupo)">
+        <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
+          @if (grupo.avatar) {
+            <img [src]="grupo.avatar" [alt]="grupo.nombre" />
+          } @else {
+            <span class="anillo__iniciales">{{ grupo.nombre.slice(0, 2).toUpperCase() }}</span>
+          }
+        </span>
+        <span class="estado-tarjeta__nombre">{{ grupo.nombre.split(' ')[0] }}</span>
+      </button>
+    }
+
+    @if (!cargando() && otros().length === 0) {
+      <p class="estados__vacio">Aún no hay estados de tus contactos. Crea el tuyo.</p>
+    }
+  </div>
+</section>

@@ -42,7 +42,7 @@
         </button>
 
         @if (svc.activeContact(); as contacto) {
-          <div class="avatar-wrap" (click)="svc.abrirPerfilDe(contacto)" title="Ver perfil">
+          <div class="avatar-wrap" [class.avatar-wrap--estado]="tieneEstado()" (click)="abrirEstado()" [title]="tieneEstado() ? 'Ver estado' : 'Crear estado'">
             @if (contacto.avatar) {
               <img [src]="contacto.avatar" [alt]="contacto.name" />
             } @else {
@@ -69,6 +69,14 @@
         }
 
         <div class="hilo__acciones">
+          <button
+            type="button"
+            class="icono-btn"
+            [title]="tieneEstado() ? 'Ver estado' : 'Compartir estado'"
+            [attr.aria-label]="tieneEstado() ? 'Ver estado' : 'Compartir estado'"
+            (click)="abrirEstado()">
+            <i class="fa-solid" [class.fa-circle-play]="tieneEstado()" [class.fa-circle-plus]="!tieneEstado()" aria-hidden="true"></i>
+          </button>
           <button type="button" class="icono-btn" title="Llamada de voz" aria-label="Llamada de voz">
             <i class="fa-solid fa-phone" aria-hidden="true"></i>
           </button>
@@ -95,3 +103,11 @@
     }
   </section>
 </div>
+
+@if (creadorAbierto()) {
+  <app-estados-creador (cerrar)="creadorAbierto.set(false)" (publicado)="creadorAbierto.set(false)" />
+}
+
+@if (visorAbierto() && estadosDelContacto(); as grupo) {
+  <app-estados-visor [grupo]="grupo" (cerrar)="cerrarVisor()" (borrado)="cerrarVisor()" />
+}

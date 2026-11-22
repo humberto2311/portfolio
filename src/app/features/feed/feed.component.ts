@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service'; // 👈 Importam
 import { CrearPostComponent } from '../perfil/components/crear-post/crear-post.component';
 import { PostCardComponent } from '../perfil/components/post-card/post-card.component';
 import { ToastComponent } from '../perfil/components/toast/toast.component';
+import { EstadosComponent } from '../estados/estados.component';
 
 @Component({
   selector: 'app-feed',
@@ -13,7 +14,8 @@ import { ToastComponent } from '../perfil/components/toast/toast.component';
     CommonModule,
     CrearPostComponent,
     PostCardComponent,
-    ToastComponent
+    ToastComponent,
+    EstadosComponent
   ],
   templateUrl: './feed.component.html',
   styleUrls: ['./feed.component.scss']

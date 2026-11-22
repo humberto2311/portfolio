@@ -94,6 +94,13 @@
   flex-shrink: 0;
 }
 
+.avatar-wrap--estado {
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 200deg, $accent, $cyan-secondary, $accent-strong, $accent);
+}
+
 .hilo__datos {
   min-width: 0;
   flex: 1;

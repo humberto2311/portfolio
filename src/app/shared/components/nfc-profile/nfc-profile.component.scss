@@ -352,7 +352,6 @@
 
   @media (min-width: 1024px) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: minmax(150px, auto);
   }
 }
 
@@ -389,16 +388,8 @@
   }
 
   @media (min-width: 1024px) {
-    &--grande {
-      grid-column: span 2;
-      grid-row: span 2;
-    }
-
-    &--alto {
-      grid-column: span 2;
-      grid-row: span 1;
-    }
-
+    &--grande,
+    &--alto,
     &--ancha {
       grid-column: span 2;
     }
@@ -491,11 +482,88 @@
   }
 }
 
+.bento__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.76rem;
+    color: $text-light;
+
+    i {
+      color: $accent;
+      font-size: 0.66rem;
+    }
+
+    em {
+      margin-left: auto;
+      font-style: normal;
+      font-size: 0.68rem;
+      color: $text-faint;
+    }
+  }
+}
+
+.bento__stats {
+  display: flex;
+  gap: 0.9rem;
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+
+    strong {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: $text-light;
+    }
+
+    em {
+      font-style: normal;
+      font-size: 0.68rem;
+      color: $text-faint;
+    }
+  }
+}
+
+.bento__venta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: auto;
+  padding: 0.55rem 0.8rem;
+  border-radius: 12px;
+  background: $accent-soft;
+  border: 1px solid $accent-border;
+}
+
+.bento__venta-total {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $accent;
+}
+
+.bento__venta-meta {
+  margin-left: auto;
+  font-size: 0.68rem;
+  color: $text-muted;
+}
+
 .mini-grafico {
   display: flex;
   align-items: flex-end;
   gap: 0.3rem;
-  height: 72px;
+  height: 54px;
   margin-top: auto;
   padding-top: 0.5rem;
 
@@ -557,6 +625,59 @@
   border: 1px solid $accent-border;
   color: $accent;
   font-size: 1.25rem;
+}
+
+.paso--doble {
+  @media (min-width: 768px) {
+    grid-column: span 3;
+  }
+}
+
+.paso__opciones {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+
+  @media (min-width: 560px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.paso__opcion {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.55rem;
+  align-items: center;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  i {
+    grid-row: span 2;
+    color: $accent;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  strong {
+    font-size: 0.85rem;
+    font-weight: 650;
+    color: $text-light;
+  }
+
+  em {
+    font-style: normal;
+    font-size: 0.72rem;
+    color: $text-faint;
+  }
+
+  &:hover {
+    border-color: $accent-border;
+    background: $accent-soft;
+  }
 }
 
 .paso__num {

@@ -94,6 +94,12 @@ export const routes: Routes = [
       },
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
       { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
+      {
+        path: 'ajustes/comandos',
+        loadComponent: () =>
+          import('./features/ajustes/ajustes-comandos.component').then((m) => m.AjustesComandosComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'dashboard', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'personal' } },
       { path: 'dashboard/empresa', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa' } },
       { path: 'dashboard/empresa/mi-actividad', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa-personal' } },

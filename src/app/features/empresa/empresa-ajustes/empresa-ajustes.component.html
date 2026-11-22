@@ -41,7 +41,7 @@
       </div>
       <span class="sello" [class.sello--ok]="actual.certificada" [class.sello--pendiente]="!actual.certificada && !esPersonal">
         <i class="fa-solid" [class.fa-circle-check]="actual.certificada" [class.fa-hourglass-half]="!actual.certificada && !esPersonal" [class.fa-user]="esPersonal"></i>
-        {{ esPersonal ? 'Marca personal' : (actual.certificada ? 'Certificada' : 'Sin certificar') }}
+        {{ esPersonal ? 'Marca personal' : (actual.certificada ? 'Documentos completos' : 'Documentos pendientes') }}
       </span>
     </div>
 

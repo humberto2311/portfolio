@@ -76,6 +76,34 @@
     </div>
   }
 
+  <div class="hub-vistas">
+    <button
+      type="button"
+      class="hub-vista"
+      [class.hub-vista--activa]="vista === 'enlaces'"
+      (click)="cambiarVista('enlaces')">
+      <i class="fas fa-list-check"></i>
+      <span>
+        <strong>Enlaces</strong>
+        <small>Tu enlace activo y los que creas a mano</small>
+      </span>
+      <em>{{ enlacesVisibles.length }}</em>
+    </button>
+
+    <button
+      type="button"
+      class="hub-vista"
+      [class.hub-vista--activa]="vista === 'proyectos'"
+      (click)="cambiarVista('proyectos')">
+      <i class="fas fa-folder-tree"></i>
+      <span>
+        <strong>Mis Proyectos</strong>
+        <small>Los proyectos que marcas para mostrarlos en tu Hub</small>
+      </span>
+      <em>{{ proyectosEnHub.length }}</em>
+    </button>
+  </div>
+
   <div class="hub-content">
     <!-- Panel Izquierdo: Preview -->
     <aside class="active-preview-card">
@@ -127,7 +155,7 @@
         </p>
       }
 
-      <div class="links-list">
+      <div class="links-list" *ngIf="vista === 'enlaces'">
         <div
           *ngFor="let link of enlacesVisibles"
           class="link-item"
@@ -185,6 +213,47 @@
             }
           </div>
         </div>
+      </div>
+
+      <!-- MIS PROYECTOS DENTRO DEL HUB -->
+      <div class="proyectos-hub" *ngIf="vista === 'proyectos'">
+        <p class="hub-nota">
+          <i class="fas fa-circle-info"></i>
+          Aquí aparecen los proyectos que marcaste con «Mostrar en Hub» en Mis Proyectos.
+          Si un proyecto pasa a privado, su enlace se oculta a los visitantes y solo tú lo ves.
+        </p>
+
+        <div class="proyectos-hub__lista" *ngIf="proyectosEnHub.length; else sinProyectos">
+          <article class="proyecto-hub" *ngFor="let proyecto of proyectosEnHub; track proyecto.id">
+            <div class="proyecto-hub__icono">
+              <i [class]="iconoProyecto(proyecto)"></i>
+            </div>
+            <div class="proyecto-hub__datos">
+              <strong>{{ proyecto.name }}</strong>
+              <span class="proyecto-hub__url">{{ enlaceProyecto(proyecto) }}</span>
+              <small *ngIf="proyecto.description">{{ proyecto.description }}</small>
+            </div>
+            <div class="proyecto-hub__acciones">
+              <a class="icon-btn" [href]="enlaceProyecto(proyecto)" target="_blank" rel="noopener noreferrer" title="Abrir proyecto">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+              <button type="button" class="btn-secondary btn-quitar" (click)="quitarProyecto(proyecto)">
+                <i class="fas fa-link-slash"></i>
+                Quitar del Hub
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #sinProyectos>
+          <div class="proyectos-hub__vacio">
+            <i class="fas fa-folder-open"></i>
+            <p>Todavía no has publicado proyectos en tu Hub.</p>
+            <a class="btn-primary" routerLink="/app/proyectos">
+              <i class="fas fa-arrow-right"></i> Ir a Mis Proyectos
+            </a>
+          </div>
+        </ng-template>
       </div>
 
       <p class="hub-aviso" *ngIf="errorMessage">{{ errorMessage }}</p>

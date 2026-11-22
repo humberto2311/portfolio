@@ -1041,8 +1041,8 @@ $border-soft: var(--bg-border);
 
 .badge-demo {
   position: absolute;
-  top: 0.6rem;
-  left: 0.6rem;
+  top: 2.5rem;
+  right: 0.6rem;
   z-index: 2;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
@@ -1358,5 +1358,619 @@ $border-soft: var(--bg-border);
 
   .aviso-git {
     flex-wrap: wrap;
+  }
+}
+
+.importador {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  border: 1px solid $border-soft;
+
+  .importador-fila {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .fuente-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 170px;
+
+    .fuente-select {
+      width: 100%;
+      appearance: none;
+      padding: 0.7rem 2rem 0.7rem 2.1rem;
+      border-radius: 0.7rem;
+      border: 1px solid $border-soft;
+      background: var(--bg-input);
+      color: $text-light;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      }
+    }
+
+    .fuente-icono {
+      position: absolute;
+      left: 0.7rem;
+      font-size: 0.9rem;
+      color: $text-light;
+      pointer-events: none;
+    }
+
+    .fuente-flecha {
+      position: absolute;
+      right: 0.75rem;
+      font-size: 0.65rem;
+      color: $text-muted;
+      pointer-events: none;
+    }
+  }
+
+  .social-proyecto {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    margin-right: 0.6rem;
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid $border-soft;
+      background: transparent;
+      color: $text-muted;
+      font-size: 0.76rem;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: color .2s, border-color .2s, background .2s;
+
+      &:hover:not(:disabled) { color: $text-light; border-color: $accent-blue; }
+
+      &.activo {
+        color: #ff5c8a;
+        border-color: rgba(255, 92, 138, .45);
+      }
+
+      &:disabled { cursor: default; }
+    }
+
+    .social-vistas { cursor: default; }
+  }
+
+  .aviso-sesion {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    flex-basis: 100%;
+    font-size: 0.76rem;
+    color: $text-muted;
+
+    i { color: $accent-blue; }
+  }
+
+  .importador-url {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 280px;
+
+    > i {
+      position: absolute;
+      left: 0.85rem;
+      font-size: 0.95rem;
+      color: $accent-cyan;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.7rem 0.9rem 0.7rem 2.4rem;
+      border-radius: 0.7rem;
+      border: 1px solid $border-soft;
+      background: var(--bg-input);
+      color: $text-light;
+      font-size: 0.86rem;
+
+      &::placeholder {
+        color: $text-muted;
+        opacity: 0.75;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      }
+    }
+  }
+
+  .btn-importar-fuente {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.7rem 1.1rem;
+    border-radius: 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent-blue) 18%, transparent));
+    color: $accent-cyan;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 26%, transparent);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .spinner-mini {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-top-color: $accent-cyan;
+      animation: girar 0.7s linear infinite;
+    }
+  }
+
+  .importador-error {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+    color: var(--danger);
+    font-size: 0.8rem;
+  }
+
+  .btn-importar-github {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 0.5rem;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+    border: 1px dashed $border-soft;
+    background: transparent;
+    color: $text-muted;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      color: $accent-cyan;
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.filtros-proyectos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 2rem;
+
+  .filtro-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid $border-soft;
+    background: var(--bg-card);
+    color: $text-muted;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    em {
+      font-style: normal;
+      font-size: 0.66rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      color: inherit;
+    }
+
+    &:hover {
+      color: $text-light;
+      border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    &.activo {
+      color: $accent-cyan;
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+
+      em {
+        background: color-mix(in srgb, var(--accent) 25%, transparent);
+      }
+    }
+  }
+}
+
+.badge-fuente {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.6rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1b2430;
+  box-shadow: 0 2px 8px rgba(9, 12, 20, 0.14);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(6px);
+
+  i {
+    font-size: 0.72rem;
+    color: #3d4450;
+  }
+
+  &.es-diseno i {
+    color: #f472b6;
+  }
+
+  &.es-docker i {
+    color: #38bdf8;
+  }
+}
+
+.hub-toggle {
+  padding: 0 0.25rem 0.15rem;
+  display: flex;
+  justify-content: flex-end;
+
+  .btn-hub {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid $border-soft;
+    background: var(--bg-elevated);
+    color: $text-muted;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.64rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    .hub-switch {
+      width: 22px;
+      height: 12px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--text-muted) 35%, transparent);
+      display: inline-flex;
+      align-items: center;
+      padding: 1px;
+      transition: background 0.2s ease;
+
+      .hub-knob {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        transition: transform 0.2s ease;
+      }
+    }
+
+    &:hover:not(:disabled) {
+      color: $accent-cyan;
+      border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    &.activo {
+      color: $accent-cyan;
+      border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+
+      .hub-switch {
+        background: color-mix(in srgb, var(--accent) 65%, transparent);
+
+        .hub-knob {
+          transform: translateX(10px);
+        }
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+  }
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .importador {
+    .importador-fila {
+      flex-direction: column;
+    }
+
+    .fuente-selector,
+    .importador-url,
+    .btn-importar-fuente {
+      width: 100%;
+    }
+  }
+}
+
+
+.comentarios-proyecto {
+  padding: 1rem 1.25rem 1.4rem;
+  border-top: 1px solid $border-soft;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: 0 0 .8rem;
+    font-size: .9rem;
+    color: $text-light;
+  }
+
+  .comentario-form {
+    display: flex;
+    gap: .6rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+
+    textarea {
+      flex: 1;
+      resize: vertical;
+      padding: .6rem .75rem;
+      border-radius: .6rem;
+      border: 1px solid $border-soft;
+      background: var(--bg-input);
+      color: $text-light;
+      font-family: inherit;
+      font-size: .82rem;
+    }
+  }
+
+  .comentarios-aviso,
+  .comentarios-vacio {
+    margin: 0 0 .8rem;
+    font-size: .78rem;
+    color: $text-muted;
+  }
+
+  .comentario {
+    padding: .7rem .8rem;
+    border-radius: .6rem;
+    background: rgba(255, 255, 255, .03);
+    margin-bottom: .6rem;
+
+    .comentario-autor {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .35rem;
+      font-size: .78rem;
+      color: $text-light;
+
+      small { color: $text-muted; margin-left: auto; }
+    }
+
+    .comentario-iniciales {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.7rem;
+      height: 1.7rem;
+      border-radius: 50%;
+      background: rgba(74, 158, 255, .18);
+      color: $accent-blue;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .comentario-texto {
+      margin: 0;
+      font-size: .82rem;
+      color: $text-light;
+      white-space: pre-wrap;
+    }
+
+    .comentario-borrar {
+      margin-top: .35rem;
+      background: none;
+      border: none;
+      color: $text-muted;
+      font-size: .72rem;
+      cursor: pointer;
+
+      &:hover { color: #ff6b6b; }
+    }
+  }
+}
+
+
+.tarjeta-social {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid $border-soft;
+
+  .mini-social {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: $text-muted;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    cursor: default;
+    transition: color .2s;
+
+    &:first-child { cursor: pointer; }
+    &:first-child:hover:not(:disabled) { color: #ff5c8a; }
+    &:disabled { cursor: default; }
+
+    &.activo { color: #ff5c8a; }
+  }
+}
+
+.readme-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+
+  .btn-ghost-mini,
+  .btn-primary-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all .2s;
+
+    &:disabled { opacity: .5; cursor: not-allowed; }
+  }
+
+  .btn-ghost-mini {
+    border: 1px solid $border-soft;
+    background: transparent;
+    color: $text-muted;
+
+    &:hover:not(:disabled) { color: $text-light; border-color: $accent-blue; }
+  }
+
+  .btn-primary-mini {
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    color: var(--accent);
+  }
+}
+
+.readme-editor {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.6rem;
+  border: 1px solid $border-soft;
+  background: var(--bg-input);
+  color: $text-light;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.readme-content.markdown {
+  h1, h2, h3, h4 {
+    margin: 1rem 0 0.5rem;
+    color: $text-light;
+    line-height: 1.3;
+  }
+
+  h1 { font-size: 1.25rem; }
+  h2 { font-size: 1.05rem; }
+  h3 { font-size: 0.92rem; }
+
+  p { margin: 0 0 0.6rem; line-height: 1.6; }
+
+  ul, ol { margin: 0 0 0.7rem 1.1rem; padding: 0; }
+  li { margin-bottom: 0.25rem; line-height: 1.5; }
+
+  a {
+    color: $accent-blue;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+
+  code {
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.3rem;
+    background: rgba(127, 127, 127, 0.16);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78em;
+  }
+
+  pre {
+    margin: 0 0 0.8rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.6rem;
+    background: rgba(9, 12, 20, 0.06);
+    border: 1px solid $border-soft;
+    overflow-x: auto;
+
+    code { background: none; padding: 0; }
+  }
+
+  blockquote {
+    margin: 0 0 0.8rem;
+    padding: 0.35rem 0.9rem;
+    border-left: 3px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    color: $text-muted;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.8rem;
+    font-size: 0.78rem;
+
+    th, td {
+      border: 1px solid $border-soft;
+      padding: 0.35rem 0.55rem;
+      text-align: left;
+    }
+
+    th { background: rgba(127, 127, 127, 0.1); }
+  }
+
+  img { max-width: 100%; border-radius: 0.5rem; }
+
+  hr {
+    border: none;
+    border-top: 1px solid $border-soft;
+    margin: 1rem 0;
   }
 }

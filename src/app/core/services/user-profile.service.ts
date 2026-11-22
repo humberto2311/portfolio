@@ -15,11 +15,9 @@ export class UserProfileService {
   private readonly miPortada = signal<string | null>(null);
   private avatarCargado = false;
 
-  /** Foto de quien usa la app: la piden el navbar, los comentarios y el modal de compartir. */
-  readonly avatar = this.miAvatar.asReadonly();
+    readonly avatar = this.miAvatar.asReadonly();
 
-  /** Portada del perfil propio: se usa como valor inicial al crear un espacio o una landing. */
-  readonly portada = this.miPortada.asReadonly();
+    readonly portada = this.miPortada.asReadonly();
 
   getMe(): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.API}/me`);
@@ -27,6 +25,11 @@ export class UserProfileService {
 
   updateGitUsername(gitUsername: string): Observable<UserProfile> {
     return this.http.put<UserProfile>(`${this.API}/me/git-username`, { gitUsername });
+  }
+
+    updateGitlabUsername(gitlabUsername: string): Observable<{ gitlabUsername?: string }> {
+    return this.http.put<{ gitlabUsername?: string }>(
+      `${this.API}/me/fuentes/gitlab`, { gitlabUsername });
   }
 
   getPerfilCompletoPorId(id: string): Observable<any> {
@@ -37,13 +40,11 @@ export class UserProfileService {
     return this.http.get<any>(`${this.API}/perfil-completo/username/${username}`);
   }
 
-  /** Perfil social propio (rol, estado, portada, bio...). */
-  getMiPerfilSocial(): Observable<any> {
+    getMiPerfilSocial(): Observable<any> {
     return this.http.get<any>(`${this.API}/social/me`);
   }
 
-  /** Guarda el perfil social propio (rol, estado, portada, bio...) y alinea el avatar del navbar. */
-  guardarMiPerfilSocial(dto: any): Observable<any> {
+    guardarMiPerfilSocial(dto: any): Observable<any> {
     return this.http.post<any>(`${this.API}/social/me`, dto).pipe(
       tap((guardado) => this.aplicarAvatar(guardado))
     );
@@ -55,8 +56,7 @@ export class UserProfileService {
     );
   }
 
-  /** Varios componentes lo piden en el arranque; la foto se consulta una sola vez. */
-  cargarMiAvatar(): void {
+    cargarMiAvatar(): void {
     if (this.avatarCargado || !this.auth.isAuthenticated()) return;
 
     this.avatarCargado = true;

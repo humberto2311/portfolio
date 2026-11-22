@@ -99,6 +99,36 @@
       </section>
 
       <section class="card">
+        <h2><i class="fas fa-cloud-arrow-down"></i> De dónde importar tus proyectos</h2>
+        <p class="helper">
+          Escribe tu usuario público y NFSocial traerá tus repositorios y proyectos desde ahí.
+          También puedes conectar la cuenta con el botón, que es lo más rápido.
+        </p>
+
+        <div class="field">
+          <label for="gitlab-usuario"><i class="fa-brands fa-gitlab"></i> Usuario de GitLab</label>
+          <div class="campo-con-boton">
+            <input id="gitlab-usuario" type="text" [(ngModel)]="gitlabUsuario"
+                   placeholder="tu-usuario" autocomplete="off" maxlength="255">
+            <button type="button" class="btn-ghost"
+                    [disabled]="guardandoFuente('gitlab') || gitlabUsuario === fuentesBase.gitlab"
+                    (click)="guardarFuente('gitlab')">
+              @if (guardandoFuente('gitlab')) {
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+              } @else {
+                <i class="fa-solid fa-floppy-disk"></i> Guardar
+              }
+            </button>
+          </div>
+          <small>Se usa para importar desde "Mis Proyectos". No cambia tu forma de entrar.</small>
+        </div>
+
+        <div class="actions">
+          <a class="btn-ghost" routerLink="/app/proyectos">Ir a Mis Proyectos</a>
+        </div>
+      </section>
+
+      <section class="card">
         <h2><i class="fas fa-eye"></i> Visibilidad de tu hoja de vida</h2>
 
         @if (cargandoCv()) {

@@ -16,6 +16,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../core/services/auth.service';
+import { UserProfileService } from '../../core/services/user-profile.service';
 import { TemaService } from '../../core/services/tema.service';
 import { Diseno, DisenoService } from '../../core/services/diseno.service';
 import { UserPhotoService, FotoPerfil } from '../../core/services/user-photo.service';
@@ -48,6 +49,7 @@ const ACENTO_POR_DEFECTO = '#4a9eff';
 })
 export class AjustesCuentaComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
+  private userProfileService = inject(UserProfileService);
   private resume = inject(ResumeService);
   private resumeSave = inject(ResumeSaveService);
   private router = inject(Router);
@@ -82,6 +84,8 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   readonly paleta = ['#4a9eff', '#3fb950', '#f5b75e', '#e5484d', '#c297ff', '#ff7ac6', '#2dd4bf', '#e8e8e8'];
 
   nombre = '';
+  gitlabUsuario = '';
+  fuenteEnCurso: 'gitlab' | null = null;
   telefono = '';
   genero = '';
   nacimiento = '';
@@ -108,6 +112,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   guardandoDiseno = false;
 
   private datosBase = { nombre: '', telefono: '', genero: '', nacimiento: '' };
+  fuentesBase = { gitlab: '' };
   private disenoBase: Diseno | null = null;
   private disenoFotoBase = JSON.stringify([ACENTO_POR_DEFECTO, '', '', '']);
   private tarjetaFotoBase = JSON.stringify(['', '', '']);
@@ -232,6 +237,42 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.nacimiento = base.nacimiento;
     this.error.set(null);
     this.exito.set(null);
+  }
+
+  get fuentesSucias(): boolean {
+    return this.gitlabUsuario !== this.fuentesBase.gitlab;
+  }
+
+  guardandoFuente(fuente: 'gitlab'): boolean {
+    return this.fuenteEnCurso === fuente;
+  }
+
+  guardarFuente(fuente: 'gitlab'): void {
+    if (this.fuenteEnCurso) return;
+
+    const valor = this.gitlabUsuario.trim();
+    this.fuenteEnCurso = fuente;
+    this.error.set(null);
+    this.exito.set(null);
+
+    this.userProfileService
+      .updateGitlabUsername(valor)
+      .pipe(finalize(() => (this.fuenteEnCurso = null)))
+      .subscribe({
+        next: (datos) => {
+          this.gitlabUsuario = datos.gitlabUsername ?? '';
+          this.fuentesBase = { gitlab: this.gitlabUsuario };
+          this.exito.set(
+            valor
+              ? 'Guardado: importarás tus proyectos de GitLab.'
+              : 'Se quitó el usuario de GitLab.'
+          );
+        },
+        error: (err) => {
+          const mensaje = err?.error?.message || err?.error?.error;
+          this.error.set(mensaje || 'No se pudo guardar el usuario.');
+        },
+      });
   }
 
   guardarDatos(): void {
@@ -526,6 +567,8 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
           if (this.datosSucios) return;
 
           this.nombre = estado.nombre ?? '';
+          this.gitlabUsuario = estado.gitlabUsername ?? '';
+          this.fuentesBase = { gitlab: this.gitlabUsuario };
           this.telefono = estado.telefono ?? '';
           this.genero = estado.genero ?? '';
           this.nacimiento = estado.nacimiento ?? '';

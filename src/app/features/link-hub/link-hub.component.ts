@@ -1,6 +1,6 @@
-// src/app/features/link-hub/link-hub.component.ts
+
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { catchError, finalize, of, switchMap } from 'rxjs';
@@ -11,11 +11,13 @@ import { ResumeSaveService } from '../../core/services/resume-save.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { ConfirmationModalService } from '../../core/services/confirmation-modal.service';
 import { Empresa, MiembroEmpresa } from '../../core/models/empresa.model';
+import { Proyecto } from '../../core/models/proyecto';
+import { ProyectosService } from '../../core/services/proyectos.service';
 
 @Component({
   selector: 'app-link-hub',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './link-hub.component.html',
   styleUrls: ['./link-hub.component.scss']
 })
@@ -25,6 +27,7 @@ export class LinkHubComponent implements OnInit {
   private readonly resumeSave = inject(ResumeSaveService);
   private readonly empresas = inject(EmpresaService);
   private readonly confirmationModal = inject(ConfirmationModalService);
+  private readonly proyectosService = inject(ProyectosService);
 
   availableIcons = [
     { id: 'globe',  name: 'Web',      class: 'fas fa-globe' },
@@ -44,6 +47,9 @@ export class LinkHubComponent implements OnInit {
   puedeEditarEmpresa = false;
   cargandoEmpresa = false;
   ambito: 'personal' | 'empresa' = 'personal';
+  vista: 'enlaces' | 'proyectos' = 'enlaces';
+  proyectosEnHub: Proyecto[] = [];
+  cargandoProyectos = false;
 
   isLoading = false;
   isSaving = false;
@@ -57,9 +63,67 @@ export class LinkHubComponent implements OnInit {
   ngOnInit(): void {
     this.loadLinks();
     this.loadEmpresa();
+    this.loadProyectos();
   }
 
-  // ---------- Carga ----------
+  
+  loadProyectos(): void {
+    this.cargandoProyectos = true;
+
+    this.proyectosService.getProyectos()
+      .pipe(finalize(() => (this.cargandoProyectos = false)))
+      .subscribe({
+        next: (proyectos) => {
+          this.proyectosEnHub = (proyectos ?? []).filter((p) => p.hubVisible && p.sourceUrl);
+        },
+        error: (err) => {
+          console.error(err);
+          this.proyectosEnHub = [];
+        }
+      });
+  }
+
+  enlaceProyecto(proyecto: Proyecto): string {
+    return proyecto.sourceUrl || proyecto.homepage || '';
+  }
+
+  iconoProyecto(proyecto: Proyecto): string {
+    switch (proyecto.sourceType) {
+      case 'gitlab':
+        return 'fa-brands fa-gitlab';
+      case 'docker_hub':
+        return 'fa-brands fa-docker';
+      case 'behance':
+        return 'fa-brands fa-behance';
+      case 'dribbble':
+        return 'fa-brands fa-dribbble';
+      case 'figma':
+        return 'fa-brands fa-figma';
+      case 'manual':
+        return 'fa-solid fa-rocket';
+      default:
+        return 'fa-brands fa-github';
+    }
+  }
+
+  cambiarVista(vista: 'enlaces' | 'proyectos'): void {
+    this.vista = vista;
+    if (vista === 'proyectos') this.loadProyectos();
+  }
+
+  quitarProyecto(proyecto: Proyecto): void {
+    this.proyectosService.mostrarEnHub(proyecto.id, false).subscribe({
+      next: () => {
+        this.proyectosEnHub = this.proyectosEnHub.filter((p) => p.id !== proyecto.id);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'No se pudo quitar el proyecto del Hub.';
+      }
+    });
+  }
+
+  
   loadLinks(): void {
     this.isLoading = true;
     this.errorMessage = null;
@@ -155,7 +219,7 @@ export class LinkHubComponent implements OnInit {
     return this.equipoEmpresa.find((miembro) => miembro.usuarioId === id)?.nombre ?? 'Todo el equipo';
   }
 
-  // ---------- Helpers ----------
+  
   private getEmptyForm(): LinkItem {
     return {
       id: '',
@@ -182,7 +246,7 @@ export class LinkHubComponent implements OnInit {
     }
   }
 
-  // ---------- Activar ----------
+  
   setActiveLink(id: string, event?: Event): void {
     if (event) event.stopPropagation();
 
@@ -212,7 +276,7 @@ export class LinkHubComponent implements OnInit {
     });
   }
 
-  // ---------- Modal ----------
+  
   openCreateModal(): void {
     this.isEditing = false;
     this.formData = this.getEmptyForm();
@@ -232,7 +296,7 @@ export class LinkHubComponent implements OnInit {
     this.formData = this.getEmptyForm();
   }
 
-  // ---------- Guardar (create / update) ----------
+  
   saveLink(): void {
     if (!this.formData.title.trim() || !this.formData.url.trim()) return;
 
@@ -299,7 +363,7 @@ export class LinkHubComponent implements OnInit {
     });
   }
 
-  // ---------- Eliminar ----------
+  
   async deleteLink(id: string, event?: Event): Promise<void> {
     if (event) event.stopPropagation();
 
@@ -337,13 +401,12 @@ export class LinkHubComponent implements OnInit {
     });
   }
 
-  // ---------- Enlace de la hoja de vida ----------
+  
   esDelCv(link: LinkItem): boolean {
     return link.kind === 'cv';
   }
 
-  /** El estado público se lee del perfil en cada GET, nunca se guarda en el enlace. */
-  estaPublicado(link: LinkItem): boolean {
+    estaPublicado(link: LinkItem): boolean {
     return this.esDelCv(link) && link.isPublic === true;
   }
 

@@ -5,16 +5,15 @@ export interface LinkItem {
   iconClass: string;
   description?: string;
   active: boolean;
-  /** 'cv' | 'vcard' | undefined: los que genera la app, no se editan a mano. */
-  kind?: string;
-  /** Solo en 'cv': lectura en vivo del estado del perfil, no un campo del enlace. */
-  isPublic?: boolean;
+    kind?: string;
+    isPublic?: boolean;
   profileId?: number;
   empresaId?: string;
   empresaSlug?: string;
   deEmpresa?: boolean;
   asignadoA?: string | null;
   asignadoNombre?: string | null;
+  createdAt?: string;
 }
 
 export type LinkItemPayload = Omit<LinkItem, 'id' | 'createdAt' | 'updatedAt'>;

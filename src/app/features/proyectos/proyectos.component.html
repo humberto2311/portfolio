@@ -55,14 +55,74 @@
   <!-- CONTENIDO -->
   <ng-container *ngIf="!cargando && !error">
 
-    <!-- BOTÓN IMPORTAR (SOLO PRIVADO) -->
-    <div class="acciones-privadas" *ngIf="modoPrivado">
-      <button class="btn-importar" (click)="abrirImportarGithub()" [disabled]="importando">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
-        <span *ngIf="!importando">Importar desde GitHub</span>
-        <span *ngIf="importando">Importando...</span>
+    <!-- IMPORTACIÓN MULTI-FUENTE (SOLO PRIVADO) -->
+    <div class="importador" *ngIf="modoPrivado">
+      <div class="importador-fila">
+        <div class="fuente-selector">
+          <select
+            class="fuente-select"
+            [ngModel]="fuenteSeleccionada"
+            (ngModelChange)="cambiarFuente($event)"
+            name="fuenteProyecto"
+            [disabled]="importandoFuente">
+            <option *ngFor="let fuente of fuentesDisponibles" [ngValue]="fuente.id">
+              {{ etiquetaFuente(fuente.id) }}
+            </option>
+          </select>
+          <i class="fab fuente-icono" [ngClass]="iconoDeFuente(fuenteSeleccionada)"></i>
+          <i class="fas fa-chevron-down fuente-flecha"></i>
+        </div>
+
+        <p class="aviso-sesion" *ngIf="modoPrivado && permiteImportarTodo && requiereIniciarSesion">
+          <i class="fa-solid fa-circle-info"></i> {{ mensajeIniciarSesion }}
+        </p>
+
+        <div class="importador-url">
+          <i [class]="iconoFuenteSeleccionada"></i>
+          <input
+            type="url"
+            name="urlImportacion"
+            [(ngModel)]="urlImportacion"
+            (ngModelChange)="onUrlImportacion()"
+            (keyup.enter)="importarProyecto()"
+            [placeholder]="placeholderUrl"
+            [disabled]="importandoFuente"
+            autocomplete="off">
+        </div>
+
+        <button
+          type="button"
+          class="btn-importar-fuente"
+          (click)="importarProyecto()"
+          [disabled]="!puedeImportar">
+          <span class="spinner-mini" *ngIf="importandoFuente"></span>
+          <i class="fas fa-download" *ngIf="!importandoFuente"></i>
+          <span>{{ importandoFuente ? 'Importando...' : 'Importar' }}</span>
+        </button>
+      </div>
+
+      <p class="importador-error" *ngIf="errorImportacion">
+        <i class="fas fa-circle-exclamation"></i>
+        {{ errorImportacion }}
+      </p>
+
+      <button type="button" class="btn-importar-github" (click)="importarTodoDeLaFuente()"
+              [disabled]="importandoFuente || !permiteImportarTodo" *ngIf="permiteImportarTodo">
+        <i class="fab" [ngClass]="iconoImportarTodo"></i>
+        <span>{{ importandoFuente ? 'Importando proyectos...' : etiquetaImportarTodo }}</span>
+      </button>
+    </div>
+
+    <!-- TABS POR TIPO DE PROYECTO -->
+    <div class="filtros-proyectos">
+      <button
+        type="button"
+        class="filtro-chip"
+        *ngFor="let filtro of filtros"
+        [class.activo]="filtroActivo === filtro.id"
+        (click)="cambiarFiltro(filtro.id)">
+        {{ filtro.etiqueta }}
+        <em>{{ contarPorFiltro(filtro.id) }}</em>
       </button>
     </div>
 
@@ -113,6 +173,10 @@
               Ver Detalles
             </span>
           </div>
+          <span class="badge-fuente" [class.es-diseno]="grupoDe(p) === 'diseno'" [class.es-docker]="grupoDe(p) === 'contenedores'">
+            <i [class]="iconoFuente(p)"></i>
+            {{ nombreFuente(p) }}
+          </span>
           <span class="badge-demo" *ngIf="p.homepage">
             <i class="fas fa-rocket"></i> Desplegado
           </span>
@@ -147,6 +211,21 @@
           <div class="tarjeta-stack" *ngIf="stackVisible(p).length > 0">
             <span class="tech-chip" *ngFor="let tech of stackVisible(p)">{{ tech }}</span>
           </div>
+
+          <div class="tarjeta-social">
+            <button class="mini-social" [class.activo]="p.likedByMe"
+                    (click)="alternarMeGustaTarjeta(p, $event)" [disabled]="!modoPrivado"
+                    [title]="p.likedByMe ? 'Quitar me gusta' : 'Me gusta'">
+              <i [class]="p.likedByMe ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+              <span>{{ p.likes ?? 0 }}</span>
+            </button>
+            <span class="mini-social" title="Comentarios">
+              <i class="fa-regular fa-comment"></i><span>{{ p.comments ?? 0 }}</span>
+            </span>
+            <span class="mini-social" title="Vistas">
+              <i class="fa-regular fa-eye"></i><span>{{ p.views ?? 0 }}</span>
+            </span>
+          </div>
         </div>
 
         <!-- ACCIONES PRIVADAS (ESTADO / EDITAR / ELIMINAR) -->
@@ -173,6 +252,21 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
             </svg>
+          </button>
+        </div>
+
+        <!-- ENVIAR AL HUB DE ENLACES -->
+        <div class="hub-toggle" *ngIf="modoPrivado" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="btn-hub"
+            [class.activo]="p.hubVisible"
+            [disabled]="alternandoHubId === p.id"
+            (click)="toggleHub(p, $event)"
+            [title]="p.hubVisible ? 'Quitar del Hub de Enlaces' : 'Mostrar en el Hub de Enlaces'">
+            <span class="hub-switch"><span class="hub-knob"></span></span>
+            <i class="fas fa-link"></i>
+            <span class="hub-texto">{{ p.hubVisible ? 'En el Hub' : 'Mostrar en Hub' }}</span>
           </button>
         </div>
       </article>
@@ -212,6 +306,24 @@
         </svg>
         <span class="nombre-repo">{{ proyectoActivo.name }}</span>
       </div>
+
+      <div class="social-proyecto" *ngIf="socialActivo">
+        <button class="social-btn" [class.activo]="socialActivo.likedByMe"
+                (click)="alternarMeGustaProyecto()" [disabled]="!modoPrivado"
+                [title]="socialActivo.likedByMe ? 'Quitar me gusta' : 'Me gusta'">
+          <i [class]="socialActivo.likedByMe ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+          <span>{{ socialActivo.likes }}</span>
+        </button>
+        <button class="social-btn" (click)="verComentariosProyecto()"
+                [title]="'Comentarios'">
+          <i class="fa-regular fa-comment"></i>
+          <span>{{ socialActivo.comments }}</span>
+        </button>
+        <span class="social-btn social-vistas" title="Vistas">
+          <i class="fa-regular fa-eye"></i>
+          <span>{{ socialActivo.views }}</span>
+        </span>
+      </div>
       <button class="btn-cerrar" (click)="cerrarPanel()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -228,12 +340,41 @@
         Información
       </button>
       <button class="tab" [class.active]="pestanaActiva === 'git'" (click)="cambiarPestana('git')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-        </svg>
+        <i class="fab" [ngClass]="iconoImportarTodo"></i>
         Clonar / Ramas
       </button>
     </div>
+
+    <section class="comentarios-proyecto" *ngIf="mostrarComentarios">
+      <h3><i class="fa-regular fa-comment"></i> Comentarios ({{ socialActivo?.comments ?? 0 }})</h3>
+
+      <div class="comentario-form" *ngIf="modoPrivado">
+        <textarea [(ngModel)]="nuevoComentario" name="nuevoComentario" rows="2"
+                  maxlength="1000" placeholder="Escribe un comentario sobre este proyecto…"></textarea>
+        <button class="btn-primary" (click)="enviarComentarioProyecto()"
+                [disabled]="enviandoComentario || !nuevoComentario.trim()">
+          <i class="fa-solid fa-paper-plane"></i> Comentar
+        </button>
+      </div>
+      <p class="comentarios-aviso" *ngIf="!modoPrivado">Inicia sesión para comentar.</p>
+
+      <p class="comentarios-vacio" *ngIf="!cargandoComentarios && comentariosProyecto.length === 0">
+        Todavía no hay comentarios.
+      </p>
+
+      <div class="comentario" *ngFor="let c of comentariosProyecto">
+        <div class="comentario-autor">
+          <span class="comentario-iniciales">{{ c.author?.initials || '??' }}</span>
+          <strong>{{ c.author?.fullName || 'Usuario' }}</strong>
+          <small>{{ formatearFecha(c.createdAt) }}</small>
+        </div>
+        <p class="comentario-texto">{{ c.content }}</p>
+        <button class="comentario-borrar" *ngIf="c.author?.id === miUsuarioId"
+                (click)="borrarComentarioProyecto(c.id)">
+          <i class="fa-solid fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </section>
 
     <!-- PESTAÑA INFORMACIÓN -->
     <div class="tab-contenido" *ngIf="pestanaActiva === 'codigo'">
@@ -241,7 +382,40 @@
       <div class="info-grid">
         <div class="info-item main-desc">
           <h3>Descripción / README</h3>
-          <div class="readme-content">{{ proyectoActivo.description || 'Sin descripción detallada.' }}</div>
+          <div class="readme-toolbar" *ngIf="modoPrivado">
+            <button class="btn-ghost-mini" *ngIf="!editandoDescripcion" (click)="empezarEdicionDescripcion()">
+              <i class="fa-solid fa-pen"></i> Editar descripción
+            </button>
+            <ng-container *ngIf="editandoDescripcion">
+              <button class="btn-ghost-mini" (click)="cancelarEdicionDescripcion()" [disabled]="guardandoDescripcion">
+                Cancelar
+              </button>
+              <button class="btn-primary-mini" (click)="guardarDescripcion()" [disabled]="guardandoDescripcion">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar
+              </button>
+            </ng-container>
+          </div>
+
+          <textarea class="readme-editor" *ngIf="editandoDescripcion" [(ngModel)]="borradorDescripcion"
+                    name="borradorDescripcion" rows="14"
+                    placeholder="Escribe en Markdown: ## Título, **negrita**, - lista, `código`"></textarea>
+
+          <div class="readme-content markdown" *ngIf="!editandoDescripcion && descripcionHtml"
+               [innerHTML]="descripcionHtml"></div>
+          <div class="readme-content" *ngIf="!editandoDescripcion && !descripcionHtml">
+            Sin descripción detallada.
+          </div>
+        </div>
+
+        <div class="info-item" *ngIf="enlaceFuente(proyectoActivo)">
+          <h3>Origen</h3>
+          <p class="short-bio-text">
+            <i [class]="iconoFuente(proyectoActivo)"></i>
+            {{ nombreFuente(proyectoActivo) }} ·
+            <a [href]="enlaceFuente(proyectoActivo)" target="_blank" rel="noopener noreferrer" class="meta-link">
+              Abrir enlace original ↗
+            </a>
+          </p>
         </div>
 
         <div class="info-item short-bio" *ngIf="proyectoActivo.shortBio">

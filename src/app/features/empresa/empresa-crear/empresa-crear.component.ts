@@ -61,19 +61,19 @@ export class EmpresaCrearComponent implements OnInit {
     {
       valor: 'LEGALMENTE_CONSTITUIDA',
       titulo: 'Legalmente constituida',
-      descripcion: 'Tiene NIT, cámara de comercio y representante legal. Se certifica con documentos del Estado.',
+      descripcion: 'Tiene NIT, cámara de comercio y representante legal. Puede cargar sus documentos del Estado.',
       icono: 'fa-solid fa-building-columns',
     },
     {
       valor: 'MIPYME',
       titulo: 'Mipyme',
-      descripcion: 'Pequeña o mediana empresa formal. También puede certificarse con sus documentos.',
+      descripcion: 'Pequeña o mediana empresa formal. También puede cargar sus documentos.',
       icono: 'fa-solid fa-store',
     },
     {
       valor: 'PERSONAL',
       titulo: 'Personal',
-      descripcion: 'Marca personal o emprendimiento sin constituir. No pide documentos ni se certifica.',
+      descripcion: 'Marca personal o emprendimiento sin constituir. No pide documentos.',
       icono: 'fa-solid fa-user-tie',
     },
   ];

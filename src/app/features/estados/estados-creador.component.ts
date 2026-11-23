@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EstadosService, FONDOS_ESTADO, STICKERS_ESTADO } from '../../core/services/estados.service';
-import { CrearEstado, PistaMusica, TipoEstado } from '../../core/models/estado.model';
+import { EstadosService, STICKERS_ESTADO } from '../../core/services/estados.service';
+import { PistaMusica } from '../../core/models/estado.model';
 
 @Component({
   selector: 'app-estados-creador',
@@ -18,16 +18,13 @@ export class EstadosCreadorComponent implements OnInit {
   readonly cerrar = output<void>();
   readonly publicado = output<void>();
 
-  readonly fondos = FONDOS_ESTADO;
   readonly stickers = STICKERS_ESTADO;
 
-  readonly tipo = signal<TipoEstado>('TEXTO');
-  readonly fondo = signal(FONDOS_ESTADO[2]);
-  readonly texto = signal('');
+  readonly video = signal<string | null>(null);
   readonly imagen = signal<string | null>(null);
+  readonly texto = signal('');
   readonly stickersPuestos = signal<string[]>([]);
   readonly musica = signal<PistaMusica | null>(null);
-  readonly duracion = signal(10);
   readonly guardando = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -35,23 +32,21 @@ export class EstadosCreadorComponent implements OnInit {
   readonly consultaMusica = signal('');
   readonly resultados = signal<PistaMusica[]>([]);
 
+  readonly tipoMedia = computed<'VIDEO' | 'FOTO' | 'TEXTO'>(() => {
+    if (this.video()) return 'VIDEO';
+    if (this.imagen()) return 'FOTO';
+
+    return 'TEXTO';
+  });
+
   readonly puedePublicar = computed(() =>
-    this.tipo() === 'FOTO' ? !!this.imagen() : this.texto().trim().length > 0);
+    !!this.video() || !!this.imagen() || this.texto().trim().length > 0);
 
   ngOnInit(): void {
     this.buscar('');
   }
 
-  elegirTipo(tipo: TipoEstado): void {
-    this.tipo.set(tipo);
-  }
-
-  elegirFondo(color: string): void {
-    this.fondo.set(color);
-    this.tipo.set('TEXTO');
-  }
-
-  async elegirImagen(evento: Event): Promise<void> {
+  async elegirArchivo(evento: Event): Promise<void> {
     const entrada = evento.target as HTMLInputElement;
     const archivo = entrada.files?.[0];
 
@@ -60,22 +55,30 @@ export class EstadosCreadorComponent implements OnInit {
     try {
       const datos = await this.estados.leerComoDataUrl(archivo);
 
-      this.imagen.set(datos);
-      this.tipo.set('FOTO');
+      if (archivo.type.startsWith('video/')) {
+        this.video.set(datos);
+        this.imagen.set(null);
+      } else {
+        this.imagen.set(datos);
+        this.video.set(null);
+      }
+
       this.error.set(null);
     } catch {
-      this.error.set('No se pudo leer la imagen.');
+      this.error.set('No se pudo leer el archivo.');
     }
+
+    entrada.value = '';
   }
 
-  quitarImagen(): void {
+  quitarMedia(): void {
+    this.video.set(null);
     this.imagen.set(null);
-    this.tipo.set('TEXTO');
   }
 
   anadirSticker(sticker: string): void {
     if (this.stickersPuestos().length >= 8) {
-      this.error.set('Máximo 8 stickers por estado.');
+      this.error.set('Máximo 8 stickers.');
       return;
     }
 
@@ -101,35 +104,26 @@ export class EstadosCreadorComponent implements OnInit {
   }
 
   publicar(): void {
-    if (!this.puedePublicar()) return;
+    if (!this.puedePublicar() || this.guardando()) return;
 
     this.guardando.set(true);
     this.error.set(null);
 
-    const pista = this.musica();
-
-    const cuerpo: CrearEstado = {
-      tipo: this.tipo(),
-      contenidoUrl: this.tipo() === 'FOTO' ? this.imagen() : null,
-      texto: this.texto().trim() || null,
-      fondo: this.fondo(),
-      musicaId: pista?.id ?? null,
-      musicaTitulo: pista?.titulo ?? null,
-      musicaArtista: pista?.artista ?? null,
-      musicaUrl: pista?.url || null,
-      musicaInicio: 0,
+    this.estados.publicarPublicacion({
+      texto: this.texto().trim(),
+      imagen: this.imagen(),
+      video: this.video(),
+      mediaType: this.tipoMedia(),
       stickers: this.stickersPuestos(),
-      duracionSegundos: this.duracion()
-    };
-
-    this.estados.publicar(cuerpo).subscribe({
+      musica: this.musica()
+    }).subscribe({
       next: () => {
         this.guardando.set(false);
         this.publicado.emit();
       },
-      error: (err) => {
+      error: () => {
         this.guardando.set(false);
-        this.error.set(err?.error?.error ?? 'No se pudo publicar el estado.');
+        this.error.set('No se pudo publicar. Intenta de nuevo.');
       }
     });
   }

@@ -32,6 +32,15 @@ export const PISTAS_DEMO: PistaMusica[] = [
   { id: 'demo-6', titulo: 'Café y Código', artista: 'Dev Sessions', url: '', portada: '' }
 ];
 
+export interface BorradorPublicacion {
+  texto: string;
+  imagen: string | null;
+  video: string | null;
+  mediaType: 'FOTO' | 'VIDEO' | 'TEXTO';
+  stickers: string[];
+  musica: PistaMusica | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EstadosService {
 
@@ -56,6 +65,23 @@ export class EstadosService {
 
   borrar(estadoId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${estadoId}`);
+  }
+
+  publicarPublicacion(borrador: BorradorPublicacion): Observable<unknown> {
+    const pista = borrador.musica;
+    const texto = borrador.stickers.length
+      ? `${borrador.texto} ${borrador.stickers.join(' ')}`.trim()
+      : borrador.texto;
+
+    return this.http.post(`${environment.apiUrl}/api/posts`, {
+      content: texto,
+      imageUrl: borrador.imagen,
+      videoUrl: borrador.video,
+      mediaType: borrador.mediaType,
+      musicTitle: pista?.titulo ?? null,
+      musicArtist: pista?.artista ?? null,
+      musicUrl: pista?.url || null
+    });
   }
 
   buscarMusica(texto: string): Observable<PistaMusica[]> {

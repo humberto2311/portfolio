@@ -1,30 +1,30 @@
-<div class="creador" role="dialog" aria-modal="true" aria-label="Crear estado">
+<div class="creador" role="dialog" aria-modal="true" aria-label="Crear publicación">
   <header class="creador__barra">
     <button type="button" class="icono" (click)="cerrar.emit()" aria-label="Cerrar">
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
     </button>
-    <span class="creador__titulo">Nuevo estado</span>
+    <span class="creador__titulo">Nueva publicación</span>
     <button type="button" class="publicar" [disabled]="!puedePublicar() || guardando()" (click)="publicar()">
       {{ guardando() ? 'Publicando…' : 'Publicar' }}
     </button>
   </header>
 
-  <div class="creador__lienzo" [style.background]="tipo() === 'TEXTO' ? fondo() : '#000'">
-    @if (tipo() === 'FOTO' && imagen()) {
-      <img class="lienzo__imagen" [src]="imagen()" alt="Fondo del estado" />
+  <div class="creador__lienzo">
+    @if (video()) {
+      <video class="lienzo__media" [src]="video()!" controls playsinline></video>
+    } @else if (imagen()) {
+      <img class="lienzo__media" [src]="imagen()!" alt="Vista previa" />
+    } @else {
+      <label class="lienzo__vacio">
+        <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
+        <span>Sube una foto o un video</span>
+        <input type="file" accept="image/*,video/*" hidden (change)="elegirArchivo($event)" />
+      </label>
     }
 
-    @if (texto()) {
-      <p class="lienzo__texto">{{ texto() }}</p>
+    @if (video() || imagen()) {
+      <button type="button" class="lienzo__quitar" (click)="quitarMedia()">Quitar</button>
     }
-
-    <div class="lienzo__stickers">
-      @for (sticker of stickersPuestos(); track $index) {
-        <button type="button" class="sticker" (click)="quitarSticker($index)" [title]="'Quitar ' + sticker">
-          {{ sticker }}
-        </button>
-      }
-    </div>
 
     @if (musica(); as pista) {
       <div class="widget-musica">
@@ -38,55 +38,27 @@
         </button>
       </div>
     }
-
-    @if (imagen()) {
-      <button type="button" class="lienzo__quitar-imagen" (click)="quitarImagen()">Quitar foto</button>
-    }
   </div>
 
-  <div class="creador__texto">
-    <input
-      type="text"
-      placeholder="Escribe algo…"
-      maxlength="120"
-      [ngModel]="texto()"
-      (ngModelChange)="texto.set($event)" />
-  </div>
+  <textarea
+    class="creador__texto"
+    rows="3"
+    maxlength="500"
+    placeholder="Escribe algo sobre esta publicación…"
+    [ngModel]="texto()"
+    (ngModelChange)="texto.set($event)"></textarea>
 
   <div class="herramientas">
-    <button type="button" class="herramienta" (click)="elegirTipo('FOTO')">
-      <i class="fa-solid fa-image" aria-hidden="true"></i>
-      Foto
-    </button>
-
     <label class="herramienta">
-      <i class="fa-solid fa-upload" aria-hidden="true"></i>
-      Subir
-      <input type="file" accept="image/*" hidden (change)="elegirImagen($event)" />
+      <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
+      Foto o video
+      <input type="file" accept="image/*,video/*" hidden (change)="elegirArchivo($event)" />
     </label>
 
     <button type="button" class="herramienta" (click)="buscadorMusica.set(!buscadorMusica())">
       <i class="fa-solid fa-music" aria-hidden="true"></i>
       Música
     </button>
-
-    <label class="herramienta herramienta--rango">
-      <i class="fa-regular fa-clock" aria-hidden="true"></i>
-      {{ duracion() }}s
-      <input type="range" min="5" max="15" [ngModel]="duracion()" (ngModelChange)="duracion.set($event)" />
-    </label>
-  </div>
-
-  <div class="paleta">
-    @for (color of fondos; track color) {
-      <button
-        type="button"
-        class="paleta__color"
-        [style.background]="color"
-        [class.paleta__color--activo]="fondo() === color && tipo() === 'TEXTO'"
-        (click)="elegirFondo(color)"
-        [attr.aria-label]="'Fondo ' + color"></button>
-    }
   </div>
 
   <div class="barra-stickers">
@@ -94,6 +66,16 @@
       <button type="button" class="barra-stickers__item" (click)="anadirSticker(sticker)">{{ sticker }}</button>
     }
   </div>
+
+  @if (stickersPuestos().length) {
+    <div class="puestos">
+      @for (sticker of stickersPuestos(); track $index) {
+        <button type="button" class="puesto" (click)="quitarSticker($index)" [title]="'Quitar ' + sticker">
+          {{ sticker }}
+        </button>
+      }
+    </div>
+  }
 
   @if (buscadorMusica()) {
     <div class="buscador">

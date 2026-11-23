@@ -50,6 +50,11 @@ export interface Publicacion {
   tiempo: string;
   texto: string;
   imagen?: string;
+  video?: string;
+  tipoMedia?: 'FOTO' | 'VIDEO' | 'TEXTO';
+  musicaTitulo?: string;
+  musicaArtista?: string;
+  musicaUrl?: string;
   likes: number;
   compartidos: number;
   comentarios: Comentario[];
@@ -133,6 +138,11 @@ export interface PostDto {
   author: AuthorDto;
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
+  mediaType?: string;
+  musicTitle?: string;
+  musicArtist?: string;
+  musicUrl?: string;
   createdAt: string;
   likesCount: number;
   likedByMe: boolean;

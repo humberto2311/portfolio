@@ -44,6 +44,7 @@ export interface Conversacion {
   contraparteId: string;
   contraparteNombre: string;
   contraparteRol?: string | null;
+  contraparteAvatar?: string | null;
   solicitanteId?: string | null;
   esSolicitud: boolean;
   soySolicitante: boolean;

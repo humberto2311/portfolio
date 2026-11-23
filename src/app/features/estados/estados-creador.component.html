@@ -10,19 +10,24 @@
   </header>
 
   <div class="creador__lienzo">
-    @if (video()) {
+    @if (audio()) {
+      <div class="lienzo__audio">
+        <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+        <audio [src]="audio()!" controls></audio>
+      </div>
+    } @else if (video()) {
       <video class="lienzo__media" [src]="video()!" controls playsinline></video>
     } @else if (imagen()) {
       <img class="lienzo__media" [src]="imagen()!" alt="Vista previa" />
     } @else {
       <label class="lienzo__vacio">
         <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
-        <span>Sube una foto o un video</span>
-        <input type="file" accept="image/*,video/*" hidden (change)="elegirArchivo($event)" />
+        <span>Sube una foto, un video o un audio</span>
+        <input type="file" accept="image/*,video/*,audio/*" hidden (change)="elegirArchivo($event)" />
       </label>
     }
 
-    @if (video() || imagen()) {
+    @if (video() || imagen() || audio()) {
       <button type="button" class="lienzo__quitar" (click)="quitarMedia()">Quitar</button>
     }
 
@@ -51,8 +56,8 @@
   <div class="herramientas">
     <label class="herramienta">
       <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
-      Foto o video
-      <input type="file" accept="image/*,video/*" hidden (change)="elegirArchivo($event)" />
+      Foto, video o audio
+      <input type="file" accept="image/*,video/*,audio/*" hidden (change)="elegirArchivo($event)" />
     </label>
 
     <button type="button" class="herramienta" (click)="buscadorMusica.set(!buscadorMusica())">

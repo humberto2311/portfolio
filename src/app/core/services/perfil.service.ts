@@ -245,7 +245,7 @@ export class PerfilService {
                         c.author?.initials?.trim() || this.generarIniciales(autor),
                       autorId: c.author?.id,
                       autorUsername: c.author?.gitUsername || undefined,
-                      autorAvatar: this.avatarDelAutor(c.author?.id),
+                      autorAvatar: this.avatarDelAutor(c.author?.id, c.author?.avatarUrl),
                       texto: c.content,
                       likes: c.likes ?? 0,
                       likedByMe: c.likedByMe ?? false,
@@ -330,7 +330,7 @@ export class PerfilService {
       iniciales: c.author?.initials?.trim() || this.generarIniciales(autor),
       autorId: c.author?.id,
       autorUsername: c.author?.gitUsername || undefined,
-      autorAvatar: this.avatarDelAutor(c.author?.id),
+      autorAvatar: this.avatarDelAutor(c.author?.id, c.author?.avatarUrl),
       texto: c.content,
       likes: c.likes ?? 0,
       likedByMe: c.likedByMe ?? false,
@@ -347,7 +347,7 @@ export class PerfilService {
       iniciales: p.author?.initials?.trim() || this.generarIniciales(autor),
       autorId: p.author?.id,
       autorUsername: p.author?.gitUsername || undefined,
-      autorAvatar: this.avatarDelAutor(p.author?.id),
+      autorAvatar: this.avatarDelAutor(p.author?.id, p.author?.avatarUrl),
       tiempo: this.tiempoRelativo(p.createdAt),
       texto: p.content,
       imagen: p.imageUrl,
@@ -374,7 +374,8 @@ export class PerfilService {
    * AuthorDto no incluye foto: si el autor es el usuario/perfil actual,
    * usamos su avatarUrl del perfil para el círculo.
    */
-  private avatarDelAutor(authorId?: string): string | undefined {
+  private avatarDelAutor(authorId?: string, delBackend?: string): string | undefined {
+    if (delBackend) return delBackend;
     if (!authorId) return undefined;
     const perfil = this.perfil();
     const usuario = this.authService.currentUser();

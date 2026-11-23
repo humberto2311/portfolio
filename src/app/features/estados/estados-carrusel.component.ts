@@ -17,6 +17,7 @@ export class EstadosCarruselComponent implements OnInit {
   private auth = inject(AuthService);
 
   readonly recarga = input<number>(0);
+  readonly soloTextoYAudio = input(false);
   readonly cargados = output<GrupoEstados[]>();
   readonly abrirCreador = output<void>();
   readonly abrirVisor = output<GrupoEstados>();
@@ -25,7 +26,9 @@ export class EstadosCarruselComponent implements OnInit {
   readonly cargando = signal(true);
 
   readonly mio = computed(() => this.grupos().find((grupo) => grupo.usuarioId === this.auth.currentUser()?.id) ?? null);
-  readonly otros = computed(() => this.grupos().filter((grupo) => grupo.usuarioId !== this.auth.currentUser()?.id));
+  readonly otros = computed(() => this.grupos()
+    .filter((grupo) => grupo.usuarioId !== this.auth.currentUser()?.id)
+    .filter((grupo) => !this.soloTextoYAudio() || grupo.estados.some((estado) => this.esTextoOAudio(estado))));
   readonly iniciales = computed(() => {
     const nombre = this.auth.currentUser()?.fullName ?? 'Yo';
 
@@ -57,6 +60,10 @@ export class EstadosCarruselComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  esTextoOAudio(estado: { tipo: string; musicaTitulo: string | null }): boolean {
+    return estado.tipo === 'TEXTO' || !!estado.musicaTitulo;
   }
 
   crear(): void {

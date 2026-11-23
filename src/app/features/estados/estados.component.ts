@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EstadosCarruselComponent } from './estados-carrusel.component';
 import { EstadosCreadorComponent } from './estados-creador.component';
@@ -12,6 +12,7 @@ import { GrupoEstados } from '../../core/models/estado.model';
   template: `
     <app-estados-carrusel
       [recarga]="recarga()"
+      [soloTextoYAudio]="soloTextoYAudio()"
       (cargados)="recibirGrupos($event)"
       (abrirCreador)="creador.set(true)"
       (abrirVisor)="abrirVisor($event)" />
@@ -30,6 +31,8 @@ import { GrupoEstados } from '../../core/models/estado.model';
   `
 })
 export class EstadosComponent {
+
+  readonly soloTextoYAudio = input(false);
 
   readonly creador = signal(false);
   readonly visor = signal<GrupoEstados | null>(null);

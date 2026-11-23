@@ -603,6 +603,7 @@ export class SidePanelService {
       if (idx < 0) return [contact, ...list];
       const previo = list[idx];
       const copiado = { ...previo, ...contact };
+      if (!contact.avatar && previo.avatar) copiado.avatar = previo.avatar;
       return [...list.slice(0, idx), copiado, ...list.slice(idx + 1)];
     });
   }
@@ -611,7 +612,7 @@ export class SidePanelService {
     return {
       id: c.contraparteId,
       name: c.contraparteNombre,
-      avatar: '',
+      avatar: c.contraparteAvatar ?? '',
       status: 'offline',
       statusText: this.textoEstado(c),
       lastMsg: c.ultimoMensaje ?? '',

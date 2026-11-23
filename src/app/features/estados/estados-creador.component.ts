@@ -20,6 +20,7 @@ export class EstadosCreadorComponent implements OnInit {
 
   readonly stickers = STICKERS_ESTADO;
 
+  readonly audio = signal<string | null>(null);
   readonly video = signal<string | null>(null);
   readonly imagen = signal<string | null>(null);
   readonly texto = signal('');
@@ -32,7 +33,8 @@ export class EstadosCreadorComponent implements OnInit {
   readonly consultaMusica = signal('');
   readonly resultados = signal<PistaMusica[]>([]);
 
-  readonly tipoMedia = computed<'VIDEO' | 'FOTO' | 'TEXTO'>(() => {
+  readonly tipoMedia = computed<'AUDIO' | 'VIDEO' | 'FOTO' | 'TEXTO'>(() => {
+    if (this.audio()) return 'AUDIO';
     if (this.video()) return 'VIDEO';
     if (this.imagen()) return 'FOTO';
 
@@ -40,7 +42,7 @@ export class EstadosCreadorComponent implements OnInit {
   });
 
   readonly puedePublicar = computed(() =>
-    !!this.video() || !!this.imagen() || this.texto().trim().length > 0);
+    !!this.audio() || !!this.video() || !!this.imagen() || this.texto().trim().length > 0);
 
   ngOnInit(): void {
     this.buscar('');
@@ -55,8 +57,13 @@ export class EstadosCreadorComponent implements OnInit {
     try {
       const datos = await this.estados.leerComoDataUrl(archivo);
 
-      if (archivo.type.startsWith('video/')) {
+      if (archivo.type.startsWith('audio/')) {
+        this.audio.set(datos);
+        this.video.set(null);
+        this.imagen.set(null);
+      } else if (archivo.type.startsWith('video/')) {
         this.video.set(datos);
+        this.audio.set(null);
         this.imagen.set(null);
       } else {
         this.imagen.set(datos);
@@ -74,6 +81,7 @@ export class EstadosCreadorComponent implements OnInit {
   quitarMedia(): void {
     this.video.set(null);
     this.imagen.set(null);
+    this.audio.set(null);
   }
 
   anadirSticker(sticker: string): void {
@@ -113,6 +121,7 @@ export class EstadosCreadorComponent implements OnInit {
       texto: this.texto().trim(),
       imagen: this.imagen(),
       video: this.video(),
+      audio: this.audio(),
       mediaType: this.tipoMedia(),
       stickers: this.stickersPuestos(),
       musica: this.musica()

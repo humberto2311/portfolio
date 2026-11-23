@@ -6,11 +6,12 @@ import { SidePanelService } from '../../../../../core/services/side-panel.servic
 import { ChatService } from '../../../../../core/services/chat.service';
 import { Contact } from '../../../../../core/models/contact.model';
 import { UsuarioBuscado } from '../../../../../core/models/chat.model';
+import { EstadosComponent } from '../../../../../features/estados/estados.component';
 
 @Component({
   selector: 'app-contacts-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EstadosComponent],
   templateUrl: './contacts-list.component.html',
   styleUrls: ['./contacts-list.component.scss'],
 })

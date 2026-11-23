@@ -42,6 +42,17 @@
     <div class="header-row">
       <!-- AVATAR -->
       <div class="avatar-block">
+        @if (hayEstado()) {
+          <div class="avatar-estado" (click)="verEstado()" title="Ver estado">
+            <div class="avatar-wrapper" [class.has-image]="perfil.avatarUrl">
+              @if (perfil.avatarUrl) {
+                <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img" />
+              } @else {
+                <span class="initials">{{ perfil.iniciales }}</span>
+              }
+            </div>
+          </div>
+        } @else {
         <div class="avatar-wrapper" [class.has-image]="perfil.avatarUrl">
           @if (perfil.avatarUrl) {
             <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img"
@@ -56,6 +67,7 @@
             </button>
           }
         </div>
+        }
       </div>
 
       <!-- INFO -->
@@ -163,3 +175,11 @@
       (eliminada)="alEliminarFoto($event)" />
   }
 </div>
+
+@if (viendoEstado() && estadosDelPerfil(); as grupo) {
+  <app-estados-visor
+    [grupo]="grupo"
+    [vecinos]="[grupo]"
+    (cerrar)="viendoEstado.set(false)"
+    (borrado)="cargarEstado()" />
+}

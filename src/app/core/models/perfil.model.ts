@@ -108,6 +108,7 @@ export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empr
 // ===== DTOs del backend (coinciden con /v3/api-docs) =====
 
 export interface AuthorDto {
+  avatarUrl?: string;
   id: string;
   fullName: string;
   gitUsername?: string;

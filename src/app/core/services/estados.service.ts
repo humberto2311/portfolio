@@ -36,7 +36,8 @@ export interface BorradorPublicacion {
   texto: string;
   imagen: string | null;
   video: string | null;
-  mediaType: 'FOTO' | 'VIDEO' | 'TEXTO';
+  audio: string | null;
+  mediaType: 'AUDIO' | 'FOTO' | 'VIDEO' | 'TEXTO';
   stickers: string[];
   musica: PistaMusica | null;
 }
@@ -76,7 +77,7 @@ export class EstadosService {
     return this.http.post(`${environment.apiUrl}/api/posts`, {
       content: texto,
       imageUrl: borrador.imagen,
-      videoUrl: borrador.video,
+      videoUrl: borrador.video ?? borrador.audio,
       mediaType: borrador.mediaType,
       musicTitle: pista?.titulo ?? null,
       musicArtist: pista?.artista ?? null,

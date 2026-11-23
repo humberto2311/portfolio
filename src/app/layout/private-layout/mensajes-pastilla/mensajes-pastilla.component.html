@@ -30,16 +30,6 @@
       }
     </button>
 
-    <!-- Lápiz: buscar a alguien y empezar una charla nueva. -->
-    <button type="button" class="pastilla__accion" (click)="nuevoMensaje($event)" title="Buscar a alguien y mandar un mensaje" aria-label="Nuevo mensaje">
-      <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
-    </button>
-
-    <!-- Pantalla completa: abre el componente de Mensajes a página entera. -->
-    <button type="button" class="pastilla__accion" (click)="pantallaCompleta($event)" title="Ver Mensajes a pantalla completa" aria-label="Pantalla completa">
-      <i class="fa-solid fa-expand" aria-hidden="true"></i>
-    </button>
-
     <!-- Solicitudes pendientes: no se pierden aunque no haya mensajes nuevos. -->
     @if (svc.solicitudes().length) {
       <button type="button" class="pastilla__solicitudes" (click)="verTodas($event)" title="Solicitudes de chat">

@@ -15,6 +15,7 @@ import { TabContactosComponent } from './components/tab-contactos/tab-contactos.
 import { TabEmpresaComponent } from './components/tab-empresa/tab-empresa.component';
 import { TabEnlacesComponent } from './components/tab-enlaces/tab-enlaces.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { NotasUsuarioComponent } from '../../shared/components/notas-usuario/notas-usuario.component';
 
 @Component({
   selector: 'app-perfil',
@@ -30,7 +31,8 @@ import { ToastComponent } from './components/toast/toast.component';
     TabEmpresaComponent,
     TabEnlacesComponent,
     ToastComponent,
-    TabContactosComponent 
+    TabContactosComponent,
+    NotasUsuarioComponent
   ],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.scss']

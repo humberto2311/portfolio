@@ -5,15 +5,15 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
-          Red social de identidad profesional
+          Perfil, CRM, IA y empresa
         </div>
 
         <h1 class="hero-title">
-          Tu perfil profesional, listo para <span class="gradient-text">compartir</span>
+          La red social donde tu <span class="gradient-text">marca</span> crece
         </h1>
 
         <p class="hero-subtitle">
-          Crea tu perfil, reúne lo que haces y compártelo con un enlace, un QR o un toque NFC.
+          Perfil, CRM, IA y gestión empresarial en un solo lugar. Conecta, mide y escala tu red desde el primer toque.
         </p>
 
         <div class="hero-actions">
@@ -23,8 +23,8 @@
           </button>
 
           <button type="button" (click)="abrirLogin('login')" class="btn-secondary">
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Ya tengo cuenta
+            <i class="fa-solid fa-gauge-high"></i>
+            Ir a mi panel
           </button>
         </div>
       </div>
@@ -35,8 +35,7 @@
           (mousemove)="onCardTilt($event)"
           (mouseleave)="resetCardTilt()"
           (click)="triggerTapScan()"
-          [style.transform]="cardTransform"
-        >
+          [style.transform]="cardTransform">
           <div class="card-header">
             <div class="card-brand-wrap">
               <app-logo class="card-marca" [alto]="18" />
@@ -66,72 +65,193 @@
     </div>
   </section>
 
-  <section id="que-es" class="git-section">
+  <section id="capacidades" class="bento-section">
     <div class="section-header centered">
-      <span class="section-eyebrow">Lo que puedes hacer hoy</span>
-      <h2 class="section-title">Todo tu perfil en un solo lugar</h2>
+      <span class="section-eyebrow">Lo que hay dentro</span>
+      <h2 class="section-title">Mucho más que una tarjeta</h2>
+      <p class="section-subtitle">Seis piezas que trabajan juntas: identidad, datos, automatización y ventas.</p>
     </div>
 
-    <div class="que-haces">
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-solid fa-id-card-clip"></i></span>
-        <h3 class="hace__titulo">Tu perfil</h3>
-        <p class="hace__texto">Foto, portada, rol y disponibilidad. Tu enlace propio para compartir.</p>
+    <div class="bento">
+      <article class="bento__tarjeta bento__tarjeta--grande">
+        <span class="bento__icono"><i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Networking inteligente</h3>
+        <p class="bento__texto">Cada toque NFC o QR captura un lead con su contexto. Nada se pierde.</p>
+        <ul class="bento__datos">
+          <li><strong>NFC</strong><span>un toque</span></li>
+          <li><strong>QR</strong><span>sin app</span></li>
+          <li><strong>Leads</strong><span>al CRM</span></li>
+        </ul>
+        <div class="bento__lista" aria-hidden="true">
+          <span><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Ana Gómez <em>hace 2 min</em></span>
+          <span><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Luis Pineda <em>hoy 9:14</em></span>
+          <span><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Marta Ruiz <em>ayer</em></span>
+        </div>
       </article>
 
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-solid fa-comment-dots"></i></span>
-        <h3 class="hace__titulo">Publica y comenta</h3>
-        <p class="hace__texto">Comparte lo que haces, recibe me gusta y responde comentarios.</p>
+      <article class="bento__tarjeta bento__tarjeta--alto">
+        <span class="bento__icono"><i class="fa-solid fa-chart-simple" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Analíticas en vivo</h3>
+        <p class="bento__texto">Mira quién ve tu perfil, desde dónde llega y qué enlaces abren.</p>
+        <div class="bento__stats">
+          <span><strong>1.284</strong><em>visitas</em></span>
+          <span><strong>327</strong><em>contactos</em></span>
+          <span><strong>18%</strong><em>conversión</em></span>
+        </div>
+        <div class="mini-grafico" aria-hidden="true">
+          <span style="height: 34%"></span>
+          <span style="height: 58%"></span>
+          <span style="height: 42%"></span>
+          <span style="height: 76%"></span>
+          <span style="height: 64%"></span>
+          <span style="height: 92%"></span>
+          <span style="height: 71%"></span>
+        </div>
       </article>
 
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-solid fa-users"></i></span>
-        <h3 class="hace__titulo">Contactos</h3>
-        <p class="hace__texto">Busca personas, agrégalas y habla con ellas desde el chat.</p>
+      <article class="bento__tarjeta">
+        <span class="bento__icono"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Bots e IA</h3>
+        <p class="bento__texto">Crea eventos en Calendar o exporta a Sheets desde el chat.</p>
       </article>
 
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-brands fa-github"></i></span>
-        <h3 class="hace__titulo">Proyectos y hoja de vida</h3>
-        <p class="hace__texto">Suma tus repos de GitHub y tu hoja de vida a tu perfil.</p>
+      <article class="bento__tarjeta">
+        <span class="bento__icono"><i class="fa-solid fa-building" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Modo empresa</h3>
+        <p class="bento__texto">Equipos, roles y rendimiento individual en un panel.</p>
       </article>
 
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-solid fa-building"></i></span>
-        <h3 class="hace__titulo">Espacio de empresa</h3>
-        <p class="hace__texto">Crea el espacio de tu empresa y publica con su marca.</p>
+      <article class="bento__tarjeta bento__tarjeta--ancha">
+        <span class="bento__icono"><i class="fa-solid fa-cash-register" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Ecosistema de ventas</h3>
+        <p class="bento__texto">POS nativo y webhooks para conectar tu comercio actual.</p>
+        <div class="bento__chips">
+          <span><i class="fa-solid fa-plug" aria-hidden="true"></i> Webhooks</span>
+          <span><i class="fa-solid fa-receipt" aria-hidden="true"></i> Tickets</span>
+          <span><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Ventas al panel</span>
+        </div>
+        <div class="bento__venta" aria-hidden="true">
+          <span class="bento__venta-total">$ 184.500</span>
+          <span class="bento__venta-meta">3 ítems · cobrada hace 1 min</span>
+        </div>
       </article>
 
-      <article class="hace glass-panel">
-        <span class="hace__icono"><i class="fa-solid fa-tower-broadcast"></i></span>
-        <h3 class="hace__titulo">Comparte en un toque</h3>
-        <p class="hace__texto">Enlace, código QR o toque NFC entre teléfonos Android.</p>
+      <article class="bento__tarjeta">
+        <span class="bento__icono"><i class="fa-brands fa-github" aria-hidden="true"></i></span>
+        <h3 class="bento__titulo">Proyectos y hoja de vida</h3>
+        <p class="bento__texto">Repos de GitHub y tu CV dentro del mismo perfil.</p>
       </article>
     </div>
   </section>
 
-  <section id="como-funciona" class="roadmap-section">
+  <section id="como-funciona" class="pasos-section">
     <div class="section-header centered">
       <span class="section-eyebrow">Cómo funciona</span>
-      <h2 class="section-title">Tres pasos y ya</h2>
+      <h2 class="section-title">Tres pasos, cero fricción</h2>
     </div>
 
     <div class="pasos">
-      <div class="paso">
-        <span class="step-num">01</span>
-        <h4>Creas tu perfil</h4>
-        <p>Foto, portada, rol y disponibilidad.</p>
+      <article class="paso paso--doble">
+        <span class="paso__icono"><i class="fa-solid fa-id-card-clip" aria-hidden="true"></i></span>
+        <span class="paso__num">01</span>
+        <h3>Crea tu identidad</h3>
+        <p>Elige cómo te presentas al mundo: identidad personal o identidad empresarial.</p>
+        <div class="paso__opciones">
+          <span class="paso__opcion">
+            <i class="fa-solid fa-user" aria-hidden="true"></i>
+            <strong>Personal</strong>
+            <em>Tu perfil, tu marca y tu CV</em>
+          </span>
+          <span class="paso__opcion">
+            <i class="fa-solid fa-building" aria-hidden="true"></i>
+            <strong>Empresarial</strong>
+            <em>Tu equipo, tu marca y tus sedes</em>
+          </span>
+        </div>
+      </article>
+
+      <article class="paso">
+        <span class="paso__icono"><i class="fa-solid fa-hand-pointer" aria-hidden="true"></i></span>
+        <span class="paso__num">02</span>
+        <h3>Comparte con un toque</h3>
+        <p>NFC, QR o enlace directo: el contacto queda registrado.</p>
+      </article>
+
+      <article class="paso">
+        <span class="paso__icono"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i></span>
+        <span class="paso__num">03</span>
+        <h3>Escala con IA</h3>
+        <p>Analíticas, comandos y bots trabajando para ti.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="empresas" class="b2b-section">
+    <div class="b2b">
+      <div class="b2b__texto">
+        <span class="b2b__eyebrow"><i class="fa-solid fa-building" aria-hidden="true"></i> Para equipos</span>
+        <h2>Potencia a tu equipo</h2>
+        <p>
+          Gestiona el rendimiento de tus empleados, usa nuestro sistema POS para ventas,
+          o integra tus herramientas con nuestros bots.
+        </p>
+        <button type="button" class="b2b__boton" (click)="abrirLogin('register')">
+          Descubrir Modo Empresa
+          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
       </div>
-      <div class="paso">
-        <span class="step-num">02</span>
-        <h4>Publicas lo que haces</h4>
-        <p>Post, me gusta y comentarios.</p>
+
+      <ul class="b2b__lista">
+        <li><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i> Rendimiento por empleado</li>
+        <li><i class="fa-solid fa-cash-register" aria-hidden="true"></i> Ventas con POS y webhooks</li>
+        <li><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Roles y permisos por equipo</li>
+        <li><i class="fa-solid fa-file-export" aria-hidden="true"></i> Exportación a Sheets y Docs</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="ia" class="ia-section">
+    <div class="ia">
+      <div class="ia__texto">
+        <span class="section-eyebrow">Chat + IA</span>
+        <h2>Tu red social, ahora se controla con IA</h2>
+        <p>
+          Usa nuestro asistente en el chat para automatizar tareas de Google Workspace
+          y GitHub sin salir de la conversación.
+        </p>
       </div>
-      <div class="paso">
-        <span class="step-num">03</span>
-        <h4>Compartes tu tarjeta</h4>
-        <p>Enlace propio, QR o toque NFC.</p>
+
+      <div class="ia__mockup" role="img" aria-label="Ejemplo de conversación con el asistente">
+        <div class="mockup__barra">
+          <span class="mockup__punto"></span>
+          <span class="mockup__punto"></span>
+          <span class="mockup__punto"></span>
+          <span class="mockup__titulo">Ayuda IA</span>
+        </div>
+
+        <div class="mockup__cuerpo">
+          <div class="burbuja burbuja--yo">
+            Oye bot, exporta mis contactos de los últimos 7 días a Sheets
+          </div>
+
+          <div class="burbuja burbuja--bot">
+            <span class="burbuja__comando"><code>/gsheet-crear</code></span>
+            <p>Contactos NFC, últimos 7 días, 3 columnas. ¿Confirmas?</p>
+            <div class="burbuja__acciones">
+              <span class="burbuja__si">Sí, ejecutar</span>
+              <span class="burbuja__no">No</span>
+            </div>
+          </div>
+
+          <div class="burbuja burbuja--yo burbuja--corta">
+            /gcal-crear titulo="Demo con Ana" inicio="mañana 10:00"
+          </div>
+
+          <div class="burbuja burbuja--bot burbuja--ok">
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+            Evento creado e invitados notificados.
+          </div>
+        </div>
       </div>
     </div>
   </section>

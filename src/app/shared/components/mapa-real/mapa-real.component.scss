@@ -129,6 +129,11 @@
   box-shadow: 0 0 0 3px rgba(245, 158, 11, .3);
 }
 
+:global(.pin-mapa--amigo .pin-mapa__punto) {
+  background: linear-gradient(120deg, #34d399, #10b981);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, .3);
+}
+
 :global(.pin-mapa--empleo .pin-mapa__punto) {
   background: linear-gradient(120deg, #f59e0b, #f97316);
   color: #1c1002;

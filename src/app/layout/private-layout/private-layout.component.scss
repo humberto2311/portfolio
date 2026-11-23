@@ -169,3 +169,23 @@
     font-size: 0.8rem;
   }
 }
+
+.shell__cuenta-cerrar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: $text-muted;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: $bg-elevated;
+    color: $text-light;
+  }
+}

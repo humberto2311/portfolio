@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../../../core/services/auth.service';
@@ -6,6 +6,9 @@ import { UserProfileService } from '../../../core/services/user-profile.service'
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
+import { PrivacidadService } from '../../../core/services/privacidad.service';
+import { PRESENCIAS, Presencia } from '../../../core/models/privacidad.model';
+import { ToastService } from '../../../core/services/toast.service';
 
 interface Destino {
   label: string;
@@ -22,13 +25,18 @@ interface Destino {
   templateUrl: './tab-bar.component.html',
   styleUrls: ['./tab-bar.component.scss'],
 })
-export class TabBarComponent {
+export class TabBarComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
   private perfiles = inject(UserProfileService);
   private mensajes = inject(SidePanelService);
   private confirmationModal = inject(ConfirmationModalService);
+  private privacidad = inject(PrivacidadService);
+  private toast = inject(ToastService);
   readonly empresa = inject(EmpresaService);
+
+  readonly presencias = PRESENCIAS;
+  readonly presencia = signal<Presencia>('EN_LINEA');
 
   readonly user = this.auth.currentUser;
   readonly avatar = this.perfiles.avatar;
@@ -64,6 +72,7 @@ export class TabBarComponent {
         : []),
       { label: 'Ajustes de cuenta', icon: 'fa-solid fa-gear', ruta: '/app/ajustes/cuenta' },
       { label: 'Seguridad', icon: 'fa-solid fa-shield-halved', ruta: '/app/ajustes/seguridad' },
+      { label: 'Privacidad', icon: 'fa-solid fa-user-lock', ruta: '/app/ajustes/privacidad' },
     ];
   }
 
@@ -83,6 +92,26 @@ export class TabBarComponent {
   ir(ruta: string): void {
     this.cerrarHoja();
     this.router.navigate([ruta]);
+  }
+
+  ngOnInit(): void {
+    this.privacidad.cargar().subscribe({
+      next: (datos) => this.presencia.set(datos.presencia),
+      error: () => this.presencia.set('EN_LINEA'),
+    });
+  }
+
+  elegirPresencia(valor: Presencia): void {
+    this.presencia.set(valor);
+
+    this.privacidad.guardar({ presencia: valor }).subscribe({
+      next: () => this.toast.show(`Ahora apareces como ${this.etiquetaPresencia(valor).toLowerCase()}.`),
+      error: () => this.toast.show('No se pudo cambiar tu presencia.'),
+    });
+  }
+
+  etiquetaPresencia(valor: Presencia): string {
+    return PRESENCIAS.find((p) => p.valor === valor)?.etiqueta ?? 'En línea';
   }
 
   abrirMensajes(): void {

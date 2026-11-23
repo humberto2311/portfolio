@@ -124,7 +124,7 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
     this.mapa?.flyTo([lat, lng], zoom, { duration: 1.1 });
   }
 
-  marcar(lat: number, lng: number, texto?: string, tono: 'personal' | 'empresarial' | 'local' | 'empleo' = 'empleo'): void {
+  marcar(lat: number, lng: number, texto?: string, tono: 'personal' | 'empresarial' | 'local' | 'empleo' | 'amigo' = 'empleo'): void {
     if (!this.mapa) return;
 
     const icono = this.icono(tono);
@@ -153,7 +153,7 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
   }
 
   marcarVarios(
-    puntos: { lat: number; lng: number; texto: string; tono?: 'personal' | 'empresarial' | 'local' | 'empleo' }[],
+    puntos: { lat: number; lng: number; texto: string; tono?: 'personal' | 'empresarial' | 'local' | 'empleo' | 'amigo' }[],
   ): void {
     if (!this.mapa || !this.L) return;
 
@@ -188,6 +188,10 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  ajustarVista(): void {
+    this.mapa?.invalidateSize();
+  }
+
   ajustar(puntos: { lat: number; lng: number }[]): void {
     if (!this.mapa || !this.L || !puntos.length) return;
 
@@ -200,7 +204,7 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
     this.mapa.fitBounds(limites, { padding: [40, 40], maxZoom: 14 });
   }
 
-  private icono(tono: 'personal' | 'empresarial' | 'local' | 'empleo' = 'empleo'): import('leaflet').DivIcon | null {
+  private icono(tono: 'personal' | 'empresarial' | 'local' | 'empleo' | 'amigo' = 'empleo'): import('leaflet').DivIcon | null {
     if (!this.L) return null;
 
     const iconos: Record<string, string> = {
@@ -208,6 +212,7 @@ export class MapaRealComponent implements AfterViewInit, OnDestroy {
       empresarial: 'fa-building',
       local: 'fa-store',
       empleo: 'fa-briefcase',
+      amigo: 'fa-user-group',
     };
 
     return this.L.divIcon({

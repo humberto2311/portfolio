@@ -1,0 +1,46 @@
+<section class="estados" [class.estados--compacta]="compacto()" aria-label="Estados">
+  @if (!ocultarCabecera()) {
+    <div class="estados__cabecera">
+      <h3>Estados</h3>
+      <button type="button" class="estados__crear" (click)="crear()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        Crear estado
+      </button>
+    </div>
+  }
+
+  <div class="estados__fila">
+    <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="verMio()">
+      <span class="anillo anillo--crear" [class.anillo--propio]="mio()">
+        @if (avatarPropio(); as foto) {
+          @if (!avatarRoto()) {
+            <img [src]="foto" alt="Tu estado" (error)="avatarRoto.set(true)" />
+          } @else {
+            <span class="anillo__iniciales">{{ iniciales() }}</span>
+          }
+        } @else {
+          <span class="anillo__iniciales">{{ iniciales() }}</span>
+        }
+        <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+      </span>
+      <span class="estado-tarjeta__nombre">{{ mio() ? 'Tu estado' : 'Crear estado' }}</span>
+    </button>
+
+    @for (grupo of otros(); track grupo.usuarioId) {
+      <button type="button" class="estado-tarjeta" (click)="ver(grupo)">
+        <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
+          @if (grupo.avatar && !roto(grupo.usuarioId)) {
+            <img [src]="grupo.avatar" [alt]="grupo.nombre" (error)="marcarRoto(grupo.usuarioId)" />
+          } @else {
+            <span class="anillo__iniciales">{{ grupo.nombre.slice(0, 2).toUpperCase() }}</span>
+          }
+        </span>
+        <span class="estado-tarjeta__nombre">{{ grupo.nombre.split(' ')[0] }}</span>
+      </button>
+    }
+
+    @if (!cargando() && otros().length === 0) {
+      <p class="estados__vacio">Aún no hay estados de tus contactos. Crea el tuyo.</p>
+    }
+  </div>
+</section>

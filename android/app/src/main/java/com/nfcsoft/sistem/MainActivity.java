@@ -6,6 +6,8 @@ import android.os.Bundle;
 
 import com.getcapacitor.BridgeActivity;
 
+import androidx.core.content.ContextCompat;
+
 public class MainActivity extends BridgeActivity {
 
     @Override
@@ -13,6 +15,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(DispositivoNfcPlugin.class);
         super.onCreate(savedInstanceState);
         anotaEnlace(getIntent());
+        AvisoEmision.crearCanal(this);
+        reanudaEmision();
     }
 
     @Override
@@ -27,6 +31,16 @@ public class MainActivity extends BridgeActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         DispositivoNfcPlugin.entregaResultados(requestCode, permissions, grantResults);
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void reanudaEmision() {
+        Emision.asegurar(this);
+
+        if (!EmisionActiva.reanuda(this) || !Emision.hayTarjeta() || EmisionActiva.slug(this) == null) {
+            return;
+        }
+
+        ContextCompat.startForegroundService(this, new Intent(this, EmisoraNfcResguardo.class));
     }
 
     private void anotaEnlace(Intent intento) {

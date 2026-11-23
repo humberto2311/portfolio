@@ -1,0 +1,377 @@
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  background: #05070a;
+}
+
+.visor__marca {
+  padding: 0.9rem 1.6rem;
+}
+
+.visor__logo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.visor__cerrar {
+  position: absolute;
+  top: 0.85rem;
+  right: 1.2rem;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.visor__escenario {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2rem;
+  padding: 0 1.5rem 1.5rem;
+  min-height: 0;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  width: min(430px, 92vw);
+  height: min(760px, 88vh);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0b0d10;
+  border: 1px solid var(--bg-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.tarjeta__progreso {
+  display: flex;
+  gap: 4px;
+  padding: 0.55rem 0.6rem 0;
+}
+
+.barra {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(230, 232, 234, 0.3);
+  overflow: hidden;
+}
+
+.barra__relleno {
+  display: block;
+  height: 100%;
+  background: #fff;
+  transition: width 0.1s linear;
+}
+
+.tarjeta__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.7rem;
+}
+
+.tarjeta__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: 0 0 auto;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.tarjeta__iniciales {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tarjeta__datos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+
+  strong {
+    font-size: 0.8rem;
+    color: #fff;
+  }
+
+  span {
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.tarjeta__acciones {
+  margin-left: auto;
+  display: flex;
+  gap: 0.3rem;
+
+  button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.tarjeta__lienzo {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.lienzo__foto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lienzo__texto {
+  position: relative;
+  margin: 0;
+  padding: 0 1.6rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+
+.lienzo__stickers {
+  position: absolute;
+  inset: auto 0 4.5rem 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lienzo__sticker {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+}
+
+.lienzo__musica {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(11, 13, 16, 0.72);
+  border: 1px solid rgba(230, 232, 234, 0.16);
+
+  i {
+    color: var(--accent);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 0.74rem;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+.lienzo__vistas {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(11, 13, 16, 0.6);
+  font-size: 0.68rem;
+  color: #fff;
+}
+
+.zona {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &--izquierda {
+    left: 0;
+  }
+
+  &--derecha {
+    right: 0;
+  }
+}
+
+.tarjeta__pie {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.55rem 0.65rem 0.7rem;
+  background: #0b0d10;
+}
+
+.pie__reaccion {
+  font-size: 1.4rem;
+  align-self: flex-start;
+}
+
+.pie__reacciones {
+  display: flex;
+  gap: 0.2rem;
+
+  button {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(230, 232, 234, 0.14);
+    border-radius: 50%;
+    background: var(--bg-elevated);
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+}
+
+.pie__respuesta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  input {
+    flex: 1;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(230, 232, 234, 0.22);
+    background: transparent;
+    color: #fff;
+    font-size: 0.8rem;
+    outline: none;
+  }
+
+  button {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.miniatura {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 150px;
+  padding: 0.7rem 0.5rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+
+  strong {
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+}
+
+.miniatura__anillo {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.miniatura__iniciales {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .miniatura {
+    display: none;
+  }
+
+  .visor__marca {
+    padding: 0.7rem 1rem;
+  }
+
+  .tarjeta {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  .visor__escenario {
+    padding: 0;
+  }
+}

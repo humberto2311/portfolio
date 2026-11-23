@@ -1,0 +1,140 @@
+<div class="creador" role="dialog" aria-modal="true" aria-label="Crear publicación">
+  <header class="creador__barra">
+    <button type="button" class="icono" (click)="cerrar.emit()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <span class="creador__quien">
+      <span class="creador__avatar">
+        @if (avatarPropio()) {
+          <img [src]="avatarPropio()!" alt="Tu foto" (error)="avatarRoto.set(true)" />
+        }
+        @if (!avatarPropio() || avatarRoto()) {
+          {{ iniciales() }}
+        }
+      </span>
+      <span class="creador__titulo">Comparte lo que piensas</span>
+    </span>
+    <button type="button" class="publicar" [disabled]="!puedePublicar() || guardando()" (click)="publicar()">
+      {{ guardando() ? 'Publicando…' : 'Publicar' }}
+    </button>
+  </header>
+
+  <div class="creador__lienzo">
+    @if (audio()) {
+      <div class="lienzo__audio">
+        <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+        <audio [src]="audio()!" controls></audio>
+      </div>
+    } @else if (video()) {
+      <video class="lienzo__media" [src]="video()!" controls playsinline></video>
+    } @else if (imagen()) {
+      <img class="lienzo__media" [src]="imagen()!" alt="Vista previa" />
+    } @else {
+      <label class="lienzo__vacio">
+        <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
+        <span>Sube una foto, un video o un audio</span>
+        <input type="file" accept="image/*,video/*,audio/*" hidden (change)="elegirArchivo($event)" />
+      </label>
+    }
+
+    @if (video() || imagen() || audio()) {
+      <button type="button" class="lienzo__quitar" (click)="quitarMedia()">Quitar</button>
+    }
+
+    @if (musica(); as pista) {
+      <div class="widget-musica">
+        <i class="fa-solid fa-music" aria-hidden="true"></i>
+        <div class="widget-musica__datos">
+          <strong>{{ pista.titulo }}</strong>
+          <span>{{ pista.artista }}</span>
+        </div>
+        <button type="button" class="widget-musica__quitar" (click)="quitarMusica()" aria-label="Quitar música">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+  </div>
+
+  <textarea
+    class="creador__texto"
+    rows="3"
+    maxlength="500"
+    placeholder="Escribe algo sobre esta publicación…"
+    [ngModel]="texto()"
+    (ngModelChange)="texto.set($event)"></textarea>
+
+  <div class="herramientas">
+    <label class="herramienta">
+      <i class="fa-solid fa-photo-film" aria-hidden="true"></i>
+      Foto, video o audio
+      <input type="file" accept="image/*,video/*,audio/*" hidden (change)="elegirArchivo($event)" />
+    </label>
+
+    <button type="button" class="herramienta" (click)="buscadorMusica.set(!buscadorMusica())">
+      <i class="fa-solid fa-music" aria-hidden="true"></i>
+      Música
+    </button>
+  </div>
+
+  <div class="barra-stickers">
+    @for (sticker of stickers; track sticker) {
+      <button type="button" class="barra-stickers__item" (click)="anadirSticker(sticker)">{{ sticker }}</button>
+    }
+  </div>
+
+  @if (stickersPuestos().length) {
+    <div class="puestos">
+      @for (sticker of stickersPuestos(); track $index) {
+        <button type="button" class="puesto" (click)="quitarSticker($index)" [title]="'Quitar ' + sticker">
+          {{ sticker }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (buscadorMusica()) {
+    <div class="buscador">
+      <input
+        type="search"
+        placeholder="Buscar canción o artista"
+        [ngModel]="consultaMusica()"
+        (ngModelChange)="buscar($event)" />
+
+      <ul class="buscador__lista">
+        @for (pista of resultados(); track pista.id) {
+          <li>
+            <button type="button" (click)="elegirMusica(pista)">
+              <i class="fa-solid fa-music" aria-hidden="true"></i>
+              <span>
+                <strong>{{ pista.titulo }}</strong>
+                <em>{{ pista.artista }}</em>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="buscador__vacio">Sin resultados. Prueba otro nombre.</li>
+        }
+      </ul>
+      <p class="buscador__nota">Catálogo de demostración: aquí se conectará tu proveedor de música.</p>
+    </div>
+  }
+
+  @if (error()) {
+    <p class="creador__error">{{ error() }}</p>
+  }
+
+  <button type="button" class="audiencia" (click)="abrirAudiencia()">
+    <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+    <span>{{ etiquetaVisibilidad() }}</span>
+  </button>
+
+  @if (modalAudiencia()) {
+    <app-audiencia-modal
+      [visibilidad]="visibilidad()"
+      [permitidos]="permitidos()"
+      [excluidos]="excluidos()"
+      (cerrar)="modalAudiencia.set(false)"
+      (confirmar)="aplicarAudiencia($event)">
+    </app-audiencia-modal>
+  }
+</div>

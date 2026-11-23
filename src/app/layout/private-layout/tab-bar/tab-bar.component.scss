@@ -212,3 +212,48 @@
     opacity: 1;
   }
 }
+
+.hoja__presencia {
+  padding: 0 16px 12px;
+}
+
+.hoja__presencia-titulo {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+.hoja__presencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hoja__presencia-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid $bg-border;
+  background: $bg-card;
+  color: $text-muted;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+
+  &--activa {
+    border-color: $accent-border;
+    background: $accent-soft;
+    color: $text-light;
+  }
+}
+
+.hoja__presencia-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}

@@ -79,7 +79,7 @@
           }
 
           @if (t.web) {
-            <a class="fila" [href]="enlaceWeb(t.web)" target="_blank" rel="noopener">
+            <a class="fila" [href]="enlaceWeb(t.web)" target="_blank" rel="noopener" (click)="registrarClic(t.web)">
               <i class="fa-solid fa-globe"></i>
               <span>{{ t.web }}</span>
               <i class="fa-solid fa-arrow-up-right-from-square copia"></i>
@@ -87,7 +87,7 @@
           }
 
           @if (t.linkedin) {
-            <a class="fila" [href]="enlaceWeb(t.linkedin)" target="_blank" rel="noopener">
+            <a class="fila" [href]="enlaceWeb(t.linkedin)" target="_blank" rel="noopener" (click)="registrarClic(t.linkedin)">
               <i class="fa-brands fa-linkedin"></i>
               <span>{{ t.linkedin }}</span>
               <i class="fa-solid fa-arrow-up-right-from-square copia"></i>

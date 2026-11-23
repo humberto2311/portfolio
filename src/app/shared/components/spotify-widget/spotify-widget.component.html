@@ -1,0 +1,114 @@
+@if (mostrar()) {
+  <div class="sw" [class.sw--perfil]="contexto === 'profile'" [class.sw--abierto]="popoverAbierto()">
+    @if (cargando()) {
+      <span class="sw__hueso" aria-hidden="true"></span>
+    } @else if (!conectado()) {
+      <button type="button" class="sw__pildora" [disabled]="ocupado()" (click)="conectar()">
+        <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+        <span>Conectar Spotify</span>
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="sw__disco"
+        [class.sw__disco--girando]="sonando()"
+        [class.sw__disco--idle]="!reproduciendo()"
+        [attr.aria-label]="reproduciendo() ? titulo() : 'Spotify conectado'"
+        (click)="alternarPopover()">
+        @if (reproduciendo() && caratula()) {
+          <img class="sw__caratula" [src]="caratula()!" alt="" loading="lazy" />
+        } @else {
+          <i class="fa-brands fa-spotify sw__logo" aria-hidden="true"></i>
+        }
+
+        <span class="sw__anillo" aria-hidden="true"></span>
+        <span class="sw__insignia" aria-hidden="true">
+          <i class="fa-brands fa-spotify"></i>
+        </span>
+        <span class="sw__punto" aria-hidden="true"></span>
+
+        <span class="sw__tip" role="tooltip">
+          @if (reproduciendo()) {
+            <strong>{{ titulo() }}</strong>
+            <em>{{ subtitulo() }}</em>
+          } @else {
+            <strong>Spotify conectado</strong>
+          }
+        </span>
+      </button>
+    }
+
+    @if (popoverAbierto() && isOwner) {
+      <div class="sw-pop" role="dialog" aria-label="Spotify">
+        <header class="sw-pop__cabecera">
+          <span class="sw-pop__marca">
+            <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+            Spotify
+          </span>
+          <button type="button" class="sw-pop__cerrar" aria-label="Cerrar" (click)="popoverAbierto.set(false)">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        @if (!conectado()) {
+          <p class="sw-pop__nota">Conecta tu cuenta para controlar lo que suena.</p>
+          <button type="button" class="sw-pop__conectar" [disabled]="ocupado()" (click)="conectar()">
+            <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+            Conectar Spotify
+          </button>
+        } @else {
+          <div class="sw-pop__pista">
+            @if (caratula()) {
+              <img [src]="caratula()!" alt="" />
+            } @else {
+              <span class="sw-pop__sinarte"><i class="fa-solid fa-music" aria-hidden="true"></i></span>
+            }
+            <span class="sw-pop__datos">
+              <strong>{{ titulo() }}</strong>
+              <em>{{ subtitulo() || 'Sin reproducción' }}</em>
+            </span>
+          </div>
+
+          <div class="sw-pop__controles">
+            <button type="button" title="Anterior" [disabled]="ocupado()" (click)="anterior()">
+              <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="sw-pop__principal" [title]="sonando() ? 'Pausar' : 'Reproducir'"
+                    [disabled]="ocupado()" (click)="alternarReproduccion()">
+              <i class="fa-solid" [class.fa-pause]="sonando()" [class.fa-play]="!sonando()" aria-hidden="true"></i>
+            </button>
+            <button type="button" title="Siguiente" [disabled]="ocupado()" (click)="siguiente()">
+              <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="sw-pop__acciones">
+            <button type="button" (click)="abrirSpotify($event)">
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+              Abrir Spotify
+            </button>
+            <button type="button" class="sw-pop__salir" (click)="desconectar()">
+              <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+              Desconectar
+            </button>
+          </div>
+        }
+
+        @if (error(); as fallo) {
+          <div class="sw-pop__error" role="alert">
+            <span>{{ fallo.mensaje }}</span>
+            <button type="button" aria-label="Cerrar aviso" (click)="descartarError()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (error(); as fallo) {
+      @if (!popoverAbierto()) {
+        <p class="sw__aviso" role="alert">{{ fallo.mensaje }}</p>
+      }
+    }
+  </div>
+}

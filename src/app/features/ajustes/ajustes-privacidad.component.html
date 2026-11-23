@@ -1,0 +1,154 @@
+<section class="privacidad">
+  <header class="privacidad__cabecera">
+    <h1>Privacidad</h1>
+    <p>Elige cómo te ven, qué estados compartes y a quién bloqueas.</p>
+  </header>
+
+  @if (cargando()) {
+    <p class="privacidad__cargando"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Cargando…</p>
+  } @else {
+    <article class="tarjeta">
+      <h2>Estado de presencia</h2>
+      <p class="tarjeta__nota">Así apareces en el chat y en la lista de conversaciones.</p>
+
+      <div class="presencias">
+        @for (opcion of presencias; track opcion.valor) {
+          <button
+            type="button"
+            class="presencia"
+            [class.presencia--activa]="presencia() === opcion.valor"
+            (click)="elegirPresencia(opcion.valor)">
+            <span class="presencia__punto" [style.background]="opcion.color">
+              <i class="fa-solid" [ngClass]="opcion.icono" aria-hidden="true"></i>
+            </span>
+            <span class="presencia__datos">
+              <strong>{{ opcion.etiqueta }}</strong>
+              <small>{{ opcion.descripcion }}</small>
+            </span>
+            @if (presencia() === opcion.valor) {
+              <i class="fa-solid fa-check presencia__marca" aria-hidden="true"></i>
+            }
+          </button>
+        }
+      </div>
+    </article>
+
+    <article class="tarjeta">
+      <h2>Última vez en línea</h2>
+      <p class="tarjeta__nota">Si lo desactivas, tus contactos no verán cuándo entraste por última vez.</p>
+
+      <label class="interruptor">
+        <input type="checkbox" [ngModel]="mostrarUltimaVez()" (ngModelChange)="cambiarUltimaVez($event)" />
+        <span class="interruptor__pista"></span>
+        <span class="interruptor__texto">{{ mostrarUltimaVez() ? 'Mostrar la última vez' : 'Oculto' }}</span>
+      </label>
+    </article>
+
+    <article class="tarjeta">
+      <h2>Quién puede ver tus estados</h2>
+      <p class="tarjeta__nota">Aplica a los estados de texto, audio, foto y video de las últimas 24 horas.</p>
+
+      <div class="visibilidades">
+        @for (opcion of visibilidades; track opcion.valor) {
+          <button
+            type="button"
+            class="visibilidad"
+            [class.visibilidad--activa]="visibilidad() === opcion.valor"
+            (click)="elegirVisibilidad(opcion.valor)">
+            <strong>{{ opcion.etiqueta }}</strong>
+            <small>{{ opcion.detalle }}</small>
+          </button>
+        }
+      </div>
+    </article>
+
+    <article class="tarjeta">
+      <h2>Personas bloqueadas</h2>
+      <p class="tarjeta__nota">Puedes bloquear todo o restringir solo el chat, los estados o las publicaciones.</p>
+
+      <div class="bloqueo">
+        <input
+          type="text"
+          placeholder="ID de la persona"
+          [ngModel]="nuevoBloqueo()"
+          (ngModelChange)="nuevoBloqueo.set($event)" />
+        <select [ngModel]="alcanceNuevo()" (ngModelChange)="alcanceNuevo.set($event)">
+          @for (alcance of alcances; track alcance.valor) {
+            <option [value]="alcance.valor">{{ alcance.etiqueta }}</option>
+          }
+        </select>
+        <button type="button" class="bloqueo__btn" (click)="bloquear()">Bloquear</button>
+      </div>
+
+      <ul class="bloqueados">
+        @for (persona of bloqueados(); track persona.usuarioId) {
+          <li>
+            <div>
+              <strong>{{ persona.nombre }}</strong>
+              <small>{{ persona.alcance }}</small>
+            </div>
+            <button type="button" (click)="desbloquear(persona.usuarioId)">Desbloquear</button>
+          </li>
+        } @empty {
+          <li class="bloqueados__vacio">No has bloqueado a nadie.</li>
+        }
+      </ul>
+    </article>
+
+    <article class="tarjeta">
+      <h2>Mejores amigos</h2>
+      <p class="tarjeta__nota">Cuando publicas para mejores amigos, solo ellos ven tu contenido.</p>
+
+      <div class="bloqueo">
+        <input
+          type="text"
+          placeholder="ID de la persona"
+          [ngModel]="nuevoAmigo()"
+          (ngModelChange)="nuevoAmigo.set($event)" />
+        <button type="button" class="bloqueo__btn" (click)="agregarAmigo()">Agregar</button>
+      </div>
+
+      <ul class="bloqueados">
+        @for (persona of amigos(); track persona.usuarioId) {
+          <li>
+            <div>
+              <strong>{{ persona.nombre }}</strong>
+              <small>Mejor amigo</small>
+            </div>
+            <button type="button" (click)="quitarAmigo(persona.usuarioId)">Quitar</button>
+          </li>
+        } @empty {
+          <li class="bloqueados__vacio">Todavía no tienes mejores amigos.</li>
+        }
+      </ul>
+    </article>
+
+    <article class="tarjeta">
+      <h2>Personas restringidas</h2>
+      <p class="tarjeta__nota">Una persona restringida no ve tu presencia ni puede ver tus estados.</p>
+
+      <div class="bloqueo">
+        <input
+          type="text"
+          placeholder="ID de la persona"
+          [ngModel]="nuevoRestringido()"
+          (ngModelChange)="nuevoRestringido.set($event)" />
+        <button type="button" class="bloqueo__btn" (click)="agregarRestringido()">Restringir</button>
+      </div>
+
+      <ul class="bloqueados">
+        @for (persona of restringidos(); track persona.usuarioId) {
+          <li>
+            <div>
+              <strong>{{ persona.nombre }}</strong>
+              <small>Restringida</small>
+            </div>
+            <button type="button" (click)="quitarRestringido(persona.usuarioId)">Quitar</button>
+          </li>
+        } @empty {
+          <li class="bloqueados__vacio">No has restringido a nadie.</li>
+        }
+      </ul>
+    </article>
+  }
+</section>

@@ -155,7 +155,20 @@
 }
 
 <!-- Composer: cámara a la izquierda, campo al centro y las acciones a la derecha. -->
+@if (interpreteAbierto()) {
+  <app-comandos-chat class="comandos-flotante" [conversacionId]="conversacionActual()" />
+}
+
 <form class="composer" (ngSubmit)="send()">
+  <button
+    type="button"
+    class="composer__icono composer__icono--comandos"
+    [class.composer__icono--activo]="interpreteAbierto()"
+    title="Comandos y bots"
+    aria-label="Abrir comandos y bots"
+    (click)="alternarInterprete()">
+    <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+  </button>
   <div class="composer__pildora">
     @if (puedeEscribir) {
       <button type="button" class="composer__icono" title="Cámara" aria-label="Adjuntar foto o vídeo" (click)="abrirCamara(campoMensaje)">

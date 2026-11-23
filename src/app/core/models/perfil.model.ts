@@ -50,6 +50,11 @@ export interface Publicacion {
   tiempo: string;
   texto: string;
   imagen?: string;
+  video?: string;
+  tipoMedia?: 'FOTO' | 'VIDEO' | 'TEXTO';
+  musicaTitulo?: string;
+  musicaArtista?: string;
+  musicaUrl?: string;
   likes: number;
   compartidos: number;
   comentarios: Comentario[];
@@ -93,6 +98,8 @@ export interface PerfilData {
   disenoFondoUrl?: string;
   disenoCss?: string;
   disenoActivo?: boolean;
+  gitUsername?: string;
+  spotifyPublico?: boolean;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa' | 'enlaces';
@@ -101,6 +108,7 @@ export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empr
 // ===== DTOs del backend (coinciden con /v3/api-docs) =====
 
 export interface AuthorDto {
+  avatarUrl?: string;
   id: string;
   fullName: string;
   gitUsername?: string;
@@ -131,6 +139,11 @@ export interface PostDto {
   author: AuthorDto;
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
+  mediaType?: string;
+  musicTitle?: string;
+  musicArtist?: string;
+  musicUrl?: string;
   createdAt: string;
   likesCount: number;
   likedByMe: boolean;

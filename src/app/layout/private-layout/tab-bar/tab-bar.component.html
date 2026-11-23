@@ -73,6 +73,22 @@
       </span>
     </div>
 
+    <div class="hoja__presencia">
+      <p class="hoja__presencia-titulo">Presencia</p>
+      <div class="hoja__presencias">
+        @for (opcion of presencias; track opcion.valor) {
+          <button
+            type="button"
+            class="hoja__presencia-btn"
+            [class.hoja__presencia-btn--activa]="presencia() === opcion.valor"
+            (click)="elegirPresencia(opcion.valor)">
+            <span class="hoja__presencia-punto" [style.background]="opcion.color"></span>
+            {{ opcion.etiqueta }}
+          </button>
+        }
+      </div>
+    </div>
+
     <ul class="hoja__lista">
       @for (extra of extras; track extra.label) {
         <li>

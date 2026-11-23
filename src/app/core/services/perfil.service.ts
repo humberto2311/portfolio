@@ -128,7 +128,14 @@ export class PerfilService {
    */
   crearPublicacion(
     texto: string,
-    imagen?: string
+    imagen?: string,
+    extra?: {
+      videoUrl?: string;
+      mediaType?: 'FOTO' | 'VIDEO' | 'TEXTO';
+      musicTitle?: string;
+      musicArtist?: string;
+      musicUrl?: string;
+    }
   ): Observable<{ pendiente: boolean; destino: string; compartidosCon: number }> {
     const destino = this.perfil();
     const miId = String(this.authService.currentUser()?.id ?? '');
@@ -137,6 +144,11 @@ export class PerfilService {
     const req = {
       content: texto,
       imageUrl: imagen,
+      videoUrl: extra?.videoUrl,
+      mediaType: extra?.mediaType,
+      musicTitle: extra?.musicTitle,
+      musicArtist: extra?.musicArtist,
+      musicUrl: extra?.musicUrl,
       targetProfileId: destino?.id,
     };
 
@@ -233,7 +245,7 @@ export class PerfilService {
                         c.author?.initials?.trim() || this.generarIniciales(autor),
                       autorId: c.author?.id,
                       autorUsername: c.author?.gitUsername || undefined,
-                      autorAvatar: this.avatarDelAutor(c.author?.id),
+                      autorAvatar: this.avatarDelAutor(c.author?.id, c.author?.avatarUrl),
                       texto: c.content,
                       likes: c.likes ?? 0,
                       likedByMe: c.likedByMe ?? false,
@@ -318,7 +330,7 @@ export class PerfilService {
       iniciales: c.author?.initials?.trim() || this.generarIniciales(autor),
       autorId: c.author?.id,
       autorUsername: c.author?.gitUsername || undefined,
-      autorAvatar: this.avatarDelAutor(c.author?.id),
+      autorAvatar: this.avatarDelAutor(c.author?.id, c.author?.avatarUrl),
       texto: c.content,
       likes: c.likes ?? 0,
       likedByMe: c.likedByMe ?? false,
@@ -335,10 +347,15 @@ export class PerfilService {
       iniciales: p.author?.initials?.trim() || this.generarIniciales(autor),
       autorId: p.author?.id,
       autorUsername: p.author?.gitUsername || undefined,
-      autorAvatar: this.avatarDelAutor(p.author?.id),
+      autorAvatar: this.avatarDelAutor(p.author?.id, p.author?.avatarUrl),
       tiempo: this.tiempoRelativo(p.createdAt),
       texto: p.content,
       imagen: p.imageUrl,
+      video: p.videoUrl,
+      tipoMedia: (p.mediaType as 'FOTO' | 'VIDEO' | 'TEXTO') ?? undefined,
+      musicaTitulo: p.musicTitle,
+      musicaArtista: p.musicArtist,
+      musicaUrl: p.musicUrl,
       likes: p.likesCount ?? 0,
       compartidos: p.sharesCount ?? 0,
       comentarios: [],
@@ -357,7 +374,8 @@ export class PerfilService {
    * AuthorDto no incluye foto: si el autor es el usuario/perfil actual,
    * usamos su avatarUrl del perfil para el círculo.
    */
-  private avatarDelAutor(authorId?: string): string | undefined {
+  private avatarDelAutor(authorId?: string, delBackend?: string): string | undefined {
+    if (delBackend) return delBackend;
     if (!authorId) return undefined;
     const perfil = this.perfil();
     const usuario = this.authService.currentUser();
@@ -403,6 +421,8 @@ export class PerfilService {
       disenoFondoUrl: data.disenoFondoUrl || undefined,
       disenoCss: data.disenoCss || undefined,
       disenoActivo: Boolean(data.disenoActivo),
+      gitUsername: data.gitUsername || undefined,
+      spotifyPublico: data.spotifyPublico !== false,
     };
   }
 

@@ -1,0 +1,474 @@
+:host {
+  display: block;
+}
+
+.pos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.1rem;
+  border-radius: 20px;
+  background: var(--superficie, #17171d);
+  border: 1px solid var(--borde, rgba(255, 255, 255, 0.08));
+}
+
+.pos__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pos__cabecera h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.pos__cabecera h1 i {
+  color: #1ed760;
+}
+
+.pos__cabecera p {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.pestanas {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pestanas button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.7rem;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--texto-suave, #9a9aa8);
+  cursor: pointer;
+}
+
+.pestanas button.activa {
+  background: rgba(30, 215, 96, 0.16);
+  color: #1ed760;
+}
+
+.aviso {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.aviso--error {
+  color: #ff9d9d;
+}
+
+.aviso--ok {
+  color: #8ef0b4;
+}
+
+.resumenes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.6rem;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem;
+  border-radius: 14px;
+  background: rgba(30, 215, 96, 0.1);
+}
+
+.kpi--suave {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.kpi__valor {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--texto, #f2f2f6);
+}
+
+.kpi__etiqueta {
+  font-size: 0.72rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.ventas,
+.catalogo {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .ventas,
+  .catalogo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ticket,
+.formulario,
+.listado,
+.integracion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ticket h2,
+.formulario h2,
+.integracion h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.ticket__productos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.producto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.producto:hover {
+  border-color: rgba(30, 215, 96, 0.5);
+}
+
+.producto__nombre {
+  font-size: 0.76rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.producto__precio {
+  font-size: 0.7rem;
+  color: #1ed760;
+}
+
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linea {
+  display: grid;
+  grid-template-columns: 1fr 56px 70px 24px;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.linea input {
+  width: 100%;
+  padding: 0.2rem 0.3rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--texto, #f2f2f6);
+  font-size: 0.72rem;
+}
+
+.linea__total {
+  text-align: right;
+}
+
+.linea__quitar {
+  border: none;
+  background: none;
+  color: #ff9d9d;
+  cursor: pointer;
+}
+
+.lineas__vacio {
+  font-size: 0.74rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.ticket__totales {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.impuesto {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.impuesto input {
+  width: 64px;
+  padding: 0.2rem 0.3rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--texto, #f2f2f6);
+}
+
+.totales {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.totales span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.totales__final {
+  font-size: 0.9rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--texto, #f2f2f6);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton--cobrar {
+  border-color: rgba(30, 215, 96, 0.5);
+  background: rgba(30, 215, 96, 0.16);
+  color: #1ed760;
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.filtros select,
+.filtros input {
+  padding: 0.28rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--texto, #f2f2f6);
+  font-size: 0.74rem;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.tabla th {
+  padding: 0.3rem 0.4rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--texto-suave, #9a9aa8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tabla td {
+  padding: 0.32rem 0.4rem;
+  color: var(--texto, #e7e7ee);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.tabla__vacio {
+  text-align: center;
+  color: var(--texto-suave, #9a9aa8);
+  padding: 0.8rem;
+}
+
+.estado {
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.estado--ok {
+  background: rgba(30, 215, 96, 0.16);
+  color: #1ed760;
+}
+
+.estado--no {
+  background: rgba(255, 107, 107, 0.16);
+  color: #ff9d9d;
+}
+
+.estado--abierta {
+  background: rgba(255, 196, 84, 0.16);
+  color: #ffc454;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.mini {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--texto, #f2f2f6);
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+
+.mini--no {
+  color: #ff9d9d;
+}
+
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.74rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.formulario input[type='text'],
+.formulario input[type='number'] {
+  padding: 0.3rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--texto, #f2f2f6);
+  font-size: 0.78rem;
+}
+
+.formulario .check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.formulario__acciones {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.integracion p {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.74rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.campo__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.campo__fila code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size: 0.74rem;
+  color: #8ef0b4;
+}
+
+.token {
+  padding: 0.55rem;
+  border-radius: 10px;
+  background: rgba(255, 196, 84, 0.1);
+  border: 1px solid rgba(255, 196, 84, 0.3);
+}
+
+.token p {
+  color: #ffc454;
+  font-size: 0.74rem;
+}
+
+.ejemplo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ejemplo pre {
+  margin: 0;
+  padding: 0.6rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #8ef0b4;
+  font-size: 0.7rem;
+  overflow-x: auto;
+}

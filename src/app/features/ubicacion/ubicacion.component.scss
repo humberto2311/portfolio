@@ -867,3 +867,206 @@
     flex-wrap: wrap;
   }
 }
+
+/* Permisos de ubicación: tres niveles, alineados con la paleta oscura del mapa. */
+.aviso--abierto {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.permisos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .45rem;
+  margin: 0 0 .9rem;
+  padding: .5rem;
+  border: 1px solid var(--border-soft, #1e293b);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: var(--bg-card, #111a2e);
+
+  &__aviso {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: .7rem;
+    color: var(--text-secondary, #94a3b8);
+  }
+
+  @media (max-width: 700px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.permiso {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .55rem .65rem;
+  border-radius: 11px;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: var(--bg-elevated, #0f172a);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+
+  i {
+    font-size: .82rem;
+    color: var(--text-secondary, #94a3b8);
+  }
+
+  span {
+    display: grid;
+    gap: .1rem;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: .76rem;
+  }
+
+  small {
+    font-size: .66rem;
+    color: var(--text-secondary, #94a3b8);
+    line-height: 1.3;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent-cyan, #38bdf8) 45%, transparent);
+  }
+
+  &--activo {
+    border-color: var(--accent-cyan, #38bdf8);
+    background: color-mix(in srgb, var(--accent-cyan, #38bdf8) 12%, transparent);
+
+    i {
+      color: var(--accent-cyan, #38bdf8);
+    }
+  }
+
+  &:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+}
+
+/* Barra de acciones del tablero y modo pantalla completa. */
+.tablero__barra {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: .35rem .45rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border-soft, #1e293b) 90%, transparent);
+  background: color-mix(in srgb, var(--bg-elevated, #0f172a) 92%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, .38);
+}
+
+.barra__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft, #1e293b);
+  background: var(--bg-card, #111a2e);
+  color: inherit;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .18s ease, color .18s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent-cyan, #38bdf8) 50%, transparent);
+    color: var(--accent-cyan, #38bdf8);
+  }
+
+  &--activo {
+    border-color: color-mix(in srgb, var(--accent-cyan, #38bdf8) 55%, transparent);
+    color: var(--accent-cyan, #38bdf8);
+  }
+
+  span {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 520px) {
+    span {
+      display: none;
+    }
+  }
+}
+
+.capa--amigos {
+  border-color: color-mix(in srgb, #10b981 45%, transparent);
+}
+
+.punto--amigos {
+  background: linear-gradient(120deg, #34d399, #10b981);
+}
+
+.tablero--completo {
+  --alto-tablero: calc(100vh - 96px);
+  position: fixed;
+  inset: 12px;
+  z-index: 900;
+  margin: 0;
+  box-shadow: 0 30px 80px rgba(2, 6, 23, .65);
+}
+
+.ciudades__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: .4rem;
+  padding: 0;
+  margin: 0 0 .5rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.ciudades__flecha--girada {
+  transform: rotate(180deg);
+}
+
+/* En móvil, filtros y capas deslizan en horizontal en vez de romper el layout. */
+@media (max-width: 700px) {
+  .capas {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: .2rem;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .capa {
+    flex: 0 0 auto;
+  }
+
+  .capas__pista {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .permiso,
+  .barra__btn {
+    transition: none;
+  }
+}

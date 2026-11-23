@@ -61,6 +61,26 @@
           {{ ocupado() ? 'Preparando…' : 'Transmitir' }}
         </button>
       </div>
+
+      <label class="interruptor">
+        <input
+          type="checkbox"
+          [checked]="reanudarAlReiniciar()"
+          (change)="cambiarReanudar($any($event.target).checked)" />
+        <span class="interruptor__texto">
+          <strong>Reanudar emisión al reiniciar</strong>
+          <em>Si lo dejas activo, tu tarjeta sigue lista aunque apagues el teléfono o cierres la app.</em>
+        </span>
+      </label>
+
+      <p class="parrafo emitiendo" *ngIf="emisionActiva()">
+        <span class="pulso"></span>
+        Emisión activa: {{ nombreActivo() || 'tu tarjeta' }}
+      </p>
+
+      <p class="parrafo" *ngIf="recortada()">
+        Tu tarjeta tiene muchos campos: se envía la referencia y el otro teléfono completa los datos al abrirla.
+      </p>
     </section>
 
     <section class="card">

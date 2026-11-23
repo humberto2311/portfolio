@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MapaRealComponent } from '../../shared/components/mapa-real/mapa-real.component';
 import { MapillaryComponent } from '../../shared/components/mapillary/mapillary.component';
@@ -7,6 +7,8 @@ import { EmpleoMapaComponent, VacanteUbicada } from './empleo-mapa/empleo-mapa.c
 
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
+import { MapaService, UbicacionMapa, VisibilidadUbicacion } from '../../core/services/mapa.service';
+import { ToastService } from '../../core/services/toast.service';
 import {
   CIUDADES_DEMO,
   LOCALES_DEMO,
@@ -26,11 +28,27 @@ type Medio = 'TODOS' | 'NFC' | 'QR';
   templateUrl: './ubicacion.component.html',
   styleUrls: ['./ubicacion.component.scss'],
 })
-export class UbicacionComponent implements AfterViewInit {
+export class UbicacionComponent implements OnInit, AfterViewInit {
   @ViewChild(MapaRealComponent) mapa?: MapaRealComponent;
 
   private auth = inject(AuthService);
   private empresas = inject(EmpresaService);
+  private mapaSvc = inject(MapaService);
+  private toasts = inject(ToastService);
+
+  readonly VISIBILIDADES: { valor: VisibilidadUbicacion; etiqueta: string; detalle: string; icono: string }[] = [
+    { valor: 'PRIVATE', etiqueta: 'Privada', detalle: 'Solo tú ves tu mapa', icono: 'fa-lock' },
+    { valor: 'FRIENDS', etiqueta: 'Solo amigos', detalle: 'Compartes con tus conexiones', icono: 'fa-user-group' },
+    { valor: 'PUBLIC', etiqueta: 'Público', detalle: 'Apareces en el mapa de todos', icono: 'fa-globe' }
+  ];
+
+  readonly visibilidad = signal<VisibilidadUbicacion>('PRIVATE');
+  readonly panelPrivacidad = signal(false);
+  readonly guardandoUbicacion = signal(false);
+  readonly ubicaciones = this.mapaSvc.ubicaciones;
+  readonly miUbicacion = this.mapaSvc.miUbicacion;
+  readonly pantallaCompleta = signal(false);
+  readonly metricasAbiertas = signal(typeof window !== 'undefined' ? window.innerWidth > 900 : true);
 
   readonly nombrePersona = signal(this.auth.currentUser()?.fullName ?? 'Tu perfil');
   readonly empresaActiva = this.empresas.empresaActual;
@@ -41,9 +59,9 @@ export class UbicacionComponent implements AfterViewInit {
   readonly filtroHasta = signal('');
   readonly filtroMedio = signal<Medio>('TODOS');
   readonly filtroTipo = signal<'TODOS' | TipoConexion>('TODOS');
-  readonly capas = signal({ personal: true, empresarial: true, locales: true });
+  readonly capas = signal({ personal: true, empresarial: true, locales: true, amigos: true });
   readonly punto = signal({ lat: 4.6097, lng: -74.0817, zoom: 12, nombre: 'Bogotá' });
-  readonly abierto = signal({ locales: true, historial: false });
+  readonly abierto = signal({ locales: true, historial: false, ciudades: true });
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
   readonly localActivo = signal<LocalRegistrado | null>(null);
   readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
@@ -110,14 +128,14 @@ export class UbicacionComponent implements AfterViewInit {
     this.filtroTipo.set('TODOS');
     this.busquedaLocal.set('');
     this.filtroSector.set('');
-    this.capas.set({ personal: true, empresarial: true, locales: true });
+    this.capas.set({ personal: true, empresarial: true, locales: true, amigos: true });
   }
 
-  alternar(panel: 'locales' | 'historial'): void {
+  alternar(panel: 'locales' | 'historial' | 'ciudades'): void {
     this.abierto.update((actual) => ({ ...actual, [panel]: !actual[panel] }));
   }
 
-  alternarCapa(capa: 'personal' | 'empresarial' | 'locales'): void {
+  alternarCapa(capa: 'personal' | 'empresarial' | 'locales' | 'amigos'): void {
     this.capas.update((actual) => ({ ...actual, [capa]: !actual[capa] }));
     this.pintarPines();
   }
@@ -238,6 +256,124 @@ export class UbicacionComponent implements AfterViewInit {
     });
   }
 
+  ngOnInit(): void {
+    this.cargarUbicacion();
+  }
+
+  cargarUbicacion(): void {
+    this.mapaSvc.cargarMiUbicacion().subscribe({
+      next: (ubicacion) => {
+        this.visibilidad.set(ubicacion?.visibilidad ?? 'PRIVATE');
+        if (ubicacion) this.centrarEnMi();
+      }
+    });
+
+    this.mapaSvc.cargarUbicaciones().subscribe({
+      next: () => this.pintarPines()
+    });
+  }
+
+  etiquetaVisibilidad(): string {
+    return this.VISIBILIDADES.find((opcion) => opcion.valor === this.visibilidad())?.etiqueta ?? 'Privada';
+  }
+
+  alternarPrivacidad(): void {
+    this.panelPrivacidad.update((abierto) => !abierto);
+  }
+
+  cambiarVisibilidad(valor: VisibilidadUbicacion): void {
+    if (this.guardandoUbicacion() || valor === this.visibilidad()) return;
+
+    if (valor === 'PRIVATE') {
+      this.ocultarUbicacion();
+      return;
+    }
+
+    this.guardandoUbicacion.set(true);
+
+    this.obtenerCoordenadas().then((coordenadas) => {
+      this.mapaSvc.publicarUbicacion({
+        visibilidad: valor,
+        lat: coordenadas.lat,
+        lng: coordenadas.lng,
+        ciudad: coordenadas.ciudad,
+        origen: 'N-SOFT'
+      }).subscribe({
+        next: (ubicacion) => {
+          this.guardandoUbicacion.set(false);
+          this.visibilidad.set(ubicacion.visibilidad);
+          this.panelPrivacidad.set(false);
+          this.pintarPines();
+          this.centrarEnMi();
+          this.toasts.show(valor === 'PUBLIC' ? 'Tu ubicación es pública.' : 'Compartes tu ubicación con tus amigos.');
+        },
+        error: () => {
+          this.guardandoUbicacion.set(false);
+          this.toasts.show('No se pudo guardar tu ubicación.');
+        }
+      });
+    }).catch(() => {
+      this.guardandoUbicacion.set(false);
+      this.toasts.show('Necesitamos tu permiso de ubicación para compartirla.');
+    });
+  }
+
+  ocultarUbicacion(): void {
+    this.guardandoUbicacion.set(true);
+
+    this.mapaSvc.ocultarUbicacion().subscribe({
+      next: () => {
+        this.guardandoUbicacion.set(false);
+        this.visibilidad.set('PRIVATE');
+        this.panelPrivacidad.set(false);
+        this.pintarPines();
+        this.toasts.show('Tu ubicación volvió a ser privada.');
+      },
+      error: () => {
+        this.guardandoUbicacion.set(false);
+        this.toasts.show('No se pudo ocultar tu ubicación.');
+      }
+    });
+  }
+
+  centrarEnMi(): void {
+    const propia = this.miUbicacion();
+
+    if (!propia || propia.lat == null) return;
+
+    this.punto.set({ lat: propia.lat, lng: propia.lng, zoom: 14, nombre: propia.ciudad ?? 'Tu ubicación' });
+    this.mapa?.irA(propia.lat, propia.lng, 14);
+  }
+
+  alternarMetricas(): void {
+    this.metricasAbiertas.update((abierta) => !abierta);
+  }
+
+  alternarPantallaCompleta(): void {
+    this.pantallaCompleta.update((completa) => !completa);
+
+    setTimeout(() => this.mapa?.ajustarVista(), 260);
+  }
+
+  private obtenerCoordenadas(): Promise<{ lat: number; lng: number; ciudad: string | null }> {
+    return new Promise((resolver, rechazar) => {
+      if (!('geolocation' in navigator)) {
+        rechazar(new Error('sin geolocalización'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (posicion) => resolver({
+          lat: posicion.coords.latitude,
+          lng: posicion.coords.longitude,
+          ciudad: this.miUbicacion()?.ciudad ?? null
+        }),
+        () => rechazar(new Error('permiso denegado')),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    });
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => this.pintarPines(), 700);
   }
@@ -259,6 +395,20 @@ export class UbicacionComponent implements AfterViewInit {
           .filter(Boolean)
           .join('<br>'),
       })),
+      ...(capas.amigos
+        ? this.ubicaciones()
+            .filter((ubicacion) => !ubicacion.propio && ubicacion.lat != null)
+            .map((ubicacion: UbicacionMapa) => ({
+              lat: ubicacion.lat,
+              lng: ubicacion.lng,
+              tono: 'amigo' as const,
+              texto: [
+                `<b>${ubicacion.nombre}</b>`,
+                ubicacion.ciudad ?? '',
+                ubicacion.visibilidad === 'FRIENDS' ? 'Solo amigos' : 'Público'
+              ].filter(Boolean).join('<br>')
+            }))
+        : []),
       ...(capas.locales
         ? this.localesVisibles().map((local) => ({
             lat: local.latitud,

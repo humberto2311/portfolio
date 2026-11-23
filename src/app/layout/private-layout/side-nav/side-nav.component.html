@@ -68,6 +68,12 @@
     }
   </ul>
 
+  @if (!empresa.enModoEmpresa()) {
+    <div class="rail__spotify" [class.rail__spotify--oculto]="rail.colapsado()">
+      <app-spotify-widget [isOwner]="true" />
+    </div>
+  }
+
   <div class="rail__empuje"></div>
 
   <!-- "Más": como en Instagram, lo que no cabe en el riel. -->

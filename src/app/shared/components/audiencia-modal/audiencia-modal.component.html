@@ -1,0 +1,69 @@
+<div class="fondo" (click)="cerrar.emit()">
+  <div class="hoja" (click)="$event.stopPropagation()">
+    <header class="hoja__cabecera">
+      <h3>Privacidad personalizada</h3>
+      <button type="button" class="hoja__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">✕</button>
+    </header>
+
+    <p class="hoja__ayuda">Elige quién puede ver esto.</p>
+
+    <div class="opciones">
+      @for (opcion of opciones; track opcion.valor) {
+        <button type="button" class="opcion" [class.opcion--activa]="elegida() === opcion.valor"
+                (click)="elegir(opcion.valor)">
+          <span class="opcion__texto">
+            <strong>{{ opcion.etiqueta }}</strong>
+            <small>{{ opcion.detalle }}</small>
+          </span>
+          @if (elegida() === opcion.valor) {
+            <span class="opcion__marca">✓</span>
+          }
+        </button>
+      }
+    </div>
+
+    <div class="listas">
+      <section class="lista">
+        <h4>Permitidos</h4>
+        @if (permitidosLocales().length === 0) {
+          <p class="lista__vacia">Nadie en la lista.</p>
+        }
+        @for (id of permitidosLocales(); track id) {
+          <div class="fila">
+            <span>{{ id }}</span>
+            <button type="button" (click)="quitar('PERMITIDO', id)">Quitar</button>
+          </div>
+        }
+      </section>
+
+      <section class="lista">
+        <h4>Excluidos</h4>
+        @if (excluidosLocales().length === 0) {
+          <p class="lista__vacia">Nadie excluido.</p>
+        }
+        @for (id of excluidosLocales(); track id) {
+          <div class="fila">
+            <span>{{ id }}</span>
+            <button type="button" (click)="quitar('EXCLUIDO', id)">Quitar</button>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="agregar">
+      <input type="text" placeholder="Identificador de la persona" [ngModel]="nuevoId()"
+             (ngModelChange)="nuevoId.set($event)" />
+      <button type="button" (click)="agregar('PERMITIDO')">Permitir</button>
+      <button type="button" class="agregar__excluir" (click)="agregar('EXCLUIDO')">Excluir</button>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <footer class="hoja__pie">
+      <button type="button" class="boton boton--fantasma" (click)="cerrar.emit()">Cancelar</button>
+      <button type="button" class="boton" (click)="aplicar()">Listo</button>
+    </footer>
+  </div>
+</div>

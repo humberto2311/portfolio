@@ -65,11 +65,13 @@ export class OAuthCallbackComponent implements OnInit {
       return;
     }
 
-    if (token) {
+    const tokenFinal = token ?? this.tokenDeCookie();
+
+    if (tokenFinal) {
       const retorno = sessionStorage.getItem('nfc_return_to');
       sessionStorage.removeItem('nfc_return_to');
 
-      this.authService.handleOAuthSuccess(token); // navega a /app
+      this.authService.handleOAuthSuccess(tokenFinal); // navega a /app
 
       if (retorno) {
         // Vuelve a donde estaba (ej. /app/proyectos?importar=1)
@@ -81,4 +83,13 @@ export class OAuthCallbackComponent implements OnInit {
     }
   });
 }
+
+  private tokenDeCookie(): string | null {
+    if (typeof document === 'undefined') return null;
+
+    const partes = document.cookie ? document.cookie.split('; ') : [];
+    const par = partes.find((parte) => parte.startsWith('oauth2_token='));
+
+    return par ? decodeURIComponent(par.split('=').slice(1).join('=')) : null;
+  }
 }

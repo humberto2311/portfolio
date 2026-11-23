@@ -477,3 +477,20 @@
     transition: none;
   }
 }
+
+.sw__aviso {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: 220px;
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 9px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(40, 12, 12, 0.95);
+  color: #fecaca;
+  font-size: 0.68rem;
+  line-height: 1.3;
+}

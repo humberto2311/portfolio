@@ -13,15 +13,6 @@
         (accionProyectos)="irAProyectos()" 
       />
 
-      <section class="perfil-red" aria-label="Tu actividad">
-        <div class="perfil-red__estados">
-          <app-estados [compacto]="true" [ocultarCabecera]="true" />
-        </div>
-        <div class="perfil-red__nota">
-          <app-notas-usuario [compacto]="true" />
-        </div>
-      </section>
-
       <app-perfil-tabs
         [tabActiva]="seccionActiva"
         [mostrarEmpresa]="mostrarEmpresa"

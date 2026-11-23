@@ -1,16 +1,6 @@
 <section class="notas" [class.notas--compacto]="compacto()" aria-label="Tu nota">
-  <header class="notas__cabecera">
-    <h3>Tu nota</h3>
-    @if (nota()) {
-      <button type="button" class="notas__editar" (click)="abrir()">
-        <i class="fa-solid fa-pen" aria-hidden="true"></i>
-        Editar
-      </button>
-    }
-  </header>
-
-  <button type="button" class="nota" (click)="abrir()">
-    <span class="nota__anillo">
+  <div class="nota">
+    <span class="nota__avatar">
       @if (avatar(); as foto) {
         @if (!avatarRoto()) {
           <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />
@@ -20,22 +10,28 @@
       } @else {
         <span class="nota__iniciales">{{ iniciales() }}</span>
       }
+
+      <button type="button" class="nota__lapiz" (click)="abrir()"
+              [title]="nota() ? 'Editar tu pensamiento' : 'Escribe lo que estás pensando'"
+              aria-label="Editar tu pensamiento">
+        <i class="fa-solid fa-pen" aria-hidden="true"></i>
+      </button>
     </span>
 
-    <span class="nota__texto">
+    <button type="button" class="nota__texto" (click)="abrir()">
       @if (nota(); as contenido) {
         {{ contenido }}
       } @else {
         ¿Qué estás pensando?
       }
-    </span>
-  </button>
+    </button>
+  </div>
 
   @if (editando()) {
-    <div class="editor" role="dialog" aria-modal="true" aria-label="Tu nota">
+    <div class="editor" role="dialog" aria-modal="true" aria-label="Tu pensamiento">
       <div class="editor__caja">
-        <h4>{{ nota() ? 'Edita tu nota' : 'Crea tu nota' }}</h4>
-        <p>Se muestra arriba de tu foto. Solo la ven tus contactos.</p>
+        <h4>{{ nota() ? 'Edita tu pensamiento' : '¿Qué estás pensando?' }}</h4>
+        <p>Se muestra arriba de tu foto de perfil. Solo la ven tus contactos.</p>
 
         <textarea
           rows="3"
@@ -50,7 +46,7 @@
 
         <div class="editor__acciones">
           @if (nota()) {
-            <button type="button" class="editor__quitar" (click)="quitar()">Quitar nota</button>
+            <button type="button" class="editor__quitar" (click)="quitar()">Quitar</button>
           }
           <button type="button" class="editor__ok" (click)="guardar()">Listo</button>
         </div>

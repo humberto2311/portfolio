@@ -3,7 +3,7 @@
     @if (cargando()) {
       <span class="sw__hueso" aria-hidden="true"></span>
     } @else if (!conectado()) {
-      <button type="button" class="sw__pildora" (click)="conectar()">
+      <button type="button" class="sw__pildora" [disabled]="ocupado()" (click)="conectar()">
         <i class="fa-brands fa-spotify" aria-hidden="true"></i>
         <span>Conectar Spotify</span>
       </button>
@@ -52,7 +52,7 @@
 
         @if (!conectado()) {
           <p class="sw-pop__nota">Conecta tu cuenta para controlar lo que suena.</p>
-          <button type="button" class="sw-pop__conectar" (click)="conectar()">
+          <button type="button" class="sw-pop__conectar" [disabled]="ocupado()" (click)="conectar()">
             <i class="fa-brands fa-spotify" aria-hidden="true"></i>
             Conectar Spotify
           </button>
@@ -103,6 +103,12 @@
           </div>
         }
       </div>
+    }
+
+    @if (error(); as fallo) {
+      @if (!popoverAbierto()) {
+        <p class="sw__aviso" role="alert">{{ fallo.mensaje }}</p>
+      }
     }
   </div>
 }

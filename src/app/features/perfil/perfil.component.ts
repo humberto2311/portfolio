@@ -15,7 +15,6 @@ import { TabContactosComponent } from './components/tab-contactos/tab-contactos.
 import { TabEmpresaComponent } from './components/tab-empresa/tab-empresa.component';
 import { TabEnlacesComponent } from './components/tab-enlaces/tab-enlaces.component';
 import { ToastComponent } from './components/toast/toast.component';
-import { EstadosComponent } from '../estados/estados.component';
 import { NotasUsuarioComponent } from '../../shared/components/notas-usuario/notas-usuario.component';
 
 @Component({
@@ -33,7 +32,6 @@ import { NotasUsuarioComponent } from '../../shared/components/notas-usuario/not
     TabEnlacesComponent,
     ToastComponent,
     TabContactosComponent,
-    EstadosComponent,
     NotasUsuarioComponent
   ],
   templateUrl: './perfil.component.html',

@@ -17,6 +17,7 @@ import { EstadosService } from '../../../../core/services/estados.service';
 import { EstadosVisorComponent } from '../../../estados/estados-visor.component';
 import { GrupoEstados } from '../../../../core/models/estado.model';
 import { AudienciaService } from '../../../../core/services/audiencia.service';
+import { NotasUsuarioComponent } from '../../../../shared/components/notas-usuario/notas-usuario.component';
 
 interface CambiosPerfilSocial {
   role?: string;
@@ -29,7 +30,7 @@ interface CambiosPerfilSocial {
 @Component({
   selector: 'app-perfil-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, PhotoViewerComponent, SpotifyWidgetComponent, EstadosVisorComponent],
+  imports: [CommonModule, FormsModule, PhotoViewerComponent, SpotifyWidgetComponent, EstadosVisorComponent, NotasUsuarioComponent],
   templateUrl: './perfil-header.component.html',
   styleUrls: ['./perfil-header.component.scss']
 })
@@ -51,6 +52,22 @@ export class PerfilHeaderComponent implements OnChanges {
   readonly estadosDelPerfil = signal<GrupoEstados | null>(null);
   readonly viendoEstado = signal(false);
   readonly hayEstado = computed(() => (this.estadosDelPerfil()?.estados.length ?? 0) > 0);
+
+  readonly elegirAvatar = signal(false);
+
+  preguntarAvatar(): void {
+    this.elegirAvatar.update((abierto) => !abierto);
+  }
+
+  verFoto(): void {
+    this.elegirAvatar.set(false);
+    this.abrirVisor('avatar');
+  }
+
+  verEstadoDesdeMenu(): void {
+    this.elegirAvatar.set(false);
+    this.verEstado();
+  }
 
   verEstado(): void {
     if (this.hayEstado()) this.viendoEstado.set(true);

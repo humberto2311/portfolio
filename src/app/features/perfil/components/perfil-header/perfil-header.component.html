@@ -42,8 +42,13 @@
     <div class="header-row">
       <!-- AVATAR -->
       <div class="avatar-block">
-        @if (hayEstado()) {
-          <div class="avatar-estado" (click)="verEstado()" title="Ver estado">
+        @if (esMiPerfil) {
+          <app-notas-usuario [compacto]="true" />
+        }
+
+        <div class="avatar-eleccion">
+          <div class="avatar-estado" [class.avatar-estado--sin-estado]="!hayEstado()" (click)="preguntarAvatar()"
+               [title]="hayEstado() ? 'Ver foto o estado' : 'Ver foto de perfil'">
             <div class="avatar-wrapper" [class.has-image]="perfil.avatarUrl">
               @if (perfil.avatarUrl) {
                 <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img" />
@@ -52,14 +57,20 @@
               }
             </div>
           </div>
-        } @else {
-        <div class="avatar-wrapper" [class.has-image]="perfil.avatarUrl">
-          @if (perfil.avatarUrl) {
-            <img [src]="perfil.avatarUrl" alt="avatar" class="profile-img"
-                 title="Ver en grande" (click)="abrirVisor('avatar')" />
-          } @else {
-            <span class="initials">{{ perfil.iniciales }}</span>
+
+          @if (elegirAvatar()) {
+            <div class="avatar-menu" role="menu">
+              <button type="button" role="menuitem" (click)="verFoto()">
+                <i class="fa-solid fa-image"></i> Ver foto
+              </button>
+              @if (hayEstado()) {
+                <button type="button" role="menuitem" (click)="verEstadoDesdeMenu()">
+                  <i class="fa-solid fa-circle-play"></i> Ver estado
+                </button>
+              }
+            </div>
           }
+
           @if (esMiPerfil) {
             <button type="button" class="btn-edit-avatar" [disabled]="subiendoImagen" (click)="elegirImagen('avatar')"
                     title="Cambiar foto de perfil">
@@ -67,7 +78,6 @@
             </button>
           }
         </div>
-        }
       </div>
 
       <!-- INFO -->

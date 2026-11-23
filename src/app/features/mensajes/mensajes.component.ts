@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { EstadosComponent } from '../estados/estados.component';
 import { Router } from '@angular/router';
 import { SidePanelService } from '../../core/services/side-panel.service';
 import { ContactsListComponent } from '../../shared/components/side-panel/components/contacts-list/contacts-list.component';
@@ -23,7 +24,7 @@ import { Presencia } from '../../core/models/privacidad.model';
 @Component({
   selector: 'app-mensajes',
   standalone: true,
-  imports: [CommonModule, ContactsListComponent, ChatViewComponent, EstadosCreadorComponent, EstadosVisorComponent, NotasUsuarioComponent, RouterLink],
+  imports: [CommonModule, ContactsListComponent, ChatViewComponent, EstadosCreadorComponent, EstadosVisorComponent, NotasUsuarioComponent, EstadosComponent, RouterLink],
   templateUrl: './mensajes.component.html',
   styleUrls: ['./mensajes.component.scss'],
 })
@@ -36,6 +37,7 @@ export class MensajesComponent implements OnInit, OnDestroy {
 
   readonly presenciaContacto = signal<Presencia>('EN_LINEA');
   readonly estadosDelContacto = signal<GrupoEstados | null>(null);
+  readonly vistaAmplia = signal(false);
   readonly creadorAbierto = signal(false);
   readonly visorAbierto = signal(false);
 
@@ -140,11 +142,25 @@ export class MensajesComponent implements OnInit, OnDestroy {
     // Esta página manda: el panel flotante se aparta mientras estemos aquí.
     this.svc.cerrarPanelFlotante();
     this.svc.cargarConversaciones();
+    this.observarAncho();
   }
 
   ngOnDestroy(): void {
+    this.quitarAncho?.();
     // Se sale por donde se salga (riel, atrás, un enlace): la pastilla vuelve.
     this.svc.salirDePaginaCompleta();
+  }
+
+  private quitarAncho?: () => void;
+
+  private observarAncho(): void {
+    if (typeof window === 'undefined') return;
+
+    const medir = () => this.vistaAmplia.set(window.innerWidth >= 1180);
+
+    medir();
+    window.addEventListener('resize', medir);
+    this.quitarAncho = () => window.removeEventListener('resize', medir);
   }
 
   volver(): void {

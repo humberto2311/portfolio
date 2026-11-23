@@ -102,14 +102,20 @@ export class SpotifyWidgetComponent implements OnInit {
   }
 
   conectar(): void {
-    this.spotify.getUrlConexion(window.location.href)
+    this.ocupado.set(true);
+
+    this.spotify.getUrlConexion()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: ({ url }) => {
+          this.ocupado.set(false);
           this.alConectar.emit();
           window.location.href = url;
         },
-        error: (fallo) => this.error.set(this.spotify.comoError(fallo))
+        error: (fallo) => {
+          this.ocupado.set(false);
+          this.error.set(this.spotify.comoError(fallo));
+        }
       });
   }
 

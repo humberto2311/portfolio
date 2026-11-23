@@ -104,6 +104,10 @@
         <div class="vacio__notas">
           <app-notas-usuario [compacto]="true" (cambiar)="guardarNota($event)" />
 
+          @if (vistaAmplia()) {
+            <app-estados [soloTextoYAudio]="true" [compacto]="true" [ocultarCabecera]="true" />
+          }
+
           <a class="acceso-mapa" routerLink="/app/ubicacion" title="Mapa de conexiones">
             <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
             <span>Mapa</span>

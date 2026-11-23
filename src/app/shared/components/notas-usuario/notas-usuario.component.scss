@@ -48,9 +48,7 @@
   padding: 8px 10px;
   background: $bg-card;
   border: 1px solid $bg-border;
-  border-radius: 14px;
-  cursor: pointer;
-  text-align: left;
+  border-radius: 999px;
   transition: border-color 0.18s ease, background 0.18s ease;
 
   &:hover {
@@ -58,24 +56,45 @@
     background: $bg-elevated;
   }
 
-  &__anillo {
+  &__avatar {
+    position: relative;
     flex: 0 0 auto;
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    padding: 2px;
-    background: linear-gradient(135deg, $accent, rgba(74, 158, 255, 0.25));
+    border: 2px solid $accent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    background: $bg-elevated;
 
     img {
       width: 100%;
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
-      border: 2px solid $bg-card;
       display: block;
+    }
+  }
+
+  &__lapiz {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid $bg-card;
+    background: $accent;
+    color: #06120a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+
+    i {
+      font-size: 0.48rem;
     }
   }
 
@@ -83,10 +102,8 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: $bg-elevated;
-    border: 2px solid $bg-card;
     color: $text-muted;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -96,9 +113,15 @@
   &__texto {
     flex: 1 1 auto;
     min-width: 0;
+    background: transparent;
+    border: none;
+    padding: 0;
+    text-align: left;
+    font-family: inherit;
     font-size: 0.78rem;
     line-height: 1.35;
     color: $text-light;
+    cursor: pointer;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -110,19 +133,18 @@
 
 .notas--compacto {
   .nota {
-    padding: 6px 8px;
+    padding: 5px 9px 5px 5px;
     gap: 8px;
-    border-radius: 12px;
-  }
 
-  .nota__anillo {
-    width: 34px;
-    height: 34px;
-  }
+    &__avatar {
+      width: 30px;
+      height: 30px;
+    }
 
-  .nota__texto {
-    font-size: 0.74rem;
-    -webkit-line-clamp: 1;
+    &__texto {
+      font-size: 0.74rem;
+      -webkit-line-clamp: 1;
+    }
   }
 }
 

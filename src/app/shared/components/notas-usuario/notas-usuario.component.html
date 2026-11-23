@@ -1,0 +1,60 @@
+<section class="notas" [class.notas--compacto]="compacto()" aria-label="Tu nota">
+  <header class="notas__cabecera">
+    <h3>Tu nota</h3>
+    @if (nota()) {
+      <button type="button" class="notas__editar" (click)="abrir()">
+        <i class="fa-solid fa-pen" aria-hidden="true"></i>
+        Editar
+      </button>
+    }
+  </header>
+
+  <button type="button" class="nota" (click)="abrir()">
+    <span class="nota__anillo">
+      @if (avatar(); as foto) {
+        @if (!avatarRoto()) {
+          <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />
+        } @else {
+          <span class="nota__iniciales">{{ iniciales() }}</span>
+        }
+      } @else {
+        <span class="nota__iniciales">{{ iniciales() }}</span>
+      }
+    </span>
+
+    <span class="nota__texto">
+      @if (nota(); as contenido) {
+        {{ contenido }}
+      } @else {
+        ¿Qué estás pensando?
+      }
+    </span>
+  </button>
+
+  @if (editando()) {
+    <div class="editor" role="dialog" aria-modal="true" aria-label="Tu nota">
+      <div class="editor__caja">
+        <h4>{{ nota() ? 'Edita tu nota' : 'Crea tu nota' }}</h4>
+        <p>Se muestra arriba de tu foto. Solo la ven tus contactos.</p>
+
+        <textarea
+          rows="3"
+          [attr.maxlength]="120"
+          autofocus
+          placeholder="¿Qué estás pensando?"
+          [value]="texto()"
+          (input)="texto.set($any($event.target).value)"
+          (keydown.enter)="guardar($event)"></textarea>
+
+        <span class="editor__contador">{{ texto().length }}/120</span>
+
+        <div class="editor__acciones">
+          @if (nota()) {
+            <button type="button" class="editor__quitar" (click)="quitar()">Quitar nota</button>
+          }
+          <button type="button" class="editor__ok" (click)="guardar()">Listo</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

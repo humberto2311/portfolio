@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CrearEstado, Estado, GrupoEstados, PistaMusica } from '../models/estado.model';
+import { AudienciaContenido, VisibilidadContenido } from '../models/privacidad.model';
 
 export type { PistaMusica };
 
@@ -32,14 +33,16 @@ export const PISTAS_DEMO: PistaMusica[] = [
   { id: 'demo-6', titulo: 'Café y Código', artista: 'Dev Sessions', url: '', portada: '' }
 ];
 
-export interface BorradorPublicacion {
+export interface BorradorEstado {
   texto: string;
   imagen: string | null;
   video: string | null;
   audio: string | null;
-  mediaType: 'AUDIO' | 'FOTO' | 'VIDEO' | 'TEXTO';
   stickers: string[];
   musica: PistaMusica | null;
+  visibilidad?: VisibilidadContenido;
+  permitidos?: string[];
+  excluidos?: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -56,6 +59,15 @@ export class EstadosService {
     return this.http.get<GrupoEstados>(`${this.base}/usuario/${usuarioId}`);
   }
 
+  subirArchivo(archivo: File): Observable<string> {
+    const datos = new FormData();
+
+    datos.append('file', archivo);
+
+    return this.http.post<{ url: string }>(`${environment.apiUrl}/api/archivos`, datos)
+      .pipe(map((respuesta) => `${environment.apiUrl}${respuesta.url}`));
+  }
+
   publicar(estado: CrearEstado): Observable<Estado> {
     return this.http.post<Estado>(this.base, estado);
   }
@@ -68,20 +80,28 @@ export class EstadosService {
     return this.http.delete<void>(`${this.base}/${estadoId}`);
   }
 
-  publicarPublicacion(borrador: BorradorPublicacion): Observable<unknown> {
+  publicarBorrador(borrador: BorradorEstado): Observable<Estado> {
+    const media = borrador.video ?? borrador.imagen ?? borrador.audio;
     const pista = borrador.musica;
-    const texto = borrador.stickers.length
-      ? `${borrador.texto} ${borrador.stickers.join(' ')}`.trim()
-      : borrador.texto;
+    const texto = borrador.texto.trim();
 
-    return this.http.post(`${environment.apiUrl}/api/posts`, {
-      content: texto,
-      imageUrl: borrador.imagen,
-      videoUrl: borrador.video ?? borrador.audio,
-      mediaType: borrador.mediaType,
-      musicTitle: pista?.titulo ?? null,
-      musicArtist: pista?.artista ?? null,
-      musicUrl: pista?.url || null
+    return this.publicar({
+      tipo: media ? 'FOTO' : 'TEXTO',
+      contenidoUrl: media,
+      texto: texto || null,
+      fondo: media ? null : FONDOS_ESTADO[0],
+      stickers: borrador.stickers,
+      musicaId: pista?.id ?? null,
+      musicaTitulo: pista?.titulo ?? null,
+      musicaArtista: pista?.artista ?? null,
+      musicaUrl: pista?.url || null,
+      duracionSegundos: media ? 10 : 8,
+      visibilidad: borrador.visibilidad ?? 'PUBLICO',
+      audiencia: {
+        visibilidad: borrador.visibilidad ?? 'PUBLICO',
+        permitidos: borrador.permitidos ?? [],
+        excluidos: borrador.excluidos ?? []
+      }
     });
   }
 

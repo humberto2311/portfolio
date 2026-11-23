@@ -95,6 +95,12 @@ export const routes: Routes = [
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
       { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
       {
+        path: 'ajustes/privacidad',
+        loadComponent: () =>
+          import('./features/ajustes/ajustes-privacidad.component').then((m) => m.AjustesPrivacidadComponent),
+        data: { anchoCompleto: true },
+      },
+      {
         path: 'ajustes/comandos',
         loadComponent: () =>
           import('./features/ajustes/ajustes-comandos.component').then((m) => m.AjustesComandosComponent),

@@ -1,121 +1,108 @@
-  <div class="widget" [class.widget--compacto]="compacto" [class.widget--abierto]="panelAbierto()">
+@if (mostrar()) {
+  <div class="sw" [class.sw--perfil]="contexto === 'profile'" [class.sw--abierto]="popoverAbierto()">
+    @if (cargando()) {
+      <span class="sw__hueso" aria-hidden="true"></span>
+    } @else if (!conectado()) {
+      <button type="button" class="sw__pildora" (click)="conectar()">
+        <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+        <span>Conectar Spotify</span>
+      </button>
+    } @else {
       <button
         type="button"
-        class="cd"
-        [class.cd--girando]="sonando()"
-        [class.cd--vacio]="!caratula()"
-        [attr.aria-label]="isOwner ? 'Abrir el control de Spotify' : titulo()"
-        [disabled]="!isOwner"
-        (click)="alternarPanel()">
-        @if (caratula()) {
-          <img class="cd__caratula" [src]="caratula()" [alt]="titulo()" loading="lazy" />
+        class="sw__disco"
+        [class.sw__disco--girando]="sonando()"
+        [class.sw__disco--idle]="!reproduciendo()"
+        [attr.aria-label]="reproduciendo() ? titulo() : 'Spotify conectado'"
+        (click)="alternarPopover()">
+        @if (reproduciendo() && caratula()) {
+          <img class="sw__caratula" [src]="caratula()!" alt="" loading="lazy" />
         } @else {
-          <i class="fa-brands fa-spotify cd__icono" aria-hidden="true"></i>
+          <i class="fa-brands fa-spotify sw__logo" aria-hidden="true"></i>
         }
-        <span class="cd__borde" aria-hidden="true"></span>
-        <span class="cd__centro" aria-hidden="true"></span>
-      </button>
 
-      @if (compacto === false) {
-        <div class="datos">
-          <p class="datos__titulo" [title]="titulo()">{{ titulo() }}</p>
-          @if (subtitulo()) {
-            <p class="datos__artista" [title]="subtitulo()">{{ subtitulo() }}</p>
-          } @else if (!cargando() && !conectado() && isOwner) {
-            <button type="button" class="datos__enlace" (click)="conectar()">Conectar Spotify</button>
+        <span class="sw__anillo" aria-hidden="true"></span>
+        <span class="sw__insignia" aria-hidden="true">
+          <i class="fa-brands fa-spotify"></i>
+        </span>
+        <span class="sw__punto" aria-hidden="true"></span>
+
+        <span class="sw__tip" role="tooltip">
+          @if (reproduciendo()) {
+            <strong>{{ titulo() }}</strong>
+            <em>{{ subtitulo() }}</em>
+          } @else {
+            <strong>Spotify conectado</strong>
           }
-        </div>
-      }
+        </span>
+      </button>
+    }
 
-      @if (panelAbierto() && isOwner) {
-        <div class="panel" role="dialog" aria-label="Control de Spotify">
-          <div class="panel__cabecera">
-            <span class="panel__titulo">Spotify</span>
-            @if (conectado()) {
-              <button type="button" class="panel__salir" title="Desconectar Spotify" (click)="desconectar()">
-                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
-              </button>
+    @if (popoverAbierto() && isOwner) {
+      <div class="sw-pop" role="dialog" aria-label="Spotify">
+        <header class="sw-pop__cabecera">
+          <span class="sw-pop__marca">
+            <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+            Spotify
+          </span>
+          <button type="button" class="sw-pop__cerrar" aria-label="Cerrar" (click)="popoverAbierto.set(false)">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        @if (!conectado()) {
+          <p class="sw-pop__nota">Conecta tu cuenta para controlar lo que suena.</p>
+          <button type="button" class="sw-pop__conectar" (click)="conectar()">
+            <i class="fa-brands fa-spotify" aria-hidden="true"></i>
+            Conectar Spotify
+          </button>
+        } @else {
+          <div class="sw-pop__pista">
+            @if (caratula()) {
+              <img [src]="caratula()!" alt="" />
+            } @else {
+              <span class="sw-pop__sinarte"><i class="fa-solid fa-music" aria-hidden="true"></i></span>
             }
+            <span class="sw-pop__datos">
+              <strong>{{ titulo() }}</strong>
+              <em>{{ subtitulo() || 'Sin reproducción' }}</em>
+            </span>
           </div>
 
-          @if (conectado() === false) {
-            <p class="panel__nota">Conecta tu cuenta para controlar lo que suena desde NFSocial.</p>
-            <button type="button" class="panel__conectar" (click)="conectar()">
-              <i class="fa-brands fa-spotify" aria-hidden="true"></i>
-              Conectar Spotify
+          <div class="sw-pop__controles">
+            <button type="button" title="Anterior" [disabled]="ocupado()" (click)="anterior()">
+              <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
             </button>
-          } @else {
-            <div class="panel__pista">
-              <p class="panel__nombre" [title]="titulo()">{{ titulo() }}</p>
-              <p class="panel__artista" [title]="subtitulo()">{{ subtitulo() }}</p>
-            </div>
+            <button type="button" class="sw-pop__principal" [title]="sonando() ? 'Pausar' : 'Reproducir'"
+                    [disabled]="ocupado()" (click)="alternarReproduccion()">
+              <i class="fa-solid" [class.fa-pause]="sonando()" [class.fa-play]="!sonando()" aria-hidden="true"></i>
+            </button>
+            <button type="button" title="Siguiente" [disabled]="ocupado()" (click)="siguiente()">
+              <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
+            </button>
+          </div>
 
-            <div class="panel__controles">
-              <button type="button" class="control" title="Anterior" [disabled]="ocupado()" (click)="anterior()">
-                <i class="fa-solid fa-backward-step" aria-hidden="true"></i>
-              </button>
-              <button
-                type="button"
-                class="control control--principal"
-                [title]="sonando() ? 'Pausar' : 'Reproducir'"
-                [disabled]="ocupado()"
-                (click)="alternarReproduccion()">
-                <i class="fa-solid" [class.fa-pause]="sonando()" [class.fa-play]="!sonando()" aria-hidden="true"></i>
-              </button>
-              <button type="button" class="control" title="Siguiente" [disabled]="ocupado()" (click)="siguiente()">
-                <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
-              </button>
-            </div>
+          <div class="sw-pop__acciones">
+            <button type="button" (click)="abrirSpotify($event)">
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+              Abrir Spotify
+            </button>
+            <button type="button" class="sw-pop__salir" (click)="desconectar()">
+              <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+              Desconectar
+            </button>
+          </div>
+        }
 
-            <div class="panel__buscador">
-              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-              <input
-                type="search"
-                placeholder="Buscar en Spotify…"
-                [ngModel]="consulta()"
-                (ngModelChange)="consulta.set($event)"
-                (keyup.enter)="buscar()"
-                aria-label="Buscar en Spotify" />
-              @if (buscando()) {
-                <span class="panel__girando" aria-hidden="true"></span>
-              }
-            </div>
-
-            @if (hayResultados()) {
-              <ul class="resultados">
-                @for (pista of resultados(); track pista.id) {
-                  <li>
-                    <button type="button" class="resultado" (click)="elegir(pista)">
-                      @if (pista.imagenUrl) {
-                        <img class="resultado__imagen" [src]="pista.imagenUrl" alt="" loading="lazy" />
-                      } @else {
-                        <span class="resultado__imagen resultado__imagen--vacia">
-                          <i class="fa-solid fa-music" aria-hidden="true"></i>
-                        </span>
-                      }
-                      <span class="resultado__texto">
-                        <span class="resultado__nombre">{{ pista.nombre }}</span>
-                        <span class="resultado__artista">{{ pista.artistas }}</span>
-                      </span>
-                      <i class="fa-solid fa-play resultado__play" aria-hidden="true"></i>
-                    </button>
-                  </li>
-                }
-              </ul>
-            } @else if (sinResultados()) {
-              <p class="panel__nota">No encontré nada con ese nombre.</p>
-            }
-          }
-
-          @if (error(); as fallo) {
-            <div class="panel__error" role="alert">
-              <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-              <p>{{ fallo.mensaje }}</p>
-              <button type="button" class="panel__cerrar" aria-label="Cerrar aviso" (click)="descartarError()">
-                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-              </button>
-            </div>
-          }
-        </div>
-      }
-    </div>
+        @if (error(); as fallo) {
+          <div class="sw-pop__error" role="alert">
+            <span>{{ fallo.mensaje }}</span>
+            <button type="button" aria-label="Cerrar aviso" (click)="descartarError()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

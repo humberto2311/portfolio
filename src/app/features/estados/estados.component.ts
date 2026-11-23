@@ -13,6 +13,8 @@ import { GrupoEstados } from '../../core/models/estado.model';
     <app-estados-carrusel
       [recarga]="recarga()"
       [soloTextoYAudio]="soloTextoYAudio()"
+      [compacto]="compacto()"
+      [ocultarCabecera]="ocultarCabecera()"
       (cargados)="recibirGrupos($event)"
       (abrirCreador)="creador.set(true)"
       (abrirVisor)="abrirVisor($event)" />
@@ -33,6 +35,8 @@ import { GrupoEstados } from '../../core/models/estado.model';
 export class EstadosComponent {
 
   readonly soloTextoYAudio = input(false);
+  readonly compacto = input(false);
+  readonly ocultarCabecera = input(false);
 
   readonly creador = signal(false);
   readonly visor = signal<GrupoEstados | null>(null);

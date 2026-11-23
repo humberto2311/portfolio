@@ -3,7 +3,17 @@
     <button type="button" class="icono" (click)="cerrar.emit()" aria-label="Cerrar">
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
     </button>
-    <span class="creador__titulo">Nueva publicación</span>
+    <span class="creador__quien">
+      <span class="creador__avatar">
+        @if (avatarPropio()) {
+          <img [src]="avatarPropio()!" alt="Tu foto" (error)="avatarRoto.set(true)" />
+        }
+        @if (!avatarPropio() || avatarRoto()) {
+          {{ iniciales() }}
+        }
+      </span>
+      <span class="creador__titulo">Comparte lo que piensas</span>
+    </span>
     <button type="button" class="publicar" [disabled]="!puedePublicar() || guardando()" (click)="publicar()">
       {{ guardando() ? 'Publicando…' : 'Publicar' }}
     </button>
@@ -111,5 +121,20 @@
 
   @if (error()) {
     <p class="creador__error">{{ error() }}</p>
+  }
+
+  <button type="button" class="audiencia" (click)="abrirAudiencia()">
+    <i class="fa-solid fa-user-group" aria-hidden="true"></i>
+    <span>{{ etiquetaVisibilidad() }}</span>
+  </button>
+
+  @if (modalAudiencia()) {
+    <app-audiencia-modal
+      [visibilidad]="visibilidad()"
+      [permitidos]="permitidos()"
+      [excluidos]="excluidos()"
+      (cerrar)="modalAudiencia.set(false)"
+      (confirmar)="aplicarAudiencia($event)">
+    </app-audiencia-modal>
   }
 </div>

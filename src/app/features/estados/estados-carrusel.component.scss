@@ -99,3 +99,74 @@
   font-size: 0.76rem;
   color: var(--text-faint);
 }
+
+.estados__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+
+  h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+}
+
+.estados__crear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  i {
+    font-size: 0.6rem;
+  }
+}
+
+.estados__fila {
+  align-items: flex-end;
+}
+
+.estado-tarjeta {
+  width: 84px;
+}
+
+.estado-tarjeta__nombre {
+  max-width: 84px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.estados--compacta {
+  .estados__fila {
+    gap: 0.7rem;
+  }
+
+  .estado-tarjeta {
+    width: 68px;
+  }
+
+  .anillo {
+    width: 54px;
+    height: 54px;
+  }
+
+  .estado-tarjeta__nombre {
+    max-width: 68px;
+    font-size: 0.66rem;
+  }
+}
+
+.anillo--propio {
+  background: linear-gradient(135deg, var(--accent), rgba(74, 158, 255, 0.25));
+}

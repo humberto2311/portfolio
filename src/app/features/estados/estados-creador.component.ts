@@ -3,17 +3,47 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EstadosService, STICKERS_ESTADO } from '../../core/services/estados.service';
 import { PistaMusica } from '../../core/models/estado.model';
+import { firstValueFrom } from 'rxjs';
+import { PerfilService } from '../../core/services/perfil.service';
+import { UserProfileService } from '../../core/services/user-profile.service';
+import { AuthService } from '../../core/services/auth.service';
+import { AudienciaModalComponent } from '../../shared/components/audiencia-modal/audiencia-modal.component';
+import { VisibilidadContenido, VISIBILIDADES } from '../../core/models/privacidad.model';
 
 @Component({
   selector: 'app-estados-creador',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AudienciaModalComponent],
   templateUrl: './estados-creador.component.html',
   styleUrls: ['./estados-creador.component.scss']
 })
 export class EstadosCreadorComponent implements OnInit {
 
   private estados = inject(EstadosService);
+  private perfiles = inject(UserProfileService);
+  private perfilSvc = inject(PerfilService);
+  private auth = inject(AuthService);
+
+  readonly avatarRoto = signal(false);
+  readonly visibilidad = signal<VisibilidadContenido>('PUBLICO');
+  readonly permitidos = signal<string[]>([]);
+  readonly excluidos = signal<string[]>([]);
+  readonly modalAudiencia = signal(false);
+
+  readonly etiquetaVisibilidad = computed(() => {
+    const encontrada = VISIBILIDADES.find((opcion) => opcion.valor === this.visibilidad());
+
+    return encontrada ? encontrada.etiqueta : 'Público';
+  });
+
+  readonly avatarPropio = computed(() =>
+    this.perfiles.avatar() ?? this.perfilSvc.perfil()?.avatarUrl ?? null);
+
+  readonly iniciales = computed(() => {
+    const nombre = this.auth.currentUser()?.fullName ?? 'Yo';
+
+    return nombre.split(' ').filter(Boolean).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
+  });
 
   readonly cerrar = output<void>();
   readonly publicado = output<void>();
@@ -46,6 +76,7 @@ export class EstadosCreadorComponent implements OnInit {
 
   ngOnInit(): void {
     this.buscar('');
+    this.perfiles.cargarMiAvatar();
   }
 
   async elegirArchivo(evento: Event): Promise<void> {
@@ -55,7 +86,7 @@ export class EstadosCreadorComponent implements OnInit {
     if (!archivo) return;
 
     try {
-      const datos = await this.estados.leerComoDataUrl(archivo);
+      const datos = await firstValueFrom(this.estados.subirArchivo(archivo));
 
       if (archivo.type.startsWith('audio/')) {
         this.audio.set(datos);
@@ -111,20 +142,33 @@ export class EstadosCreadorComponent implements OnInit {
     this.musica.set(null);
   }
 
+  abrirAudiencia(): void {
+    this.modalAudiencia.set(true);
+  }
+
+  aplicarAudiencia(eleccion: { visibilidad: VisibilidadContenido; permitidos: string[]; excluidos: string[] }): void {
+    this.visibilidad.set(eleccion.visibilidad);
+    this.permitidos.set(eleccion.permitidos);
+    this.excluidos.set(eleccion.excluidos);
+    this.modalAudiencia.set(false);
+  }
+
   publicar(): void {
     if (!this.puedePublicar() || this.guardando()) return;
 
     this.guardando.set(true);
     this.error.set(null);
 
-    this.estados.publicarPublicacion({
+    this.estados.publicarBorrador({
       texto: this.texto().trim(),
       imagen: this.imagen(),
       video: this.video(),
       audio: this.audio(),
-      mediaType: this.tipoMedia(),
       stickers: this.stickersPuestos(),
-      musica: this.musica()
+      musica: this.musica(),
+      visibilidad: this.visibilidad(),
+      permitidos: this.permitidos(),
+      excluidos: this.excluidos()
     }).subscribe({
       next: () => {
         this.guardando.set(false);

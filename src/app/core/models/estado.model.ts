@@ -21,6 +21,8 @@ export interface Estado {
   vista: boolean;
   vistas: number;
   propio: boolean;
+  visibilidad?: string;
+  soloMejoresAmigos?: boolean;
 }
 
 export interface GrupoEstados {
@@ -45,6 +47,8 @@ export interface CrearEstado {
   musicaInicio?: number | null;
   stickers?: string[];
   duracionSegundos?: number;
+  visibilidad?: string;
+  audiencia?: { visibilidad: string; permitidos: string[]; excluidos: string[] };
 }
 
 export interface PistaMusica {

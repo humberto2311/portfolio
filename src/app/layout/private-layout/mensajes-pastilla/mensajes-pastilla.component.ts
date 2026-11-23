@@ -34,7 +34,7 @@ export class MensajesPastillaComponent {
     // En la página de Mensajes a pantalla completa no hay pastilla: el propio
     // componente trae su botón de contraer.
     if (this.svc.enPaginaCompleta()) return false;
-    return this.svc.pastillaVisible(false) && !this.svc.isOpen();
+    return this.svc.pastillaVisible(false) && !this.svc.isOpen() && !this.svc.pastillaOculta();
   }
 
   get sinLeer(): number {
@@ -44,6 +44,10 @@ export class MensajesPastillaComponent {
   get etiqueta(): string {
     const n = this.sinLeer;
     return n > 0 ? `${n} sin abrir` : 'Mensajes';
+  }
+
+  ocultar(): void {
+    this.svc.ocultarPastilla();
   }
 
   abrir(): void {

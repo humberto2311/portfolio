@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PerfilService } from '../../core/services/perfil.service';
 import { AuthService } from '../../core/services/auth.service'; // 👈 Importamos AuthService
@@ -26,14 +26,16 @@ export class FeedComponent implements OnInit {
   
   publicaciones = this.perfilService.publicaciones;
   publicacionesVisibles = this.perfilService.publicacionesVisibles;
-  cargando = this.perfilService.cargando;
+  readonly cargando = signal(false);
 
   ngOnInit(): void {
     if (this.publicaciones().length === 0) {
       // 👇 Obtenemos el ID del usuario logueado y se lo pasamos
       const currentUser = this.authService.currentUser();
       if (currentUser?.id) {
+        this.cargando.set(true);
         this.perfilService.cargarPublicaciones(currentUser.id);
+        setTimeout(() => this.cargando.set(false), 1200);
       }
     }
   }

@@ -7,20 +7,50 @@
     <span class="privacidad"><i class="fa-solid fa-shield-halved"></i> Solo tú ves este mapa</span>
   </header>
 
-  <div class="aviso">
-    <i class="fa-solid fa-lock"></i>
+  <div class="aviso" [class.aviso--abierto]="panelPrivacidad()">
+    <i class="fa-solid" [class.fa-lock]="visibilidad() === 'PRIVATE'" [class.fa-user-group]="visibilidad() === 'FRIENDS'" [class.fa-globe]="visibilidad() === 'PUBLIC'"></i>
     <div>
-      <strong>Tu ubicación es privada.</strong>
+      <strong>
+        @switch (visibilidad()) {
+          @case ('PUBLIC') { Tu ubicación es pública. }
+          @case ('FRIENDS') { Tu ubicación se comparte con tus amigos. }
+          @default { Tu ubicación es privada. }
+        }
+      </strong>
       <small>
         La ubicación solo se guarda cuando la aceptas al tocar una tarjeta. Puedes desactivarla
         cuando quieras y el historial se deja de construir desde ese momento.
       </small>
     </div>
-    <button type="button" class="btn-mini">Gestionar permisos</button>
+    <button type="button" class="btn-mini" (click)="alternarPrivacidad()">
+      {{ panelPrivacidad() ? 'Cerrar' : 'Gestionar permisos' }}
+    </button>
   </div>
 
+  @if (panelPrivacidad()) {
+    <div class="permisos">
+      @for (opcion of VISIBILIDADES; track opcion.valor) {
+        <button
+          type="button"
+          class="permiso"
+          [class.permiso--activo]="visibilidad() === opcion.valor"
+          [disabled]="guardandoUbicacion()"
+          (click)="cambiarVisibilidad(opcion.valor)">
+          <i class="fa-solid" [class]="opcion.icono"></i>
+          <span>
+            <strong>{{ opcion.etiqueta }}</strong>
+            <small>{{ opcion.detalle }}</small>
+          </span>
+        </button>
+      }
+      @if (guardandoUbicacion()) {
+        <p class="permisos__aviso">Guardando tu ubicación…</p>
+      }
+    </div>
+  }
+
   <!-- El mapa ocupa todo el bloque y los demás componentes flotan dentro, como parte del mapa. -->
-  <section class="tablero" data-tour="mapa-tablero">
+  <section class="tablero" [class.tablero--completo]="pantallaCompleta()" data-tour="mapa-tablero">
     <div class="tablero__mapa">
       <app-mapa-real
         [altura]="'620px'"
@@ -32,6 +62,20 @@
     <div class="tablero__velo" aria-hidden="true"></div>
 
     <div class="tablero__metricas">
+      <div class="tablero__barra">
+        <button type="button" class="barra__btn" [class.barra__btn--activo]="!metricasAbiertas()"
+                (click)="alternarMetricas()" [title]="metricasAbiertas() ? 'Ocultar métricas' : 'Mostrar métricas'">
+          <i class="fa-solid" [class.fa-chart-simple]="metricasAbiertas()" [class.fa-chart-column]="!metricasAbiertas()"></i>
+          <span>Métricas</span>
+        </button>
+        <button type="button" class="barra__btn" (click)="alternarPantallaCompleta()"
+                [title]="pantallaCompleta() ? 'Salir de pantalla completa' : 'Mapa en pantalla completa'">
+          <i class="fa-solid" [class.fa-expand]="!pantallaCompleta()" [class.fa-compress]="pantallaCompleta()"></i>
+          <span>{{ pantallaCompleta() ? 'Salir' : 'Pantalla completa' }}</span>
+        </button>
+      </div>
+
+      @if (metricasAbiertas()) {
       <section class="metricas" data-tour="mapa-metricas">
         <article class="metrica">
           <span class="metrica__icono"><i class="fa-solid fa-hand-pointer"></i></span>
@@ -54,6 +98,7 @@
           <div><small>Conexiones empresariales</small><strong>{{ conexionesEmpresariales() }}</strong></div>
         </article>
       </section>
+      }
 
       <div class="capas" data-tour="mapa-capas">
         <button type="button" class="capa capa--personal" [class.capa--off]="!capas().personal" (click)="alternarCapa('personal')">
@@ -64,6 +109,9 @@
         </button>
         <button type="button" class="capa capa--local" [class.capa--off]="!capas().locales" (click)="alternarCapa('locales')">
           <i class="punto punto--local"></i> Locales
+        </button>
+        <button type="button" class="capa capa--amigos" [class.capa--off]="!capas().amigos" (click)="alternarCapa('amigos')">
+          <i class="punto punto--amigos"></i> Amigos
         </button>
         <span class="capas__pista">Toca para mostrar u ocultar · el tamaño del círculo es el número de toques</span>
       </div>
@@ -175,7 +223,11 @@
     </aside>
 
     <aside class="tablero__ciudades" data-tour="mapa-ciudades">
-      <h2>Por ciudad</h2>
+      <button type="button" class="ciudades__cabecera" (click)="alternar('ciudades')">
+        <h2>Por ciudad</h2>
+        <i class="fa-solid fa-chevron-down" [class.ciudades__flecha--girada]="abierto().ciudades"></i>
+      </button>
+      @if (abierto().ciudades) {
       <ul>
         @for (ciudad of ciudades; track ciudad.ciudad) {
           <li>
@@ -185,6 +237,7 @@
           </li>
         }
       </ul>
+      }
     </aside>
 
     <div class="tablero__fotos" data-tour="mapa-fotos">

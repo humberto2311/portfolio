@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { SidePanelService } from '../../core/services/side-panel.service';
 import { ContactsListComponent } from '../../shared/components/side-panel/components/contacts-list/contacts-list.component';
@@ -8,6 +9,9 @@ import { EstadosService } from '../../core/services/estados.service';
 import { EstadosCreadorComponent } from '../estados/estados-creador.component';
 import { EstadosVisorComponent } from '../estados/estados-visor.component';
 import { GrupoEstados } from '../../core/models/estado.model';
+import { PrivacidadService } from '../../core/services/privacidad.service';
+import { NotasUsuarioComponent } from '../../shared/components/notas-usuario/notas-usuario.component';
+import { Presencia } from '../../core/models/privacidad.model';
 
 /**
  * Mensajes a página completa: la misma bandeja y el mismo hilo del panel, pero
@@ -19,7 +23,7 @@ import { GrupoEstados } from '../../core/models/estado.model';
 @Component({
   selector: 'app-mensajes',
   standalone: true,
-  imports: [CommonModule, ContactsListComponent, ChatViewComponent, EstadosCreadorComponent, EstadosVisorComponent],
+  imports: [CommonModule, ContactsListComponent, ChatViewComponent, EstadosCreadorComponent, EstadosVisorComponent, NotasUsuarioComponent, RouterLink],
   templateUrl: './mensajes.component.html',
   styleUrls: ['./mensajes.component.scss'],
 })
@@ -28,6 +32,9 @@ export class MensajesComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly estados = inject(EstadosService);
 
+  private readonly privacidadSvc = inject(PrivacidadService);
+
+  readonly presenciaContacto = signal<Presencia>('EN_LINEA');
   readonly estadosDelContacto = signal<GrupoEstados | null>(null);
   readonly creadorAbierto = signal(false);
   readonly visorAbierto = signal(false);
@@ -48,7 +55,54 @@ export class MensajesComponent implements OnInit, OnDestroy {
       }
 
       this.cargarEstados(contacto.id);
+      this.cargarPresencia(contacto.id);
     });
+  }
+
+  readonly nota = signal<string | null>(this.leerNota());
+
+  leerNota(): string | null {
+    try {
+      return localStorage.getItem('nsoft.nota');
+    } catch {
+      return null;
+    }
+  }
+
+  guardarNota(texto: string | null): void {
+    const limpio = (texto ?? '').trim();
+
+    this.nota.set(limpio || null);
+
+    try {
+      if (limpio) {
+        localStorage.setItem('nsoft.nota', limpio);
+      } else {
+        localStorage.removeItem('nsoft.nota');
+      }
+    } catch {
+      return;
+    }
+  }
+
+  notaContacto(): string | null {
+    return this.estadosDelContacto()?.estados[0]?.texto?.trim() || null;
+  }
+
+  cargarPresencia(usuarioId: string): void {
+    this.privacidadSvc.presenciaDe(usuarioId).subscribe({
+      next: (presencia) => this.presenciaContacto.set(presencia),
+      error: () => this.presenciaContacto.set('EN_LINEA'),
+    });
+  }
+
+  textoPresencia(): string {
+    switch (this.presenciaContacto()) {
+      case 'AUSENTE': return 'Ausente';
+      case 'NO_MOLESTAR': return 'No molestar';
+      case 'INVISIBLE': return 'Desconectado';
+      default: return 'En línea';
+    }
   }
 
   cargarEstados(usuarioId: string): void {

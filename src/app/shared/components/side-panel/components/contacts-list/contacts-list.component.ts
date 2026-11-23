@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { SidePanelService } from '../../../../../core/services/side-panel.service';
+import { EstadosService } from '../../../../../core/services/estados.service';
 import { ChatService } from '../../../../../core/services/chat.service';
 import { Contact } from '../../../../../core/models/contact.model';
 import { UsuarioBuscado } from '../../../../../core/models/chat.model';
@@ -18,6 +19,7 @@ import { EstadosComponent } from '../../../../../features/estados/estados.compon
 export class ContactsListComponent implements OnInit, OnDestroy {
   svc = inject(SidePanelService);
   private chat = inject(ChatService);
+  private estados = inject(EstadosService);
 
   /**
    * `true` = vista "Nuevo mensaje": título, buscador siempre visible y lista
@@ -28,6 +30,37 @@ export class ContactsListComponent implements OnInit, OnDestroy {
   search = signal('');
   personas = signal<UsuarioBuscado[]>([]);
   buscando = signal(false);
+
+  private readonly rotos = signal<Set<string>>(new Set());
+  readonly conEstado = signal<Set<string>>(new Set());
+
+  avatarRoto(id: string): boolean {
+    return this.rotos().has(id);
+  }
+
+  marcarRoto(id: string): void {
+    const siguiente = new Set(this.rotos());
+
+    siguiente.add(id);
+    this.rotos.set(siguiente);
+  }
+
+  tieneEstado(id: string): boolean {
+    return this.conEstado().has(id);
+  }
+
+  private cargarEstados(): void {
+    this.estados.bandeja().subscribe({
+      next: (grupos) => {
+        const con = new Set((grupos ?? [])
+          .filter((grupo) => grupo.estados.length > 0 && !grupo.todosVistos)
+          .map((grupo) => grupo.usuarioId));
+
+        this.conEstado.set(con);
+      },
+      error: () => this.conEstado.set(new Set()),
+    });
+  }
 
   private tecleo = new Subject<string>();
 
@@ -54,6 +87,7 @@ export class ContactsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.svc.cargarConversaciones();
+    this.cargarEstados();
     if (this.modoNuevo) {
       this.search.set('');
       this.personas.set([]);

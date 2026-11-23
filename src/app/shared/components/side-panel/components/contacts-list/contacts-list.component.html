@@ -24,9 +24,10 @@
         <div class="fila" [class.fila--elegida]="estaElegido(contacto.id)">
           <button type="button" class="fila__persona" (click)="select(contacto)">
             <span class="fila__avatar">
-              @if (contacto.avatar) {
-                <img [src]="contacto.avatar" [alt]="contacto.name" />
-              } @else {
+              @if (contacto.avatar && !avatarRoto(contacto.id)) {
+                <img [src]="contacto.avatar" [alt]="contacto.name" (error)="marcarRoto(contacto.id)" />
+              }
+              @if (!contacto.avatar || avatarRoto(contacto.id)) {
                 <span class="fila__iniciales">{{ iniciales(contacto.name) }}</span>
               }
             </span>
@@ -64,7 +65,7 @@
   </div>
 } @else {
   <div class="bandeja">
-    <app-estados [soloTextoYAudio]="true" />
+    <app-estados [soloTextoYAudio]="true" [compacto]="true" [ocultarCabecera]="true" />
 
     <!-- "Mensajes" y, a su derecha, las solicitudes pendientes. -->
     <div class="list__cabecera">
@@ -101,11 +102,12 @@
           class="contact-item"
           [class.contact-item--nuevo]="contact.leido === false"
           (click)="select(contact)">
-          <div class="avatar-wrap clickable" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
+          <div class="avatar-wrap clickable" [class.avatar-wrap--estado]="tieneEstado(contact.id)" (click)="$event.stopPropagation(); svc.abrirPerfilDe(contact)" title="Ver perfil">
             <span class="avatar-marco">
-              @if (contact.avatar) {
-                <img [src]="contact.avatar" [alt]="contact.name" />
-              } @else {
+              @if (contact.avatar && !avatarRoto(contact.id)) {
+                <img [src]="contact.avatar" [alt]="contact.name" (error)="marcarRoto(contact.id)" />
+              }
+              @if (!contact.avatar || avatarRoto(contact.id)) {
                 <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
               }
             </span>
@@ -130,11 +132,12 @@
 
       @for (contact of chatsEmpresariales; track contact.id) {
         <div class="contact-item" (click)="select(contact)">
-          <div class="avatar-wrap">
+          <div class="avatar-wrap" [class.avatar-wrap--estado]="tieneEstado(contact.id)">
             <span class="avatar-marco">
-              @if (contact.avatar) {
-                <img [src]="contact.avatar" [alt]="contact.name" />
-              } @else {
+              @if (contact.avatar && !avatarRoto(contact.id)) {
+                <img [src]="contact.avatar" [alt]="contact.name" (error)="marcarRoto(contact.id)" />
+              }
+              @if (!contact.avatar || avatarRoto(contact.id)) {
                 <span class="avatar-initials">{{ iniciales(contact.name) }}</span>
               }
             </span>
@@ -160,7 +163,7 @@
 
       @for (contact of chatsGrupales; track contact.id) {
         <div class="contact-item" (click)="select(contact)">
-          <div class="avatar-wrap">
+          <div class="avatar-wrap" [class.avatar-wrap--estado]="tieneEstado(contact.id)">
             <span class="avatar-marco">
               <span class="avatar-initials"><i class="fa-solid fa-users"></i></span>
             </span>

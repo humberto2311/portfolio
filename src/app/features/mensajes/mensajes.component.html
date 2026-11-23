@@ -59,10 +59,9 @@
             <p class="hilo__estado">
               @if (contacto.isAi) {
                 {{ contacto.statusText }}
-              } @else if (contacto.status === 'online') {
-                Activo ahora
               } @else {
-                {{ contacto.statusText || 'En línea' }}
+                <span class="hilo__punto" [class.hilo__punto--activo]="presenciaContacto() === 'EN_LINEA'"></span>
+                {{ textoPresencia() }}
               }
             </p>
           </div>
@@ -93,12 +92,29 @@
         </div>
       </header>
 
+      @if (notaContacto(); as nota) {
+        <div class="hilo__nota">
+          <span class="hilo__nota-burbuja">{{ nota }}</span>
+        </div>
+      }
+
       <app-chat-view />
     } @else {
       <div class="vacio">
-        <h2>Tus conversaciones</h2>
-        <p>Habla con las personas que conociste al tocar tu tarjeta NFC, comparte tu enlace o cuéntale a una empresa lo que buscas.</p>
-        <button type="button" class="vacio__cta" (click)="svc.abrirVistaNueva()">Buscar a alguien</button>
+        <div class="vacio__notas">
+          <app-notas-usuario [compacto]="true" (cambiar)="guardarNota($event)" />
+
+          <a class="acceso-mapa" routerLink="/app/ubicacion" title="Mapa de conexiones">
+            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+            <span>Mapa</span>
+          </a>
+        </div>
+
+        <div class="vacio__centro">
+          <h2>Tus conversaciones</h2>
+          <p>Habla con las personas que conociste al tocar tu tarjeta NFC, comparte tu enlace o cuéntale a una empresa lo que buscas.</p>
+          <button type="button" class="vacio__cta" (click)="svc.abrirVistaNueva()">Buscar a alguien</button>
+        </div>
       </div>
     }
   </section>

@@ -293,3 +293,23 @@
     bottom: calc(#{$tabbar-height} + 12px + var(--safe-bottom));
   }
 }
+
+.pastilla__cerrar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 2px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: $text-muted;
+  font-size: 0.66rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: $bg-elevated;
+    color: $text-light;
+  }
+}

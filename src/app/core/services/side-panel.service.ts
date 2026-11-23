@@ -98,6 +98,7 @@ export class SidePanelService {
 
   readonly contacts = signal<Contact[]>([]);
   readonly chatHistories = signal<Record<string, ChatMessage[]>>({});
+  readonly pastillaOculta = signal(this.leerPastillaOculta());
   readonly cargandoContactos = signal(false);
   /** Aviso para el panel: sin sesión no hay /api/chats que consultar. */
   readonly avisoContactos = signal<string | null>(null);
@@ -195,6 +196,28 @@ export class SidePanelService {
    */
   pastillaVisible(enEmpresa: boolean): boolean {
     return !enEmpresa;
+  }
+
+  ocultarPastilla(): void {
+    this.pastillaOculta.set(true);
+
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    try {
+      sessionStorage.setItem('nsoft.pastillaOculta', '1');
+    } catch {
+      return;
+    }
+  }
+
+  private leerPastillaOculta(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+
+    try {
+      return sessionStorage.getItem('nsoft.pastillaOculta') === '1';
+    } catch {
+      return false;
+    }
   }
 
   /** Borra la marca antigua (versiones previas) que escondía la pastilla entre recargas. */

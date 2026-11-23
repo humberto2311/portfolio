@@ -27,6 +27,7 @@ import { SidePanelService } from '../../core/services/side-panel.service';
 export class PrivateLayoutComponent implements OnDestroy {
   readonly rail = inject(RailStateService);
   readonly anchoCompleto = signal(false);
+  readonly avisoCuentaOculto = signal(this.leerAvisoCuenta());
   readonly empresa = inject(EmpresaService);
 
   private readonly router = inject(Router);
@@ -55,6 +56,24 @@ export class PrivateLayoutComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     void this.emisora.desarmar();
+  }
+
+  leerAvisoCuenta(): boolean {
+    try {
+      return sessionStorage.getItem('nsoft.avisoCuenta') === 'oculto';
+    } catch {
+      return false;
+    }
+  }
+
+  ocultarAvisoCuenta(): void {
+    this.avisoCuentaOculto.set(true);
+
+    try {
+      sessionStorage.setItem('nsoft.avisoCuenta', 'oculto');
+    } catch {
+      return;
+    }
   }
 
   /** Cambia entre cuenta personal y empresa desde cualquier pantalla (también en móvil). */

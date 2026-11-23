@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LogoComponent } from '../logo/logo.component';
 import { ModalService } from '../../../core/services/modal.service';
+import { TemaService } from '../../../core/services/tema.service';
+import { FondoParticulasComponent } from '../fondo-particulas/fondo-particulas.component';
 
 export interface DeveloperProfile {
   name: string;
@@ -13,12 +15,13 @@ export interface DeveloperProfile {
 @Component({
   selector: 'app-nfc-profile',
   standalone: true,
-  imports: [CommonModule, LogoComponent],
+  imports: [CommonModule, LogoComponent, FondoParticulasComponent],
   templateUrl: './nfc-profile.component.html',
   styleUrl: './nfc-profile.component.scss'
 })
 export class NfcProfileComponent {
   private modalSvc = inject(ModalService);
+  readonly tema = inject(TemaService);
 
   readonly cardUrl =
     'https://portfolio-sigma-sand-z207rxcppz.vercel.app/tarjeta/d983156f-93d8-472d-b861-f9bcafd5760b/profesional?auto=1';

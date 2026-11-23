@@ -1,3 +1,4 @@
+import { AnaliticaService } from '../../core/services/analitica.service';
 import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -26,6 +27,7 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
   private vcardService = inject(VcardService);
   private archivos = inject(ArchivoService);
   private diseno = inject(DisenoService);
+  private analitica = inject(AnaliticaService);
   private toques = inject(ToqueNfcService);
   readonly tema = inject(TemaService);
   readonly auth = inject(AuthService);
@@ -44,6 +46,11 @@ export class TarjetaPublicaComponent implements OnInit, OnDestroy {
 
   /** true cuando se abrió desde el QR / NFC (?auto=1): guarda el contacto solo. */
   modoNfc = signal(false);
+
+  registrarClic(enlace: string | null | undefined): void {
+    if (!enlace) return;
+    this.analitica.registrarClic(enlace, null).subscribe({ error: () => undefined });
+  }
 
   ngOnInit(): void {
     this.tema.pintar(this.tema.claro());

@@ -11,6 +11,7 @@ import { TourService } from '../../../core/services/tour.service';
 import { ConfirmationModalService } from '../../../core/services/confirmation-modal.service';
 import { Empresa } from '../../../core/models/empresa.model';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
+import { SpotifyWidgetComponent } from '../../../shared/components/spotify-widget/spotify-widget.component';
 import { esSinImagen } from '../../../features/empresa/espacio/espacio-ui';
 
 interface RailItem {
@@ -51,6 +52,7 @@ const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
   { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+  { label: 'Punto de venta', icon: 'fa-solid fa-cash-register', ruta: '/app/empresa/pos', nota: 'Ventas y catálogo' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
   { label: 'Enlaces', icon: 'fa-solid fa-link', accion: 'grupo', grupo: 'equipo', nota: 'Enlaces y tarjetas del equipo' },
 ];
@@ -70,7 +72,7 @@ const GRUPOS: Record<'cv' | 'equipo', RailItem[]> = {
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LogoComponent],
+  imports: [RouterLink, RouterLinkActive, LogoComponent, SpotifyWidgetComponent],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
 })

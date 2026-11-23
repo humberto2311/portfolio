@@ -94,13 +94,37 @@ export const routes: Routes = [
       },
       { path: 'ajustes/cuenta', component: AjustesCuentaComponent },
       { path: 'ajustes/seguridad', component: AjustesSeguridadComponent },
+      {
+        path: 'ajustes/privacidad',
+        loadComponent: () =>
+          import('./features/ajustes/ajustes-privacidad.component').then((m) => m.AjustesPrivacidadComponent),
+        data: { anchoCompleto: true },
+      },
+      {
+        path: 'ajustes/comandos',
+        loadComponent: () =>
+          import('./features/ajustes/ajustes-comandos.component').then((m) => m.AjustesComandosComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'dashboard', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'personal' } },
+      {
+        path: 'panel',
+        loadComponent: () =>
+          import('./features/dashboard/panel-analitica.component').then((m) => m.PanelAnaliticaComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'dashboard/empresa', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa' } },
       { path: 'dashboard/empresa/mi-actividad', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa-personal' } },
       { path: 'ubicacion', component: UbicacionComponent, data: { anchoCompleto: true } },
       { path: 'empleo', component: EmpleoComponent, data: { anchoCompleto: true } },
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },
       { path: 'empresa/ajustes', component: EmpresaAjustesComponent },
+      {
+        path: 'empresa/pos',
+        loadComponent: () =>
+          import('./features/pos/pos-panel.component').then((m) => m.PosPanelComponent),
+        data: { anchoCompleto: true },
+      },
       { path: 'empresa/lienzo', component: EmpresaLienzoComponent, data: { anchoCompleto: true } },
       { path: 'empresa/espacio', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true } },
       { path: 'empresa/espacio/vista', component: EmpresaEspacioEditorComponent, data: { anchoCompleto: true, modo: 'vista' } },

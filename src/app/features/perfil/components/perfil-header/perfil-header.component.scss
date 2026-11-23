@@ -454,3 +454,74 @@
 @container (max-width: 430px) {
   @include acciones-en-cuadricula;
 }
+
+.avatar-estado {
+  display: inline-grid;
+  place-items: center;
+  padding: 3px;
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, var(--accent), var(--accent-blue), var(--accent-strong), var(--accent));
+  cursor: pointer;
+
+  .avatar-wrapper {
+    background: var(--bg-main);
+  }
+}
+
+.menu-zona {
+  position: relative;
+}
+
+.btn-mas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  background: transparent;
+  color: var(--text-muted, #8b93a1);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--accent-blue, #4a9eff);
+    border-color: var(--accent-blue, #4a9eff);
+  }
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg-card, #12151a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 40;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-light, #e6e9ef);
+    font-size: 0.82rem;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(74, 158, 255, 0.12);
+    }
+  }
+
+  &__peligro {
+    color: #ff7a7a !important;
+  }
+}

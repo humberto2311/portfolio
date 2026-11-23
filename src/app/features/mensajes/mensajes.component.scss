@@ -94,6 +94,26 @@
   flex-shrink: 0;
 }
 
+.avatar-wrap--estado {
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(from 200deg, $accent, $cyan-secondary, $accent-strong, $accent);
+}
+
+.hilo__punto {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: $text-faint;
+
+  &--activo {
+    background: #22c55e;
+  }
+}
+
 .hilo__datos {
   min-width: 0;
   flex: 1;
@@ -123,7 +143,7 @@
 .hilo__acciones {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
@@ -132,18 +152,21 @@
 .icono-btn {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
-  border: none;
+  border: 1px solid $bg-border;
   border-radius: 50%;
-  background: transparent;
-  color: $text-light;
-  font-size: 15px;
+  background: $bg-card;
+  color: $text-muted;
+  font-size: 13px;
   cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 
   &:hover {
     background: $bg-hover;
+    border-color: $accent-border;
+    color: $accent;
   }
 
   &:focus-visible {
@@ -231,6 +254,7 @@
 
 .vacio {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -310,4 +334,80 @@
   .mensajes__hilo--abierto {
     display: flex;
   }
+}
+
+.hilo__nota {
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px 0;
+  flex-shrink: 0;
+}
+
+.hilo__nota-burbuja {
+  max-width: min(380px, 88%);
+  padding: 7px 14px;
+  border-radius: 14px 14px 14px 4px;
+  background: $bg-elevated;
+  border: 1px solid $bg-border;
+  color: $text-muted;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vacio__notas {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+}
+
+.acceso-mapa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid $bg-border;
+  background: $bg-card;
+  color: $text-muted;
+  font-size: 0.74rem;
+  text-decoration: none;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+
+  i {
+    color: $accent;
+    font-size: 0.78rem;
+  }
+
+  &:hover {
+    color: $text-light;
+    border-color: $accent-border;
+    background: $bg-elevated;
+  }
+
+  @media (max-width: 520px) {
+    span {
+      display: none;
+    }
+  }
+}
+
+.vacio__centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }

@@ -16,6 +16,7 @@ import { ChatService } from '../../../../../core/services/chat.service';
 import { ConfirmationModalService } from '../../../../../core/services/confirmation-modal.service';
 import { ChatMessage } from '../../../../../core/models/chat.model';
 import { Contact } from '../../../../../core/models/contact.model';
+import { ComandosChatComponent } from '../../../comandos-chat/comandos-chat.component';
 
 /** Mensajes seguidos del mismo remitente (una "pila" de burbujas). */
 interface GrupoMensajes {
@@ -27,7 +28,7 @@ interface GrupoMensajes {
 @Component({
   selector: 'app-chat-view',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ComandosChatComponent],
   templateUrl: './chat-view.component.html',
   styleUrls: ['./chat-view.component.scss'],
 })
@@ -37,6 +38,7 @@ export class ChatViewComponent {
   private confirmationModal = inject(ConfirmationModalService);
 
   message = signal('');
+  readonly interpreteAbierto = signal(false);
   sending = signal(false);
   cargando = signal(false);
   editingId = signal<string | null>(null);
@@ -53,6 +55,15 @@ export class ChatViewComponent {
   /** ¿Hay texto para enviar? Con texto, el corazón deja paso al botón de enviar. */
   get textoListo(): boolean {
     return this.message().trim().length > 0;
+  }
+
+  /** Conversación en la que se ejecutan los comandos (contexto de destinatarios). */
+  conversacionActual(): string | null {
+    return this.svc.activeContact()?.conversationId ?? null;
+  }
+
+  alternarInterprete(): void {
+    this.interpreteAbierto.set(!this.interpreteAbierto());
   }
 
   /** Clave estable por mensaje (los optimistas aún no tienen id). */

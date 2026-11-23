@@ -5,6 +5,7 @@
     <app-private-navbar />
 
     <!-- Aviso de cuenta: deja claro en qué cuenta estás y permite cambiar sin buscar menús. -->
+    @if (!avisoCuentaOculto()) {
     <div class="shell__cuenta" role="status">
       <span class="shell__cuenta-icono">
         <i [class]="empresa.enModoEmpresa() ? 'fa-solid fa-building' : 'fa-solid fa-user'" aria-hidden="true"></i>
@@ -19,7 +20,11 @@
       <button type="button" class="shell__cuenta-boton" (click)="alternarCuenta()">
         {{ empresa.enModoEmpresa() ? 'Volver a personal' : 'Cambiar a empresa' }}
       </button>
+      <button type="button" class="shell__cuenta-cerrar" (click)="ocultarAvisoCuenta()" title="Ocultar este aviso" aria-label="Ocultar este aviso">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
     </div>
+    }
 
     <main class="shell__main" [class.shell__main--full]="anchoCompleto()">
       <router-outlet />

@@ -76,6 +76,11 @@
           <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
           <span>Seguridad de mi cuenta</span>
         </button>
+
+        <button type="button" appAnimatedButton (click)="goTo('/app/ajustes/privacidad')">
+          <i class="fa-solid fa-user-lock" aria-hidden="true"></i>
+          <span>Privacidad y presencia</span>
+        </button>
       } @else {
         <p class="user-menu__grupo">Mi cuenta personal</p>
 
@@ -123,6 +128,11 @@
         <button type="button" appAnimatedButton (click)="goTo('/app/ajustes/seguridad')">
           <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
           <span>Seguridad</span>
+        </button>
+
+        <button type="button" appAnimatedButton (click)="goTo('/app/ajustes/privacidad')">
+          <i class="fa-solid fa-user-lock" aria-hidden="true"></i>
+          <span>Privacidad y presencia</span>
         </button>
       }
 

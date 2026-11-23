@@ -129,6 +129,10 @@ public class DispositivoNfcPlugin extends Plugin {
         datos.put("emulacionDisponible", emulacionDisponible());
         datos.put("emitiendo", Emision.hayTarjeta());
         datos.put("enlace", Emision.enlace == null ? "" : Emision.enlace);
+        datos.put("emisionActiva", EmisionActiva.activa(getContext()));
+        datos.put("reanudarAlReiniciar", EmisionActiva.reanuda(getContext()));
+        datos.put("tarjetaActiva", EmisionActiva.slug(getContext()) == null ? "" : EmisionActiva.slug(getContext()));
+        datos.put("nombreActivo", EmisionActiva.slug(getContext()) == null ? "" : EmisionActiva.nombre(getContext()));
         datos.put("permisos", permisos());
 
         call.resolve(datos);
@@ -168,17 +172,28 @@ public class DispositivoNfcPlugin extends Plugin {
             return;
         }
 
-        if (contenido.length > MAXIMO_DATOS) {
-            contenido = Arrays.copyOf(contenido, MAXIMO_DATOS);
+        boolean requiereConsulta = contenido.length > MAXIMO_DATOS;
+
+        if (requiereConsulta) {
+            contenido = referencia(contenido, url);
         }
 
         Emision.guardar(getContext(), url, archivo, contenido);
+
+        String usuarioId = usuarioDelEnlace(url);
+        String slug = slugDelEnlace(url);
+
+        if (usuarioId != null && slug != null) {
+            EmisionActiva.guardar(getContext(), usuarioId, slug, nombreDelContenido(contenido, slug));
+            EmisionActiva.marcarActiva(getContext(), true);
+        }
 
         JSObject resultado = new JSObject();
         resultado.put("enlace", url == null ? "" : url);
         resultado.put("bytes", archivo == null ? 0 : archivo.length);
         resultado.put("emulacionDisponible", emulacionDisponible());
         resultado.put("sinEnlace", url == null);
+        resultado.put("requiereConsulta", requiereConsulta);
 
         call.resolve(resultado);
     }
@@ -186,7 +201,40 @@ public class DispositivoNfcPlugin extends Plugin {
     @PluginMethod
     public void detenerEmision(PluginCall call) {
         Emision.guardar(getContext(), null, null, null);
+        EmisionActiva.olvidar(getContext());
+        AvisoEmision.retirar(getContext());
+
+        getContext().stopService(new Intent(getContext(), EmisoraNfcResguardo.class));
+
         call.resolve();
+    }
+
+    @PluginMethod
+    public void preferencias(PluginCall call) {
+        Emision.asegurar(getContext());
+
+        JSObject datos = new JSObject();
+        datos.put("reanudarAlReiniciar", EmisionActiva.reanuda(getContext()));
+        datos.put("emisionActiva", EmisionActiva.activa(getContext()));
+        datos.put("tarjetaActiva", EmisionActiva.slug(getContext()) == null ? "" : EmisionActiva.slug(getContext()));
+        datos.put("nombreActivo", EmisionActiva.slug(getContext()) == null ? "" : EmisionActiva.nombre(getContext()));
+
+        call.resolve(datos);
+    }
+
+    @PluginMethod
+    public void guardarPreferencias(PluginCall call) {
+        Boolean reanudar = call.getBoolean("reanudarAlReiniciar");
+
+        if (reanudar != null) {
+            EmisionActiva.reanudar(getContext(), reanudar);
+        }
+
+        if (!EmisionActiva.reanuda(getContext())) {
+            getContext().stopService(new Intent(getContext(), EmisoraNfcResguardo.class));
+        }
+
+        preferencias(call);
     }
 
     @PluginMethod
@@ -713,5 +761,76 @@ public class DispositivoNfcPlugin extends Plugin {
         PluginCall call = instancia.esperaPermisos;
         instancia.esperaPermisos = null;
         call.resolve(instancia.permisos());
+    }
+
+    private static byte[] referencia(byte[] contenido, String url) {
+        String usuarioId = usuarioDelEnlace(url);
+        String slug = slugDelEnlace(url);
+        String nombre = nombreDelContenido(contenido, slug);
+        String minimo = "{\"usuarioId\":\"" + (usuarioId == null ? "" : usuarioId) + "\","
+                + "\"tarjeta\":\"" + (slug == null ? "" : slug) + "\","
+                + "\"nombre\":\"" + escapa(nombre) + "\","
+                + "\"origen\":\"EMISION\",\"requiereConsulta\":true}";
+
+        Log.i(ETIQUETA, "tarjeta " + slug + " supera el limite: se emite solo la referencia");
+
+        return minimo.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String nombreDelContenido(byte[] contenido, String slug) {
+        try {
+            String crudo = new String(contenido, StandardCharsets.UTF_8);
+            int inicio = crudo.indexOf("\"nombre\":");
+
+            if (inicio < 0) {
+                return slug == null ? "tu tarjeta" : slug;
+            }
+
+            int abre = crudo.indexOf('"', inicio + 9);
+
+            if (abre < 0) {
+                return slug == null ? "tu tarjeta" : slug;
+            }
+
+            int cierra = crudo.indexOf('"', abre + 1);
+
+            if (cierra < 0) {
+                return slug == null ? "tu tarjeta" : slug;
+            }
+
+            return crudo.substring(abre + 1, cierra);
+        } catch (RuntimeException error) {
+            return slug == null ? "tu tarjeta" : slug;
+        }
+    }
+
+    private static String escapa(String texto) {
+        return texto == null ? "" : texto.replace("\\", "").replace("\"", "'");
+    }
+
+    private static String usuarioDelEnlace(String url) {
+        if (url == null) {
+            return null;
+        }
+
+        java.util.regex.Matcher coincidencia = java.util.regex.Pattern
+                .compile("/tarjeta/([^/?#]+)(?:/([^/?#]+))?").matcher(url);
+
+        return coincidencia.find() ? coincidencia.group(1) : null;
+    }
+
+    private static String slugDelEnlace(String url) {
+        if (url == null) {
+            return null;
+        }
+
+        java.util.regex.Matcher coincidencia = java.util.regex.Pattern
+                .compile("/tarjeta/([^/?#]+)(?:/([^/?#]+))?").matcher(url);
+
+        if (!coincidencia.find()) {
+            return null;
+        }
+
+        return coincidencia.group(2) == null ? "personal" : coincidencia.group(2);
     }
 }

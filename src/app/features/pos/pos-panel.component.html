@@ -1,0 +1,283 @@
+<div class="pos">
+  <header class="pos__cabecera">
+    <div>
+      <h1><i class="fa-solid fa-cash-register" aria-hidden="true"></i> Punto de venta</h1>
+      <p>Registra ventas del local o recibe las de tu POS externo.</p>
+    </div>
+
+    <nav class="pestanas">
+      <button type="button" [class.activa]="pestana() === 'ventas'" (click)="cambiarPestana('ventas')">
+        <i class="fa-solid fa-receipt" aria-hidden="true"></i> Ventas
+      </button>
+      <button type="button" [class.activa]="pestana() === 'catalogo'" (click)="cambiarPestana('catalogo')">
+        <i class="fa-solid fa-tags" aria-hidden="true"></i> Catálogo
+      </button>
+      <button type="button" [class.activa]="pestana() === 'integracion'" (click)="cambiarPestana('integracion')">
+        <i class="fa-solid fa-plug" aria-hidden="true"></i> Integración
+      </button>
+    </nav>
+  </header>
+
+  @if (error()) {
+    <p class="aviso aviso--error">{{ error() }}</p>
+  }
+  @if (aviso()) {
+    <p class="aviso aviso--ok">{{ aviso() }}</p>
+  }
+
+  @if (!empresaId()) {
+    <p class="aviso">Entra al modo empresa para usar el punto de venta.</p>
+  }
+
+  @if (pestana() === 'ventas') {
+    <div class="resumenes">
+      <article class="kpi">
+        <span class="kpi__valor">{{ resumen()?.totalVendido ?? 0 | number: '1.2-2' }}</span>
+        <span class="kpi__etiqueta">Vendido (30 días)</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi__valor">{{ resumen()?.ordenesPagadas ?? 0 }}</span>
+        <span class="kpi__etiqueta">Órdenes pagadas</span>
+      </article>
+      @for (fila of resumen()?.porEmpleado ?? []; track fila.empleado) {
+        <article class="kpi kpi--suave">
+          <span class="kpi__valor">{{ fila.total | number: '1.2-2' }}</span>
+          <span class="kpi__etiqueta">{{ fila.empleado }}</span>
+        </article>
+      }
+    </div>
+
+    <div class="ventas">
+      <section class="ticket">
+        <h2><i class="fa-solid fa-basket-shopping" aria-hidden="true"></i> Ticket nuevo</h2>
+
+        <div class="ticket__productos">
+          @for (producto of productos(); track producto.id) {
+            @if (producto.activo) {
+              <button type="button" class="producto" (click)="agregarAlTicket(producto)">
+                <span class="producto__nombre">{{ producto.nombre }}</span>
+                <span class="producto__precio">{{ producto.precio | number: '1.2-2' }}</span>
+              </button>
+            }
+          } @empty {
+            <p class="aviso">Crea productos en la pestaña Catálogo.</p>
+          }
+        </div>
+
+        <ul class="lineas">
+          @for (linea of ticket(); track linea.producto.id) {
+            <li class="linea">
+              <span class="linea__nombre">{{ linea.producto.nombre }}</span>
+              <input
+                type="number"
+                min="1"
+                [ngModel]="linea.cantidad"
+                (ngModelChange)="cambiarCantidad(linea.producto.id, $event)"
+                aria-label="Cantidad" />
+              <span class="linea__total">{{ linea.producto.precio * linea.cantidad | number: '1.2-2' }}</span>
+              <button type="button" class="linea__quitar" (click)="quitarDelTicket(linea.producto.id)" aria-label="Quitar">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
+            </li>
+          } @empty {
+            <li class="lineas__vacio">Toca un producto para añadirlo.</li>
+          }
+        </ul>
+
+        <div class="ticket__totales">
+          <label class="impuesto">
+            Impuesto %
+            <input type="number" min="0" [ngModel]="impuesto()" (ngModelChange)="impuesto.set($event)" />
+          </label>
+          <div class="totales">
+            <span>Subtotal <strong>{{ totalTicket() | number: '1.2-2' }}</strong></span>
+            <span>Impuesto <strong>{{ impuestoCalculado() | number: '1.2-2' }}</strong></span>
+            <span class="totales__final">Total <strong>{{ totalConImpuesto() | number: '1.2-2' }}</strong></span>
+          </div>
+          <button type="button" class="boton boton--cobrar" [disabled]="ticket().length === 0" (click)="cobrar()">
+            <i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i> Cobrar
+          </button>
+        </div>
+      </section>
+
+      <section class="listado">
+        <div class="filtros">
+          <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event); cargarOrdenes()" aria-label="Estado">
+            <option value="">Todos los estados</option>
+            <option value="ABIERTA">Abiertas</option>
+            <option value="PAGADA">Pagadas</option>
+            <option value="CANCELADA">Canceladas</option>
+          </select>
+          <input type="date" [ngModel]="filtroDesde()" (ngModelChange)="filtroDesde.set($event)" aria-label="Desde" />
+          <input type="date" [ngModel]="filtroHasta()" (ngModelChange)="filtroHasta.set($event)" aria-label="Hasta" />
+          <button type="button" class="boton" (click)="cargarOrdenes()">
+            <i class="fa-solid fa-rotate" aria-hidden="true"></i> Filtrar
+          </button>
+        </div>
+
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Origen</th>
+              <th>Ítems</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (orden of ordenes(); track orden.id) {
+              <tr>
+                <td>{{ orden.creadoEn | date: 'dd/MM HH:mm' }}</td>
+                <td>
+                  <i class="fa-solid" [class.fa-cash-register]="orden.origen === 'NATIVO'"
+                     [class.fa-plug]="orden.origen === 'WEBHOOK'" aria-hidden="true"></i>
+                  {{ orden.origen === 'NATIVO' ? 'Nativo' : 'Externo' }}
+                </td>
+                <td>{{ orden.items.length }}</td>
+                <td>{{ orden.total | number: '1.2-2' }}</td>
+                <td><span class="estado" [class]="claseEstado(orden.estado)">{{ orden.estado }}</span></td>
+                <td class="acciones">
+                  @if (orden.estado === 'ABIERTA') {
+                    <button type="button" class="mini" (click)="pagarOrden(orden)" title="Cobrar">
+                      <i class="fa-solid fa-check" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="mini mini--no" (click)="cancelarOrden(orden)" title="Cancelar">
+                      <i class="fa-solid fa-ban" aria-hidden="true"></i>
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="tabla__vacio">Sin ventas en este periodo.</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+  }
+
+  @if (pestana() === 'catalogo') {
+    <div class="catalogo">
+      <section class="formulario">
+        <h2>{{ editando() ? 'Editar producto' : 'Nuevo producto' }}</h2>
+
+        <label>
+          Nombre
+          <input type="text" [ngModel]="formProducto().nombre"
+                 (ngModelChange)="cambiarCampo('nombre', $event)" />
+        </label>
+        <label>
+          Precio
+          <input type="number" min="0" step="0.01" [ngModel]="formProducto().precio"
+                 (ngModelChange)="cambiarCampo('precio', $event)" />
+        </label>
+        <label>
+          Categoría
+          <input type="text" [ngModel]="formProducto().categoria"
+                 (ngModelChange)="cambiarCampo('categoria', $event)" />
+        </label>
+        <label class="check">
+          <input type="checkbox" [ngModel]="formProducto().activo"
+                 (ngModelChange)="cambiarCampo('activo', $event)" />
+          Activo
+        </label>
+
+        <div class="formulario__acciones">
+          <button type="button" class="boton boton--cobrar" (click)="guardarProducto()">
+            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardar
+          </button>
+          @if (editando()) {
+            <button type="button" class="boton" (click)="editar(null)">Cancelar</button>
+          }
+        </div>
+      </section>
+
+      <section class="listado">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (producto of productos(); track producto.id) {
+              <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.categoria || '—' }}</td>
+                <td>{{ producto.precio | number: '1.2-2' }}</td>
+                <td>
+                  <span class="estado" [class.estado--ok]="producto.activo" [class.estado--no]="!producto.activo">
+                    {{ producto.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="acciones">
+                  <button type="button" class="mini" (click)="editar(producto)" title="Editar">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="mini mini--no" (click)="borrarProducto(producto)" title="Eliminar">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="tabla__vacio">Todavía no hay productos.</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    </div>
+  }
+
+  @if (pestana() === 'integracion') {
+    <section class="integracion">
+      <h2><i class="fa-solid fa-plug" aria-hidden="true"></i> Conecta tu POS externo</h2>
+      <p>Configura esta URL y el token en Square, Toast o tu sistema propio. Cada venta que envíes se registra aquí y suma a tus gráficos.</p>
+
+      <label class="campo">
+        URL del webhook
+        <div class="campo__fila">
+          <code>{{ urlCompleta() }}</code>
+          <button type="button" class="mini" (click)="copiar(urlCompleta())" title="Copiar">
+            <i class="fa-solid fa-copy" aria-hidden="true"></i>
+          </button>
+        </div>
+      </label>
+
+      <label class="campo">
+        Token secreto
+        <div class="campo__fila">
+          <code>{{ integracion()?.configurado ? integracion()?.tokenPista + '••••••••' : 'Sin generar' }}</code>
+          <button type="button" class="boton" (click)="rotarToken()">
+            <i class="fa-solid fa-key" aria-hidden="true"></i> {{ integracion()?.configurado ? 'Rotar' : 'Generar' }}
+          </button>
+        </div>
+      </label>
+
+      @if (tokenNuevo(); as token) {
+        <div class="token">
+          <p><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Cópialo ahora: no se vuelve a mostrar.</p>
+          <div class="campo__fila">
+            <code>{{ token }}</code>
+            <button type="button" class="mini" (click)="copiar(token)" title="Copiar">
+              <i class="fa-solid fa-copy" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="ejemplo">
+        <p>Ejemplo de envío</p>
+        <pre>curl -X POST "{{ urlCompleta() }}" \
+  -H "X-POS-Token: TU_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{{ '{' }}"referencia":"TX-1042","clienteEmail":"ana&#64;correo.com","impuestoPorcentaje":19,"items":[{{ '{' }}"nombre":"Café","cantidad":2,"precioUnitario":4500{{ '}' }}]{{ '}' }}'</pre>
+      </div>
+    </section>
+  }
+</div>

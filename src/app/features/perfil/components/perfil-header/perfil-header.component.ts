@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, inject, signal, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed, inject, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { PerfilData } from '../../../../core/models/perfil.model';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -11,6 +12,11 @@ import { SidePanelService } from '../../../../core/services/side-panel.service';
 import { FotoPerfil, UserPhotoService } from '../../../../core/services/user-photo.service';
 import { imagenDePerfilComoDataUrl } from '../../../../core/utils/imagen.util';
 import { PhotoViewerComponent } from '../photo-viewer/photo-viewer.component';
+import { SpotifyWidgetComponent } from '../../../../shared/components/spotify-widget/spotify-widget.component';
+import { EstadosService } from '../../../../core/services/estados.service';
+import { EstadosVisorComponent } from '../../../estados/estados-visor.component';
+import { GrupoEstados } from '../../../../core/models/estado.model';
+import { AudienciaService } from '../../../../core/services/audiencia.service';
 
 interface CambiosPerfilSocial {
   role?: string;
@@ -23,7 +29,7 @@ interface CambiosPerfilSocial {
 @Component({
   selector: 'app-perfil-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, PhotoViewerComponent],
+  imports: [CommonModule, FormsModule, PhotoViewerComponent, SpotifyWidgetComponent, EstadosVisorComponent],
   templateUrl: './perfil-header.component.html',
   styleUrls: ['./perfil-header.component.scss']
 })
@@ -34,6 +40,90 @@ export class PerfilHeaderComponent implements OnChanges {
   @Output() accionCv = new EventEmitter<void>();
   @Output() accionProyectos = new EventEmitter<void>();
   @Output() accionMensaje = new EventEmitter<void>();
+
+  private readonly estadosSvc = inject(EstadosService);
+  private readonly audienciaSvc = inject(AudienciaService);
+  private readonly toasts = inject(ToastService);
+
+  readonly menuAbierto = signal(false);
+  readonly relacion = signal<{ bloqueado: boolean; bloqueaMe: boolean; restringido: boolean; mejorAmigo: boolean } | null>(null);
+
+  readonly estadosDelPerfil = signal<GrupoEstados | null>(null);
+  readonly viendoEstado = signal(false);
+  readonly hayEstado = computed(() => (this.estadosDelPerfil()?.estados.length ?? 0) > 0);
+
+  verEstado(): void {
+    if (this.hayEstado()) this.viendoEstado.set(true);
+  }
+
+  cargarRelacion(): void {
+    this.audienciaSvc.relacion(this.perfil.id).subscribe({
+      next: (relacion) => this.relacion.set(relacion),
+      error: () => this.relacion.set(null)
+    });
+  }
+
+  alternarMenu(): void {
+    this.menuAbierto.update((abierto) => !abierto);
+  }
+
+  cambiarRestriccion(): void {
+    const actual = this.relacion();
+    const accion: Observable<unknown> = actual?.restringido
+      ? this.audienciaSvc.quitarRestriccion(this.perfil.id)
+      : this.audienciaSvc.restringir(this.perfil.id);
+
+    accion.subscribe({
+      next: () => {
+        this.menuAbierto.set(false);
+        this.toasts.show(actual?.restringido ? 'Restricción quitada' : 'Persona restringida');
+        this.cargarRelacion();
+      },
+      error: () => this.toasts.show('No se pudo actualizar la restricción')
+    });
+  }
+
+  cambiarMejorAmigo(): void {
+    const actual = this.relacion();
+    const accion: Observable<unknown> = actual?.mejorAmigo
+      ? this.audienciaSvc.quitarMejorAmigo(this.perfil.id)
+      : this.audienciaSvc.agregarMejorAmigo(this.perfil.id);
+
+    accion.subscribe({
+      next: () => {
+        this.menuAbierto.set(false);
+        this.toasts.show(actual?.mejorAmigo ? 'Quitado de mejores amigos' : 'Agregado a mejores amigos');
+        this.cargarRelacion();
+      },
+      error: () => this.toasts.show('No se pudo actualizar la lista')
+    });
+  }
+
+  cambiarBloqueo(): void {
+    const actual = this.relacion();
+
+    if (actual?.bloqueado) {
+      this.menuAbierto.set(false);
+      this.toasts.show('Desbloqueo disponible en Privacidad');
+      return;
+    }
+
+    this.audienciaSvc.bloquear(this.perfil.id, 'TODO').subscribe({
+      next: () => {
+        this.menuAbierto.set(false);
+        this.toasts.show('Persona bloqueada');
+        this.cargarRelacion();
+      },
+      error: () => this.toasts.show('No se pudo bloquear')
+    });
+  }
+
+  cargarEstado(): void {
+    this.estadosSvc.deUsuario(String(this.perfil.id)).subscribe({
+      next: (grupo) => this.estadosDelPerfil.set(grupo),
+      error: () => this.estadosDelPerfil.set(null),
+    });
+  }
 
   isFollowing = false;
   cargandoAccion = false;
@@ -332,7 +422,12 @@ export class PerfilHeaderComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['perfil'] && this.perfil) {
+      this.cargarEstado();
       this.verificarEstadoSeguimiento();
+
+      if (!this.esMiPerfil && this.perfil.id) {
+        this.cargarRelacion();
+      }
       this.posicionY.set(this.desdeValor(this.perfil.coverPosition));
       this.acomodando = false;
     }

@@ -271,9 +271,30 @@ export class ProyectosComponent implements OnInit {
   }
 
     resumenProyecto(p: Proyecto): string {
-    const crudo = p.shortBio || p.description || 'Sin descripción.';
-    const texto = this.textoPlano(crudo);
-    return texto.length > 130 ? texto.slice(0, 130).trim() + '…' : (texto || 'Sin descripción.');
+    const texto = this.textoPlano(p.shortBio || p.description || '');
+    const generica = /^sin descripci[oó]n( disponible| detallada)?\.?$/i.test(texto);
+    if (!texto || generica) {
+      return p.homepage ? 'Proyecto desplegado en ' + this.dominioHomepage(p) : 'Sin descripción todavía.';
+    }
+    return texto.length > 130 ? texto.slice(0, 130).trim() + '…' : texto;
+  }
+
+    markdownAHtml(markdown: string): string {
+    return (markdown ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/^\s{0,3}######\s+(.*)$/gm, '<h6>$1</h6>')
+      .replace(/^\s{0,3}#####\s+(.*)$/gm, '<h5>$1</h5>')
+      .replace(/^\s{0,3}####\s+(.*)$/gm, '<h4>$1</h4>')
+      .replace(/^\s{0,3}###\s+(.*)$/gm, '<h3>$1</h3>')
+      .replace(/^\s{0,3}##\s+(.*)$/gm, '<h2>$1</h2>')
+      .replace(/^\s{0,3}#\s+(.*)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/^\s*[-*+]\s+(.*)$/gm, '<li>$1</li>')
+      .replace(/\n{2,}/g, '</p><p>')
+      .replace(/^/, '<p>').replace(/$/, '</p>');
   }
 
     private textoPlano(markdown: string): string {
@@ -547,7 +568,7 @@ export class ProyectosComponent implements OnInit {
     this.proyectosService.getDescripcionProyecto(id).subscribe({
       next: (d) => {
         this.descripcionMarkdown = d.markdown ?? '';
-        this.descripcionHtml = d.html ?? '';
+        this.descripcionHtml = d.html || this.markdownAHtml(d.markdown);
       },
       error: () => { this.descripcionHtml = ''; }
     });
@@ -588,7 +609,7 @@ export class ProyectosComponent implements OnInit {
           if (idx >= 0) this.proyectos[idx] = { ...this.proyectos[idx], description: actualizado.description };
           this.descripcionMarkdown = actualizado.description ?? '';
           this.proyectosService.getDescripcionProyecto(actualizado.id).subscribe({
-            next: (d) => { this.descripcionHtml = d.html ?? ''; },
+            next: (d) => { this.descripcionHtml = d.html || this.markdownAHtml(d.markdown); },
             error: () => {}
           });
         },

@@ -5,6 +5,8 @@
       <span>Cargando feed...</span>
     </div>
   } @else {
+    <app-estados />
+
     <app-crear-post />
 
     @for (post of publicacionesVisibles(); track post.uid) {

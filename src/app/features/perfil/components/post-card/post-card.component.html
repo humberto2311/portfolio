@@ -84,6 +84,24 @@
     <p class="post-text"><app-menciones-texto [texto]="post.texto" /></p>
   }
 
+  @if (post.video) {
+    <div class="post-media post-media--video">
+      <video [src]="post.video" controls playsinline preload="metadata"></video>
+    </div>
+  }
+
+  @if (post.musicaTitulo) {
+    <div class="post-musica">
+      <i class="fa-solid fa-music" aria-hidden="true"></i>
+      <div class="post-musica__datos">
+        <strong>{{ post.musicaTitulo }}</strong>
+        @if (post.musicaArtista) {
+          <span>{{ post.musicaArtista }}</span>
+        }
+      </div>
+    </div>
+  }
+
   @if (post.imagen) {
     <div class="post-image">
       <img [src]="post.imagen" alt="post" />

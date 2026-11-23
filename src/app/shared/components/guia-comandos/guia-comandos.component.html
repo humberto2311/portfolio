@@ -1,0 +1,120 @@
+<div class="guia">
+  <div class="guia__cabecera">
+    <div class="guia__titulo">
+      <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+      <div>
+        <h2>Comandos disponibles</h2>
+        <p>Escribe cualquiera de estos comandos en un chat. Se generan desde el catálogo del servidor.</p>
+      </div>
+    </div>
+
+    <div class="guia__buscador">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        type="search"
+        placeholder="Buscar comando o categoría…"
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+        aria-label="Buscar comando" />
+    </div>
+  </div>
+
+  <div class="filtros">
+    <button type="button" class="filtro" [class.filtro--activo]="categoriaActiva() === null" (click)="filtrarCategoria(null)">
+      Todas
+    </button>
+    @for (categoria of categorias(); track categoria.id) {
+      <button
+        type="button"
+        class="filtro"
+        [class.filtro--activo]="categoriaActiva() === categoria.id"
+        (click)="filtrarCategoria(categoria.id)">
+        <i [class]="categoria.icono" aria-hidden="true"></i>
+        {{ categoria.nombre }}
+      </button>
+    }
+  </div>
+
+  @if (cargando()) {
+    <p class="guia__aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando comandos…</p>
+  } @else if (totalVisibles() === 0) {
+    <p class="guia__aviso">No hay comandos que coincidan con la búsqueda.</p>
+  }
+
+  @for (grupo of grupos(); track grupo.categoria.id) {
+    <section class="grupo">
+      <h3 class="grupo__titulo">
+        <i [class]="grupo.categoria.icono" aria-hidden="true"></i>
+        {{ grupo.categoria.nombre }}
+        <span class="grupo__cuenta">{{ grupo.comandos.length }}</span>
+      </h3>
+
+      <ul class="lista">
+        @for (comando of grupo.comandos; track comando.nombre) {
+          <li class="comando" [class.comando--abierto]="abierto() === comando.nombre">
+            <button type="button" class="comando__fila" (click)="alternar(comando.nombre)">
+              <code class="comando__nombre">{{ comando.nombre }}</code>
+              <span class="comando__descripcion">{{ comando.descripcion }}</span>
+              @if (comando.requiereConfirmacion) {
+                <span class="etiqueta etiqueta--confirmar" title="Pide confirmación antes de ejecutar">
+                  <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                </span>
+              }
+              <i class="fa-solid fa-chevron-down comando__flecha" aria-hidden="true"></i>
+            </button>
+
+            @if (abierto() === comando.nombre) {
+              <div class="comando__detalle">
+                @if (hayParametros(comando)) {
+                  <table class="parametros">
+                    <thead>
+                      <tr>
+                        <th>Parámetro</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (parametro of comando.parametros; track parametro.nombre) {
+                        <tr>
+                          <td>
+                            <code>{{ parametro.nombre }}</code>
+                            @if (parametro.obligatorio) {
+                              <span class="etiqueta etiqueta--obligatorio">obligatorio</span>
+                            }
+                          </td>
+                          <td>{{ parametro.tipo }}</td>
+                          <td>{{ parametro.descripcion }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                } @else {
+                  <p class="comando__sin-parametros">Este comando no necesita parámetros.</p>
+                }
+
+                <p class="comando__roles">
+                  <strong>Roles válidos:</strong>
+                  @for (rol of comando.roles; track rol) {
+                    <span class="rol">{{ rol }}</span>
+                  }
+                </p>
+
+                <div class="ejemplo">
+                  <code>{{ comando.ejemplo }}</code>
+                  <button type="button" class="ejemplo__copiar" (click)="copiar(comando.ejemplo)">
+                    @if (copiado() === comando.ejemplo) {
+                      <i class="fa-solid fa-check" aria-hidden="true"></i> Copiado
+                    } @else {
+                      <i class="fa-solid fa-copy" aria-hidden="true"></i> Copiar
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

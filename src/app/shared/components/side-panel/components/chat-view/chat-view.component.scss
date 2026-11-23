@@ -627,3 +627,12 @@
     padding: 10px 16px 14px;
   }
 }
+
+.comandos-flotante {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.composer__icono--comandos.composer__icono--activo {
+  color: #1ed760;
+}

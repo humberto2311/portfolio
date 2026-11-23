@@ -56,3 +56,23 @@
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.perfil-red {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 14px;
+  align-items: start;
+  margin: 14px 0 10px;
+
+  &__estados {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__nota {
+    min-width: 0;
+  }
+
+  @media (max-width: 780px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

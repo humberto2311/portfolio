@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { VcardService } from '../../core/services/vcard.service';
@@ -33,6 +33,7 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
   private readonly nfc = inject(EmisoraNfcService);
   private readonly toques = inject(ToqueNfcService);
   private readonly vcard = inject(VcardService);
+  private readonly ruta = inject(ActivatedRoute);
 
   readonly esNativa = this.nfc.esNativa;
   readonly grupos: GrupoPermiso[] = [
@@ -49,6 +50,10 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
   readonly totalToques = signal(0);
   readonly sugerencias = signal<ContactoNfc[]>([]);
   readonly ocupado = signal(false);
+  readonly reanudarAlReiniciar = signal(true);
+  readonly emisionActiva = signal(false);
+  readonly nombreActivo = signal('');
+  readonly recortada = signal(false);
 
   readonly escuchando = computed(() => this.nfc.escuchando());
   readonly recibido = computed(() => this.nfc.recibido());
@@ -181,6 +186,36 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
 
     await this.leerTelefono();
     await this.cargarToques();
+    await this.leerPreferencias();
+
+    if (this.ruta.snapshot.queryParamMap.get('activar') === '1') {
+      await this.transmitir();
+    }
+  }
+
+  async leerPreferencias(): Promise<void> {
+    const preferencias = await this.nfc.preferencias();
+
+    if (!preferencias) return;
+
+    this.reanudarAlReiniciar.set(preferencias.reanudarAlReiniciar);
+    this.emisionActiva.set(preferencias.emisionActiva);
+    this.nombreActivo.set(preferencias.nombreActivo);
+  }
+
+  async cambiarReanudar(activo: boolean): Promise<void> {
+    this.reanudarAlReiniciar.set(activo);
+
+    const guardadas = await this.nfc.guardarPreferencias(activo);
+
+    if (!guardadas) {
+      this.error = 'No pude guardar la preferencia.';
+      return;
+    }
+
+    this.aviso = activo
+      ? 'Tu tarjeta se reanudará sola al reiniciar el teléfono.'
+      : 'La emisión ya no se reanudará al reiniciar.';
   }
 
   async ngOnDestroy(): Promise<void> {
@@ -209,7 +244,9 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
         this.aviso = 'Tu tarjeta ya está lista para que se la acerquen.';
       }
 
+      this.recortada.set(emitida?.requiereConsulta === true);
       await this.leerTelefono();
+      await this.leerPreferencias();
     } catch (e) {
       this.error = mensaje(e, 'No se pudo preparar la tarjeta.');
     } finally {
@@ -225,7 +262,12 @@ export class EmisoraNfcComponent implements OnInit, OnDestroy {
     try {
       const emitida = await this.nfc.transmitir(this.tarjetas().find((t) => t.slug === this.slug()) ?? null);
 
-      if (!emitida) this.error = 'No hay tarjeta que entregar.';
+      if (!emitida) {
+        this.error = 'No hay tarjeta que entregar.';
+      } else {
+        this.recortada.set(emitida.requiereConsulta === true);
+        await this.leerPreferencias();
+      }
     } catch (e) {
       this.nfc.dejaDeTransmitir();
       this.error = mensaje(e, 'No se pudo poner a transmitir.');

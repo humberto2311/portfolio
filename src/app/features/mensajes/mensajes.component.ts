@@ -42,8 +42,8 @@ export class MensajesComponent implements OnInit, OnDestroy {
   /** Foto del usuario con la sesión abierta (para el pie y el retrato). */
   readonly miAvatar = this.perfiles.avatar;
 
-  /** Al pulsar su avatar, el texto de bienvenida se cambia por el retrato. */
-  readonly perfilEnGrande = signal(false);
+  /** El texto de bienvenida se cambia por el retrato cuando se pide desde el carrusel. */
+  readonly perfilEnGrande = this.svc.notaGrande;
 
   /** Contador para que el hijo cierre la edición de la nota. */
   readonly cerrarNota = signal(0);
@@ -69,6 +69,19 @@ export class MensajesComponent implements OnInit, OnDestroy {
   abrirChatDe(persona: { id: string; nombre: string; avatar: string | null }): void {
     this.svc.abrirChatCon({ id: persona.id, name: persona.nombre, avatar: persona.avatar });
   }
+
+  /**
+   * Nombre corto para el título: un nombre y un apellido. "Humberto Jose Lozano
+   * Verbel" queda "Humberto Lozano".
+   */
+  readonly nombreUsuario = computed(() => {
+    const partes = (this.auth.currentUser()?.fullName ?? '').trim().split(/\s+/).filter(Boolean);
+
+    if (partes.length === 0) return 'Mi bandeja';
+    if (partes.length === 1) return partes[0];
+
+    return `${partes[0]} ${partes[1]}`;
+  });
 
   readonly inicialesUsuario = computed(() => {
     const nombre = this.auth.currentUser()?.fullName ?? 'Yo';
@@ -122,6 +135,8 @@ export class MensajesComponent implements OnInit, OnDestroy {
     const limpio = (texto ?? '').trim();
 
     this.nota.set(limpio || null);
+    // El carrusel de la lista lee la nota del servicio: se actualiza al instante.
+    this.svc.fijarNotaPropia(limpio);
 
     try {
       if (limpio) {
@@ -216,13 +231,18 @@ export class MensajesComponent implements OnInit, OnDestroy {
 
   /** Abre o cierra el retrato con la nota del propio usuario. */
   alternarPerfilGrande(): void {
-    this.perfilEnGrande.update((abierto) => !abierto);
+    if (this.perfilEnGrande()) {
+      this.svc.cerrarNotaGrande();
+      return;
+    }
+
+    this.svc.abrirNotaGrande();
   }
 
   /** La X del retrato: vuelve al texto de "Tus conversaciones". */
   cerrarPerfilGrande(): void {
     this.cerrarNota.update((valor) => valor + 1);
-    this.perfilEnGrande.set(false);
+    this.svc.cerrarNotaGrande();
   }
 
   /** El "Volver" de la cabecera: sale de "Nuevo mensaje" o de la conversación. */

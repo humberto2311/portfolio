@@ -66,9 +66,8 @@
 } @else {
   <div class="bandeja">
 
-    <!-- "Mensajes" y, a su derecha, las solicitudes pendientes. -->
+    <!-- Solicitudes pendientes (el título "Mensajes" ya está arriba en la bandeja). -->
     <div class="list__cabecera">
-      <h3>Mensajes</h3>
       @if (solicitudes.length) {
         <button type="button" class="list__solicitudes" (click)="verSolicitudes()">
           Solicitudes <span class="list__contador">{{ solicitudes.length }}</span>
@@ -76,21 +75,20 @@
       }
     </div>
 
-    <!-- Buscador de la bandeja, siempre a la vista. -->
-    <div class="bandeja__buscador">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input
-        type="text"
-        autocomplete="off"
-        placeholder="Buscar"
-        aria-label="Buscar una conversación"
-        [ngModel]="search()"
-        (ngModelChange)="onSearch($event)" />
-      @if (buscando()) {
-        <span class="bandeja__cargando"><i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i></span>
-      }
-    </div>
+    <!-- Avatares con su nota (y el mapa al final), debajo de "Mensajes". -->
+    @if (!modoNuevo) {
+      <!-- Solo la fila de avatares: sin cabecera ni márgenes que dejen un hueco. -->
+      <app-estados-carrusel
+        [compacto]="true"
+        [ocultarCabecera]="true"
+        [personas]="personasDelCarrusel()"
+        [propiaEsNota]="true"
+        [notaGuardada]="svc.notaPropia()"
+        (abrirChat)="abrirChatDe($event)"
+        (abrirNota)="abrirNota()" />
+    }
 
+    <!-- Buscador de la bandeja, siempre a la vista. -->
     @if (svc.avisoContactos()) {
       <p class="panel-notice">{{ svc.avisoContactos() }}</p>
     }

@@ -58,6 +58,41 @@ export class SidePanelService {
    */
   readonly vistaNueva = signal(false);
 
+  /**
+   * El avatar propio en grande para escribir la nota. Vive en el servicio
+   * porque el carrusel está en la lista y el avatar grande en el panel.
+   */
+  readonly notaGrande = signal(false);
+
+  /** La nota del usuario conectado, para pintarla donde haga falta. */
+  readonly notaPropia = signal<string | null>(null);
+
+  /** Guarda la nota ya limpia (o la quita si viene vacía). */
+  fijarNotaPropia(texto: string | null): void {
+    const limpio = (texto ?? '').trim();
+
+    this.notaPropia.set(limpio || null);
+  }
+
+  /**
+   * Muestra el avatar propio en grande, listo para escribir la nota.
+   * Si el panel estaba en "Nuevo mensaje" o en un chat, vuelve a la bandeja.
+   */
+  abrirNotaGrande(): void {
+    this.vistaNueva.set(false);
+    this.activeView.set('contacts');
+    this.activeContact.set(null);
+    this.notaGrande.set(true);
+
+    if (!this.enPaginaCompleta()) {
+      this.isOpen.set(true);
+    }
+  }
+
+  cerrarNotaGrande(): void {
+    this.notaGrande.set(false);
+  }
+
   abrirVistaNueva(): void {
     this.vistaNueva.set(true);
     this.activeView.set('nuevo');

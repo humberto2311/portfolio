@@ -1,14 +1,17 @@
 import { Component, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { EstadosService } from '../../core/services/estados.service';
 import { GrupoEstados } from '../../core/models/estado.model';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
+import { PerfilService } from '../../core/services/perfil.service';
+import { SidePanelService } from '../../core/services/side-panel.service';
 
 @Component({
   selector: 'app-estados-carrusel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './estados-carrusel.component.html',
   styleUrls: ['./estados-carrusel.component.scss']
 })
@@ -17,14 +20,26 @@ export class EstadosCarruselComponent implements OnInit {
   private estados = inject(EstadosService);
   private auth = inject(AuthService);
   private perfiles = inject(UserProfileService);
+  private perfilSvc = inject(PerfilService);
+  private svc = inject(SidePanelService);
 
   readonly recarga = input<number>(0);
   readonly soloTextoYAudio = input(false);
   readonly compacto = input(false);
   readonly ocultarCabecera = input(false);
+  /** Pone un acceso al mapa al final de la fila. */
+  readonly mapa = input(false);
+  /** El avatar propio no abre la historia: muestra y edita la nota. */
+  readonly propiaEsNota = input(false);
+  /** Si es false, la nota propia se muestra pero no se edita (solo lectura). */
+  readonly editarPropia = input(true);
   readonly cargados = output<GrupoEstados[]>();
   /** Clic en un avatar: abre su chat. */
   readonly abrirChat = output<{ id: string; nombre: string; avatar: string | null }>();
+  /** La nota que se acaba de guardar desde el avatar grande (o null si se quitó). */
+  readonly notaGuardada = input<string | null>(null);
+  /** Clic en el avatar propio cuando `propiaEsNota`: hay que editar la nota. */
+  readonly abrirNota = output<void>();
   readonly abrirCreador = output<void>();
   readonly abrirVisor = output<GrupoEstados>();
 
@@ -54,7 +69,18 @@ export class EstadosCarruselComponent implements OnInit {
   readonly avatarPropio = computed(() => this.perfiles.avatar() ?? null);
 
   /** La nota del propio usuario (el servidor la devuelve dentro de su historia). */
-  readonly notaPropia = computed(() => this.textoDe(this.mio()));
+  /**
+   * La nota propia: la de la historia, la del perfil o la que acaba de guardar
+   * el usuario (el servicio la guarda al instante). Así se pinta siempre.
+   */
+  readonly notaPropia = computed(() =>
+    this.notaGuardada()
+    || this.textoDe(this.mio())
+    || (this.perfilSvc.perfil()?.nota?.trim() || '')
+    || (this.svc.notaPropia() || ''));
+
+  /** Nombre del propio usuario, para el nombre del avatar. */
+  readonly nombrePropio = computed(() => this.auth.currentUser()?.fullName?.split(' ')[0] ?? 'Tu nota');
 
   /** "Tú: ..." mientras haya nota; si no, "Mi historia". */
   readonly etiquetaPropia = computed(() => {
@@ -106,6 +132,8 @@ export class EstadosCarruselComponent implements OnInit {
   ngOnInit(): void {
     this.cargar();
     this.perfiles.cargarMiAvatar();
+    // El perfil propio trae la nota; así se pinta aunque no haya historia creada.
+    this.perfilSvc.cargarPerfil().subscribe({ error: () => undefined });
   }
 
   cargar(): void {
@@ -172,6 +200,20 @@ export class EstadosCarruselComponent implements OnInit {
   /** Abre el chat de esa persona (no su historia). */
   chatear(grupo: GrupoEstados): void {
     this.abrirChat.emit({ id: grupo.usuarioId, nombre: grupo.nombre, avatar: grupo.avatar });
+  }
+
+  /** Clic en el avatar propio: se edita la nota (o se abre la historia). */
+  tocarPropio(): void {
+    if (!this.propiaEsNota()) {
+      this.verMio();
+      return;
+    }
+
+    // Solo lectura: no se abre nada al pulsar.
+    if (!this.editarPropia()) return;
+
+    // Se avisa para que el padre muestre el avatar en grande con el editor.
+    this.abrirNota.emit();
   }
 
   verMio(): void {

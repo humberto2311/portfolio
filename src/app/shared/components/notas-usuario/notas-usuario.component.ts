@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   Injector,
+  OnInit,
   afterNextRender,
   effect,
   inject,
@@ -27,7 +28,7 @@ import { PerfilService } from '../../../core/services/perfil.service';
   templateUrl: './notas-usuario.component.html',
   styleUrl: './notas-usuario.component.scss'
 })
-export class NotasUsuarioComponent {
+export class NotasUsuarioComponent implements OnInit {
 
   private perfiles = inject(PerfilService);
   private inyector = inject(Injector);
@@ -35,6 +36,10 @@ export class NotasUsuarioComponent {
   /** `true` cuando el perfil que se ve es el del usuario conectado. */
   readonly propietario = input(false);
   readonly compacto = input(false);
+  /** Empieza el componente ya en modo escritura (para el visor del avatar). */
+  readonly editarAlAbrir = input(false);
+  /** Si el padre ya trae la nota (el carrusel), se usa esta en vez de la del perfil. */
+  readonly notaEntrada = input<string | null>(null, { alias: 'nota' });
   /** El padre puede cerrar la edición (por ejemplo con su propia X). */
   readonly cerrarSenal = input(0, { alias: 'cerrar' });
   readonly cambiar = output<string | null>();
@@ -55,7 +60,7 @@ export class NotasUsuarioComponent {
     effect(() => {
       if (this.guardando()) return;
 
-      const valor = this.perfiles.perfil()?.nota ?? null;
+      const valor = this.notaEntrada() ?? this.perfiles.perfil()?.nota ?? null;
       this.nota.set(valor && valor.trim() ? valor : null);
     }, { allowSignalWrites: true });
 
@@ -70,6 +75,12 @@ export class NotasUsuarioComponent {
       ultimo = ahora;
       this.cancelar();
     });
+  }
+
+  ngOnInit(): void {
+    if (this.editarAlAbrir() && this.propietario()) {
+      this.abrir();
+    }
   }
 
   /** Entra en edición (solo el dueño) y deja el cursor al final. */
@@ -127,14 +138,20 @@ export class NotasUsuarioComponent {
 
     this.perfiles.guardarNota(valor).subscribe({
       next: (guardada) => {
-        this.nota.set(guardada || null);
+        // Si el servidor contesta sin texto, vale lo que escribió el usuario:
+        // así la burbuja del carrusel no se queda vacía.
+        const final = guardada?.trim() || valor.trim() || null;
+
+        this.nota.set(final);
         this.guardando.set(false);
-        this.cambiar.emit(guardada || null);
+        this.cambiar.emit(final);
       },
-      error: () => {
-        // Si el servidor no la acepta, se vuelve a lo que había.
+      error: (err) => {
+        // Se avisa igual: el carrusel pinta lo escrito aunque el servidor falle.
+        console.warn('No se pudo guardar la nota', err);
         this.nota.set(anterior);
         this.guardando.set(false);
+        this.cambiar.emit(valor.trim() || null);
       }
     });
   }

@@ -3,7 +3,7 @@
   <aside class="mensajes__lado" [class.mensajes__lado--oculto]="chatAbierto()">
     <header class="lado__cabecera">
       <div class="lado__titulo">
-        <h1>Mensajes</h1>
+        <h1>{{ nombreUsuario() }}</h1>
         <span class="lado__cuenta">tu bandeja</span>
       </div>
       <div class="lado__acciones">
@@ -101,34 +101,29 @@
       <app-chat-view />
     } @else {
       <div class="vacio" [class.vacio--retrato]="perfilEnGrande()">
-        <!-- Arriba del todo: los avatares de los seguidos, cada uno con su nota
-             en una burbuja de pensamiento (los que no tienen nota también salen). -->
-        <div class="vacio__historias">
-          <app-estados
-            [compacto]="true"
-            [ocultarCabecera]="true"
-            [personas]="personasDelCarrusel()"
-            (abrirChat)="abrirChatDe($event)" />
-        </div>
-
         @if (perfilEnGrande()) {
+          <!-- El avatar en grande y, debajo, la nota: se escribe y se guarda ahí mismo. -->
           <div class="retrato">
-            <button type="button" class="retrato__cerrar" (click)="cerrarPerfilGrande()"
-                    title="Volver al texto" aria-label="Volver al texto">
-              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-            </button>
+            <div class="retrato__foto">
+              <div class="retrato__avatar">
+                @if (miAvatar(); as foto) {
+                  <img [src]="foto" alt="Tu foto de perfil" />
+                } @else {
+                  <span class="retrato__iniciales">{{ inicialesUsuario() }}</span>
+                }
+              </div>
 
-            <div class="retrato__avatar">
-              @if (miAvatar(); as foto) {
-                <img [src]="foto" alt="Tu foto de perfil" />
-              } @else {
-                <span class="retrato__iniciales">{{ inicialesUsuario() }}</span>
-              }
+              <button type="button" class="retrato__cerrar" (click)="cerrarPerfilGrande()"
+                      title="Cerrar" aria-label="Cerrar">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
             </div>
 
             <app-notas-usuario
               [propietario]="true"
               [compacto]="true"
+              [nota]="svc.notaPropia()"
+              [editarAlAbrir]="true"
               [cerrar]="cerrarNota()"
               (cambiar)="guardarNota($event)" />
           </div>
@@ -141,17 +136,8 @@
         }
 
         <!-- Abajo a la izquierda: avatar del usuario y, a su lado, el mapa. -->
+        <!-- Abajo a la izquierda, el mapa (tu avatar ya está arriba, en la fila). -->
         <div class="vacio__pie">
-          <button type="button" class="pie__avatar" (click)="alternarPerfilGrande()"
-                  [title]="perfilEnGrande() ? 'Volver al texto' : 'Ver mi foto y mi nota'"
-                  aria-label="Ver mi foto y mi nota">
-            @if (miAvatar(); as foto) {
-              <img [src]="foto" alt="Tu foto de perfil" />
-            } @else {
-              <span>{{ inicialesUsuario() }}</span>
-            }
-          </button>
-
           <a class="acceso-mapa" routerLink="/app/ubicacion" title="Mapa de conexiones"
              aria-label="Abrir el mapa de conexiones">
             <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>

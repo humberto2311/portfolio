@@ -1,23 +1,30 @@
 <section class="notas" [class.notas--compacto]="compacto()" aria-label="Pensamiento del perfil">
   @if (editando()) {
-    <div class="nota nota--editando">
-      <input
-        #campo
-        type="text"
-        class="nota__campo"
-        [attr.maxlength]="limite"
-        [value]="texto()"
-        placeholder="¿Qué estás pensando?"
-        (input)="texto.set($any($event.target).value)"
-        (keydown.enter)="guardar($event)"
-        (keydown.escape)="cancelar()"
-        (blur)="guardar()" />
+    <div class="pensamiento pensamiento--editando">
+      <div class="nota nota--editando">
+        <input
+          #campo
+          type="text"
+          class="nota__campo"
+          [attr.maxlength]="limite"
+          [value]="texto()"
+          placeholder="¿Qué estás pensando?"
+          (input)="texto.set($any($event.target).value)"
+          (keydown.enter)="guardar($event)"
+          (keydown.escape)="cancelar()"
+          (blur)="guardar()" />
 
-      <span class="nota__contador">{{ texto().length }}/{{ limite }}</span>
+        <span class="nota__contador">{{ texto().length }}/{{ limite }}</span>
 
-      <button type="button" class="nota__ok" (mousedown)="guardar($event)" title="Guardar" aria-label="Guardar">
-        <i class="fa-solid fa-check" aria-hidden="true"></i>
-      </button>
+        <button type="button" class="nota__ok" (mousedown)="guardar($event)" title="Guardar" aria-label="Guardar">
+          <i class="fa-solid fa-check" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <span class="pensamiento__cola" aria-hidden="true">
+        <i class="pensamiento__punto pensamiento__punto--grande"></i>
+        <i class="pensamiento__punto pensamiento__punto--chico"></i>
+      </span>
     </div>
   } @else if (nota() || propietario()) {
     <!-- Burbuja de pensamiento: el texto va arriba y los dos circulitos

@@ -10,23 +10,37 @@
   }
 
   <div class="estados__fila">
-    <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="verMio()">
+    <!-- El mapa abre la fila, pegado al avatar del usuario logueado. -->
+    @if (mapa()) {
+      <a class="estado-tarjeta estado-tarjeta--mapa" routerLink="/app/ubicacion"
+         title="Mapa de conexiones" aria-label="Abrir el mapa de conexiones">
+        <span class="anillo anillo--mapa">
+          <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+        </span>
+        <span class="estado-tarjeta__nombre">Mapa</span>
+      </a>
+    }
+
+    <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="tocarPropio()"
+            [title]="propiaEsNota() ? 'Escribe o edita tu nota' : 'Ver tu historia'">
       <span class="anillo anillo--crear" [class.anillo--propio]="mio()">
         @if (avatarPropio(); as foto) {
           @if (!avatarRoto()) {
-            <img [src]="foto" alt="Tu estado" (error)="avatarRoto.set(true)" />
+            <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />
           } @else {
             <span class="anillo__iniciales">{{ iniciales() }}</span>
           }
         } @else {
           <span class="anillo__iniciales">{{ iniciales() }}</span>
         }
-        <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+        @if (!propiaEsNota()) {
+          <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
+        }
       </span>
       @if (notaPropia(); as nota) {
         <span class="estado-tarjeta__burbuja">{{ nota }}</span>
       }
-      <span class="estado-tarjeta__nombre">{{ etiquetaPropia() }}</span>
+      <span class="estado-tarjeta__nombre">{{ propiaEsNota() ? 'Tu nota' : etiquetaPropia() }}</span>
     </button>
 
     @for (grupo of otros(); track grupo.usuarioId) {

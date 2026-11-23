@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
@@ -7,11 +7,12 @@ import { EstadosService } from '../../../../../core/services/estados.service';
 import { ChatService } from '../../../../../core/services/chat.service';
 import { Contact } from '../../../../../core/models/contact.model';
 import { UsuarioBuscado } from '../../../../../core/models/chat.model';
+import { EstadosCarruselComponent } from '../../../../../features/estados/estados-carrusel.component';
 
 @Component({
   selector: 'app-contacts-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EstadosCarruselComponent],
   templateUrl: './contacts-list.component.html',
   styleUrls: ['./contacts-list.component.scss'],
 })
@@ -25,6 +26,36 @@ export class ContactsListComponent implements OnInit, OnDestroy {
    * limpia de contactos. `false` = bandeja de entrada normal.
    */
   @Input() modoNuevo = false;
+
+  /**
+   * Personas de la fila de avatares: los chats abiertos y los seguidos.
+   * Salen con nota o sin ella, así la fila nunca queda vacía.
+   */
+  readonly personasDelCarrusel = computed(() => [
+    ...this.svc.chatsActivos().map((contacto) => ({
+      id: contacto.id,
+      nombre: contacto.name,
+      avatar: contacto.fotoUrl || contacto.avatar || null
+    })),
+    ...this.svc.solicitudes().map((contacto) => ({
+      id: contacto.id,
+      nombre: contacto.name,
+      avatar: contacto.fotoUrl || contacto.avatar || null
+    }))
+  ]);
+
+  /**
+   * Clic en el avatar propio: se muestra el avatar en grande para escribir la
+   * nota ahí mismo, sin ventana encima.
+   */
+  abrirNota(): void {
+    this.svc.abrirNotaGrande();
+  }
+
+  /** Clic en un avatar: abre (o crea) el chat con esa persona. */
+  abrirChatDe(persona: { id: string; nombre: string; avatar: string | null }): void {
+    this.svc.abrirChatCon({ id: persona.id, name: persona.nombre, avatar: persona.avatar });
+  }
 
   search = signal('');
   personas = signal<UsuarioBuscado[]>([]);

@@ -16,10 +16,16 @@ import { GrupoEstados } from '../../core/models/estado.model';
       [compacto]="compacto()"
       [ocultarCabecera]="ocultarCabecera()"
       [personas]="personas()"
+      [mapa]="mapa()"
+      [propiaEsNota]="propiaEsNota()"
+      [editarPropia]="editarPropia()"
+      [notaGuardada]="notaGuardada()"
       (cargados)="recibirGrupos($event)"
       (abrirCreador)="creador.set(true)"
       (abrirChat)="abrirChat.emit($event)"
+      (abrirNota)="pedirNota.emit()"
       (abrirVisor)="abrirVisor($event)" />
+
 
     @if (creador()) {
       <app-estados-creador (cerrar)="creador.set(false)" (publicado)="publicado()" />
@@ -40,9 +46,16 @@ export class EstadosComponent {
   readonly compacto = input(false);
   readonly ocultarCabecera = input(false);
   readonly personas = input<Array<{ id: string; nombre: string; avatar?: string | null }>>([]);
+  readonly mapa = input(false);
+  /** Avisa al padre de que se está editando la nota. */
+  readonly pedirNota = output<void>();
+  readonly propiaEsNota = input(false);
+  readonly editarPropia = input(true);
+  readonly notaGuardada = input<string | null>(null);
   readonly abrirChat = output<{ id: string; nombre: string; avatar: string | null }>();
 
   readonly creador = signal(false);
+
   readonly visor = signal<GrupoEstados | null>(null);
   readonly recarga = signal(0);
   readonly gruposVisor = signal<GrupoEstados[]>([]);

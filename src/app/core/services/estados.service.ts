@@ -76,6 +76,17 @@ export class EstadosService {
     return this.http.post<Estado>(`${this.base}/${estadoId}/vista`, {});
   }
 
+  /**
+   * Manda la reacción y/o el texto de una historia al chat privado del dueño.
+   * Devuelve el mensaje tal como quedó guardado.
+   */
+  responder(estadoId: string, reaccion: string | null, texto: string | null): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${this.base}/${estadoId}/responder`, {
+      reaccion: reaccion ?? null,
+      texto: texto ?? null
+    });
+  }
+
   borrar(estadoId: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${estadoId}`);
   }

@@ -39,7 +39,44 @@
   }
 }
 
-// La cápsula: una sola línea que pasa de lectura a edición sin abrir nada.
+// Burbuja de pensamiento: la cápsula arriba y su cola de círculos debajo.
+.pensamiento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+
+  &__cola {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: 3px;
+    // Se inclina un poco para que no quede como un punto suspensivo.
+    margin-right: 14px;
+  }
+
+  &__punto {
+    display: block;
+    border-radius: 50%;
+    background: $bg-elevated;
+    border: 1px solid $bg-border;
+
+    &--grande {
+      width: 10px;
+      height: 10px;
+    }
+
+    &--chico {
+      width: 6px;
+      height: 6px;
+      margin-left: -6px;
+    }
+  }
+}
+
+// La cápsula: el texto se parte en varias líneas y la forma se vuelve un
+// cuadrado redondeado (nunca una píldora larguísima).
 .nota {
   display: flex;
   align-items: center;
@@ -47,22 +84,29 @@
   width: fit-content;
   max-width: 100%;
   min-height: 34px;
-  padding: 6px 12px;
-  background: $bg-card;
+  padding: 7px 12px;
+  background: $bg-elevated;
   border: 1px solid $bg-border;
-  border-radius: 999px;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
   transition: border-color 0.18s ease, background 0.18s ease;
 
   &:hover {
     border-color: $accent-border;
-    background: $bg-elevated;
+  }
+
+  // Sin nota todavía: la pista en forma de píldora.
+  &--vacia {
+    border-radius: 999px;
+    box-shadow: none;
+    background: $bg-card;
   }
 
   &--editando {
     width: 100%;
     max-width: 100%;
+    border-radius: 16px;
     border-color: $accent-border;
-    background: $bg-elevated;
   }
 
   &__icono {
@@ -85,10 +129,11 @@
     cursor: pointer;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     word-break: break-word;
     overflow-wrap: anywhere;
+    white-space: normal;
 
     // A un visitante se le muestra, no se le ofrece pulsarlo.
     &--lectura {

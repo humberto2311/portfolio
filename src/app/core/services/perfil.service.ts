@@ -300,6 +300,14 @@ export class PerfilService {
     });
   }
 
+  /** ¿Esta publicación la escribió el usuario con la sesión abierta? */
+  esPublicacionPropia(publicacion: { autorId?: string | null } | null | undefined): boolean {
+    const actual = this.authService.currentUser()?.id;
+    const autor = publicacion?.autorId;
+
+    return !!actual && !!autor && String(actual) === String(autor);
+  }
+
   esComentarioPropio(autorId?: string): boolean {
     const actual = this.authService.currentUser()?.id;
     return !!actual && !!autorId && String(actual) === String(autorId);

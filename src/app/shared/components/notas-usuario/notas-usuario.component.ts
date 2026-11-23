@@ -35,6 +35,8 @@ export class NotasUsuarioComponent {
   /** `true` cuando el perfil que se ve es el del usuario conectado. */
   readonly propietario = input(false);
   readonly compacto = input(false);
+  /** El padre puede cerrar la edición (por ejemplo con su propia X). */
+  readonly cerrarSenal = input(0, { alias: 'cerrar' });
   readonly cambiar = output<string | null>();
 
   readonly limite = 120;
@@ -55,6 +57,18 @@ export class NotasUsuarioComponent {
 
       const valor = this.perfiles.perfil()?.nota ?? null;
       this.nota.set(valor && valor.trim() ? valor : null);
+    }, { allowSignalWrites: true });
+
+    // Un cambio en esta señal (la X del padre) sale del modo edición.
+    let ultimo = this.cerrarSenal();
+
+    effect(() => {
+      const ahora = this.cerrarSenal();
+
+      if (ahora === ultimo) return;
+
+      ultimo = ahora;
+      this.cancelar();
     });
   }
 

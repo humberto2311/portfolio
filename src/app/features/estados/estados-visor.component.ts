@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { EstadosService } from '../../core/services/estados.service';
 import { Estado, GrupoEstados } from '../../core/models/estado.model';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-estados-visor',
@@ -17,6 +18,7 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
 
   private estados = inject(EstadosService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   readonly grupoInicial = input.required<GrupoEstados>({ alias: 'grupo' });
   readonly vecinos = input<GrupoEstados[]>([]);
@@ -65,7 +67,13 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
 
     this.detener();
     this.cerrar.emit();
-    void this.router.navigate(['/perfil', usuarioId]);
+
+    // Si venimos de dentro de la app (logueado), el perfil tiene que abrirse dentro
+    // del layout privado para conservar el navbar. La ruta suelta `/perfil/:id`
+    // vive fuera de él, y por eso el perfil salía sin barra superior.
+    const dentroDeLaApp = this.router.url.startsWith('/app');
+
+    void this.router.navigate(dentroDeLaApp ? ['/app/perfil', usuarioId] : ['/perfil', usuarioId]);
   }
 
   avanzar(): void {
@@ -109,16 +117,42 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
   }
 
   reaccionar(emoji: string): void {
+    const estado = this.actual();
+
+    if (!estado || estado.propio) return;
+
     this.reaccion.set(emoji);
+
+    // La reacción viaja al chat del dueño; si falla se avisa y se deshace.
+    this.estados.responder(estado.id, emoji, null).subscribe({
+      next: () => this.toast.show('Reacción enviada'),
+      error: () => {
+        this.reaccion.set(null);
+        this.toast.show('No se pudo enviar la reacción');
+      }
+    });
   }
 
   enviarRespuesta(): void {
+    const estado = this.actual();
     const texto = this.respuesta().trim();
 
-    if (!texto) return;
+    if (!estado || estado.propio || !texto) return;
+
+    const emoji = this.reaccion();
 
     this.respuesta.set('');
-    this.reaccion.set('📩');
+
+    this.estados.responder(estado.id, emoji, texto).subscribe({
+      next: () => {
+        this.reaccion.set('📩');
+        this.toast.show('Respuesta enviada al chat');
+      },
+      error: () => {
+        this.respuesta.set(texto);
+        this.toast.show('No se pudo enviar la respuesta');
+      }
+    });
   }
 
   eliminar(): void {

@@ -11,6 +11,7 @@
 
   .avatar-block {
     align-self: center;
+    align-items: center;
   }
 
   .avatar-block .avatar-wrapper {
@@ -60,8 +61,14 @@
   background: $bg-card;
   border: 1px solid $bg-border;
   border-radius: 16px;
-  overflow: hidden;
+  // El menú se dibuja fuera de la tarjeta, así que puede sobresalir del borde
+  // sin que `overflow: hidden` lo recorte.
+  overflow: visible;
   margin-bottom: 16px;
+  // `overflow: visible` quitó también el recorte de las esquinas: la portada es
+  // cuadrada y se veía el corte. Con `clip-path` se redondea el borde sin volver
+  // a recortar los menús que salen de la tarjeta.
+  clip-path: inset(0 round 16px);
 }
 
 .cover-banner {
@@ -461,11 +468,13 @@
   align-items: flex-start;
   gap: 8px;
 
-  // El pensamiento va encima del avatar, alineado con él.
+  // El pensamiento va encima del avatar, centrado con él y sin pasar de su ancho.
   app-notas-usuario {
     display: block;
+    width: 100%;
     max-width: 128px;
-    margin-bottom: 4px;
+    margin: 0 auto 4px;
+    text-align: center;
   }
 }
 
@@ -493,10 +502,13 @@
 }
 
 .avatar-menu {
+  // Anclado a la esquina inferior derecha del avatar, que es donde está el botón
+  // que lo abre; antes caía debajo del bloque y tapaba el nombre.
   position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 30;
+  top: calc(100% - 4px);
+  right: 0;
+  left: auto;
+  z-index: 60;
   min-width: 168px;
   display: grid;
   gap: 2px;
@@ -514,7 +526,9 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: var(--text-light, #e2e8f0);
+    // --text-light no existe en styles.scss: caía siempre al claro de reserva y en
+    // tema claro el texto del menú quedaba casi blanco sobre fondo blanco.
+    color: var(--text-primary);
     font-size: 0.78rem;
     text-align: left;
     cursor: pointer;
@@ -544,12 +558,15 @@
   border-radius: 10px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   background: transparent;
-  color: var(--text-muted, #8b93a1);
+  // Antes usaba --text-muted: en tema claro quedaba gris sobre blanco y el icono
+  // se veía apagado. Con el color principal se lee en los dos temas.
+  color: var(--text-primary);
   cursor: pointer;
 
   &:hover {
     color: var(--accent-blue, #4a9eff);
     border-color: var(--accent-blue, #4a9eff);
+    background: var(--accent-soft, rgba(74, 158, 255, 0.12));
   }
 }
 
@@ -558,12 +575,14 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  background: var(--bg-card, #12151a);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  // Fondo y borde del tema: antes el fondo claro (#12151a) con texto claro dejaba
+  // las opciones casi invisibles en tema claro.
+  background: var(--bg-elevated, var(--bg-card, #12151a));
+  border: 1px solid var(--bg-border, var(--border-color, rgba(255, 255, 255, 0.12)));
   border-radius: 12px;
   padding: 6px;
-  z-index: 40;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  z-index: 60;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
 
   button {
     display: flex;
@@ -574,13 +593,20 @@
     background: transparent;
     border: none;
     border-radius: 8px;
-    color: var(--text-light, #e6e9ef);
+    color: var(--text-primary);
     font-size: 0.82rem;
     text-align: left;
     cursor: pointer;
 
+    i {
+      width: 16px;
+      text-align: center;
+      opacity: 0.85;
+    }
+
     &:hover {
-      background: rgba(74, 158, 255, 0.12);
+      background: var(--accent-soft, rgba(74, 158, 255, 0.12));
+      color: var(--accent-blue, #4a9eff);
     }
   }
 

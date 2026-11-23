@@ -53,22 +53,25 @@
       </div>
     </div>
     
-    <div class="more-options-container">
-      <button class="more" (click)="toggleMenu($event)">
-        <i class="fa-solid fa-ellipsis-vertical"></i>
-      </button>
+    <!-- Editar y borrar son solo del autor: en el perfil de otro no se muestran. -->
+    @if (esMiPublicacion()) {
+      <div class="more-options-container">
+        <button class="more" (click)="toggleMenu($event)">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
 
-      @if (mostrarMenu()) {
-        <div class="dropdown-menu">
-          <button (click)="activarEdicion()">
-            <i class="fa-solid fa-pen"></i> Editar
-          </button>
-          <button class="btn-delete" (click)="borrarPost()">
-            <i class="fa-solid fa-trash"></i> Borrar
-          </button>
-        </div>
-      }
-    </div>
+        @if (mostrarMenu()) {
+          <div class="dropdown-menu">
+            <button (click)="activarEdicion()">
+              <i class="fa-solid fa-pen"></i> Editar
+            </button>
+            <button class="btn-delete" (click)="borrarPost()">
+              <i class="fa-solid fa-trash"></i> Borrar
+            </button>
+          </div>
+        }
+      </div>
+    }
   </header>
 
 

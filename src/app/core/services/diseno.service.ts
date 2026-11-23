@@ -229,6 +229,17 @@ export class DisenoService {
 
     variables.push(`--fondo-imagen: ${this.urlFondo(diseno.fondoUrl)};`);
 
+    // El texto se recalcula con el tema que toca: sobre superficie clara tiene que
+    // ser oscuro, y al revés. Sin esto, el color del tema del visitante no pegaba
+    // con la superficie que impone el diseño del dueño.
+    variables.push(
+      claro
+        ? '--text-primary: color-mix(in srgb, #161a1f 88%, var(--accent));'
+          + ' --text-secondary: #5a646f; --text-muted: #5a646f; --text-faint: #666f7a;'
+        : '--text-primary: color-mix(in srgb, #e6e8ea 92%, var(--accent));'
+          + ' --text-secondary: #8b949e; --text-muted: #8b949e; --text-faint: #6e7681;',
+    );
+
     return variables.length ? `${selector} {\n  ${variables.join('\n  ')}\n}` : '';
   }
 

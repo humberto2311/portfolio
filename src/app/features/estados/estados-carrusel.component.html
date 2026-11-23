@@ -23,11 +23,17 @@
         }
         <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
       </span>
-      <span class="estado-tarjeta__nombre">{{ mio() ? 'Tu estado' : 'Crear estado' }}</span>
+      @if (notaPropia(); as nota) {
+        <span class="estado-tarjeta__burbuja">{{ nota }}</span>
+      }
+      <span class="estado-tarjeta__nombre">{{ etiquetaPropia() }}</span>
     </button>
 
     @for (grupo of otros(); track grupo.usuarioId) {
-      <button type="button" class="estado-tarjeta" (click)="ver(grupo)">
+      <div class="estado-tarjeta" [class.estado-tarjeta--sin-nota]="!textoDe(grupo)">
+        <button type="button" class="estado-tarjeta__anillo" (click)="chatear(grupo)"
+                [title]="'Abrir el chat con ' + grupo.nombre"
+                [attr.aria-label]="'Abrir el chat con ' + grupo.nombre">
         <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
           @if (grupo.avatar && !roto(grupo.usuarioId)) {
             <img [src]="grupo.avatar" [alt]="grupo.nombre" (error)="marcarRoto(grupo.usuarioId)" />
@@ -35,8 +41,19 @@
             <span class="anillo__iniciales">{{ grupo.nombre.slice(0, 2).toUpperCase() }}</span>
           }
         </span>
-        <span class="estado-tarjeta__nombre">{{ grupo.nombre.split(' ')[0] }}</span>
-      </button>
+        </button>
+        @if (textoDe(grupo); as nota) {
+          <span class="estado-tarjeta__burbuja">{{ nota }}</span>
+        }
+        <button type="button" class="estado-tarjeta__nombre estado-tarjeta__nombre--boton"
+                (click)="chatear(grupo)" [title]="'Abrir el chat con ' + grupo.nombre">
+          {{ grupo.nombre.split(' ')[0] }}
+        </button>
+        @if (grupo.estados.length) {
+          <button type="button" class="estado-tarjeta__historia" (click)="ver(grupo)"
+                  [title]="'Ver la historia de ' + grupo.nombre">Ver historia</button>
+        }
+      </div>
     }
 
     @if (!cargando() && otros().length === 0) {

@@ -148,6 +148,22 @@ export class PerfilComponent implements OnInit, OnDestroy {
       css: p.disenoCss ?? null,
       activo: true,
     });
+
+    // Si el perfil-completo no trajo el fondo (respuesta antigua o dato vacío),
+    // se pide el diseño por su endpoint y se pinta igual.
+    if (!p.disenoFondoUrl) {
+      this.diseno.cargarDeUsuario(p.id).subscribe((diseno) => {
+        if (!diseno?.fondoUrl) return;
+
+        this.diseno.aplicarAjeno({
+          acento: diseno.acento ?? p.disenoAcento ?? null,
+          secundario: diseno.secundario ?? p.disenoSecundario ?? null,
+          fondoUrl: diseno.fondoUrl,
+          css: diseno.css ?? p.disenoCss ?? null,
+          activo: true,
+        });
+      });
+    }
   }
 
   ngOnDestroy(): void {

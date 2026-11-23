@@ -23,6 +23,8 @@ export class EstadosCarruselComponent implements OnInit {
   readonly compacto = input(false);
   readonly ocultarCabecera = input(false);
   readonly cargados = output<GrupoEstados[]>();
+  /** Clic en un avatar: abre su chat. */
+  readonly abrirChat = output<{ id: string; nombre: string; avatar: string | null }>();
   readonly abrirCreador = output<void>();
   readonly abrirVisor = output<GrupoEstados>();
 
@@ -30,12 +32,61 @@ export class EstadosCarruselComponent implements OnInit {
   readonly cargando = signal(true);
   readonly avatarRoto = signal(false);
 
+  /** Cuando llega, se pintan estas personas aunque no tengan historia. */
+  readonly personas = input<Array<{ id: string; nombre: string; avatar?: string | null }>>([]);
+
+  /** Lo que trae la bandeja del servidor, ya ordenado para mostrar. */
+  readonly delServidor = computed(() => {
+    const grupos = this.grupos();
+    const mio = this.mio();
+    const yo = this.auth.currentUser()?.id;
+
+    return {
+      propia: mio,
+      // Quien tiene nota va primero; el resto después.
+      ajenas: grupos
+        .filter((grupo) => grupo.usuarioId !== yo)
+        .filter((grupo) => !this.soloTextoYAudio() || grupo.estados.some((estado) => this.esTextoOAudio(estado)))
+        .sort((a, b) => Number(!this.textoDe(a)) - Number(!this.textoDe(b)))
+    };
+  });
+
   readonly avatarPropio = computed(() => this.perfiles.avatar() ?? null);
+
+  /** La nota del propio usuario (el servidor la devuelve dentro de su historia). */
+  readonly notaPropia = computed(() => this.textoDe(this.mio()));
+
+  /** "Tú: ..." mientras haya nota; si no, "Mi historia". */
+  readonly etiquetaPropia = computed(() => {
+    const nota = this.notaPropia();
+
+    return nota ? `Tú: ${nota}` : 'Mi historia';
+  });
   readonly mio = computed(() =>
     this.grupos().find((grupo) => grupo.usuarioId === this.auth.currentUser()?.id) ?? null);
-  readonly otros = computed(() => this.grupos()
-    .filter((grupo) => grupo.usuarioId !== this.auth.currentUser()?.id)
-    .filter((grupo) => !this.soloTextoYAudio() || grupo.estados.some((estado) => this.esTextoOAudio(estado))));
+  // Quien tiene historia con texto (su "nota") va primero; las historias sin
+  // nota quedan al final. Así se ve de un vistazo quién dejó algo escrito.
+  readonly otros = computed(() => {
+    const ajenas = [...this.delServidor().ajenas];
+    const conocidos = new Set(ajenas.map((grupo) => grupo.usuarioId));
+
+    // Los seguidos que no tienen historia también aparecen, sin burbuja y al final.
+    for (const persona of this.personas()) {
+      if (!persona.id || conocidos.has(persona.id)) continue;
+
+      conocidos.add(persona.id);
+      ajenas.push({
+        usuarioId: persona.id,
+        nombre: persona.nombre,
+        avatar: persona.avatar ?? null,
+        todosVistos: true,
+        total: 0,
+        estados: []
+      });
+    }
+
+    return ajenas;
+  });
 
   private readonly rotos = signal<Set<string>>(new Set());
 
@@ -73,14 +124,26 @@ export class EstadosCarruselComponent implements OnInit {
     });
   }
 
+  /** Solo el texto de la historia: es lo que se muestra como burbuja de nota. */
+  textoDe(grupo: GrupoEstados | null): string {
+    if (!grupo) return '';
+
+    for (const estado of grupo.estados) {
+      const texto = estado.texto?.trim();
+
+      if (texto) return texto;
+    }
+
+    return '';
+  }
+
+  /** Resumen para el tooltip cuando la historia no trae texto. */
   burbujaDe(grupo: GrupoEstados): string {
     const primero = grupo.estados[0];
 
     if (!primero) return '';
 
-    if (primero.texto) return primero.texto;
-
-    return primero.musicaTitulo ? 'Con música' : 'Foto';
+    return this.textoDe(grupo) || (primero.musicaTitulo ? 'Con música' : 'Foto');
   }
 
   roto(usuarioId: string): boolean {
@@ -104,6 +167,11 @@ export class EstadosCarruselComponent implements OnInit {
 
   ver(grupo: GrupoEstados): void {
     this.abrirVisor.emit(grupo);
+  }
+
+  /** Abre el chat de esa persona (no su historia). */
+  chatear(grupo: GrupoEstados): void {
+    this.abrirChat.emit({ id: grupo.usuarioId, nombre: grupo.nombre, avatar: grupo.avatar });
   }
 
   verMio(): void {

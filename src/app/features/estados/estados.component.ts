@@ -1,4 +1,4 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EstadosCarruselComponent } from './estados-carrusel.component';
 import { EstadosCreadorComponent } from './estados-creador.component';
@@ -15,8 +15,10 @@ import { GrupoEstados } from '../../core/models/estado.model';
       [soloTextoYAudio]="soloTextoYAudio()"
       [compacto]="compacto()"
       [ocultarCabecera]="ocultarCabecera()"
+      [personas]="personas()"
       (cargados)="recibirGrupos($event)"
       (abrirCreador)="creador.set(true)"
+      (abrirChat)="abrirChat.emit($event)"
       (abrirVisor)="abrirVisor($event)" />
 
     @if (creador()) {
@@ -37,6 +39,8 @@ export class EstadosComponent {
   readonly soloTextoYAudio = input(false);
   readonly compacto = input(false);
   readonly ocultarCabecera = input(false);
+  readonly personas = input<Array<{ id: string; nombre: string; avatar?: string | null }>>([]);
+  readonly abrirChat = output<{ id: string; nombre: string; avatar: string | null }>();
 
   readonly creador = signal(false);
   readonly visor = signal<GrupoEstados | null>(null);

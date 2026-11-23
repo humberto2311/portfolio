@@ -56,7 +56,17 @@ export class PerfilHeaderComponent implements OnChanges {
   readonly elegirAvatar = signal(false);
 
   preguntarAvatar(): void {
-    this.elegirAvatar.update((abierto) => !abierto);
+    // Con historia, siempre se pregunta: foto o estado. Sin historia, se abre la foto.
+    if (this.hayEstado()) {
+      const abriendo = !this.elegirAvatar();
+
+      // Solo uno abierto a la vez: si estaba el menú de "..." se cierra.
+      this.menuAbierto.set(false);
+      this.elegirAvatar.set(abriendo);
+      return;
+    }
+
+    this.verFoto();
   }
 
   verFoto(): void {
@@ -67,6 +77,16 @@ export class PerfilHeaderComponent implements OnChanges {
   verEstadoDesdeMenu(): void {
     this.elegirAvatar.set(false);
     this.verEstado();
+  }
+
+  /** Cierra el menú de la foto al salir de él o al elegir una opción. */
+  cerrarMenuAvatar(): void {
+    this.elegirAvatar.set(false);
+  }
+
+  /** Cierra el menú de "..." al sacar el ratón o al elegir una opción. */
+  cerrarMenuOpciones(): void {
+    this.menuAbierto.set(false);
   }
 
   verEstado(): void {
@@ -81,7 +101,11 @@ export class PerfilHeaderComponent implements OnChanges {
   }
 
   alternarMenu(): void {
-    this.menuAbierto.update((abierto) => !abierto);
+    const abriendo = !this.menuAbierto();
+
+    // Solo uno abierto a la vez: si estaba el menú de la foto, se cierra.
+    this.elegirAvatar.set(false);
+    this.menuAbierto.set(abriendo);
   }
 
   cambiarRestriccion(): void {

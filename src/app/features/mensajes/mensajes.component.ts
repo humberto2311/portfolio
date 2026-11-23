@@ -13,6 +13,8 @@ import { GrupoEstados } from '../../core/models/estado.model';
 import { PrivacidadService } from '../../core/services/privacidad.service';
 import { NotasUsuarioComponent } from '../../shared/components/notas-usuario/notas-usuario.component';
 import { Presencia } from '../../core/models/privacidad.model';
+import { AuthService } from '../../core/services/auth.service';
+import { UserProfileService } from '../../core/services/user-profile.service';
 
 /**
  * Mensajes a página completa: la misma bandeja y el mismo hilo del panel, pero
@@ -34,6 +36,51 @@ export class MensajesComponent implements OnInit, OnDestroy {
   private readonly estados = inject(EstadosService);
 
   private readonly privacidadSvc = inject(PrivacidadService);
+  private readonly auth = inject(AuthService);
+  private readonly perfiles = inject(UserProfileService);
+
+  /** Foto del usuario con la sesión abierta (para el pie y el retrato). */
+  readonly miAvatar = this.perfiles.avatar;
+
+  /** Al pulsar su avatar, el texto de bienvenida se cambia por el retrato. */
+  readonly perfilEnGrande = signal(false);
+
+  /** Contador para que el hijo cierre la edición de la nota. */
+  readonly cerrarNota = signal(0);
+
+  /**
+   * Personas que van en la fila de avatares: los chats abiertos y los seguidos.
+   * Salen tengan o no una historia con texto, así que la fila nunca queda vacía.
+   */
+  readonly personasDelCarrusel = computed(() => [
+    ...this.svc.chatsActivos().map((contacto) => ({
+      id: contacto.id,
+      nombre: contacto.name,
+      avatar: contacto.fotoUrl || contacto.avatar || null
+    })),
+    ...this.svc.solicitudes().map((contacto) => ({
+      id: contacto.id,
+      nombre: contacto.name,
+      avatar: contacto.fotoUrl || contacto.avatar || null
+    }))
+  ]);
+
+  /** Clic en un avatar: abre (o crea) el chat con esa persona. */
+  abrirChatDe(persona: { id: string; nombre: string; avatar: string | null }): void {
+    this.svc.abrirChatCon({ id: persona.id, name: persona.nombre, avatar: persona.avatar });
+  }
+
+  readonly inicialesUsuario = computed(() => {
+    const nombre = this.auth.currentUser()?.fullName ?? 'Yo';
+
+    return nombre
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((parte) => parte.charAt(0).toUpperCase())
+      .join('');
+  });
 
   readonly presenciaContacto = signal<Presencia>('EN_LINEA');
   readonly estadosDelContacto = signal<GrupoEstados | null>(null);
@@ -165,6 +212,17 @@ export class MensajesComponent implements OnInit, OnDestroy {
 
   volver(): void {
     this.svc.backToContacts();
+  }
+
+  /** Abre o cierra el retrato con la nota del propio usuario. */
+  alternarPerfilGrande(): void {
+    this.perfilEnGrande.update((abierto) => !abierto);
+  }
+
+  /** La X del retrato: vuelve al texto de "Tus conversaciones". */
+  cerrarPerfilGrande(): void {
+    this.cerrarNota.update((valor) => valor + 1);
+    this.perfilEnGrande.set(false);
   }
 
   /** El "Volver" de la cabecera: sale de "Nuevo mensaje" o de la conversación. */

@@ -174,15 +174,37 @@ export class SpotifyWidgetComponent implements OnInit {
   }
 
   private consultarEstado(): void {
+    let avisado = false;
+
     interval(this.SEGUNDOS_ESTADO * 1000)
       .pipe(
         startWith(0),
-        switchMap(() => this.spotify.getEstadoActual().pipe(catchError(() => of(null)))),
+        switchMap(() => this.spotify.getEstadoActual().pipe(
+          catchError((fallo) => {
+            // Sin cuenta conectada el backend responde 428 en cada sondeo. Eso no es
+            // un error que haya que enseñar: se marca como no conectado y se calla.
+            if (fallo?.status === 428) {
+              this.conectado.set(false);
+              this.pista.set(null);
+              this.sonando.set(false);
+              return of(null);
+            }
+
+            // Cualquier otro fallo se avisa una sola vez, no cada 6 segundos.
+            if (!avisado) {
+              avisado = true;
+              this.error.set(this.spotify.comoError(fallo));
+            }
+
+            return of(null);
+          })
+        )),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((estado) => {
         this.cargando.set(false);
         if (!estado) return;
+        avisado = false;
         this.aplicarEstado(estado);
       });
   }

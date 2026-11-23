@@ -20,24 +20,36 @@
       </button>
     </div>
   } @else if (nota() || propietario()) {
-    <div class="nota">
-      <i class="nota__icono fa-solid fa-pen" aria-hidden="true"></i>
-
-      @if (propietario()) {
-        <button type="button" class="nota__texto" (click)="abrir()"
-                [title]="nota() ? 'Editar tu pensamiento' : 'Escribe lo que estás pensando'">
-          {{ nota() || '¿Qué estás pensando?' }}
-        </button>
-
-        @if (nota()) {
-          <button type="button" class="nota__quitar" (click)="quitar()" title="Quitar el pensamiento"
-                  aria-label="Quitar el pensamiento">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-          </button>
+    <!-- Burbuja de pensamiento: el texto va arriba y los dos circulitos
+         apuntan hacia abajo, al avatar. -->
+    <div class="pensamiento">
+      <div class="nota" [class.nota--vacia]="!nota()">
+        @if (propietario()) {
+          <i class="nota__icono fa-solid fa-pen" aria-hidden="true"></i>
         }
-      } @else {
-        <span class="nota__texto nota__texto--lectura">{{ nota() }}</span>
-      }
+
+        @if (propietario()) {
+          <button type="button" class="nota__texto" (click)="abrir()"
+                  [title]="nota() ? 'Editar tu pensamiento' : 'Escribe lo que estás pensando'">
+            {{ nota() || '¿Qué estás pensando?' }}
+          </button>
+
+          @if (nota()) {
+            <button type="button" class="nota__quitar" (click)="quitar()" title="Quitar el pensamiento"
+                    aria-label="Quitar el pensamiento">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          }
+        } @else {
+          <span class="nota__texto nota__texto--lectura">{{ nota() }}</span>
+        }
+      </div>
+
+      <!-- Los dos círculos de la burbuja de pensamiento. -->
+      <span class="pensamiento__cola" aria-hidden="true">
+        <i class="pensamiento__punto pensamiento__punto--grande"></i>
+        <i class="pensamiento__punto pensamiento__punto--chico"></i>
+      </span>
     </div>
   }
 </section>

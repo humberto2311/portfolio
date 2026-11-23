@@ -59,7 +59,7 @@
           </div>
 
           @if (elegirAvatar()) {
-            <div class="avatar-menu" role="menu">
+            <div class="avatar-menu" role="menu" (mouseleave)="cerrarMenuAvatar()">
               <button type="button" role="menuitem" (click)="verFoto()">
                 <i class="fa-solid fa-image"></i> Ver foto
               </button>
@@ -164,30 +164,6 @@
           <i class="fa-regular fa-paper-plane"></i> Mensaje
         </button>
 
-        <div class="menu-zona">
-          <button type="button" class="btn-mas" (click)="alternarMenu()" aria-label="Más opciones">
-            <i class="fa-solid fa-ellipsis"></i>
-          </button>
-
-          @if (menuAbierto()) {
-            <div class="menu" (click)="$event.stopPropagation()">
-              <button type="button" (click)="cambiarRestriccion()">
-                <i class="fa-solid fa-user-slash"></i>
-                {{ relacion()?.restringido ? 'Quitar restricción' : 'Restringir' }}
-              </button>
-
-              <button type="button" (click)="cambiarMejorAmigo()">
-                <i class="fa-solid fa-star"></i>
-                {{ relacion()?.mejorAmigo ? 'Quitar de mejores amigos' : 'Agregar a mejores amigos' }}
-              </button>
-
-              <button type="button" class="menu__peligro" (click)="cambiarBloqueo()">
-                <i class="fa-solid fa-ban"></i>
-                {{ relacion()?.bloqueado ? 'Desbloquear' : 'Bloquear' }}
-              </button>
-            </div>
-          }
-        </div>
       }
 
       <button type="button" class="btn-primary" (click)="accionCv.emit()">
@@ -197,6 +173,31 @@
       <button type="button" class="btn-outline" (click)="accionProyectos.emit()">
         <i class="fa-solid fa-code"></i> Proyectos
       </button>
+
+      <div class="menu-zona">
+        <button type="button" class="btn-mas" (click)="alternarMenu()" aria-label="Más opciones">
+          <i class="fa-solid fa-ellipsis"></i>
+        </button>
+
+        @if (menuAbierto()) {
+          <div class="menu" (click)="$event.stopPropagation()" (mouseleave)="cerrarMenuOpciones()">
+            <button type="button" (click)="cambiarRestriccion()">
+              <i class="fa-solid fa-user-slash"></i>
+              {{ relacion()?.restringido ? 'Quitar restricción' : 'Restringir' }}
+            </button>
+
+            <button type="button" (click)="cambiarMejorAmigo()">
+              <i class="fa-solid fa-star"></i>
+              {{ relacion()?.mejorAmigo ? 'Quitar de mejores amigos' : 'Agregar a mejores amigos' }}
+            </button>
+
+            <button type="button" class="menu__peligro" (click)="cambiarBloqueo()">
+              <i class="fa-solid fa-ban"></i>
+              {{ relacion()?.bloqueado ? 'Desbloquear' : 'Bloquear' }}
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </div>
 

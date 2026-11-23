@@ -163,6 +163,10 @@ export class PostCardComponent implements OnInit, OnChanges {
   // ==========================================
 
   activarEdicion(): void {
+    // Doble cierre: aunque el menú ya no se dibuje para un post ajeno,
+    // la acción no se ejecuta si no eres el autor.
+    if (!this.esMiPublicacion()) return;
+
     this.mostrarMenu.set(false); // Cerramos el menú
     this.textoEditado = this.post.texto; // Prellenamos el textarea
     this.estaEditando.set(true); // Activamos el modo edición
@@ -192,6 +196,8 @@ export class PostCardComponent implements OnInit, OnChanges {
   // ==========================================
 
   async borrarPost(): Promise<void> {
+    if (!this.esMiPublicacion()) return;
+
     this.mostrarMenu.set(false);
 
     const confirmed = await this.confirmationModal.confirmDelete('esta publicación');
@@ -210,6 +216,11 @@ export class PostCardComponent implements OnInit, OnChanges {
   // ==========================================
   // DESCRIPCIÓN DEL COMPARTIDO (EDITAR/BORRAR)
   // ==========================================
+
+  /** Solo el autor puede editar o borrar la publicación. */
+  esMiPublicacion(): boolean {
+    return this.perfilService.esPublicacionPropia(this.post);
+  }
 
   esMiCompartido(): boolean {
     const yo = this.authService.currentUser();

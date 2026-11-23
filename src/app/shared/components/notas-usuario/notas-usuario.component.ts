@@ -49,7 +49,10 @@ export class NotasUsuarioComponent {
 
   constructor() {
     // La nota la carga el perfil; este componente solo la refleja y la guarda.
+    // Mientras se está guardando no se pisa lo que el usuario acaba de escribir.
     effect(() => {
+      if (this.guardando()) return;
+
       const valor = this.perfiles.perfil()?.nota ?? null;
       this.nota.set(valor && valor.trim() ? valor : null);
     });
@@ -72,20 +75,43 @@ export class NotasUsuarioComponent {
     }, { injector: this.inyector });
   }
 
-  /** Guarda lo escrito. Un texto vacío borra el pensamiento. */
+  /**
+   * Guarda lo escrito. Un texto vacío borra el pensamiento.
+   *
+   * Ojo: el input dispara `blur` cuando se pulsa el check, y el check dispara
+   * `click`. Sin esta guarda, el `blur` guardaba primero y el `click` encontraba
+   * `editando()` ya en false: el segundo guardado mandaba el texto viejo y
+   * borraba lo recién escrito. Por eso solo se guarda una vez por edición.
+   */
   guardar(evento?: Event): void {
     evento?.preventDefault();
 
     if (!this.editando() || this.guardando()) return;
 
-    const limpio = this.texto().trim().slice(0, this.limite);
-    const anterior = this.nota();
+    this.editando.set(false);
+    this.enviar(this.texto().trim().slice(0, this.limite));
+  }
+
+  /** Sale sin guardar. */
+  cancelar(): void {
+    this.editando.set(false);
+    this.texto.set('');
+  }
+
+  quitar(): void {
+    if (!this.propietario() || this.guardando()) return;
 
     this.editando.set(false);
-    this.nota.set(limpio || null);
+    this.enviar('');
+  }
+
+  private enviar(valor: string): void {
+    const anterior = this.nota();
+
+    this.nota.set(valor || null);
     this.guardando.set(true);
 
-    this.perfiles.guardarNota(limpio).subscribe({
+    this.perfiles.guardarNota(valor).subscribe({
       next: (guardada) => {
         this.nota.set(guardada || null);
         this.guardando.set(false);
@@ -97,18 +123,5 @@ export class NotasUsuarioComponent {
         this.guardando.set(false);
       }
     });
-  }
-
-  /** Sale sin guardar. */
-  cancelar(): void {
-    this.editando.set(false);
-    this.texto.set('');
-  }
-
-  quitar(): void {
-    if (!this.propietario()) return;
-
-    this.texto.set('');
-    this.guardar();
   }
 }

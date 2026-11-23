@@ -424,6 +424,7 @@ export class PerfilService {
       gitUsername: data.gitUsername || undefined,
       spotifyPublico: data.spotifyPublico !== false,
       nota: data.nota || undefined,
+      notaExpira: data.notaExpira || undefined,
     };
   }
 
@@ -480,7 +481,18 @@ export class PerfilService {
 
   /** Guarda el pensamiento del perfil. Devuelve el texto ya limpio por el servidor. */
   guardarNota(texto: string): Observable<string> {
-    return this.http.put<{ nota: string }>(`${this.API_URL}/me/nota`, { nota: texto }).pipe(
+    return this.http.put<{ nota: string; expira?: string | null }>(`${this.API_URL}/me/nota`, { nota: texto }).pipe(
+      tap((respuesta) => {
+        // Se refleja en el perfil cargado para que no haga falta recargar.
+        const actual = this.perfil();
+        if (actual) {
+          this.perfil.set({
+            ...actual,
+            nota: respuesta?.nota || undefined,
+            notaExpira: respuesta?.expira || undefined,
+          });
+        }
+      }),
       map((respuesta) => respuesta?.nota ?? '')
     );
   }

@@ -102,6 +102,8 @@ export interface PerfilData {
   spotifyPublico?: boolean;
   /** El pensamiento del perfil: lo ve cualquiera que entre al perfil. */
   nota?: string;
+  /** Cuándo caduca (ISO). Pasada esa hora el servidor deja de mandarla. */
+  notaExpira?: string;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa' | 'enlaces';

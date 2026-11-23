@@ -17,6 +17,7 @@ export class EstadosCarruselComponent implements OnInit {
   private auth = inject(AuthService);
 
   readonly recarga = input<number>(0);
+  readonly cargados = output<GrupoEstados[]>();
   readonly abrirCreador = output<void>();
   readonly abrirVisor = output<GrupoEstados>();
 
@@ -45,7 +46,10 @@ export class EstadosCarruselComponent implements OnInit {
   cargar(): void {
     this.estados.bandeja().subscribe({
       next: (grupos) => {
-        this.grupos.set(grupos ?? []);
+        const lista = grupos ?? [];
+
+        this.grupos.set(lista);
+        this.cargados.emit(lista);
         this.cargando.set(false);
       },
       error: () => {

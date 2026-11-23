@@ -1,78 +1,143 @@
-<div class="visor" role="dialog" aria-modal="true" aria-label="Estado">
-  <div class="visor__progreso">
-    @for (estado of grupo().estados; track estado.id; let i = $index) {
-      <span class="barra">
-        <span
-          class="barra__relleno"
-          [style.width.%]="i < indice() ? 100 : (i === indice() ? progreso() : 0)"></span>
-      </span>
-    }
-  </div>
-
-  <header class="visor__cabecera">
-    <div class="visor__autor">
-      @if (grupo().avatar) {
-        <img [src]="grupo().avatar" [alt]="grupo().nombre" />
-      } @else {
-        <span class="visor__iniciales">{{ grupo().nombre.slice(0, 2).toUpperCase() }}</span>
-      }
-      <div class="visor__datos">
-        <strong>{{ grupo().nombre }}</strong>
-        <span>{{ actual()?.creadoEn | date: 'HH:mm' }}</span>
-      </div>
-    </div>
-
-    <div class="visor__acciones">
-      @if (actual()?.propio) {
-        <button type="button" (click)="eliminar()" aria-label="Eliminar estado">
-          <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
-        </button>
-      }
-      <button type="button" (click)="cerrar.emit()" aria-label="Cerrar">
-        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-      </button>
-    </div>
+<div class="visor" role="dialog" aria-modal="true" aria-label="Historia">
+  <header class="visor__marca">
+    <span class="visor__logo">N-SOFT</span>
   </header>
 
-  <div class="visor__lienzo" [style.background]="actual()?.tipo === 'TEXTO' ? (actual()?.fondo || '#0d1117') : '#000'">
-    @if (actual(); as estado) {
-      @if (estado.tipo === 'FOTO' && estado.contenidoUrl) {
-        <img class="visor__imagen" [src]="estado.contenidoUrl" alt="Estado" />
-      }
+  <div class="visor__escenario">
+    @if (anterior(); as previo) {
+      <button type="button" class="miniatura miniatura--izquierda" (click)="irA(previo)" [title]="previo.nombre">
+        <span class="miniatura__anillo" [style.background]="previo.estados[0].fondo || '#1e3a8a'">
+          @if (previo.avatar) {
+            <img [src]="previo.avatar" [alt]="previo.nombre" />
+          } @else {
+            <span class="miniatura__iniciales">{{ previo.nombre.slice(0, 2).toUpperCase() }}</span>
+          }
+        </span>
+        <strong>{{ previo.nombre }}</strong>
+        <span>{{ previo.total }} {{ previo.total === 1 ? 'historia' : 'historias' }}</span>
+      </button>
+    }
 
-      @if (estado.texto) {
-        <p class="visor__texto">{{ estado.texto }}</p>
-      }
-
-      <div class="visor__stickers">
-        @for (sticker of estado.stickers; track $index) {
-          <span class="visor__sticker">{{ sticker }}</span>
+    <article class="tarjeta">
+      <div class="tarjeta__progreso">
+        @for (estado of grupo().estados; track estado.id; let i = $index) {
+          <span class="barra">
+            <span class="barra__relleno" [style.width.%]="i < indice() ? 100 : (i === indice() ? progreso() : 0)"></span>
+          </span>
         }
       </div>
 
-      @if (estado.musicaTitulo) {
-        <div class="visor__musica">
-          <i class="fa-solid fa-music" aria-hidden="true"></i>
-          <div>
-            <strong>{{ estado.musicaTitulo }}</strong>
-            <span>{{ estado.musicaArtista }}</span>
-          </div>
-        </div>
-      }
-
-      @if (estado.propio) {
-        <span class="visor__vistas">
-          <i class="fa-regular fa-eye" aria-hidden="true"></i>
-          {{ estado.vistas }}
+      <header class="tarjeta__cabecera">
+        <span class="tarjeta__avatar" [style.background]="actual()?.fondo || '#1e3a8a'">
+          @if (grupo().avatar) {
+            <img [src]="grupo().avatar" [alt]="grupo().nombre" />
+          } @else {
+            <span class="tarjeta__iniciales">{{ grupo().nombre.slice(0, 2).toUpperCase() }}</span>
+          }
         </span>
-      }
+
+        <div class="tarjeta__datos">
+          <strong>{{ grupo().nombre }}</strong>
+          <span>{{ actual()?.creadoEn | date: 'HH:mm' }}</span>
+        </div>
+
+        <div class="tarjeta__acciones">
+          <button type="button" (click)="alternarPausa()" [attr.aria-label]="pausado() ? 'Reanudar' : 'Pausar'">
+            <i class="fa-solid" [class.fa-play]="pausado()" [class.fa-pause]="!pausado()" aria-hidden="true"></i>
+          </button>
+
+          @if (actual()?.propio) {
+            <button type="button" (click)="eliminar()" aria-label="Eliminar">
+              <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      </header>
+
+      <div class="tarjeta__lienzo" [style.background]="actual()?.tipo === 'TEXTO' ? (actual()?.fondo || '#1e3a8a') : '#000'">
+        @if (actual(); as estado) {
+          @if (estado.tipo === 'FOTO') {
+            @if (estado.contenidoUrl) {
+              <img class="lienzo__foto" [src]="estado.contenidoUrl" alt="Historia" />
+            }
+          }
+
+          @if (estado.texto) {
+            <p class="lienzo__texto">{{ estado.texto }}</p>
+          }
+
+          <div class="lienzo__stickers">
+            @for (sticker of estado.stickers; track $index) {
+              <span class="lienzo__sticker">{{ sticker }}</span>
+            }
+          </div>
+
+          @if (estado.musicaTitulo) {
+            <div class="lienzo__musica">
+              <i class="fa-solid fa-music" aria-hidden="true"></i>
+              <div>
+                <strong>{{ estado.musicaTitulo }}</strong>
+                <span>{{ estado.musicaArtista }}</span>
+              </div>
+            </div>
+          }
+
+          @if (estado.propio) {
+            <span class="lienzo__vistas">
+              <i class="fa-regular fa-eye" aria-hidden="true"></i>
+              {{ estado.vistas }}
+            </span>
+          }
+        }
+
+        <button type="button" class="zona zona--izquierda" (click)="retroceder()" aria-label="Anterior"></button>
+        <button type="button" class="zona zona--derecha" (click)="avanzar()" aria-label="Siguiente"></button>
+      </div>
+
+      <footer class="tarjeta__pie">
+        @if (reaccion(); as emoji) {
+          <span class="pie__reaccion">{{ emoji }}</span>
+        }
+
+        <div class="pie__reacciones">
+          @for (emoji of reacciones; track emoji) {
+            <button type="button" (click)="reaccionar(emoji)" [attr.aria-label]="'Reaccionar ' + emoji">
+              {{ emoji }}
+            </button>
+          }
+        </div>
+
+        <div class="pie__respuesta">
+          <input
+            #cajaRespuesta
+            type="text"
+            [placeholder]="'Responder a ' + grupo().nombre + '…'"
+            [ngModel]="respuesta()"
+            (ngModelChange)="respuesta.set($event)"
+            (keydown.enter)="enviarRespuesta()" />
+          <button type="button" (click)="enviarRespuesta()" aria-label="Enviar respuesta">
+            <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+          </button>
+        </div>
+      </footer>
+    </article>
+
+    @if (siguiente(); as proximo) {
+      <button type="button" class="miniatura miniatura--derecha" (click)="irA(proximo)" [title]="proximo.nombre">
+        <span class="miniatura__anillo" [style.background]="proximo.estados[0].fondo || '#1e3a8a'">
+          @if (proximo.avatar) {
+            <img [src]="proximo.avatar" [alt]="proximo.nombre" />
+          } @else {
+            <span class="miniatura__iniciales">{{ proximo.nombre.slice(0, 2).toUpperCase() }}</span>
+          }
+        </span>
+        <strong>{{ proximo.nombre }}</strong>
+        <span>{{ proximo.total }} {{ proximo.total === 1 ? 'historia' : 'historias' }}</span>
+      </button>
     }
   </div>
 
-  <button type="button" class="zona zona--izquierda" (click)="retroceder()" aria-label="Anterior"></button>
-  <button type="button" class="zona zona--derecha" (click)="avanzar()" aria-label="Siguiente"></button>
-
-  <button type="button" class="visor__pausa" (click)="alternarPausa()" [attr.aria-label]="pausado() ? 'Reanudar' : 'Pausar'">
-    <i class="fa-solid" [class.fa-play]="pausado()" [class.fa-pause]="!pausado()" aria-hidden="true"></i>
+  <button type="button" class="visor__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
+    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
   </button>
 </div>

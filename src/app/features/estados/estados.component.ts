@@ -12,8 +12,9 @@ import { GrupoEstados } from '../../core/models/estado.model';
   template: `
     <app-estados-carrusel
       [recarga]="recarga()"
+      (cargados)="recibirGrupos($event)"
       (abrirCreador)="creador.set(true)"
-      (abrirVisor)="visor.set($event)" />
+      (abrirVisor)="abrirVisor($event)" />
 
     @if (creador()) {
       <app-estados-creador (cerrar)="creador.set(false)" (publicado)="publicado()" />
@@ -22,6 +23,7 @@ import { GrupoEstados } from '../../core/models/estado.model';
     @if (visor(); as grupo) {
       <app-estados-visor
         [grupo]="grupo"
+        [vecinos]="gruposVisor()"
         (cerrar)="visor.set(null)"
         (borrado)="publicado()" />
     }
@@ -32,6 +34,15 @@ export class EstadosComponent {
   readonly creador = signal(false);
   readonly visor = signal<GrupoEstados | null>(null);
   readonly recarga = signal(0);
+  readonly gruposVisor = signal<GrupoEstados[]>([]);
+
+  abrirVisor(grupo: GrupoEstados): void {
+    this.visor.set(grupo);
+  }
+
+  recibirGrupos(grupos: GrupoEstados[]): void {
+    this.gruposVisor.set(grupos);
+  }
 
   publicado(): void {
     this.creador.set(false);

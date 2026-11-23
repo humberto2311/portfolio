@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-oauth-callback',
@@ -52,44 +52,40 @@ export class OAuthCallbackComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
 
- ngOnInit(): void {
-  this.route.queryParams.subscribe(params => {
-    const token = params['token'];
-    const error = params['error'];
+  /** Mensajes para los errores que devuelve el back en ?error=... */
+  private static readonly MENSAJES: Record<string, string> = {
+    cuenta_existente: 'Ese correo ya tiene una cuenta. Entra con tu correo y contraseña.',
+    sin_correo: 'Tu cuenta del proveedor no comparte un correo. Usa otra forma de entrar.',
+    auth_failed: 'No pudimos completar el inicio de sesión. Intenta otra vez.',
+  };
 
-    // El GitHub ya pertenece a otra cuenta del sistema
-    if (error === 'git_en_uso') {
-      sessionStorage.removeItem('nfc_return_to');
-      this.router.navigate(['/app/proyectos'], { queryParams: { gitError: 1 } });
-      return;
-    }
+  ngOnInit(): void {
+    // En el prerender (SSR) no hay sessionStorage ni cookies del usuario: solo se muestra el spinner.
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    const tokenFinal = token ?? this.tokenDeCookie();
-
-    if (tokenFinal) {
+    this.route.queryParams.subscribe(params => {
+      const error = params['error'];
       const retorno = sessionStorage.getItem('nfc_return_to');
       sessionStorage.removeItem('nfc_return_to');
 
-      this.authService.handleOAuthSuccess(tokenFinal); // navega a /app
-
-      if (retorno) {
-        // Vuelve a donde estaba (ej. /app/proyectos?importar=1)
-        setTimeout(() => this.router.navigateByUrl(retorno), 0);
+      // El GitHub ya pertenece a otra cuenta del sistema
+      if (error === 'git_en_uso') {
+        this.router.navigate(['/app/proyectos'], { queryParams: { gitError: 1 } });
+        return;
       }
-    } else {
-      console.error('No se recibió el token de autenticación. Error recibido:', error);
-      this.router.navigate(['/']);
-    }
-  });
-}
 
-  private tokenDeCookie(): string | null {
-    if (typeof document === 'undefined') return null;
+      if (error) {
+        this.authService.mostrarErrorDeAcceso(
+          OAuthCallbackComponent.MENSAJES[error] ?? OAuthCallbackComponent.MENSAJES['auth_failed']);
+        this.router.navigate(['/']);
+        return;
+      }
 
-    const partes = document.cookie ? document.cookie.split('; ') : [];
-    const par = partes.find((parte) => parte.startsWith('oauth2_token='));
-
-    return par ? decodeURIComponent(par.split('=').slice(1).join('=')) : null;
+      // El back ya no manda el token en la URL (se filtraba en historial y logs): deja la
+      // sesión en una cookie HttpOnly y aquí se canjea con /api/auth/refresh.
+      this.authService.handleOAuthSuccess(retorno);
+    });
   }
 }

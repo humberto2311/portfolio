@@ -9,8 +9,8 @@ import {
   effect,
   inject
 } from '@angular/core';
-import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
 import { TemaService } from '../../../core/services/tema.service';
 
 interface Particula {
@@ -20,6 +20,10 @@ interface Particula {
   by: number;
   vx: number;
   vy: number;
+  angulo: number;
+  largo: number;
+  tono: number;
+  radio: number;
 }
 
 @Component({
@@ -34,9 +38,7 @@ export class FondoParticulasComponent implements AfterViewInit, OnDestroy {
 
   private readonly zona = inject(NgZone);
   private readonly tema = inject(TemaService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly host = inject(ElementRef<HTMLElement>);
-  private readonly plataforma = inject(PLATFORM_ID);
   private readonly navegador = isPlatformBrowser(inject(PLATFORM_ID));
 
   private ctx: CanvasRenderingContext2D | null = null;
@@ -44,15 +46,12 @@ export class FondoParticulasComponent implements AfterViewInit, OnDestroy {
   private cuadro = 0;
   private ancho = 0;
   private alto = 0;
-  private radio = 0;
   private puntero = { x: -9999, y: -9999, activo: false };
   private reductor: MediaQueryList | null = null;
-
-  private readonly separacion = 26;
-  private readonly empuje = 120;
-  private readonly suavizado = 0.09;
-
   private observar?: ResizeObserver;
+
+  private readonly empuje = 150;
+  private readonly suavizado = 0.075;
 
   constructor() {
     effect(() => {
@@ -144,24 +143,49 @@ export class FondoParticulasComponent implements AfterViewInit, OnDestroy {
 
   private crearParticulas(): void {
     const compacto = this.ancho < 700;
-    const paso = compacto ? this.separacion * 1.9 : this.separacion;
-
-    this.radio = compacto ? 0.9 : 1.25;
-
-    const columnas = Math.max(Math.floor(this.ancho / paso), 1);
-    const filas = Math.max(Math.floor(this.alto / paso), 1);
-    const margenX = (this.ancho - (columnas - 1) * paso) / 2;
-    const margenY = (this.alto - (filas - 1) * paso) / 2;
+    const cantidad = compacto
+      ? Math.round((this.ancho * this.alto) / 21000)
+      : Math.round((this.ancho * this.alto) / 9500);
+    const centroX = this.ancho * 0.5;
+    const centroY = this.alto * 0.45;
+    const alcance = Math.hypot(this.ancho, this.alto) * 0.62;
 
     this.particulas = [];
 
-    for (let fila = 0; fila < filas; fila++) {
-      for (let columna = 0; columna < columnas; columna++) {
-        const x = margenX + columna * paso;
-        const y = margenY + fila * paso;
+    for (let i = 0; i < cantidad; i++) {
+      const radial = i % 3 !== 0;
+      let x: number;
+      let y: number;
 
-        this.particulas.push({ x, y, bx: x, by: y, vx: 0, vy: 0 });
+      if (radial) {
+        const angulo = Math.random() * Math.PI * 2;
+        const distancia = Math.pow(Math.random(), 0.6) * alcance;
+        const elipse = compacto ? 0.72 : 1.15;
+
+        x = centroX + Math.cos(angulo) * distancia * elipse;
+        y = centroY + Math.sin(angulo) * distancia * 0.62;
+      } else {
+        x = Math.random() * this.ancho;
+        y = Math.random() * this.alto;
       }
+
+      x = Math.min(Math.max(x, 6), this.ancho - 6);
+      y = Math.min(Math.max(y, 6), this.alto - 6);
+
+      const direccion = Math.atan2(y - centroY, x - centroX);
+
+      this.particulas.push({
+        x,
+        y,
+        bx: x,
+        by: y,
+        vx: 0,
+        vy: 0,
+        angulo: direccion + Math.PI / 2,
+        largo: compacto ? 2.4 + Math.random() * 1.6 : 4 + Math.random() * 4.5,
+        tono: Math.random(),
+        radio: compacto ? 0.7 : 1
+      });
     }
   }
 
@@ -176,15 +200,17 @@ export class FondoParticulasComponent implements AfterViewInit, OnDestroy {
     const ctx = this.ctx;
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, this.ancho, this.alto);
-    ctx.fillStyle = this.tema.claro() ? 'rgba(37, 64, 105, 0.30)' : 'rgba(150, 190, 245, 0.26)';
-
+    const claro = this.tema.claro();
     const quieto = this.reductor?.matches ?? false;
     const seguir = !quieto && this.puntero.activo;
-    const alcance = this.empuje;
-    const alcance2 = alcance * alcance;
+    const alcance2 = this.empuje * this.empuje;
+
+    ctx.clearRect(0, 0, this.ancho, this.alto);
+    ctx.lineCap = 'round';
 
     for (const p of this.particulas) {
+      let fuerza = 0;
+
       if (seguir) {
         const dx = p.bx - this.puntero.x;
         const dy = p.by - this.puntero.y;
@@ -192,23 +218,44 @@ export class FondoParticulasComponent implements AfterViewInit, OnDestroy {
 
         if (distancia2 < alcance2) {
           const distancia = Math.sqrt(distancia2) || 0.001;
-          const fuerza = (1 - distancia / alcance) * 26;
+          const cercania = 1 - distancia / this.empuje;
 
-          p.vx += (dx / distancia) * fuerza * 0.12;
-          p.vy += (dy / distancia) * fuerza * 0.12;
+          fuerza = cercania;
+          p.vx += (dx / distancia) * cercania * 5.5;
+          p.vy += (dy / distancia) * cercania * 5.5;
         }
       }
 
       p.vx += (p.bx - p.x) * this.suavizado;
       p.vy += (p.by - p.y) * this.suavizado;
-      p.vx *= 0.86;
-      p.vy *= 0.86;
+      p.vx *= 0.9;
+      p.vy *= 0.9;
       p.x += p.vx;
       p.y += p.vy;
 
+      const velocidad = Math.hypot(p.vx, p.vy);
+      const giro = Math.atan2(p.vy, p.vx);
+      const orientado = velocidad > 0.12;
+      const angulo = orientado ? giro : p.angulo;
+      const largo = p.largo * (1 + Math.min(velocidad * 0.22, 2.4) + fuerza * 0.6);
+
+      const alfa = Math.min(0.16 + fuerza * 0.72 + p.tono * 0.18, 0.9);
+      const color = claro
+        ? (p.tono > 0.55 ? `rgba(58, 92, 168, ${alfa * 0.85})` : `rgba(74, 158, 255, ${alfa * 0.8})`)
+        : (p.tono > 0.6
+            ? `rgba(139, 148, 255, ${alfa})`
+            : p.tono > 0.3
+              ? `rgba(96, 165, 250, ${alfa})`
+              : `rgba(196, 214, 255, ${alfa * 0.9})`);
+
+      const medio = largo / 2;
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = p.radio + (fuerza > 0.35 ? 0.45 : 0);
       ctx.beginPath();
-      ctx.arc(p.x, p.y, this.radio, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(p.x - Math.cos(angulo) * medio, p.y - Math.sin(angulo) * medio);
+      ctx.lineTo(p.x + Math.cos(angulo) * medio, p.y + Math.sin(angulo) * medio);
+      ctx.stroke();
     }
   }
 

@@ -31,8 +31,10 @@ export class NavbarComponent {
   readonly urlLanding = '/empresa/n-soft/espacio/mi-espacio';
 
   readonly secciones: SeccionLanding[] = [
-    { id: 'que-es', etiqueta: 'Qué puedes hacer', detalle: 'Lo que ya funciona hoy', icono: 'fa-solid fa-circle-info' },
-    { id: 'como-funciona', etiqueta: 'Cómo funciona', detalle: 'Tres pasos y ya', icono: 'fa-solid fa-list-check' }
+    { id: 'capacidades', etiqueta: 'Qué hay dentro', detalle: 'Seis piezas que trabajan juntas', icono: 'fa-solid fa-circle-info' },
+    { id: 'como-funciona', etiqueta: 'Cómo funciona', detalle: 'Tres pasos, cero fricción', icono: 'fa-solid fa-list-check' },
+    { id: 'empresas', etiqueta: 'Para equipos', detalle: 'Tu marca y tu equipo', icono: 'fa-solid fa-building' },
+    { id: 'ia', etiqueta: 'Chat + IA', detalle: 'Tu red se controla con IA', icono: 'fa-solid fa-wand-magic-sparkles' }
   ];
 
   readonly esInicio = signal(this.router.url === '/');

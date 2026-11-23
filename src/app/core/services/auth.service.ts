@@ -200,8 +200,8 @@ export class AuthService {
     return this.http.get<EstadoCuenta>(`${this.CUENTA_URL}/estado`);
   }
 
-  
-    handleOAuthSuccess(_token: string) {
+  /** Tras volver del proveedor: pide la sesión con la cookie y vuelve a donde estaba. */
+  handleOAuthSuccess(retorno?: string | null) {
     this.isLoading.set(true);
 
     this.sesion.renovar().subscribe({
@@ -209,14 +209,25 @@ export class AuthService {
         this.currentUser.set(sesion.user as unknown as AuthUser);
         this.isAuthenticated.set(true);
         this.isLoading.set(false);
-        this.router.navigate(['/app']);
+        if (retorno) {
+          // Vuelve a donde estaba (ej. /app/proyectos?importar=1)
+          this.router.navigateByUrl(retorno);
+        } else {
+          this.router.navigate(['/app']);
+        }
       },
       error: () => {
-        this.error.set('No pudimos abrir tu sesión. Intenta entrar otra vez.');
+        this.mostrarErrorDeAcceso('No pudimos abrir tu sesión. Intenta entrar otra vez.');
         this.isLoading.set(false);
         this.router.navigate(['/']);
       }
     });
+  }
+
+  /** Abre el modal de login con un mensaje (por ejemplo, un error al volver de GitHub). */
+  mostrarErrorDeAcceso(mensaje: string) {
+    this.error.set(mensaje);
+    this.modal.openLogin();
   }
 
   private handleSuccess(res: Sesion) {

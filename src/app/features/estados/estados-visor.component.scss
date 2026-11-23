@@ -7,29 +7,43 @@
   background: #05070a;
 }
 
-.visor__marca {
-  padding: 0.9rem 1.6rem;
-}
+// Logo y cerrar: logo más grande, pegado a la izquierda; la X separada del borde.
+.visor__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 2rem 0.6rem;
+  flex: 0 0 auto;
 
-.visor__logo {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-primary);
+  app-logo {
+    display: block;
+    transform: scale(1.45);
+    transform-origin: left center;
+    margin-left: 0.4rem;
+  }
 }
 
 .visor__cerrar {
-  position: absolute;
-  top: 0.85rem;
-  right: 1.2rem;
-  width: 38px;
-  height: 38px;
-  border: none;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.2rem;
   cursor: pointer;
+  margin-right: 0.6rem;
+  transition: background 0.16s ease, border-color 0.16s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.32);
+  }
 }
 
 .visor__escenario {
@@ -80,6 +94,30 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.6rem 0.7rem;
+}
+
+// Avatar + nombre: un solo botón que lleva al perfil del autor.
+.tarjeta__perfil {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: opacity 0.16s ease;
+
+  &:hover {
+    opacity: 0.82;
+
+    .tarjeta__datos strong {
+      text-decoration: underline;
+    }
+  }
 }
 
 .tarjeta__avatar {
@@ -360,8 +398,8 @@
     display: none;
   }
 
-  .visor__marca {
-    padding: 0.7rem 1rem;
+  .visor__barra {
+    padding: 0.6rem 0.9rem;
   }
 
   .tarjeta {

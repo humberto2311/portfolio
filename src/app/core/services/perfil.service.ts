@@ -423,6 +423,7 @@ export class PerfilService {
       disenoActivo: Boolean(data.disenoActivo),
       gitUsername: data.gitUsername || undefined,
       spotifyPublico: data.spotifyPublico !== false,
+      nota: data.nota || undefined,
     };
   }
 
@@ -474,6 +475,13 @@ export class PerfilService {
     return this.http.get<any>(this.API_URL).pipe(
       map((res) => (Array.isArray(res) ? res : [])),
       catchError(() => of([]))
+    );
+  }
+
+  /** Guarda el pensamiento del perfil. Devuelve el texto ya limpio por el servidor. */
+  guardarNota(texto: string): Observable<string> {
+    return this.http.put<{ nota: string }>(`${this.API_URL}/me/nota`, { nota: texto }).pipe(
+      map((respuesta) => respuesta?.nota ?? '')
     );
   }
 

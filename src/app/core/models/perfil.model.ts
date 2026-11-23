@@ -100,6 +100,8 @@ export interface PerfilData {
   disenoActivo?: boolean;
   gitUsername?: string;
   spotifyPublico?: boolean;
+  /** El pensamiento del perfil: lo ve cualquiera que entre al perfil. */
+  nota?: string;
 }
 
 export type TabId = 'publicaciones' | 'informacion' | 'fotos' | 'amigos' | 'empresa' | 'enlaces';

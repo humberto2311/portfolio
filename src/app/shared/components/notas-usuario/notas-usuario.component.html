@@ -1,56 +1,43 @@
-<section class="notas" [class.notas--compacto]="compacto()" aria-label="Tu nota">
-  <div class="nota">
-    <span class="nota__avatar">
-      @if (avatar(); as foto) {
-        @if (!avatarRoto()) {
-          <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />
-        } @else {
-          <span class="nota__iniciales">{{ iniciales() }}</span>
+<section class="notas" [class.notas--compacto]="compacto()" aria-label="Pensamiento del perfil">
+  @if (editando()) {
+    <div class="nota nota--editando">
+      <input
+        #campo
+        type="text"
+        class="nota__campo"
+        [attr.maxlength]="limite"
+        [value]="texto()"
+        placeholder="¿Qué estás pensando?"
+        (input)="texto.set($any($event.target).value)"
+        (keydown.enter)="guardar($event)"
+        (keydown.escape)="cancelar()"
+        (blur)="guardar()" />
+
+      <span class="nota__contador">{{ texto().length }}/{{ limite }}</span>
+
+      <button type="button" class="nota__ok" (mousedown)="guardar($event)" title="Guardar" aria-label="Guardar">
+        <i class="fa-solid fa-check" aria-hidden="true"></i>
+      </button>
+    </div>
+  } @else if (nota() || propietario()) {
+    <div class="nota">
+      <i class="nota__icono fa-solid fa-pen" aria-hidden="true"></i>
+
+      @if (propietario()) {
+        <button type="button" class="nota__texto" (click)="abrir()"
+                [title]="nota() ? 'Editar tu pensamiento' : 'Escribe lo que estás pensando'">
+          {{ nota() || '¿Qué estás pensando?' }}
+        </button>
+
+        @if (nota()) {
+          <button type="button" class="nota__quitar" (click)="quitar()" title="Quitar el pensamiento"
+                  aria-label="Quitar el pensamiento">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
         }
       } @else {
-        <span class="nota__iniciales">{{ iniciales() }}</span>
+        <span class="nota__texto nota__texto--lectura">{{ nota() }}</span>
       }
-
-      <button type="button" class="nota__lapiz" (click)="abrir()"
-              [title]="nota() ? 'Editar tu pensamiento' : 'Escribe lo que estás pensando'"
-              aria-label="Editar tu pensamiento">
-        <i class="fa-solid fa-pen" aria-hidden="true"></i>
-      </button>
-    </span>
-
-    <button type="button" class="nota__texto" (click)="abrir()">
-      @if (nota(); as contenido) {
-        {{ contenido }}
-      } @else {
-        ¿Qué estás pensando?
-      }
-    </button>
-  </div>
-
-  @if (editando()) {
-    <div class="editor" role="dialog" aria-modal="true" aria-label="Tu pensamiento">
-      <div class="editor__caja">
-        <h4>{{ nota() ? 'Edita tu pensamiento' : '¿Qué estás pensando?' }}</h4>
-        <p>Se muestra arriba de tu foto de perfil. Solo la ven tus contactos.</p>
-
-        <textarea
-          rows="3"
-          [attr.maxlength]="120"
-          autofocus
-          placeholder="¿Qué estás pensando?"
-          [value]="texto()"
-          (input)="texto.set($any($event.target).value)"
-          (keydown.enter)="guardar($event)"></textarea>
-
-        <span class="editor__contador">{{ texto().length }}/120</span>
-
-        <div class="editor__acciones">
-          @if (nota()) {
-            <button type="button" class="editor__quitar" (click)="quitar()">Quitar</button>
-          }
-          <button type="button" class="editor__ok" (click)="guardar()">Listo</button>
-        </div>
-      </div>
     </div>
   }
 </section>

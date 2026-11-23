@@ -1,11 +1,25 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../core/services/auth.service';
-import { UserProfileService } from '../../../core/services/user-profile.service';
+import { PerfilService } from '../../../core/services/perfil.service';
 
-const CLAVE_NOTA = 'nsoft.nota';
-const LIMITE_NOTA = 120;
-
+/**
+ * El pensamiento del perfil.
+ *
+ * Vive en el servidor (`PUT /api/users/me/nota`), no en el navegador: así lo ve
+ * cualquiera que entre al perfil. El dueño lo edita dentro de la propia cápsula,
+ * sin modal; a los demás solo se les muestra, sin lápiz ni X.
+ */
 @Component({
   selector: 'app-notas-usuario',
   standalone: true,
@@ -15,59 +29,86 @@ const LIMITE_NOTA = 120;
 })
 export class NotasUsuarioComponent {
 
-  private auth = inject(AuthService);
-  private perfiles = inject(UserProfileService);
+  private perfiles = inject(PerfilService);
+  private inyector = inject(Injector);
 
+  /** `true` cuando el perfil que se ve es el del usuario conectado. */
+  readonly propietario = input(false);
   readonly compacto = input(false);
   readonly cambiar = output<string | null>();
 
-  readonly nota = signal<string | null>(this.leer());
+  readonly limite = 120;
+
+  /** El servidor la limpia al guardar; lo que llega aquí ya viene recortado. */
+  readonly nota = signal<string | null>(null);
   readonly editando = signal(false);
   readonly texto = signal('');
-  readonly avatarRoto = signal(false);
+  readonly guardando = signal(false);
 
-  readonly avatar = computed(() => this.perfiles.avatar() ?? null);
-  readonly iniciales = computed(() => {
-    const nombre = this.auth.currentUser()?.fullName ?? 'Yo';
+  private readonly campo = viewChild<ElementRef<HTMLInputElement>>('campo');
 
-    return nombre.split(' ').filter(Boolean).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
-  });
-
-  abrir(): void {
-    this.texto.set(this.nota() ?? '');
-    this.editando.set(true);
+  constructor() {
+    // La nota la carga el perfil; este componente solo la refleja y la guarda.
+    effect(() => {
+      const valor = this.perfiles.perfil()?.nota ?? null;
+      this.nota.set(valor && valor.trim() ? valor : null);
+    });
   }
 
+  /** Entra en edición (solo el dueño) y deja el cursor al final. */
+  abrir(): void {
+    if (!this.propietario() || this.guardando()) return;
+
+    this.texto.set(this.nota() ?? '');
+    this.editando.set(true);
+
+    afterNextRender(() => {
+      const entrada = this.campo()?.nativeElement;
+      if (!entrada) return;
+
+      entrada.focus();
+      const fin = entrada.value.length;
+      entrada.setSelectionRange(fin, fin);
+    }, { injector: this.inyector });
+  }
+
+  /** Guarda lo escrito. Un texto vacío borra el pensamiento. */
   guardar(evento?: Event): void {
     evento?.preventDefault();
 
-    const limpio = this.texto().trim().slice(0, LIMITE_NOTA);
+    if (!this.editando() || this.guardando()) return;
 
-    this.nota.set(limpio || null);
-    this.cambiar.emit(limpio || null);
+    const limpio = this.texto().trim().slice(0, this.limite);
+    const anterior = this.nota();
+
     this.editando.set(false);
+    this.nota.set(limpio || null);
+    this.guardando.set(true);
 
-    try {
-      if (limpio) {
-        localStorage.setItem(CLAVE_NOTA, limpio);
-      } else {
-        localStorage.removeItem(CLAVE_NOTA);
+    this.perfiles.guardarNota(limpio).subscribe({
+      next: (guardada) => {
+        this.nota.set(guardada || null);
+        this.guardando.set(false);
+        this.cambiar.emit(guardada || null);
+      },
+      error: () => {
+        // Si el servidor no la acepta, se vuelve a lo que había.
+        this.nota.set(anterior);
+        this.guardando.set(false);
       }
-    } catch {
-      return;
-    }
+    });
+  }
+
+  /** Sale sin guardar. */
+  cancelar(): void {
+    this.editando.set(false);
+    this.texto.set('');
   }
 
   quitar(): void {
+    if (!this.propietario()) return;
+
     this.texto.set('');
     this.guardar();
-  }
-
-  private leer(): string | null {
-    try {
-      return localStorage.getItem(CLAVE_NOTA);
-    } catch {
-      return null;
-    }
   }
 }

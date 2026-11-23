@@ -1,6 +1,10 @@
 <div class="visor" role="dialog" aria-modal="true" aria-label="Historia">
-  <header class="visor__marca">
-    <span class="visor__logo">N-SOFT</span>
+  <header class="visor__barra">
+    <app-logo [alto]="28" partes="completo" />
+
+    <button type="button" class="visor__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
   </header>
 
   <div class="visor__escenario">
@@ -28,18 +32,22 @@
       </div>
 
       <header class="tarjeta__cabecera">
-        <span class="tarjeta__avatar" [style.background]="actual()?.fondo || '#1e3a8a'">
-          @if (grupo().avatar) {
-            <img [src]="grupo().avatar" [alt]="grupo().nombre" />
-          } @else {
-            <span class="tarjeta__iniciales">{{ grupo().nombre.slice(0, 2).toUpperCase() }}</span>
-          }
-        </span>
+        <button type="button" class="tarjeta__perfil" (click)="abrirPerfil()"
+                [title]="'Ver el perfil de ' + grupo().nombre"
+                [attr.aria-label]="'Ver el perfil de ' + grupo().nombre">
+          <span class="tarjeta__avatar" [style.background]="actual()?.fondo || '#1e3a8a'">
+            @if (grupo().avatar) {
+              <img [src]="grupo().avatar" [alt]="grupo().nombre" />
+            } @else {
+              <span class="tarjeta__iniciales">{{ grupo().nombre.slice(0, 2).toUpperCase() }}</span>
+            }
+          </span>
 
-        <div class="tarjeta__datos">
-          <strong>{{ grupo().nombre }}</strong>
-          <span>{{ actual()?.creadoEn | date: 'HH:mm' }}</span>
-        </div>
+          <span class="tarjeta__datos">
+            <strong>{{ grupo().nombre }}</strong>
+            <span>{{ actual()?.creadoEn | date: 'HH:mm' }}</span>
+          </span>
+        </button>
 
         <div class="tarjeta__acciones">
           <button type="button" (click)="alternarPausa()" [attr.aria-label]="pausado() ? 'Reanudar' : 'Pausar'">
@@ -136,8 +144,4 @@
       </button>
     }
   </div>
-
-  <button type="button" class="visor__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
-    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-  </button>
 </div>

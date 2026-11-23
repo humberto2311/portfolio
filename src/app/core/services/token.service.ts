@@ -38,6 +38,14 @@ export class TokenService {
 
   private accessToken: string | null = null;
   private expiraEn = 0;
+  /**
+   * Copia del access token en sessionStorage: en local, `ng serve` recarga el módulo
+   * al cambiar un archivo y la memoria se pierde, y al volver de Spotify en la misma
+   * pestaña la sesión debe seguir viva. En producción (environment.production) no se usa:
+   * ahí el token vive solo en memoria y se recupera con /refresh.
+   */
+  private readonly CLAVE_ACCESO = 'nfc_access';
+  private readonly guardarAccesoEnPestana = !environment.production;
   /** Una sola renovación a la vez: las demás peticiones esperan a esta. */
   private renovando$: Observable<Sesion> | null = null;
 
@@ -47,11 +55,55 @@ export class TokenService {
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       this.leerRefreshNativo();
+      this.leerAccesoDeDesarrollo();
     }
   }
 
   token(): string | null {
     return this.accessToken;
+  }
+
+  /** Solo en desarrollo: recupera el token guardado en esta pestaña (ver CLAVE_ACCESO). */
+  private leerAccesoDeDesarrollo(): void {
+    if (!this.guardarAccesoEnPestana) return;
+
+    try {
+      const crudo = sessionStorage.getItem(this.CLAVE_ACCESO);
+      if (!crudo) return;
+
+      const guardado = JSON.parse(crudo) as { token: string; expiraEn: number; usuario?: Sesion['user'] };
+      if (!guardado.token || guardado.expiraEn <= Date.now()) {
+        sessionStorage.removeItem(this.CLAVE_ACCESO);
+        return;
+      }
+
+      this.accessToken = guardado.token;
+      this.expiraEn = guardado.expiraEn;
+      if (guardado.usuario) {
+        this.usuario.set(guardado.usuario);
+        this.autenticado.set(true);
+      }
+    } catch {
+      sessionStorage.removeItem(this.CLAVE_ACCESO);
+    }
+  }
+
+  private guardarAcceso(): void {
+    if (!this.guardarAccesoEnPestana) return;
+
+    try {
+      if (!this.accessToken) {
+        sessionStorage.removeItem(this.CLAVE_ACCESO);
+        return;
+      }
+      sessionStorage.setItem(this.CLAVE_ACCESO, JSON.stringify({
+        token: this.accessToken,
+        expiraEn: this.expiraEn,
+        usuario: this.usuario() ?? undefined
+      }));
+    } catch {
+      // sessionStorage lleno o bloqueado: la sesión sigue en memoria.
+    }
   }
 
   /** ¿Queda poco para que venza? Se renueva antes de usarlo, no después del 401. */
@@ -69,6 +121,7 @@ export class TokenService {
     if (sesion.refreshToken) {
       this.guardarRefreshNativo(sesion.refreshToken);
     }
+    this.guardarAcceso();
   }
 
   limpiar(): void {
@@ -77,6 +130,7 @@ export class TokenService {
     this.usuario.set(null);
     this.autenticado.set(false);
     this.borrarRefreshNativo();
+    this.guardarAcceso();
   }
 
   /** Pide un par nuevo (access + refresh) usando la cookie o el refresh nativo. */

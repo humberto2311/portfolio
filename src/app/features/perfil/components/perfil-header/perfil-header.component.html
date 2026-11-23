@@ -42,8 +42,8 @@
     <div class="header-row">
       <!-- AVATAR -->
       <div class="avatar-block">
-        @if (esMiPerfil) {
-          <app-notas-usuario [compacto]="true" />
+        @if (esMiPerfil || perfil.nota) {
+          <app-notas-usuario [propietario]="esMiPerfil" />
         }
 
         <div class="avatar-eleccion">

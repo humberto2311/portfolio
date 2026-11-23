@@ -1,19 +1,22 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, input, output, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { EstadosService } from '../../core/services/estados.service';
 import { Estado, GrupoEstados } from '../../core/models/estado.model';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-estados-visor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoComponent],
   templateUrl: './estados-visor.component.html',
   styleUrls: ['./estados-visor.component.scss']
 })
 export class EstadosVisorComponent implements OnInit, OnDestroy {
 
   private estados = inject(EstadosService);
+  private router = inject(Router);
 
   readonly grupoInicial = input.required<GrupoEstados>({ alias: 'grupo' });
   readonly vecinos = input<GrupoEstados[]>([]);
@@ -46,6 +49,23 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.detener();
+  }
+
+  /** Escape cierra el visor. */
+  @HostListener('document:keydown.escape')
+  alPulsarEscape(): void {
+    this.cerrar.emit();
+  }
+
+  /** Lleva al perfil del autor de la historia. */
+  abrirPerfil(): void {
+    const usuarioId = this.grupo().usuarioId;
+
+    if (!usuarioId) return;
+
+    this.detener();
+    this.cerrar.emit();
+    void this.router.navigate(['/perfil', usuarioId]);
   }
 
   avanzar(): void {

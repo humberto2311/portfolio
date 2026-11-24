@@ -753,12 +753,16 @@ export class ProyectosComponent implements OnInit {
       }
 
       if (qp.get('gitlab') === 'ok') {
-        // Al volver de GitLab la página se recargó y la fuente elegida volvió a GitHub.
+        // El back ya importó los proyectos al volver de GitLab (el token se usa una vez y se
+        // descarta), así que aquí solo se recarga la lista.
         this.fuenteSeleccionada = 'gitlab';
         this.errorImportacion = null;
         this.cargarFuentes();
-        this.cargarProveedores();
-        this.ejecutarImportarConectado();
+        this.cargarProyectosLogueado();
+        const importados = Number(qp.get('importados') ?? 0);
+        this.toast.show(importados > 0
+          ? `Se importaron ${importados} proyectos de GitLab.`
+          : 'GitLab conectado, pero no se encontraron proyectos para importar.');
       } else if (qp.get('gitlab')) {
         this.errorImportacion =
           'No se pudo conectar GitLab. Vuelve a intentarlo desde "Conectar GitLab".';

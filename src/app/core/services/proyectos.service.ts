@@ -61,6 +61,11 @@ export class ProyectosService {
     });
   }
 
+  /** Ticket de un solo uso para vincular GitLab: devuelve la URL del back a la que hay que navegar. */
+  iniciarVinculoGitLab(): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.API_PROJECTS}/gitlab/vincular`, {});
+  }
+
   importarConCuentaConectada(sourceType: ProjectSourceId): Observable<Proyecto[]> {
     return this.http.post<Proyecto[]>(`${this.API_PROJECTS}/import/connected`, { sourceType });
   }

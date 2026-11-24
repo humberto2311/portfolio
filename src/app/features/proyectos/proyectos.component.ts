@@ -753,6 +753,8 @@ export class ProyectosComponent implements OnInit {
       }
 
       if (qp.get('gitlab') === 'ok') {
+        // Al volver de GitLab la página se recargó y la fuente elegida volvió a GitHub.
+        this.fuenteSeleccionada = 'gitlab';
         this.errorImportacion = null;
         this.cargarFuentes();
         this.cargarProveedores();
@@ -823,6 +825,20 @@ export class ProyectosComponent implements OnInit {
     }
 
     this.importandoFuente = true;
+
+    // GitLab solo vincula la cuenta (no inicia sesión): el back necesita saber de quién es, y la
+    // navegación a GitLab no lleva el token. Primero se pide un ticket de un solo uso con la sesión.
+    if (proveedor.id === 'gitlab') {
+      this.proyectosService.iniciarVinculoGitLab().subscribe({
+        next: ({ url }) => { window.location.href = url; },
+        error: () => {
+          this.importandoFuente = false;
+          this.errorImportacion = 'No se pudo iniciar la conexión con GitLab. Inténtalo de nuevo.';
+        }
+      });
+      return;
+    }
+
     window.location.href = proveedor.url;
   }
 

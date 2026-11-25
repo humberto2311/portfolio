@@ -2,7 +2,7 @@
 
   <header class="page-head">
     <h1>Ajustes de cuenta</h1>
-    <p>Tus datos, tu contraseña, tus empresas y cómo se ven tu perfil y tu tarjeta.</p>
+    <p>Tus datos, tu contraseña, tus empresas, cómo se ven tu perfil y tu tarjeta, y los comandos de los bots.</p>
   </header>
 
   <nav class="tabs" role="tablist" #tabsNav>
@@ -679,6 +679,94 @@
         </div>
 
         <p class="helper">El cambio se aplica al instante, no hace falta guardar.</p>
+      </section>
+    }
+
+    @case ('comandos') {
+      <section class="card card--ancho">
+        <h2><i class="fas fa-terminal"></i> Comandos de los bots</h2>
+        <p class="helper">
+          Todo lo que puedes pedirle a un bot desde un chat. Entra en una carpeta para ver qué hace cada comando,
+          sus parámetros y un ejemplo. En el chat también puedes escribir <code>&#64;listar</code>,
+          <code>&#64;lista:google</code> o <code>&#64;lista:git</code>.
+        </p>
+
+        <app-guia-comandos [compacta]="true" />
+      </section>
+
+      <section class="card">
+        <h2><i class="fas fa-lightbulb"></i> Sugiere un bot o una herramienta</h2>
+        <p class="helper">
+          ¿Falta un bot (Notion, Jira, Trello, Slack…) o una herramienta para los que ya tienes?
+          Cuéntamelo aquí: queda guardado en tu cuenta y lo revisamos para añadirlo.
+        </p>
+
+        <div class="sugerencia-tipos">
+          @for (opcion of tiposSugerencia; track opcion.valor) {
+            <button
+              type="button"
+              class="sugerencia-tipo"
+              [class.sugerencia-tipo--activa]="tipoSugerencia() === opcion.valor"
+              (click)="tipoSugerencia.set(opcion.valor)">
+              <i [class]="opcion.icono"></i> {{ opcion.etiqueta }}
+            </button>
+          }
+        </div>
+
+        <div class="field">
+          <label for="sugerencia-nombre">Nombre del bot o de la herramienta</label>
+          <input
+            id="sugerencia-nombre"
+            type="text"
+            maxlength="80"
+            [ngModel]="nombreSugerencia()"
+            (ngModelChange)="nombreSugerencia.set($event)"
+            placeholder="Por ejemplo: Notion, Jira, Trello, Slack" />
+        </div>
+
+        <div class="field">
+          <label for="sugerencia-detalle">¿Para qué lo usarías? (opcional)</label>
+          <textarea
+            id="sugerencia-detalle"
+            rows="3"
+            maxlength="800"
+            [ngModel]="detalleSugerencia()"
+            (ngModelChange)="detalleSugerencia.set($event)"
+            placeholder="Quiero que el bot lea mis tareas de Notion y me las recuerde en el chat."></textarea>
+        </div>
+
+        <footer class="panel__pie">
+          <span class="pie__estado" *ngIf="sugerenciasService.sugerencias().length">
+            {{ sugerenciasService.sugerencias().length }} sugerencia(s) enviada(s)
+          </span>
+          <span class="pie__empuje"></span>
+          <button
+            type="button"
+            class="btn-guardar"
+            [disabled]="enviandoSugerencia() || !nombreSugerencia().trim()"
+            (click)="enviarSugerencia()">
+            @if (enviandoSugerencia()) {
+              <i class="fas fa-circle-notch fa-spin"></i> Enviando…
+            } @else {
+              <i class="fas fa-paper-plane"></i> Enviar sugerencia
+            }
+          </button>
+        </footer>
+
+        @if (sugerenciasService.sugerencias().length) {
+          <ul class="sugerencias">
+            @for (s of sugerenciasService.sugerencias(); track s.id) {
+              <li class="sugerencia">
+                <span class="sugerencia__tipo">{{ etiquetaTipo(s.tipo) }}</span>
+                <span class="sugerencia__nombre">{{ s.nombre }}</span>
+                <span class="sugerencia__estado">{{ s.estado === 'RECIBIDA' ? 'Recibida' : s.estado }}</span>
+                <button type="button" class="sugerencia__borrar" title="Quitar" (click)="borrarSugerencia(s.id)">
+                  <i class="fas fa-xmark"></i>
+                </button>
+              </li>
+            }
+          </ul>
+        }
       </section>
     }
   }

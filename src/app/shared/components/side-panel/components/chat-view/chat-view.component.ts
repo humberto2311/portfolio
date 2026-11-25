@@ -66,6 +66,11 @@ export class ChatViewComponent {
     this.interpreteAbierto.set(!this.interpreteAbierto());
   }
 
+  /** La X del intérprete: cierra el panel de comandos. */
+  cerrarInterprete(): void {
+    this.interpreteAbierto.set(false);
+  }
+
   /** Clave estable por mensaje (los optimistas aún no tienen id). */
   claveDe(msg: ChatMessage): string {
     return String(msg.id ?? `${msg.time}-${msg.text}`);

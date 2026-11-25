@@ -156,7 +156,10 @@
 
 <!-- Composer: cámara a la izquierda, campo al centro y las acciones a la derecha. -->
 @if (interpreteAbierto()) {
-  <app-comandos-chat class="comandos-flotante" [conversacionId]="conversacionActual()" />
+  <app-comandos-chat
+    class="comandos-flotante"
+    [conversacionId]="conversacionActual()"
+    (cerrar)="cerrarInterprete()" />
 }
 
 <form class="composer" (ngSubmit)="send()">

@@ -1,67 +1,132 @@
 <div class="comandos" [class.comandos--compacto]="compacto">
-  <div class="comandos__barra">
+
+  <header class="comandos__cabecera">
+    <div class="comandos__titulo">
+      <span class="comandos__icono"><i class="fa-solid fa-terminal" aria-hidden="true"></i></span>
+      <div class="comandos__rotulos">
+        <strong>Comandos y bots</strong>
+        <span>Escribe un comando o pídelo con tus palabras.</span>
+      </div>
+    </div>
+
     <button
       type="button"
-      class="pildora"
-      [class.pildora--activa]="panelBots()"
-      (click)="panelBots.set(!panelBots())">
+      class="cerrar"
+      title="Cerrar"
+      aria-label="Cerrar comandos y bots"
+      (click)="cerrar.emit()">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <nav class="pestanas" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="pestana"
+      [class.pestana--activa]="vista() === 'bots'"
+      [attr.aria-selected]="vista() === 'bots'"
+      (click)="abrirVista('bots')">
       <i class="fa-solid fa-robot" aria-hidden="true"></i>
       Bots
       @if (hayBotsActivos()) {
-        <span class="pildora__punto" aria-hidden="true"></span>
+        <span class="pestana__punto" title="Tienes bots activos"></span>
       }
     </button>
 
     <button
       type="button"
-      class="pildora"
-      [class.pildora--ia]="modoIa()"
-      (click)="alternarModoIa()"
-      [title]="modoIa() ? 'La IA traduce lo que escribes' : 'Activar modo IA'">
+      role="tab"
+      class="pestana"
+      [class.pestana--activa]="vista() === 'ia'"
+      [attr.aria-selected]="vista() === 'ia'"
+      (click)="abrirVista('ia')">
       <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
       Modo IA
+      @if (modoIa()) {
+        <span class="pestana__punto pestana__punto--ia" title="Modo IA encendido"></span>
+      }
     </button>
 
     <button
       type="button"
-      class="pildora"
-      [class.pildora--activa]="panelAyuda()"
-      (click)="panelAyuda.set(!panelAyuda())">
+      role="tab"
+      class="pestana"
+      [class.pestana--activa]="vista() === 'ayuda'"
+      [attr.aria-selected]="vista() === 'ayuda'"
+      (click)="abrirVista('ayuda')">
       <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
       Ayuda IA
     </button>
+  </nav>
 
-    @if (modoTraduciendo()) {
-      <span class="traduciendo">
-        <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
-        traduciendo
-      </span>
-    }
-  </div>
+  @if (vista() === 'bots') {
+    <div class="panel">
+      <p class="panel__nota">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        Activa los bots que quieras usar en este chat. Cada uno trae sus propios comandos.
+      </p>
 
-  @if (panelBots()) {
-    <div class="panel-bots">
-      @for (bot of bots(); track bot.id) {
-        <button type="button" class="bot" [class.bot--activo]="bot.activo" (click)="alternarBot(bot)">
-          <i [class]="bot.icono" aria-hidden="true"></i>
-          <span class="bot__texto">
-            <span class="bot__nombre">{{ bot.nombre }}</span>
-            <span class="bot__descripcion">{{ bot.descripcion }}</span>
-            <span class="bot__comandos">{{ bot.comandos.length }} comandos</span>
-          </span>
-          <i class="fa-solid bot__estado" [class.fa-toggle-on]="bot.activo" [class.fa-toggle-off]="!bot.activo" aria-hidden="true"></i>
-        </button>
-      } @empty {
-        <p class="panel-bots__vacio">No hay bots disponibles.</p>
+      <div class="bots">
+        @for (bot of bots(); track bot.id) {
+          <button type="button" class="bot" [class.bot--activo]="bot.activo" (click)="alternarBot(bot)">
+            <span class="bot__icono"><i [class]="bot.icono" aria-hidden="true"></i></span>
+            <span class="bot__texto">
+              <span class="bot__nombre">{{ bot.nombre }}</span>
+              <span class="bot__descripcion">{{ bot.descripcion }}</span>
+              <span class="bot__comandos">{{ bot.comandos.length }} comandos</span>
+            </span>
+            <span class="interruptor" [class.interruptor--on]="bot.activo" aria-hidden="true">
+              <span class="interruptor__bola"></span>
+            </span>
+          </button>
+        } @empty {
+          <p class="panel__vacio">No hay bots disponibles.</p>
+        }
+      </div>
+
+      <button type="button" class="panel__enlace" (click)="verComandos()">
+        Ver todos los comandos y lo que hace cada uno
+        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+
+  @if (vista() === 'ia') {
+    <div class="panel">
+      <p class="panel__nota">
+        <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+        Con el modo IA escribes normal («manda un correo a Ana») y yo elijo el comando. Sin él, escribe el
+        comando tal cual, por ejemplo <code>/gmail-enviar</code>.
+      </p>
+
+      <button type="button" class="interruptor-fila" [class.interruptor-fila--on]="modoIa()" (click)="alternarModoIa()">
+        <span class="interruptor-fila__texto">
+          <strong>Modo IA</strong>
+          <span>{{ modoIa() ? 'Encendido: entiende lenguaje natural' : 'Apagado: sólo comandos exactos' }}</span>
+        </span>
+        <span class="interruptor" [class.interruptor--on]="modoIa()" aria-hidden="true">
+          <span class="interruptor__bola"></span>
+        </span>
+      </button>
+
+      @if (modoTraduciendo()) {
+        <span class="traduciendo">
+          <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+          traduciendo tu mensaje…
+        </span>
       }
     </div>
   }
 
-  @if (panelAyuda()) {
-    <p class="nota-ayuda">
-      <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
-      Describe lo que quieres hacer y te digo el comando exacto. Aquí nada se ejecuta.
-    </p>
+  @if (vista() === 'ayuda') {
+    <div class="panel">
+      <p class="panel__nota panel__nota--ayuda">
+        <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+        Describe lo que quieres hacer y te digo el comando exacto. Aquí nada se ejecuta.
+      </p>
+      <p class="panel__pista">Prueba con: «mandar un correo», «listar mis repos», «subir un archivo a Drive».</p>
+    </div>
   }
 
   <div class="mensajes">
@@ -131,26 +196,42 @@
         </div>
       </div>
     } @empty {
-      <p class="mensajes__vacio">
-        Escribe un comando, por ejemplo <code>/equipo-listar</code>, o usa el modo IA.
-      </p>
+      <div class="arranque">
+        <p class="arranque__titulo">
+          <i class="fa-solid fa-hand-sparkles" aria-hidden="true"></i>
+          Empieza con una de estas
+        </p>
+        <div class="arranque__chips">
+          @for (atajo of atajos; track atajo.comando) {
+            <button type="button" class="chip" (click)="usarComando(atajo.comando)">
+              <code>{{ atajo.comando }}</code>
+              <span>{{ atajo.texto }}</span>
+            </button>
+          }
+        </div>
+        <p class="arranque__pie">
+          También puedes escribir <code>&#64;listar</code> para ver todos los comandos, o
+          <code>&#64;lista:google</code> para los de Google.
+        </p>
+      </div>
     }
   </div>
 
-  <div class="entrada">
+  <div class="entrada" [class.entrada--ayuda]="vista() === 'ayuda'">
     <input
       type="text"
-      [placeholder]="panelAyuda() ? '¿Qué quieres hacer?' : 'Escribe /comando o tu mensaje…'"
+      [placeholder]="vista() === 'ayuda' ? '¿Qué quieres hacer?' : 'Escribe /comando o tu mensaje…'"
       [ngModel]="texto()"
       (ngModelChange)="texto.set($event)"
-      (keyup.enter)="panelAyuda() ? preguntarAyuda() : enviar()"
+      (keyup.enter)="vista() === 'ayuda' ? preguntarAyuda() : enviar()"
       [disabled]="enviando()" />
     <button
       type="button"
       class="entrada__enviar"
       [disabled]="enviando()"
-      (click)="panelAyuda() ? preguntarAyuda() : enviar()">
-      <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+      [title]="vista() === 'ayuda' ? 'Preguntar' : 'Enviar'"
+      (click)="vista() === 'ayuda' ? preguntarAyuda() : enviar()">
+      <i [class]="vista() === 'ayuda' ? 'fa-solid fa-circle-question' : 'fa-solid fa-paper-plane'" aria-hidden="true"></i>
     </button>
   </div>
 </div>

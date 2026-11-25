@@ -26,8 +26,10 @@ import { ResumeProfile } from '../../core/models/resume.model';
 import { Empresa } from '../../core/models/empresa.model';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { EmpresaCrearComponent } from '../empresa/empresa-crear/empresa-crear.component';
+import { GuiaComandosComponent } from '../../shared/components/guia-comandos/guia-comandos.component';
+import { SugerenciasBotService, TipoSugerencia } from '../../core/services/sugerencias-bot.service';
 
-type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia';
+type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'comandos';
 
 const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
   { id: 'cuenta', titulo: 'Cuenta', icono: 'fa-solid fa-user' },
@@ -36,6 +38,7 @@ const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
   { id: 'diseno', titulo: 'Diseño', icono: 'fa-solid fa-palette' },
   { id: 'tarjeta', titulo: 'Tarjeta', icono: 'fa-solid fa-id-card' },
   { id: 'apariencia', titulo: 'Apariencia', icono: 'fa-solid fa-circle-half-stroke' },
+  { id: 'comandos', titulo: 'Comandos', icono: 'fa-solid fa-terminal' },
 ];
 
 const ACENTO_POR_DEFECTO = '#4a9eff';
@@ -43,7 +46,7 @@ const ACENTO_POR_DEFECTO = '#4a9eff';
 @Component({
   selector: 'app-ajustes-cuenta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent],
+  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent, GuiaComandosComponent],
   templateUrl: './ajustes-cuenta.component.html',
   styleUrls: ['./ajustes-cuenta.component.scss'],
 })
@@ -60,6 +63,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   readonly tema = inject(TemaService);
   readonly diseno = inject(DisenoService);
   readonly empresas = inject(EmpresaService);
+  readonly sugerenciasService = inject(SugerenciasBotService);
 
   @ViewChild('tabsNav') tabsNav?: ElementRef<HTMLElement>;
 
@@ -80,6 +84,17 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   ];
 
   readonly maxDate = new Date().toISOString().split('T')[0];
+
+  /** Formulario de sugerencias de bots o herramientas nuevas. */
+  readonly tiposSugerencia: { valor: TipoSugerencia; etiqueta: string; icono: string }[] = [
+    { valor: 'NUEVO', etiqueta: 'Un bot nuevo', icono: 'fa-solid fa-robot' },
+    { valor: 'HERRAMIENTA', etiqueta: 'Una herramienta', icono: 'fa-solid fa-plug' },
+    { valor: 'MEJORA', etiqueta: 'Una mejora', icono: 'fa-solid fa-wand-magic-sparkles' },
+  ];
+  readonly tipoSugerencia = signal<TipoSugerencia>('NUEVO');
+  readonly nombreSugerencia = signal('');
+  readonly detalleSugerencia = signal('');
+  readonly enviandoSugerencia = signal(false);
 
   readonly paleta = ['#4a9eff', '#3fb950', '#f5b75e', '#e5484d', '#c297ff', '#ff7ac6', '#2dd4bf', '#e8e8e8'];
 
@@ -138,6 +153,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
 
     this.cargarEstado();
     this.cargarCv();
+    this.cargarSugerencias();
     this.cargarDiseno();
     this.empresas.cargarMis().subscribe();
   }
@@ -665,5 +681,52 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
       this.diseno.aplicarAjeno(borrador);
       this.diseno.aplicarPrevia(this.diseno.estaTarjeta(borrador));
     }, 350);
+  }
+
+  /* ------------------------------------------------- sugerencias de bots */
+
+  private cargarSugerencias(): void {
+    this.sugerenciasService
+      .cargar()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => this.sugerenciasService.sugerencias.set([]) });
+  }
+
+  enviarSugerencia(): void {
+    const nombre = this.nombreSugerencia().trim();
+    if (!nombre || this.enviandoSugerencia()) return;
+
+    this.enviandoSugerencia.set(true);
+    this.sugerenciasService
+      .crear(this.tipoSugerencia(), nombre, this.detalleSugerencia().trim())
+      .pipe(
+        finalize(() => this.enviandoSugerencia.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.nombreSugerencia.set('');
+          this.detalleSugerencia.set('');
+          this.exito.set('Sugerencia enviada. Gracias: queda anotada en tu cuenta.');
+          this.cargarSugerencias();
+          setTimeout(() => this.exito.set(null), 4000);
+        },
+        error: (err) => {
+          this.error.set(
+            err?.error?.message ?? 'No pude guardar la sugerencia. Inténtalo otra vez.',
+          );
+        },
+      });
+  }
+
+  borrarSugerencia(id: string): void {
+    this.sugerenciasService
+      .borrar(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.cargarSugerencias() });
+  }
+
+  etiquetaTipo(tipo: TipoSugerencia): string {
+    return this.tiposSugerencia.find((t) => t.valor === tipo)?.etiqueta ?? tipo;
   }
 }

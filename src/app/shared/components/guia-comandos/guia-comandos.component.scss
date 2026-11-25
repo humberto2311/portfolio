@@ -70,6 +70,195 @@
   color: var(--texto, #f2f2f6);
 }
 
+/* ---------- Carpetas (vista principal) ---------- */
+
+.carpetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.7rem;
+}
+
+.carpeta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.95rem 0.85rem 0.85rem;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  background: var(--bg-elevated, rgba(255, 255, 255, 0.04));
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+/* La pestaña de la carpeta, arriba a la izquierda. */
+.carpeta__pestana {
+  position: absolute;
+  top: -1px;
+  left: 0.85rem;
+  width: 52px;
+  height: 8px;
+  border-radius: 0 0 6px 6px;
+  background: var(--border-soft, rgba(255, 255, 255, 0.14));
+  transition: background 0.15s ease;
+}
+
+.carpeta:hover {
+  border-color: var(--accent-border, rgba(74, 158, 255, 0.35));
+  background: var(--bg-hover, rgba(255, 255, 255, 0.07));
+  transform: translateY(-1px);
+}
+
+.carpeta:hover .carpeta__pestana {
+  background: var(--accent-cyan, #4a9eff);
+}
+
+.carpeta__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 9px;
+  background: var(--accent-soft, rgba(74, 158, 255, 0.14));
+  color: var(--accent-cyan, #4a9eff);
+  font-size: 0.95rem;
+}
+
+.carpeta__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.carpeta__texto strong {
+  font-size: 0.84rem;
+  color: var(--text-primary, #f2f2f6);
+}
+
+.carpeta__texto small {
+  font-size: 0.71rem;
+  color: var(--text-muted, #9a9aa8);
+}
+
+.carpeta__cuenta {
+  padding: 0.05rem 0.42rem;
+  border-radius: 999px;
+  background: var(--bg-card, rgba(255, 255, 255, 0.08));
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-secondary, #9a9aa8);
+}
+
+/* ---------- Cabecera de una carpeta abierta ---------- */
+
+.migas {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  color: var(--text-muted, #9a9aa8);
+}
+
+.migas__atras {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  background: none;
+  color: var(--text-secondary, #9a9aa8);
+  font-family: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.migas__atras:hover {
+  color: var(--text-primary, #f2f2f6);
+  border-color: var(--accent-border, rgba(74, 158, 255, 0.35));
+}
+
+.migas__actual {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-primary, #f2f2f6);
+  font-weight: 600;
+}
+
+.carpeta__cabecera {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  background: var(--bg-elevated, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
+}
+
+.carpeta__cabecera .carpeta__icono {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  font-size: 1.05rem;
+}
+
+.carpeta__datos h3 {
+  margin: 0 0 0.15rem;
+  font-size: 0.98rem;
+  color: var(--text-primary, #f2f2f6);
+}
+
+.carpeta__resumen {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--accent-cyan, #4a9eff);
+}
+
+.carpeta__para-que {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #9a9aa8);
+}
+
+.carpeta__nota {
+  margin: 0.35rem 0 0;
+  font-size: 0.73rem;
+  color: var(--text-faint, #8b949e);
+}
+
+/* ---------- Resultados de búsqueda ---------- */
+
+.resultados {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.resultados__cuenta {
+  margin: 0 0 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-muted, #9a9aa8);
+}
+
+.comando__icono {
+  font-size: 0.72rem;
+  color: var(--accent-cyan, #4a9eff);
+}
+
+.comando__carpeta {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--bg-card, rgba(255, 255, 255, 0.07));
+  font-size: 0.66rem;
+  color: var(--text-muted, #9a9aa8);
+  white-space: nowrap;
+}
+
 .filtros {
   display: flex;
   flex-wrap: wrap;
@@ -324,3 +513,12 @@
 .ejemplo__copiar:hover {
   color: #1ed760;
 }
+
+/* Dentro de Ajustes: sin marco propio, sólo el contenido. */
+.guia--compacta {
+  .guia__titulo--oculto { display: none; }
+  .guia__buscador--oculto { display: none; }
+  .guia__buscador--arriba { display: flex; margin-bottom: .75rem; }
+}
+
+.guia__buscador--arriba { display: none; }

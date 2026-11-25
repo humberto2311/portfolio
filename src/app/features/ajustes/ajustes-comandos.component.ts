@@ -21,22 +21,24 @@ import { GuiaComandosComponent } from '../../shared/components/guia-comandos/gui
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      max-width: 860px;
+      margin: 0 auto;
       padding: 1.25rem;
       border-radius: 20px;
-      background: var(--superficie, #17171d);
-      border: 1px solid var(--borde, rgba(255, 255, 255, 0.08));
+      background: var(--bg-card, #17171d);
+      border: 1px solid var(--bg-border, rgba(255, 255, 255, 0.08));
     }
 
     .pagina__cabecera h1 {
       margin: 0;
-      font-size: 1.2rem;
-      color: var(--texto, #f2f2f6);
+      font-size: 1.3rem;
+      color: var(--text-primary, #f2f2f6);
     }
 
     .pagina__cabecera p {
-      margin: 0.2rem 0 0;
-      font-size: 0.8rem;
-      color: var(--texto-suave, #9a9aa8);
+      margin: 0.25rem 0 0;
+      font-size: 0.82rem;
+      color: var(--text-muted, #9a9aa8);
     }
   `]
 })

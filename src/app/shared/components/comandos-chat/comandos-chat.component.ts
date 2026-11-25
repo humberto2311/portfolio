@@ -1,4 +1,4 @@
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, Input, OnInit, computed, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,6 +28,9 @@ export class ComandosChatComponent implements OnInit {
   @Input() conversacionId: string | null = null;
   @Input() compacto = false;
 
+  /** Lo emite la X de la cabecera para que el chat cierre el intérprete. */
+  readonly cerrar = output<void>();
+
   private comandos = inject(ComandosService);
   private toques = inject(ToqueNfcService);
   private router = inject(Router);
@@ -36,8 +39,8 @@ export class ComandosChatComponent implements OnInit {
   readonly mensajes = signal<MensajeComando[]>([]);
   readonly texto = signal('');
   readonly enviando = signal(false);
-  readonly panelBots = signal(false);
-  readonly panelAyuda = signal(false);
+  /** Pestaña visible: bots, modo IA o ayuda. Una sola a la vez. */
+  readonly vista = signal<'bots' | 'ia' | 'ayuda'>('bots');
   readonly bots = signal<BotComando[]>([]);
   readonly modoIa = signal(false);
   readonly pendiente = signal<RespuestaComando | null>(null);
@@ -47,6 +50,14 @@ export class ComandosChatComponent implements OnInit {
   readonly hayPendiente = computed(() => this.pendiente() !== null);
   readonly modoTraduciendo = computed(() => this.modoIa() && this.enviando());
   readonly hayBotsActivos = computed(() => this.bots().some((bot) => bot.activo));
+
+  /** Comandos de ejemplo para arrancar sin tener que memorizar nada. */
+  readonly atajos = [
+    { comando: '@listar', texto: 'ver todos los comandos' },
+    { comando: '/equipo-listar', texto: 'mis equipos' },
+    { comando: '/gmail-buscar', texto: 'buscar un correo' },
+    { comando: '/gdrive-buscar', texto: 'buscar en Drive' },
+  ];
 
   ngOnInit(): void {
     this.cargarBots();
@@ -80,6 +91,14 @@ export class ComandosChatComponent implements OnInit {
 
   cancelar(): void {
     this.ejecutar(this.comandos.cancelar(this.conversacionId));
+  }
+
+  abrirVista(vista: 'bots' | 'ia' | 'ayuda'): void {
+    this.vista.set(this.vista() === vista ? 'bots' : vista);
+  }
+
+  verComandos(): void {
+    void this.router.navigate(['/app/ajustes'], { queryParams: { tab: 'comandos' } });
   }
 
   alternarModoIa(): void {
@@ -147,7 +166,7 @@ export class ComandosChatComponent implements OnInit {
   }
 
   usarComando(comando: string): void {
-    this.texto.set(comando + ' ');
+    this.texto.set(comando.startsWith('@') ? comando : comando + ' ');
   }
 
   private ejecutar(peticion: ReturnType<ComandosService['confirmar']>): void {

@@ -1,61 +1,157 @@
-<div class="guia">
-  <div class="guia__cabecera">
-    <div class="guia__titulo">
-      <i class="fa-solid fa-terminal" aria-hidden="true"></i>
-      <div>
-        <h2>Comandos disponibles</h2>
-        <p>No hace falta memorizarlos: pídele al bot lo que quieras con tus palabras y él elige el comando. Aquí ves qué hace cada uno, por si prefieres escribirlo directo.</p>
-      </div>
-    </div>
-
-    <div class="guia__buscador">
-      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input
-        type="search"
-        placeholder="Buscar comando o categoría…"
-        [ngModel]="busqueda()"
-        (ngModelChange)="busqueda.set($event)"
-        aria-label="Buscar comando" />
-    </div>
-  </div>
-
-  <div class="filtros">
-    <button type="button" class="filtro" [class.filtro--activo]="categoriaActiva() === null" (click)="filtrarCategoria(null)">
-      Todas
-    </button>
-    @for (categoria of categorias(); track categoria.id) {
-      <button
-        type="button"
-        class="filtro"
-        [class.filtro--activo]="categoriaActiva() === categoria.id"
-        (click)="filtrarCategoria(categoria.id)">
-        <i [class]="categoria.icono" aria-hidden="true"></i>
-        {{ categoria.nombre }}
-      </button>
-    }
-  </div>
+<div class="guia" [class.guia--compacta]="compacta()">
 
   @if (cargando()) {
     <p class="guia__aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando comandos…</p>
-  } @else if (totalVisibles() === 0) {
-    <p class="guia__aviso">No hay comandos que coincidan con la búsqueda.</p>
-  }
+  } @else {
 
-  @for (grupo of grupos(); track grupo.categoria.id) {
-    <section class="grupo">
-      <div class="grupo__cabecera">
-        <h3 class="grupo__titulo">
-          <i [class]="grupo.categoria.icono" aria-hidden="true"></i>
-          {{ grupo.categoria.nombre }}
-          <span class="grupo__cuenta">{{ grupo.comandos.length }}</span>
-        </h3>
-        @if (paraQueCategoria(grupo.categoria.id)) {
-          <p class="grupo__para-que">{{ paraQueCategoria(grupo.categoria.id) }}</p>
+    <div class="guia__cabecera">
+      @if (compacta()) {
+        <div class="guia__buscador guia__buscador--arriba">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input
+            type="search"
+            placeholder="Buscar comando o carpeta…"
+            [ngModel]="busqueda()"
+            (ngModelChange)="escribirTexto($event)"
+            aria-label="Buscar comando" />
+        </div>
+      }
+      <div class="guia__titulo" [class.guia__titulo--oculto]="compacta()">
+        <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+        <div>
+          <h2>Comandos disponibles</h2>
+          <p>No hace falta memorizarlos: pídele al bot lo que quieras con tus palabras y él elige el comando. Aquí ves qué hace cada uno, por si prefieres escribirlo directo.</p>
+        </div>
+      </div>
+
+      <div class="guia__buscador" [class.guia__buscador--oculto]="compacta()">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input
+          type="search"
+          placeholder="Buscar comando o carpeta…"
+          [ngModel]="busqueda()"
+          (ngModelChange)="escribirTexto($event)"
+          aria-label="Buscar comando" />
+      </div>
+    </div>
+
+    @if (buscando()) {
+      <!-- Resultados planos de la búsqueda -->
+      <div class="resultados">
+        <p class="resultados__cuenta">
+          {{ totalComandos() === 0 ? 'Ningún comando coincide' : totalComandos() + ' comando(s)' }}
+          para «{{ busqueda() }}»
+        </p>
+
+        @for (grupo of grupos(); track grupo.categoria.id) {
+          @for (comando of grupo.comandos; track comando.nombre) {
+            <article class="comando" [class.comando--abierto]="abierto() === comando.nombre">
+              <button type="button" class="comando__fila" (click)="alternar(comando.nombre)">
+                <i [class]="icono(grupo.categoria)" class="comando__icono" aria-hidden="true"></i>
+                <code class="comando__nombre">{{ comando.nombre }}</code>
+                <span class="comando__descripcion">{{ comando.descripcion }}</span>
+                <span class="comando__carpeta">{{ grupo.categoria.nombre }}</span>
+                <i class="fa-solid fa-chevron-down comando__flecha" aria-hidden="true"></i>
+              </button>
+
+              @if (abierto() === comando.nombre) {
+                <div class="comando__detalle">
+                  <p class="comando__para-que">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    {{ paraQue(comando.api) }}
+                  </p>
+
+                  <p class="comando__que-hace">{{ comando.descripcion }}</p>
+
+                  @if (hayParametros(comando)) {
+                    <table class="parametros">
+                      <thead>
+                        <tr>
+                          <th>Parámetro</th>
+                          <th>Tipo</th>
+                          <th>Descripción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (parametro of comando.parametros; track parametro.nombre) {
+                          <tr>
+                            <td>
+                              <code>{{ parametro.nombre }}</code>
+                              @if (parametro.obligatorio) {
+                                <span class="etiqueta etiqueta--obligatorio">obligatorio</span>
+                              }
+                            </td>
+                            <td>{{ parametro.tipo }}</td>
+                            <td>{{ parametro.descripcion }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  } @else {
+                    <p class="comando__sin-parametros">Este comando no necesita parámetros.</p>
+                  }
+
+                  <p class="comando__roles">
+                    <strong>Roles válidos:</strong>
+                    @for (rol of comando.roles; track rol) {
+                      <span class="rol">{{ rol }}</span>
+                    }
+                  </p>
+
+                  <div class="ejemplo">
+                    <code>{{ comando.ejemplo }}</code>
+                    <button type="button" class="ejemplo__copiar" (click)="copiar(comando.ejemplo, $event)">
+                      @if (copiado() === comando.ejemplo) {
+                        <i class="fa-solid fa-check" aria-hidden="true"></i> Copiado
+                      } @else {
+                        <i class="fa-solid fa-copy" aria-hidden="true"></i> Copiar
+                      }
+                    </button>
+                  </div>
+                </div>
+              }
+            </article>
+          }
+        }
+
+        @if (totalComandos() === 0) {
+          <p class="guia__aviso">No hay comandos que coincidan con la búsqueda.</p>
         }
       </div>
 
+    } @else if (carpetaActual()) {
+      <!-- Dentro de una carpeta -->
+      <div class="migas">
+        <button type="button" class="migas__atras" (click)="volver()">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Comandos
+        </button>
+        <span class="migas__separador">/</span>
+        <span class="migas__actual">
+          <i [class]="icono(carpetaActual()!.categoria)" aria-hidden="true"></i>
+          {{ carpetaActual()!.categoria.nombre }}
+        </span>
+      </div>
+
+      <header class="carpeta__cabecera">
+        <span class="carpeta__icono"><i [class]="icono(carpetaActual()!.categoria)" aria-hidden="true"></i></span>
+        <div class="carpeta__datos">
+          <h3>{{ carpetaActual()!.categoria.nombre }}</h3>
+          <p class="carpeta__resumen">{{ resumen(carpetaActual()!) }}</p>
+          @if (paraQueCategoria(carpetaActual()!.categoria.id)) {
+            <p class="carpeta__para-que">{{ paraQueCategoria(carpetaActual()!.categoria.id) }}</p>
+          }
+          <p class="carpeta__nota">
+            <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            Bot: <strong>{{ nombreBot(carpetaActual()!.categoria.id) }}</strong>
+            @if (notaBot(carpetaActual()!.categoria.id)) {
+              · {{ notaBot(carpetaActual()!.categoria.id) }}
+            }
+          </p>
+        </div>
+      </header>
+
       <ul class="lista">
-        @for (comando of grupo.comandos; track comando.nombre) {
+        @for (comando of carpetaActual()!.comandos; track comando.nombre) {
           <li class="comando" [class.comando--abierto]="abierto() === comando.nombre">
             <button type="button" class="comando__fila" (click)="alternar(comando.nombre)">
               <code class="comando__nombre">{{ comando.nombre }}</code>
@@ -119,7 +215,7 @@
 
                 <div class="ejemplo">
                   <code>{{ comando.ejemplo }}</code>
-                  <button type="button" class="ejemplo__copiar" (click)="copiar(comando.ejemplo)">
+                  <button type="button" class="ejemplo__copiar" (click)="copiar(comando.ejemplo, $event)">
                     @if (copiado() === comando.ejemplo) {
                       <i class="fa-solid fa-check" aria-hidden="true"></i> Copiado
                     } @else {
@@ -132,6 +228,26 @@
           </li>
         }
       </ul>
-    </section>
+
+    } @else {
+      <!-- Vista de carpetas -->
+      <div class="carpetas">
+        @for (grupo of grupos(); track grupo.categoria.id) {
+          <button type="button" class="carpeta" (click)="abrirCarpeta(grupo.categoria.id)">
+            <span class="carpeta__pestana"></span>
+            <span class="carpeta__icono"><i [class]="icono(grupo.categoria)" aria-hidden="true"></i></span>
+            <span class="carpeta__texto">
+              <strong>{{ grupo.categoria.nombre }}</strong>
+              <small>{{ resumen(grupo) }}</small>
+            </span>
+            <span class="carpeta__cuenta">{{ grupo.comandos.length }}</span>
+          </button>
+        }
+      </div>
+
+      @if (grupos().length === 0) {
+        <p class="guia__aviso">No hay comandos en el catálogo.</p>
+      }
+    }
   }
 </div>

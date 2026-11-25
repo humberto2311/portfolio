@@ -10,6 +10,31 @@ interface GrupoComandos {
   comandos: ComandoDefinicion[];
 }
 
+const PARA_QUE: Record<string, string> = {
+  'google-calendar': 'Mueve tu Google Calendar: crea, cancela y comparte eventos con quien le digas.',
+  'google-sheets': 'Trabaja tus hojas de Google: las crea, escribe filas y reparte permisos.',
+  'google-docs': 'Crea y edita documentos de Google Docs, y los comparte con tu equipo.',
+  'google-drive': 'Ordena tu Drive: busca archivos, los mueve de carpeta y los comparte.',
+  gmail: 'Escribe y envía correos desde tu Gmail.',
+  github: 'Consulta y toca tus repositorios: issues, ramas, commits y pull requests.',
+  youtube: 'Revisa tus videos y tu canal de YouTube.',
+  red: 'Todo lo de la propia red social: publicar, comentar, seguir y ver tu perfil.'
+};
+
+const PARA_QUE_CATEGORIA: Record<string, string> = {
+  calendar: 'Agenda y consulta tu tiempo.',
+  sheets: 'Hojas de cálculo con datos de la red o de tu equipo.',
+  docs: 'Documentos escritos y compartidos.',
+  drive: 'Archivos y carpetas.',
+  gmail: 'Correo.',
+  github: 'Código y repositorios.',
+  youtube: 'Tus videos.',
+  networking: 'Personas, contactos y tu red.',
+  equipos: 'Equipos de trabajo y sus miembros.',
+  grupos: 'Grupos y sus permisos.',
+  nfc: 'Cosas que se tocan con el móvil.'
+};
+
 @Component({
   selector: 'app-guia-comandos',
   standalone: true,
@@ -68,6 +93,18 @@ export class GuiaComandosComponent implements OnInit {
         },
         error: () => this.cargando.set(false)
       });
+  }
+
+  paraQue(api: string): string {
+    return PARA_QUE[api] ?? 'Acciones sobre tus herramientas conectadas.';
+  }
+
+  paraQueCategoria(id: string): string {
+    return PARA_QUE_CATEGORIA[id] ?? '';
+  }
+
+  escribir(comando: ComandoDefinicion): boolean {
+    return comando.escritura;
   }
 
   hayParametros(comando: ComandoDefinicion): boolean {

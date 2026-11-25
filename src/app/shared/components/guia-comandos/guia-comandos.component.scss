@@ -105,6 +105,44 @@
   color: var(--texto-suave, #9a9aa8);
 }
 
+.grupo__cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.grupo__para-que {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--texto-suave, #9a9aa8);
+}
+
+.comando__para-que {
+  margin: 0 0 0.4rem;
+  font-size: 0.76rem;
+  color: var(--texto-suave, #9a9aa8);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.comando__que-hace {
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  color: var(--texto, #f2f2f6);
+}
+
+.etiqueta--escribe {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+  font-size: 0.62rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .grupo__titulo {
   display: flex;
   align-items: center;

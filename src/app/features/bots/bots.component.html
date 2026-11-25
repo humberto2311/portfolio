@@ -1,0 +1,179 @@
+<div class="bots">
+
+  <header class="cabecera">
+    <div class="cabecera__texto">
+      <h1>{{ bot() ? bot()!.nombre : 'Tus bots' }}</h1>
+      <p class="sub" *ngIf="!bot()">
+        Pídele algo con tus palabras y el bot lo hace en tus herramientas. Sin comandos que memorizar.
+      </p>
+      <p class="sub" *ngIf="bot()?.descripcion">{{ bot()!.descripcion }}</p>
+    </div>
+
+    <div class="cabecera__acciones">
+      <button class="volver" type="button" *ngIf="bot()" (click)="volver()">
+        <i class="fa-solid fa-arrow-left"></i> Todos
+      </button>
+      <button class="primario" type="button" *ngIf="!bot()" (click)="crear()">
+        <i class="fa-solid fa-plus"></i> Nuevo bot
+      </button>
+    </div>
+  </header>
+
+  <p class="aviso" *ngIf="aviso()"><i class="fa-solid fa-circle-check"></i> {{ aviso() }}</p>
+  <p class="error" *ngIf="error()"><i class="fa-solid fa-circle-exclamation"></i> {{ error() }}</p>
+
+  <section class="lista" *ngIf="!bot()">
+    <p class="vacio" *ngIf="cargando()">
+      <i class="fa-solid fa-spinner fa-spin"></i> Cargando…
+    </p>
+
+    <div class="vacio-tarjeta" *ngIf="!cargando() && bots().length === 0">
+      <i class="fa-solid fa-robot" aria-hidden="true"></i>
+      <h2>Aún no tienes bots</h2>
+      <p>Crea uno y conéctale Google Calendar para empezar a agendar sin salir del chat.</p>
+      <button class="primario" type="button" (click)="crear()">Crear mi primer bot</button>
+    </div>
+
+    <article class="fila" *ngFor="let b of bots()" (click)="abrir(b.id)">
+      <span class="fila__icono"><i class="fa-solid fa-robot"></i></span>
+      <div class="datos">
+        <strong>{{ b.nombre }}</strong>
+        <span>{{ b.descripcion || 'Sin descripción' }}</span>
+      </div>
+      <span class="estado" [class.activo]="b.activo">{{ b.activo ? 'Activo' : 'Apagado' }}</span>
+      <i class="fa-solid fa-chevron-right fila__flecha"></i>
+    </article>
+  </section>
+
+  <section class="detalle" *ngIf="bot() as b">
+
+    <div class="pasos">
+      <div class="paso" [class.paso--hecho]="google()?.conectado">
+        <span class="paso__num">{{ google()?.conectado ? '✓' : '1' }}</span>
+        <div>
+          <strong>Conecta Google</strong>
+          <small>Sin esto el bot no puede tocar tu calendario.</small>
+        </div>
+      </div>
+      <div class="paso" [class.paso--hecho]="hayHerramientas()">
+        <span class="paso__num">{{ hayHerramientas() ? '✓' : '2' }}</span>
+        <div>
+          <strong>Activa herramientas</strong>
+          <small>Elige qué puede usar el bot.</small>
+        </div>
+      </div>
+      <div class="paso" [class.paso--hecho]="hayMensajes()">
+        <span class="paso__num">{{ hayMensajes() ? '✓' : '3' }}</span>
+        <div>
+          <strong>Pídele algo</strong>
+          <small>Escríbele abajo, con tus palabras.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="tarjeta">
+      <div class="tarjeta__cabecera">
+        <span class="tarjeta__icono"><i class="fa-brands fa-google"></i></span>
+        <div class="tarjeta__titulo">
+          <strong>Cuenta de Google</strong>
+          <small>Calendar, Sheets, Docs y Drive.</small>
+        </div>
+        <span class="pastilla" [class.pastilla--ok]="google()?.conectado">
+          {{ google()?.conectado ? 'Conectada' : 'Sin conectar' }}
+        </span>
+      </div>
+
+      <p class="error" *ngIf="google() && !google()!.disponible">
+        {{ google()!.motivo }}
+      </p>
+
+      <ng-container *ngIf="google()?.disponible">
+        <p class="tarjeta__texto" *ngIf="google()!.conectado">
+          Conectada como <strong>{{ google()!.cuenta }}</strong>. El bot ya puede crear y leer eventos.
+        </p>
+        <p class="tarjeta__texto" *ngIf="!google()!.conectado">
+          Pulsa conectar y acepta los permisos. Solo se piden una vez.
+        </p>
+
+        <div class="acciones">
+          <button class="primario" type="button" *ngIf="!google()!.conectado" (click)="conectarGoogle()">
+            <i class="fa-brands fa-google"></i> Conectar con Google
+          </button>
+          <button class="secundario" type="button" *ngIf="google()!.conectado" (click)="desconectarGoogle()">
+            Desconectar
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="tarjeta">
+      <div class="tarjeta__cabecera">
+        <span class="tarjeta__icono"><i class="fa-solid fa-plug"></i></span>
+        <div class="tarjeta__titulo">
+          <strong>Herramientas</strong>
+          <small>Lo que el bot tiene permiso de usar.</small>
+        </div>
+      </div>
+
+      <p class="tarjeta__texto" *ngIf="herramientas().length === 0">
+        Todavía no hay ninguna. Conecta Google arriba y aparecerán aquí solas.
+      </p>
+
+      <label class="herramienta" *ngFor="let h of herramientas()">
+        <input type="checkbox" [checked]="h.habilitada"
+               (change)="alternar(h.herramientaNombre, !h.habilitada)" />
+        <span class="herramienta__nombre">{{ h.herramientaNombre }}</span>
+        <small *ngIf="h.cuenta">{{ h.cuenta }}</small>
+      </label>
+    </div>
+
+    <div class="chat">
+      <div class="chat__cabecera">
+        <span class="tarjeta__icono"><i class="fa-solid fa-comments"></i></span>
+        <div class="tarjeta__titulo">
+          <strong>Habla con {{ b.nombre }}</strong>
+          <small>Escribe normal. El bot entiende y ejecuta.</small>
+        </div>
+      </div>
+
+      <div class="hilo">
+        <div class="vacio-hilo" *ngIf="mensajes().length === 0">
+          <p>Prueba con algo así:</p>
+          <div class="sugerencias">
+            <button type="button" class="sugerencia" *ngFor="let s of sugerencias" (click)="usarSugerencia(s)">
+              {{ s }}
+            </button>
+          </div>
+        </div>
+
+        <div class="mensaje" *ngFor="let m of mensajes()" [class.mio]="m.rol === 'usuario'">
+          <p>{{ m.contenido }}</p>
+          <small *ngIf="m.comando">
+            <code>{{ m.comando }}</code>
+            <span class="mensaje__estado" [class.mensaje__estado--ok]="m.estado === 'ejecutado'">
+              {{ m.estado }}
+            </span>
+          </small>
+        </div>
+
+        <div class="escribiendo" *ngIf="enviando()">
+          <i class="fa-solid fa-spinner fa-spin"></i> {{ b.nombre }} está pensando…
+        </div>
+      </div>
+
+      <form class="enviar" (ngSubmit)="enviar()">
+        <input type="text" name="borrador" [(ngModel)]="borrador"
+               placeholder="Agenda una reunión el martes a las 10 con ana@ejemplo.com"
+               [disabled]="enviando()" autocomplete="off" />
+        <button class="primario" type="submit" [disabled]="enviando() || !borrador.trim()">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+
+    <p class="pie">
+      ¿Quieres saber qué más puede hacer?
+      <a routerLink="/app/ajustes/comandos">Mira todos los comandos y para qué sirve cada uno</a>.
+    </p>
+  </section>
+</div>

@@ -8,6 +8,7 @@ import { LinkHubComponent } from './features/link-hub/link-hub.component';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
 import { PerfilComponent } from './features/perfil/perfil.component';
+import { BotsComponent } from './features/bots/bots.component';
 import { FeedComponent } from './features/feed/feed.component';
 import { ProyectosComponent } from './features/proyectos/proyectos.component';
 import { TalentoComponent } from './features/talento/talento.component';
@@ -48,6 +49,8 @@ export const routes: Routes = [
         canActivate: [publicGuard],
         pathMatch: 'full'
       },
+      { path: 'bots', component: BotsComponent },
+      { path: 'bots/:botId', component: BotsComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:username', component: ProyectosComponent }, 
       { path: 'perfil', component: PerfilComponent }, 

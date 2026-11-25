@@ -458,7 +458,6 @@
   }
 }
 
-/* Celular: una columna, botones a todo el ancho */
 @media (max-width: 640px) {
   :host { padding: 1rem .85rem; }
 
@@ -808,7 +807,6 @@
   }
 }
 
-/* --------------------------------------------------------------- Comandos */
 .card--ancho {
   grid-column: 1 / -1;
 }

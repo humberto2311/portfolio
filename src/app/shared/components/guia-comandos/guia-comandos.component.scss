@@ -70,8 +70,6 @@
   color: var(--texto, #f2f2f6);
 }
 
-/* ---------- Carpetas (vista principal) ---------- */
-
 .carpetas {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -92,7 +90,6 @@
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
-/* La pestaña de la carpeta, arriba a la izquierda. */
 .carpeta__pestana {
   position: absolute;
   top: -1px;
@@ -153,8 +150,6 @@
   font-weight: 700;
   color: var(--text-secondary, #9a9aa8);
 }
-
-/* ---------- Cabecera de una carpeta abierta ---------- */
 
 .migas {
   display: flex;
@@ -230,8 +225,6 @@
   font-size: 0.73rem;
   color: var(--text-faint, #8b949e);
 }
-
-/* ---------- Resultados de búsqueda ---------- */
 
 .resultados {
   display: flex;
@@ -514,7 +507,6 @@
   color: #1ed760;
 }
 
-/* Dentro de Ajustes: sin marco propio, sólo el contenido. */
 .guia--compacta {
   .guia__titulo--oculto { display: none; }
   .guia__buscador--oculto { display: none; }

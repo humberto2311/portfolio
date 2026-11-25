@@ -18,7 +18,6 @@ import { ChatMessage } from '../../../../../core/models/chat.model';
 import { Contact } from '../../../../../core/models/contact.model';
 import { ComandosChatComponent } from '../../../comandos-chat/comandos-chat.component';
 
-/** Mensajes seguidos del mismo remitente (una "pila" de burbujas). */
 interface GrupoMensajes {
   clave: string;
   mio: boolean;
@@ -46,18 +45,14 @@ export class ChatViewComponent {
 
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
 
-  /** Mensaje cuyo timestamp y acciones están a la vista (hover o foco). */
   readonly abiertoId = signal<string | null>(null);
 
-  /** Reacciones rápidas por mensaje (❤️ al doble tap). Solo en esta sesión. */
   readonly reacciones = signal<Record<string, string>>({});
 
-  /** ¿Hay texto para enviar? Con texto, el corazón deja paso al botón de enviar. */
   get textoListo(): boolean {
     return this.message().trim().length > 0;
   }
 
-  /** Conversación en la que se ejecutan los comandos (contexto de destinatarios). */
   conversacionActual(): string | null {
     return this.svc.activeContact()?.conversationId ?? null;
   }
@@ -66,12 +61,10 @@ export class ChatViewComponent {
     this.interpreteAbierto.set(!this.interpreteAbierto());
   }
 
-  /** La X del intérprete: cierra el panel de comandos. */
   cerrarInterprete(): void {
     this.interpreteAbierto.set(false);
   }
 
-  /** Clave estable por mensaje (los optimistas aún no tienen id). */
   claveDe(msg: ChatMessage): string {
     return String(msg.id ?? `${msg.time}-${msg.text}`);
   }
@@ -80,7 +73,6 @@ export class ChatViewComponent {
     return this.reacciones()[this.claveDe(msg)] ?? null;
   }
 
-  /** Doble tap: pone o quita el ❤️ sobre la burbuja. */
   alternarReaccion(msg: ChatMessage, evento: Event): void {
     evento.preventDefault();
     evento.stopPropagation();
@@ -104,13 +96,11 @@ export class ChatViewComponent {
     campo?.focus();
   }
 
-  /** Un corazón "me gusta" como mensaje de una sola emoji. */
   enviarLike(): void {
     this.message.set('❤️');
     this.send();
   }
 
-  /** El textarea crece hasta 4 líneas y luego hace scroll. */
   ajustarAlto(evento: Event): void {
     const campo = evento.target as HTMLTextAreaElement;
     campo.style.height = 'auto';
@@ -118,7 +108,6 @@ export class ChatViewComponent {
     campo.style.height = `${Math.min(campo.scrollHeight, maximo)}px`;
   }
 
-  /** Separa los mensajes por día y, dentro de cada día, por remitente seguido. */
   get grupos(): Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> {
     const lista = this.messages;
     const porDia: Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> = [];
@@ -144,7 +133,6 @@ export class ChatViewComponent {
     return porDia;
   }
 
-  /** Solo el último grupo de mensajes propios lleva la marca de "visto". */
   ultimoDelHistorial(grupo: GrupoMensajes): boolean {
     const dias = this.grupos;
     const ultimoDia = dias[dias.length - 1];
@@ -174,7 +162,6 @@ export class ChatViewComponent {
       .toUpperCase();
   }
 
-  /** Clave de la última carga: evita pedir dos veces la misma conversación. */
   private ultimaCarga = '';
 
   constructor() {
@@ -184,7 +171,6 @@ export class ChatViewComponent {
       queueMicrotask(() => this.scrollToBottom());
     });
 
-    // Botón "ir al último mensaje" del panel.
     effect(() => {
       this.svc.scrollAlFinal();
       untracked(() => queueMicrotask(() => this.scrollToBottom()));
@@ -205,12 +191,10 @@ export class ChatViewComponent {
     return id ? this.svc.chatHistories()[id] ?? [] : [];
   }
 
-  /** El track con `??` en el template rompe el compilador de Angular 17.3 (ReferenceError: tmp_x). */
   trackMsg(msg: ChatMessage, index: number): string | number {
     return msg.id ?? `tmp-${index}-${msg.time}`;
   }
 
-  /** El backend admite mensajes en ACEPTADA, o en PENDIENTE siendo quien los solicitó. */
   get puedeEscribir(): boolean {
     const contact = this.svc.activeContact();
     if (!contact) return false;
@@ -218,7 +202,6 @@ export class ChatViewComponent {
     return contact.estado === 'PENDIENTE' && contact.soySolicitante === true;
   }
 
-  /** Me llegó una solicitud todavía sin responder. */
   get esSolicitudPendiente(): boolean {
     const contact = this.svc.activeContact();
     return contact?.estado === 'PENDIENTE' && contact?.esSolicitud === true;
@@ -239,10 +222,9 @@ export class ChatViewComponent {
     const contact = this.svc.activeContact();
     if (!text || !contact || !this.puedeEscribir) return;
 
-    // UI optimista
     this.svc.sendMessage(text);
     this.message.set('');
-    // Que el campo vuelva a su altura de una línea.
+
     const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
     if (campo) campo.style.height = 'auto';
     this.error.set(null);
@@ -267,7 +249,6 @@ export class ChatViewComponent {
       return;
     }
 
-    // Sin conversación previa, la primera petición la crea.
     const peticion = contact.conversationId
       ? this.chatService.responder(contact.conversationId, text)
       : this.chatService.enviar(contact.id, text);
@@ -364,7 +345,7 @@ export class ChatViewComponent {
 
   private cargarHistorial(contact: Contact): void {
     if (!contact.conversationId) {
-      // Sin conversación todavía: lo ya cargado se conserva, la lista la traerá en un momento.
+
       if (!this.messages.length) this.svc.setHistorial(contact.id, []);
       return;
     }

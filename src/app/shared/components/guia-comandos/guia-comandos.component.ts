@@ -10,7 +10,6 @@ interface GrupoComandos {
   comandos: ComandoDefinicion[];
 }
 
-/** A qué bot (los "bots" de commands.json) pertenece cada categoría del catálogo. */
 const BOT_POR_CATEGORIA: Record<string, string> = {
   calendar: 'google',
   sheets: 'google',
@@ -27,7 +26,6 @@ const BOT_POR_CATEGORIA: Record<string, string> = {
 
 const BOT_POR_DEFECTO = 'red';
 
-/** Qué hace falta para que los comandos de esa carpeta funcionen de verdad. */
 const NOTA_BOT: Record<string, string> = {
   google: 'Necesita tu cuenta de Google conectada en el bot: Calendar, Sheets, Docs, Drive y Gmail.',
   github: 'Por ahora solo consulta repositorios públicos; escribir en GitHub pide conectar tu cuenta.',
@@ -73,7 +71,6 @@ export class GuiaComandosComponent implements OnInit {
   private comandos = inject(ComandosService);
   private destroyRef = inject(DestroyRef);
 
-  /** Dentro de Ajustes la guía va sin su propio marco, que ya lo pone la tarjeta. */
   readonly compacta = input(false);
 
   readonly busqueda = signal('');
@@ -81,9 +78,7 @@ export class GuiaComandosComponent implements OnInit {
   readonly definiciones = signal<ComandoDefinicion[]>([]);
   readonly bots = signal<Array<{ id: string; nombre: string; descripcion: string; icono: string; categorias: string[] }>>([]);
 
-  /** Carpeta abierta: null = vista de carpetas. */
   readonly carpetaId = signal<string | null>(null);
-  /** Comando abierto dentro de una carpeta (el que muestra el detalle). */
   readonly abierto = signal<string | null>(null);
   readonly copiado = signal<string | null>(null);
   readonly cargando = signal(true);
@@ -109,7 +104,6 @@ export class GuiaComandosComponent implements OnInit {
       .filter((grupo) => grupo.comandos.length > 0);
   });
 
-  /** Con una búsqueda activa se muestran resultados planos, sin carpetas. */
   readonly buscando = computed(() => this.busqueda().trim().length > 0);
 
   readonly totalComandos = computed(() => this.definiciones().length);
@@ -148,7 +142,6 @@ export class GuiaComandosComponent implements OnInit {
     return PARA_QUE_CATEGORIA[id] ?? '';
   }
 
-  /** Icono de la carpeta: el de su categoría o, si no, el del bot al que pertenece. */
   icono(categoria: CategoriaComando): string {
     return categoria.icono || this.botDe(categoria.id)?.icono || 'fa-solid fa-folder';
   }
@@ -175,7 +168,6 @@ export class GuiaComandosComponent implements OnInit {
     return comando.parametros.length > 0;
   }
 
-  /** Cuántos comandos de la carpeta cambian algo de verdad (el resto solo consultan). */
   cuantosEscriben(grupo: GrupoComandos): number {
     return grupo.comandos.filter((comando) => comando.escritura).length;
   }

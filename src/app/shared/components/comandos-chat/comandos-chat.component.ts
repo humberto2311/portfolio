@@ -28,7 +28,6 @@ export class ComandosChatComponent implements OnInit {
   @Input() conversacionId: string | null = null;
   @Input() compacto = false;
 
-  /** Lo emite la X de la cabecera para que el chat cierre el intérprete. */
   readonly cerrar = output<void>();
 
   private comandos = inject(ComandosService);
@@ -39,7 +38,7 @@ export class ComandosChatComponent implements OnInit {
   readonly mensajes = signal<MensajeComando[]>([]);
   readonly texto = signal('');
   readonly enviando = signal(false);
-  /** Pestaña visible: bots, modo IA o ayuda. Una sola a la vez. */
+
   readonly vista = signal<'bots' | 'ia' | 'ayuda'>('bots');
   readonly bots = signal<BotComando[]>([]);
   readonly modoIa = signal(false);
@@ -51,7 +50,6 @@ export class ComandosChatComponent implements OnInit {
   readonly modoTraduciendo = computed(() => this.modoIa() && this.enviando());
   readonly hayBotsActivos = computed(() => this.bots().some((bot) => bot.activo));
 
-  /** Comandos de ejemplo para arrancar sin tener que memorizar nada. */
   readonly atajos = [
     { comando: '@listar', texto: 'ver todos los comandos' },
     { comando: '/equipo-listar', texto: 'mis equipos' },

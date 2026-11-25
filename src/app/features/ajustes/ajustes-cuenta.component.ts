@@ -85,7 +85,6 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
 
   readonly maxDate = new Date().toISOString().split('T')[0];
 
-  /** Formulario de sugerencias de bots o herramientas nuevas. */
   readonly tiposSugerencia: { valor: TipoSugerencia; etiqueta: string; icono: string }[] = [
     { valor: 'NUEVO', etiqueta: 'Un bot nuevo', icono: 'fa-solid fa-robot' },
     { valor: 'HERRAMIENTA', etiqueta: 'Una herramienta', icono: 'fa-solid fa-plug' },
@@ -682,8 +681,6 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
       this.diseno.aplicarPrevia(this.diseno.estaTarjeta(borrador));
     }, 350);
   }
-
-  /* ------------------------------------------------- sugerencias de bots */
 
   private cargarSugerencias(): void {
     this.sugerenciasService

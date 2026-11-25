@@ -20,7 +20,6 @@ export class SugerenciasBotService {
   private http = inject(HttpClient);
   private readonly API = `${environment.apiUrl}/api/bots/sugerencias`;
 
-  /** Última lista cargada: la comparten el formulario y el resumen. */
   readonly sugerencias = signal<SugerenciaBot[]>([]);
 
   cargar(): Observable<SugerenciaBot[]> {

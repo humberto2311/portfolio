@@ -169,6 +169,11 @@
     }
   }
 
+  /* Cerrada, la columna no ocupa nada: solo queda la cápsula. */
+  &__panel--cerrado {
+    display: none;
+  }
+
   &__ciudades {
     top: 8.6rem;
     right: .65rem;
@@ -1068,5 +1073,123 @@
   .permiso,
   .barra__btn {
     transition: none;
+  }
+}
+
+/* ---------- Vista menos cargada: un solo aviso de estado y cifras solo si existen ---------- */
+
+.estado {
+  position: absolute;
+  top: 4.6rem;
+  left: 50%;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: min(520px, calc(100% - 2rem));
+  padding: 0.7rem 0.9rem;
+  transform: translateX(-50%);
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.14));
+  border-radius: 14px;
+  background: var(--bg-elevated, #1e1e26);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+
+  i {
+    color: var(--warning, #f5b544);
+    font-size: 0.95rem;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    color: var(--text-primary, #f2f2f6);
+  }
+
+  small {
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: var(--text-muted, #9a9aa8);
+  }
+}
+
+.vacio {
+  margin: 0.35rem 0;
+  padding: 0.4rem 0.15rem;
+  font-size: 0.74rem;
+  color: var(--text-muted, #9a9aa8);
+}
+
+
+.estado__cerrar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted, #9a9aa8);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-hover, rgba(255, 255, 255, 0.09));
+    color: var(--text-primary, #f2f2f6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent, #1ed760);
+    outline-offset: 1px;
+  }
+
+  i {
+    font-size: 0.78rem;
+    color: inherit;
+  }
+}
+
+
+/* ---------- Cápsula para abrir y cerrar los paneles del mapa ---------- */
+
+.panel-capsula {
+  position: absolute;
+  top: 8.6rem;
+  left: .65rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.16));
+  border-radius: 999px;
+  background: var(--bg-elevated, #1e1e26);
+  color: var(--text-secondary, #b8b8c6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+
+  &:hover {
+    background: var(--bg-hover, #26262f);
+    color: var(--text-primary, #f2f2f6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent, #1ed760);
+    outline-offset: 2px;
+  }
+
+  i {
+    font-size: 0.72rem;
+  }
+
+  /* Cerrada: la cápsula se queda sola en el borde y dice qué esconde. */
+  &--cerrada {
+    padding-right: 0.8rem;
   }
 }

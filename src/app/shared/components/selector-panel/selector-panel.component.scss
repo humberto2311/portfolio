@@ -1,0 +1,121 @@
+:host {
+  display: inline-block;
+}
+
+.selector-panel {
+  position: relative;
+}
+
+.selector-panel__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.34rem 0.7rem;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.14));
+  border-radius: 999px;
+  background: var(--bg-card, #17171d);
+  color: var(--text-primary, #f2f2f6);
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.selector-panel__boton:hover {
+  border-color: var(--accent, #1ed760);
+  background: var(--bg-elevated, rgba(255, 255, 255, 0.06));
+}
+
+.selector-panel__boton > i:first-child {
+  color: var(--accent, #1ed760);
+  font-size: 0.72rem;
+}
+
+.selector-panel__flecha {
+  font-size: 0.6rem;
+  color: var(--text-muted, #9a9aa8);
+  transition: transform 0.15s ease;
+}
+
+.selector-panel--abierto .selector-panel__flecha {
+  transform: rotate(180deg);
+}
+
+.selector-panel__menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 60;
+  width: 258px;
+  padding: 0.3rem;
+  border-radius: 14px;
+  background: var(--bg-elevated, #1e1e26);
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+}
+
+.selector-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.42rem 0.5rem;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--text-primary, #f2f2f6);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.selector-panel__item:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.07));
+}
+
+.selector-panel__item.activo {
+  background: var(--accent-soft, rgba(30, 215, 96, 0.13));
+}
+
+.selector-panel__item i {
+  width: 1rem;
+  color: var(--text-muted, #9a9aa8);
+  font-size: 0.75rem;
+}
+
+.selector-panel__item.activo i {
+  color: var(--accent, #1ed760);
+}
+
+.selector-panel__item span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.selector-panel__item strong {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.selector-panel__item small {
+  font-size: 0.67rem;
+  color: var(--text-muted, #9a9aa8);
+}
+
+.selector-panel__item--hijo {
+  padding-left: 1.4rem;
+}
+
+.selector-panel__item--empleo {
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--border-soft, rgba(255, 255, 255, 0.1));
+  border-radius: 0 0 9px 9px;
+}
+
+.selector-panel__vacio {
+  margin: 0;
+  padding: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted, #9a9aa8);
+}

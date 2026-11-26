@@ -31,7 +31,7 @@ interface MenuItem {
  * necesitan cuando el riel no existe (p. ej. la tarjeta pública).
  */
 const MENU_PERSONAL: MenuItem[] = [
-  { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard', nota: 'Tus números' },
+  { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/panel', nota: 'Tus números' },
   { label: 'Mi perfil', icon: 'fa-solid fa-id-badge', ruta: '/app/perfil', nota: 'Lo que ven los demás' },
   { label: 'Talento', icon: 'fa-solid fa-magnifying-glass', ruta: '/app/talento', nota: 'Buscar empleo' },
   { label: 'Proyectos', icon: 'fa-solid fa-diagram-project', ruta: '/app/proyectos', nota: 'En los que trabajas' },
@@ -48,7 +48,7 @@ const MENU_EMPRESA: MenuItem[] = [
   { label: 'Mi espacio', icon: 'fa-solid fa-globe', ruta: '/app/empresa/espacio', nota: 'Tu landing' },
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
-  { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa', nota: 'Tus números' },
+  { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/panel', nota: 'Tus números' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo', nota: 'Personas y permisos' },
 ];
 

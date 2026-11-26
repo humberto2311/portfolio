@@ -9,12 +9,10 @@ import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { MapaService, UbicacionMapa, VisibilidadUbicacion } from '../../core/services/mapa.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AnaliticaService } from '../../core/services/analitica.service';
 import {
-  CIUDADES_DEMO,
-  LOCALES_DEMO,
   LocalRegistrado,
   SECTORES,
-  TOQUES_DEMO,
   TipoConexion,
   ToqueUbicacion,
 } from './ubicacion.model';
@@ -35,6 +33,7 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
   private empresas = inject(EmpresaService);
   private mapaSvc = inject(MapaService);
   private toasts = inject(ToastService);
+  private analitica = inject(AnaliticaService);
 
   readonly VISIBILIDADES: { valor: VisibilidadUbicacion; etiqueta: string; detalle: string; icono: string }[] = [
     { valor: 'PRIVATE', etiqueta: 'Privada', detalle: 'Solo tú ves tu mapa', icono: 'fa-lock' },
@@ -53,7 +52,17 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
   readonly nombrePersona = signal(this.auth.currentUser()?.fullName ?? 'Tu perfil');
   readonly empresaActiva = this.empresas.empresaActual;
 
-  readonly toques = signal<ToqueUbicacion[]>(TOQUES_DEMO);
+  /**
+   * Los toques salen de tu analítica real. Mientras llegan (o si no hay),
+   * la vista lo dice en vez de enseñar cifras inventadas.
+   */
+  readonly toques = signal<ToqueUbicacion[]>([]);
+  readonly cargandoToques = signal(true);
+  readonly sinDatos = computed(() => !this.cargandoToques() && this.toques().length === 0);
+
+  /** El aviso se ve si no hay datos y no lo cerraste en esta visita al mapa. */
+  readonly avisoCerrado = signal(false);
+  readonly avisoEnEspera = computed(() => this.sinDatos() && !this.avisoCerrado());
   readonly filtroNombre = signal('');
   readonly filtroDesde = signal('');
   readonly filtroHasta = signal('');
@@ -62,14 +71,24 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
   readonly capas = signal({ personal: true, empresarial: true, locales: true, amigos: true });
   readonly punto = signal({ lat: 4.6097, lng: -74.0817, zoom: 12, nombre: 'Bogotá' });
   readonly abierto = signal({ locales: true, historial: false, ciudades: true });
+
+  /** La columna entera de paneles (locales, historial, empleo) se abre y se cierra. */
+  readonly columnaAbierta = signal(typeof window !== 'undefined' ? window.innerWidth > 900 : true);
   readonly seleccionado = signal<ToqueUbicacion | null>(null);
   readonly localActivo = signal<LocalRegistrado | null>(null);
-  readonly locales = signal<LocalRegistrado[]>(LOCALES_DEMO);
+  readonly locales = signal<LocalRegistrado[]>([]);
   readonly sectores = SECTORES;
   readonly busquedaLocal = signal('');
   readonly filtroSector = signal<'' | import('./ubicacion.model').SectorEmpresa>('');
 
-  readonly ciudades = CIUDADES_DEMO;
+  readonly ciudades = computed<{ ciudad: string; total: number }[]>(() =>
+    [...this.visibles().reduce((mapa, toque) => {
+      mapa.set(toque.ciudad, (mapa.get(toque.ciudad) ?? 0) + toque.toques);
+      return mapa;
+    }, new Map<string, number>())]
+      .map(([ciudad, total]) => ({ ciudad, total }))
+      .sort((a, b) => b.total - a.total)
+  );
 
   readonly localesVisibles = computed(() =>
     this.locales().filter((local) => {
@@ -120,7 +139,18 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
     () => this.toques().filter((toque) => toque.tipo === 'EMPRESARIAL').length,
   );
 
+  cerrarAviso(): void {
+    this.avisoCerrado.set(true);
+  }
+
+  /** La barra se mide contra la ciudad con más toques, no contra un número fijo. */
+  porcentajeCiudad(total: number): number {
+    const maximo = this.ciudades()[0]?.total ?? 0;
+    return maximo ? Math.round((total / maximo) * 100) : 0;
+  }
+
   limpiar(): void {
+    this.avisoCerrado.set(false);
     this.filtroNombre.set('');
     this.filtroDesde.set('');
     this.filtroHasta.set('');
@@ -129,6 +159,10 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
     this.busquedaLocal.set('');
     this.filtroSector.set('');
     this.capas.set({ personal: true, empresarial: true, locales: true, amigos: true });
+  }
+
+  alternarColumna(): void {
+    this.columnaAbierta.update((abierta) => !abierta);
   }
 
   alternar(panel: 'locales' | 'historial' | 'ciudades'): void {
@@ -258,6 +292,48 @@ export class UbicacionComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.cargarUbicacion();
+    this.cargarToques();
+  }
+
+  /**
+   * Trae de la analítica lo que este mapa necesita. Si el backend no tiene
+   * puntos con ciudad, la vista se queda «en espera» en vez de mostrar maqueta.
+   */
+  cargarToques(): void {
+    this.cargandoToques.set(true);
+    // Cada vez que se carga el mapa, el aviso vuelve a estar disponible.
+    this.avisoCerrado.set(false);
+
+    this.analitica.panel(null).subscribe({
+      next: (panel) => {
+        const origenes = panel.origenes ?? [];
+
+        this.toques.set(
+          origenes
+            .filter((origen) => origen.valor > 0)
+            .map((origen, indice): ToqueUbicacion => ({
+              id: String(indice),
+              persona: origen.etiqueta,
+              empresa: '',
+              iniciales: (origen.etiqueta ?? '?').slice(0, 2).toUpperCase(),
+              ciudad: '',
+              lugar: origen.etiqueta,
+              latitud: 0,
+              longitud: 0,
+              fecha: panel.desde ?? '',
+              medio: 'NFC',
+              tipo: 'PERSONAL',
+              toques: origen.valor,
+            }))
+        );
+
+        this.cargandoToques.set(false);
+      },
+      error: () => {
+        this.toques.set([]);
+        this.cargandoToques.set(false);
+      }
+    });
   }
 
   cargarUbicacion(): void {

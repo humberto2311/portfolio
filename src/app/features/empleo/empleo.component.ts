@@ -5,13 +5,14 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { BusquedaEmpleo, GraficoCv, Vacante } from '../../core/models/empleo.model';
 import { EmpleoService } from '../../core/services/empleo.service';
+import { SelectorPanelComponent } from '../../shared/components/selector-panel/selector-panel.component';
 import { EmpleoChatComponent } from './empleo-chat.component';
 import { EmpleoGraficoComponent, TipoGraficoEmpleo } from './empleo-grafico.component';
 
 @Component({
   selector: 'app-empleo',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmpleoGraficoComponent, EmpleoChatComponent, RouterLink, RouterLinkActive],
+  imports: [SelectorPanelComponent, CommonModule, FormsModule, EmpleoGraficoComponent, EmpleoChatComponent, RouterLink, RouterLinkActive],
   templateUrl: './empleo.component.html',
   styleUrls: ['./empleo.component.scss'],
 })

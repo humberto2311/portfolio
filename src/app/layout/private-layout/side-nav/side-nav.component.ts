@@ -24,6 +24,8 @@ interface RailItem {
   nota?: string;
   /** 'cv' = Hoja de vida + Portafolio + Enlaces; 'equipo' = Enlaces + Tarjetas del equipo. */
   grupo?: 'cv' | 'equipo';
+  /** Entradas desplegables dentro de una fila del riel (el panel). */
+  hijos?: RailItem[];
 }
 
 /**
@@ -40,7 +42,7 @@ const NAVEGACION_PERSONAL: RailItem[] = [
 
 /** Lo que vive en "Más": nada de esto se pierde, solo se pliega. */
 const MENU_MAS: RailItem[] = [
-  { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
+  { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/panel' },
   { label: 'Hoja de vida', icon: 'fa-solid fa-file-lines', ruta: '/app/informacion-personal' },
   { label: 'Buscar empleo', icon: 'fa-solid fa-briefcase', ruta: '/app/empleo' },
   { label: 'Emitir por NFC', icon: 'fa-solid fa-tower-broadcast', ruta: '/app/emisora' },
@@ -52,7 +54,12 @@ const NAVEGACION_EMPRESA: RailItem[] = [
   { label: 'Mi espacio', icon: 'fa-solid fa-globe', ruta: '/app/empresa/espacio', nota: 'Tu landing' },
   { label: 'Diseño', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo', nota: 'Armar secciones' },
   { label: 'Mis diseños', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos', nota: 'Componentes' },
-  { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+  {
+    label: 'Panel de la empresa',
+    icon: 'fa-solid fa-chart-pie',
+    ruta: '/app/panel',
+    hijos: [],
+  },
   { label: 'Punto de venta', icon: 'fa-solid fa-cash-register', ruta: '/app/empresa/pos', nota: 'Ventas y catálogo' },
   { label: 'Equipo', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
   { label: 'Enlaces', icon: 'fa-solid fa-link', accion: 'grupo', grupo: 'equipo', nota: 'Enlaces y tarjetas del equipo' },
@@ -81,7 +88,10 @@ export class SideNavComponent {
   private auth = inject(AuthService);
   private destruir = inject(DestroyRef);
   private perfiles = inject(UserProfileService);
-  private router = inject(Router);
+  readonly router = inject(Router);
+
+  /** Qué fila del riel está desplegada (por ahora solo el panel). */
+  readonly rielAbierto = signal<string | null>(null);
   readonly mensajes = inject(SidePanelService);
   readonly rail = inject(RailStateService);
   readonly empresa = inject(EmpresaService);
@@ -106,8 +116,60 @@ export class SideNavComponent {
     }, { allowSignalWrites: true });
   }
 
+  /**
+   * Las tres vistas del panel: tus estadísticas en la red social, las de la empresa
+   * y tu aporte dentro de la empresa. Cada una abre su propia gráfica.
+   */
+  readonly modosPanel: RailItem[] = [
+    {
+      label: 'En la red social',
+      icon: 'fa-solid fa-user',
+      ruta: '/app/panel',
+      nota: 'Tus estadísticas en la red social',
+    },
+    {
+      label: 'De la empresa',
+      icon: 'fa-solid fa-building',
+      ruta: '/app/panel',
+      nota: 'Las estadísticas de toda la empresa',
+    },
+    {
+      label: 'Mi aporte',
+      icon: 'fa-solid fa-user-tie',
+      ruta: '/app/panel',
+      nota: 'Lo que aportas dentro de la empresa',
+    },
+  ];
+
   get navegacion(): RailItem[] {
-    return this.empresa.enModoEmpresa() ? NAVEGACION_EMPRESA : NAVEGACION_PERSONAL;
+    const base = this.empresa.enModoEmpresa() ? NAVEGACION_EMPRESA : NAVEGACION_PERSONAL;
+
+    // El panel siempre lleva sus tres vistas colgando.
+    return base.map((item) =>
+      item.ruta === '/app/panel'
+        ? {
+            ...item,
+            label: this.empresa.enModoEmpresa() ? 'Panel de la empresa' : 'Mi panel',
+            hijos: this.modosPanel,
+          }
+        : item
+    );
+  }
+
+  /** Abre o cierra el desplegable de una fila del riel. */
+  alternarRiel(label: string): void {
+    this.rielAbierto.update((actual) => (actual === label ? null : label));
+  }
+
+  /** Los modos de los hijos del panel, en orden: red, empresa, mi aporte. */
+  modoDe(indice: number): string {
+    return ['red', 'empresa', 'mi-aporte'][indice] ?? 'red';
+  }
+
+  /** El modo del panel que está activo, según la URL. */
+  modoActivo(): string | null {
+    const modo = this.router.url.split('?')[1]?.match(/(?:^|&)modo=([^&]+)/)?.[1] ?? 'red';
+    return modo;
   }
 
   get salida(): RailItem[] {

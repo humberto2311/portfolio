@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   ViewChild,
+  computed,
   effect,
   inject,
   signal,
@@ -17,10 +18,18 @@ import { ConfirmationModalService } from '../../../../../core/services/confirmat
 import { ChatMessage } from '../../../../../core/models/chat.model';
 import { Contact } from '../../../../../core/models/contact.model';
 import { ComandosChatComponent } from '../../../comandos-chat/comandos-chat.component';
+import { ComandosService } from '../../../../../core/services/comandos.service';
+import {
+  MensajesProgramadosService,
+  TipoProgramacion,
+} from '../../../../../core/services/mensajes-programados.service';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { CatalogoComandos, RespuestaComando } from '../../../../../core/models/comando.model';
 
 interface GrupoMensajes {
   clave: string;
   mio: boolean;
+  comando: boolean;
   mensajes: ChatMessage[];
 }
 
@@ -35,10 +44,31 @@ export class ChatViewComponent {
   svc = inject(SidePanelService);
   private chatService = inject(ChatService);
   private confirmationModal = inject(ConfirmationModalService);
+  private comandos = inject(ComandosService);
+  private programados = inject(MensajesProgramadosService);
+  private toasts = inject(ToastService);
 
   message = signal('');
-  readonly interpreteAbierto = signal(false);
+  readonly panelComandos = signal(false);
+  readonly sugerencias = signal<CatalogoComandos['comandos']>([]);
+  readonly ejecutandoComando = signal(false);
+  readonly comandoPendiente = signal<RespuestaComando | null>(null);
   sending = signal(false);
+
+  /** Mantener pulsado el botón de enviar abre la programación del mensaje. */
+  private temporizadorPulsacion: ReturnType<typeof setTimeout> | null = null;
+  private pulsacionLarga = false;
+  readonly programarAbierto = signal(false);
+  readonly tipoProgramacion = signal<TipoProgramacion>('UNA_VEZ');
+  readonly modoUnaVez = signal<'TIEMPO' | 'FECHA'>('TIEMPO');
+  readonly minutosProgramados = signal<number | null>(60);
+  readonly diaProgramado = signal<number | null>(null);
+  readonly mesProgramado = signal<number | null>(null);
+  readonly anioProgramado = signal<number | null>(null);
+  readonly horaProgramada = signal<number | null>(null);
+  readonly minutoProgramado = signal<number | null>(0);
+  readonly guardandoProgramacion = signal(false);
+  readonly errorProgramar = signal<string | null>(null);
   cargando = signal(false);
   editingId = signal<string | null>(null);
   error = signal<string | null>(null);
@@ -49,6 +79,170 @@ export class ChatViewComponent {
 
   readonly reacciones = signal<Record<string, string>>({});
 
+  empezarPulsacion(evento: PointerEvent): void {
+    this.pulsacionLarga = false;
+    this.cancelarPulsacion();
+
+    this.temporizadorPulsacion = setTimeout(() => {
+      this.pulsacionLarga = true;
+      this.abrirProgramacion();
+    }, 550);
+  }
+
+  terminarPulsacion(): void {
+    // Si ya se abrió el panel de programar, este clic no debe enviar el mensaje.
+    if (this.pulsacionLarga) {
+      this.pulsacionLarga = false;
+      setTimeout(() => this.cancelarPulsacion(), 0);
+    } else {
+      this.cancelarPulsacion();
+    }
+  }
+
+  cancelarPulsacion(): void {
+    if (this.temporizadorPulsacion) {
+      clearTimeout(this.temporizadorPulsacion);
+      this.temporizadorPulsacion = null;
+    }
+  }
+
+  readonly previsualizacion = computed(() => {
+    if (this.modoUnaVez() === 'TIEMPO') {
+      const minutos = this.minutosProgramados() ?? 60;
+      const cuando = new Date(Date.now() + minutos * 60000);
+      return `${this.distancia(minutos)} · ${this.formato(cuando)}`;
+    }
+
+    const fecha = this.fechaElegida();
+    if (!fecha) return 'Elige día, mes, año y hora';
+    return this.formato(fecha);
+  });
+
+  private isoFecha(fecha: Date): string {
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${fecha.getFullYear()}-${mes}-${dia}`;
+  }
+
+  private isoHora(fecha: Date): string {
+    const hora = String(fecha.getHours()).padStart(2, '0');
+    const minuto = String(fecha.getMinutes()).padStart(2, '0');
+    return `${hora}:${minuto}`;
+  }
+
+  private distancia(minutos: number): string {
+    if (minutos < 60) return `en ${minutos} min`;
+    if (minutos === 60) return 'en 1 hora';
+    if (minutos < 1440) return `en ${minutos / 60} horas`;
+    return 'en 24 horas';
+  }
+
+  private formato(fecha: Date): string {
+    return fecha.toLocaleString('es-CO', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  private fechaElegida(): Date | null {
+    const dia = this.diaProgramado();
+    const mes = this.mesProgramado();
+    const anio = this.anioProgramado();
+    const hora = this.horaProgramada() ?? 0;
+    const minuto = this.minutoProgramado() ?? 0;
+
+    if (!dia || !mes || !anio) return null;
+    if (hora < 0 || hora > 23 || minuto < 0 || minuto > 59) return null;
+
+    const fecha = new Date(anio, mes - 1, dia, hora, minuto);
+    if (fecha.getDate() !== dia || fecha.getMonth() !== mes - 1) return null;
+    return fecha;
+  }
+
+  cambiarTipoProgramacion(tipo: TipoProgramacion): void {
+    this.tipoProgramacion.set(tipo);
+    if (tipo !== 'UNA_VEZ') {
+      this.modoUnaVez.set('FECHA');
+    }
+    this.llenarFechaDeHoy();
+  }
+
+  private llenarFechaDeHoy(): void {
+    const ahora = new Date();
+    if (!this.diaProgramado()) this.diaProgramado.set(ahora.getDate());
+    if (!this.mesProgramado()) this.mesProgramado.set(ahora.getMonth() + 1);
+    if (!this.anioProgramado()) this.anioProgramado.set(ahora.getFullYear());
+    if (this.horaProgramada() === null) this.horaProgramada.set(ahora.getHours() + 1);
+  }
+
+  cambiarModoUnaVez(modo: 'TIEMPO' | 'FECHA'): void {
+    this.modoUnaVez.set(modo);
+    if (modo === 'FECHA') this.llenarFechaDeHoy();
+  }
+
+  abrirProgramacion(): void {
+    this.errorProgramar.set(null);
+    this.programarAbierto.set(true);
+  }
+
+  guardarProgramacion(): void {
+    const contacto = this.svc.activeContact();
+
+    if (!contacto) {
+      this.errorProgramar.set('Abre un chat para programar el mensaje.');
+      return;
+    }
+    if (!this.message().trim()) {
+      this.errorProgramar.set('Escribe el mensaje antes de programarlo.');
+      return;
+    }
+
+    const tipo = this.tipoProgramacion();
+    const porTiempo = this.modoUnaVez() === 'TIEMPO';
+    const minutos = porTiempo ? this.minutosProgramados() : null;
+    const fecha = porTiempo ? null : this.fechaElegida();
+
+    if (!porTiempo && !fecha) {
+      this.errorProgramar.set('Revisa el día, el mes y la hora: esa fecha no existe.');
+      return;
+    }
+    if (fecha && fecha.getTime() <= Date.now()) {
+      this.errorProgramar.set('Esa fecha ya pasó. Elige una hora futura.');
+      return;
+    }
+
+    this.guardandoProgramacion.set(true);
+    this.errorProgramar.set(null);
+
+    this.programados.programar({
+      destinatarioId: contacto.id,
+      contenido: this.message().trim(),
+      tipo,
+      minutos: minutos ?? undefined,
+      fecha: fecha ? this.isoFecha(fecha) : undefined,
+      hora: fecha ? this.isoHora(fecha) : undefined,
+      diaSemana: tipo === 'SEMANAL' ? new Date().getDay() || 7 : undefined,
+      diaMes: tipo === 'MENSUAL' ? new Date().getDate() : undefined,
+    }).subscribe({
+      next: (guardado) => {
+        this.guardandoProgramacion.set(false);
+        this.programarAbierto.set(false);
+        this.message.set('');
+        this.toasts.show(`Mensaje programado: ${guardado.etiqueta}`);
+      },
+      error: (respuesta) => {
+        this.guardandoProgramacion.set(false);
+        this.errorProgramar.set(
+          respuesta?.error?.message ?? 'No se pudo programar el mensaje.'
+        );
+      }
+    });
+  }
+
   get textoListo(): boolean {
     return this.message().trim().length > 0;
   }
@@ -57,12 +251,24 @@ export class ChatViewComponent {
     return this.svc.activeContact()?.conversationId ?? null;
   }
 
-  alternarInterprete(): void {
-    this.interpreteAbierto.set(!this.interpreteAbierto());
+  alternarPanelComandos(): void {
+    this.panelComandos.set(!this.panelComandos());
   }
 
-  cerrarInterprete(): void {
-    this.interpreteAbierto.set(false);
+  cerrarPanelComandos(): void {
+    this.panelComandos.set(false);
+  }
+
+  escribirComando(comando: string): void {
+    this.message.set(comando);
+    this.panelComandos.set(false);
+    this.sugerencias.set([]);
+
+    const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
+    if (campo) {
+      campo.focus();
+      campo.style.height = 'auto';
+    }
   }
 
   claveDe(msg: ChatMessage): string {
@@ -124,7 +330,7 @@ export class ChatViewComponent {
       const mio = msg.sender === 'me';
       let grupo = dia.grupos[dia.grupos.length - 1];
       if (!grupo || grupo.mio !== mio) {
-        grupo = { clave: `${claveDia}-${dia.grupos.length}`, mio, mensajes: [] };
+        grupo = { clave: `${claveDia}-${dia.grupos.length}`, mio, comando: !!msg.comando, mensajes: [] };
         dia.grupos.push(grupo);
       }
       grupo.mensajes.push(msg);
@@ -165,6 +371,8 @@ export class ChatViewComponent {
   private ultimaCarga = '';
 
   constructor() {
+    this.cargarCatalogo();
+
     effect(() => {
       this.svc.chatHistories();
       this.svc.typing();
@@ -212,6 +420,10 @@ export class ChatViewComponent {
     return estado === 'RECHAZADA' || estado === 'REPORTADA';
   }
 
+  get textoEsComando(): boolean {
+    return this.message().trim().startsWith('/') || this.message().trim().startsWith('@');
+  }
+
   send(): void {
     if (this.editingId()) {
       this.confirmEdit();
@@ -221,6 +433,11 @@ export class ChatViewComponent {
     const text = this.message().trim();
     const contact = this.svc.activeContact();
     if (!text || !contact || !this.puedeEscribir) return;
+
+    if (text.startsWith('/') || text.startsWith('@')) {
+      this.ejecutarComando(text);
+      return;
+    }
 
     this.svc.sendMessage(text);
     this.message.set('');
@@ -267,6 +484,111 @@ export class ChatViewComponent {
         );
         this.error.set(this.mensajeError(err, 'No se pudo enviar el mensaje'));
       },
+    });
+  }
+
+  private ejecutarComando(texto: string): void {
+    const contact = this.svc.activeContact();
+    if (!contact || this.ejecutandoComando()) return;
+
+    this.svc.agregarMensaje(contact.id, {
+      sender: 'me',
+      text: texto,
+      time: this.hora(new Date().toISOString()),
+    } as any);
+
+    this.message.set('');
+    this.sugerencias.set([]);
+    this.ejecutandoComando.set(true);
+
+    const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
+    if (campo) campo.style.height = 'auto';
+
+    this.comandos.enviarMensaje(texto, contact.conversationId ?? null)
+      .pipe(take(1))
+      .subscribe({
+        next: (respuesta) => this.recibirComando(respuesta),
+        error: () => {
+          this.ejecutandoComando.set(false);
+          this.svc.agregarMensaje(contact.id, {
+            sender: 'them',
+            text: 'No pude ejecutar ese comando. Inténtalo otra vez.',
+            time: this.hora(new Date().toISOString()),
+            comando: true,
+          } as any);
+        },
+      });
+  }
+
+  private recibirComando(respuesta: RespuestaComando): void {
+    const contact = this.svc.activeContact();
+    this.ejecutandoComando.set(false);
+    if (!contact) return;
+
+    this.comandoPendiente.set(respuesta.requiereConfirmacion ? respuesta : null);
+
+    this.svc.agregarMensaje(contact.id, {
+      sender: 'them',
+      text: respuesta.mensaje,
+      time: this.hora(new Date().toISOString()),
+      comando: true,
+      comandoNombre: respuesta.comando,
+      confirmacion: respuesta.requiereConfirmacion,
+      parametros: respuesta.parametros,
+    } as any);
+  }
+
+  confirmarComando(): void {
+    const contact = this.svc.activeContact();
+    if (!contact) return;
+
+    this.ejecutandoComando.set(true);
+    this.comandos.confirmar(contact.conversationId ?? null)
+      .pipe(take(1))
+      .subscribe({
+        next: (respuesta) => {
+          this.comandoPendiente.set(null);
+          this.recibirComando(respuesta);
+        },
+        error: () => this.ejecutandoComando.set(false),
+      });
+  }
+
+  cancelarComando(): void {
+    const contact = this.svc.activeContact();
+    if (!contact) return;
+
+    this.comandos.cancelar(contact.conversationId ?? null)
+      .pipe(take(1))
+      .subscribe({
+        next: (respuesta) => {
+          this.comandoPendiente.set(null);
+          this.recibirComando(respuesta);
+        },
+        error: () => {},
+      });
+  }
+
+  sugerenciasComando(): CatalogoComandos['comandos'] {
+    const escrito = this.message().trim();
+    if (!escrito.startsWith('/') || escrito.includes(' ')) return [];
+
+    const prefijo = escrito.toLowerCase();
+    return this.sugerencias()
+      .filter((comando) => comando.nombre.toLowerCase().startsWith(prefijo))
+      .slice(0, 6);
+  }
+
+  elegirSugerencia(nombre: string): void {
+    this.message.set(nombre + ' ');
+    const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
+    if (campo) campo.focus();
+  }
+
+  private cargarCatalogo(): void {
+    this.comandos.getGuia().pipe(take(1)).subscribe({
+      next: (catalogo) => this.sugerencias.set(catalogo.comandos),
+      error: () => this.sugerencias.set([]),
     });
   }
 

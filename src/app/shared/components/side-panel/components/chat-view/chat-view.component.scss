@@ -30,6 +30,7 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  position: relative;
   background: var(--ig-fondo);
   color: var(--ig-texto-otro);
   font-family: var(--ig-tipografia);
@@ -635,4 +636,307 @@
 
 .composer__icono--comandos.composer__icono--activo {
   color: #1ed760;
+}
+
+/* Panel flotante de comandos: se abre sobre el chat y no tapa el campo de escribir. */
+.panel-comandos {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 82px;
+  z-index: 40;
+  animation: panel-comandos-entrar 0.16s ease-out;
+
+  app-comandos-chat {
+    display: block;
+    max-height: min(70vh, 30rem);
+    overflow-y: auto;
+  }
+}
+
+@keyframes panel-comandos-entrar {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Burbuja de respuesta de un comando. */
+.bubble--comando {
+  border: 1px solid color-mix(in srgb, var(--accent, #4a9eff) 32%, transparent);
+  background: color-mix(in srgb, var(--accent, #4a9eff) 8%, var(--ig-fondo));
+  border-radius: 12px;
+  padding: 8px 10px;
+  max-width: 92%;
+
+  .bubble__comando {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-family: var(--font-mono, monospace);
+    color: var(--accent, #4a9eff);
+    margin-bottom: 4px;
+  }
+
+  .bubble__texto {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.bubble__confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+
+  strong { color: var(--text-primary); margin-right: 4px; }
+}
+
+.bubble__acciones {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.bubble__si,
+.bubble__no {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.bubble__si {
+  background: var(--accent, #4a9eff);
+  color: #fff;
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.bubble__no {
+  background: transparent;
+  border-color: var(--ig-borde, #333);
+  color: var(--text-secondary);
+}
+
+/* Sugerencias al escribir "/" en el campo. */
+.sugerencias-comando {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--bg-elevated, #171b22);
+  border: 1px solid var(--bg-border, #2a2f3a);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  z-index: 30;
+}
+
+.sugerencia-comando {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: var(--bg-hover, #1e2430); }
+
+  code {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.78rem;
+    color: var(--accent, #4a9eff);
+  }
+
+  span {
+    font-size: 0.74rem;
+    color: var(--text-muted, #8b95a5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.composer__pildora { position: relative; }
+
+/* El avatar de una respuesta de comando es el del bot, no el de la persona del chat. */
+.msg-avatar--bot {
+  background: color-mix(in srgb, var(--accent, #4a9eff) 16%, var(--bg-elevated));
+  color: var(--accent, #4a9eff);
+  border: 1px solid color-mix(in srgb, var(--accent, #4a9eff) 30%, transparent);
+
+  i { font-size: 0.78rem; }
+}
+
+/* ---------- Programar mensaje desde el propio chat ---------- */
+
+.programar {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--bg-elevated, var(--ig-burbuja-otro));
+  border: 1px solid var(--ig-borde);
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-primary);
+
+    strong { font-size: 0.82rem; }
+    i { font-size: 0.78rem; color: var(--accent); }
+  }
+
+  &__cerrar {
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+
+    &:hover { background: var(--bg-hover); color: var(--text-primary); }
+  }
+
+  &__texto {
+    margin: 4px 0 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  &__opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+    }
+
+    select,
+    input {
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--ig-borde);
+      background: var(--bg-input, transparent);
+      color: var(--text-primary);
+      font-size: 0.75rem;
+    }
+  }
+
+  &__nota {
+    margin: 8px 0 0;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+
+    strong { color: var(--text-secondary); }
+  }
+}
+
+/* ---------- Iconos de escritura arriba, campo abajo (como en la captura) ---------- */
+
+.composer__herramientas {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 2px 4px;
+}
+
+.composer__herramientas .composer__icono {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  color: var(--text-secondary, var(--ig-texto-otro));
+}
+
+.composer__herramientas .composer__icono:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.07));
+  color: var(--text-primary, var(--ig-texto-otro));
+}
+
+.programar__acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+
+  small {
+    font-size: 0.64rem;
+    line-height: 1.3;
+    color: var(--text-muted);
+
+    strong { color: var(--text-secondary); }
+  }
+}
+
+.programar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.programar__error {
+  margin: 6px 0 0;
+  font-size: 0.7rem;
+  color: var(--danger);
+}
+
+.programar__preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  align-self: flex-end;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft, rgba(30, 215, 96, 0.12));
+  color: var(--accent, #1ed760);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.programar__opciones input[type='number'] {
+  width: 68px;
+  text-align: center;
+}
+
+.programar__opciones label:first-child select {
+  min-width: 110px;
 }

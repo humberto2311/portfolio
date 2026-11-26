@@ -130,76 +130,56 @@
   }
 
   <div class="mensajes">
-    @for (mensaje of mensajes(); track $index) {
-      <div class="mensaje" [class.mensaje--yo]="mensaje.autor === 'yo'" [class.mensaje--ia]="mensaje.autor === 'ia'">
-        @if (mensaje.autor === 'ia') {
-          <i class="fa-solid fa-wand-magic-sparkles mensaje__icono" aria-hidden="true"></i>
-        }
-        <div class="mensaje__cuerpo">
-          <p class="mensaje__texto">{{ mensaje.texto }}</p>
+    @if (vista() === 'ayuda') {
+      <div class="mensajes__ayuda">
+        @for (mensaje of mensajes(); track $index) {
+          <div class="mensaje" [class.mensaje--yo]="mensaje.autor === 'yo'" [class.mensaje--ia]="mensaje.autor === 'ia'">
+            @if (mensaje.autor === 'ia') {
+              <i class="fa-solid fa-wand-magic-sparkles mensaje__icono" aria-hidden="true"></i>
+            }
+            <div class="mensaje__cuerpo">
+              <p class="mensaje__texto">{{ mensaje.texto }}</p>
 
-          @if (mensaje.comando) {
-            <div class="comando-caja">
-              <code>{{ mensaje.comando }}</code>
-              <button type="button" class="comando-caja__accion" (click)="copiar(mensaje.comando)">
-                @if (copiado() === mensaje.comando) {
-                  <i class="fa-solid fa-check" aria-hidden="true"></i> Copiado
-                } @else {
-                  <i class="fa-solid fa-copy" aria-hidden="true"></i> Copiar comando
-                }
-              </button>
+              @if (mensaje.comando) {
+                <div class="comando-caja">
+                  <code>{{ mensaje.comando }}</code>
+                  <button type="button" class="comando-caja__accion" (click)="usarComando(mensaje.comando)">
+                    <i class="fa-solid fa-terminal" aria-hidden="true"></i> Usar en el chat
+                  </button>
+                </div>
+              }
             </div>
-          }
-
-          @if (mensaje.nfc; as nfc) {
-            <div class="nfc-tarjeta">
-              <p class="nfc-tarjeta__titulo">
-                <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
-                Emisión NFC
-                <span class="nfc-tarjeta__estado" [class.activa]="nfc.emisionActiva">
-                  {{ nfc.emisionActiva ? 'Activa' : 'Inactiva' }}
-                </span>
-              </p>
-
-              <div class="nfc-tarjeta__datos">
-                <span><strong>{{ nfc.toquesHoy }}</strong> toques hoy</span>
-                <span><strong>{{ nfc.toquesTotales }}</strong> en total</span>
-                <span><strong>{{ nfc.nombreTarjeta || nfc.tarjetaActiva }}</strong> tarjeta activa</span>
-              </div>
-
-              @if (!nfc.emisionActiva) {
-                <button type="button" class="nfc-tarjeta__accion" (click)="activarEmision()">
-                  <i class="fa-solid fa-play" aria-hidden="true"></i>
-                  Activar emisión
+          </div>
+        } @empty {
+          <div class="arranque">
+            <p class="arranque__titulo">
+              <i class="fa-solid fa-hand-sparkles" aria-hidden="true"></i>
+              Empieza con una de estas
+            </p>
+            <div class="arranque__chips">
+              @for (atajo of atajos; track atajo.comando) {
+                <button type="button" class="chip" (click)="usarComando(atajo.comando)">
+                  <code>{{ atajo.comando }}</code>
+                  <span>{{ atajo.texto }}</span>
                 </button>
               }
             </div>
-          }
-
-          @if (mensaje.confirmacion) {
-            <div class="confirmacion">
-              <p class="confirmacion__titulo">
-                <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                {{ mensaje.confirmacion.comando }} esperando confirmación
-              </p>
-              <ul class="confirmacion__parametros">
-                @for (par of parametrosDe(mensaje.confirmacion); track par.clave) {
-                  <li><strong>{{ par.clave }}</strong> {{ par.valor }}</li>
-                }
-              </ul>
-              <div class="confirmacion__acciones">
-                <button type="button" class="boton boton--si" [disabled]="enviando()" (click)="confirmar()">Sí, ejecutar</button>
-                <button type="button" class="boton boton--no" [disabled]="enviando()" (click)="cancelar()">No</button>
-              </div>
-            </div>
-          }
-        </div>
+            <p class="arranque__pie">
+              También puedes escribir <code>&#64;listar</code> para ver todos los comandos, o
+              <code>&#64;lista:google</code> para los de Google.
+            </p>
+          </div>
+        }
       </div>
-    } @empty {
+    } @else {
       <div class="arranque">
         <p class="arranque__titulo">
-          <i class="fa-solid fa-hand-sparkles" aria-hidden="true"></i>
-          Empieza con una de estas
+          <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+          Los comandos se escriben en el chat
+        </p>
+        <p class="arranque__pie">
+          Escribe <code>/</code> en el campo de mensajes y sale la lista. También puedes tocar uno de estos
+          para que se escriba solo:
         </p>
         <div class="arranque__chips">
           @for (atajo of atajos; track atajo.comando) {
@@ -209,29 +189,27 @@
             </button>
           }
         </div>
-        <p class="arranque__pie">
-          También puedes escribir <code>&#64;listar</code> para ver todos los comandos, o
-          <code>&#64;lista:google</code> para los de Google.
-        </p>
       </div>
     }
   </div>
 
-  <div class="entrada" [class.entrada--ayuda]="vista() === 'ayuda'">
-    <input
-      type="text"
-      [placeholder]="vista() === 'ayuda' ? '¿Qué quieres hacer?' : 'Escribe /comando o tu mensaje…'"
-      [ngModel]="texto()"
-      (ngModelChange)="texto.set($event)"
-      (keyup.enter)="vista() === 'ayuda' ? preguntarAyuda() : enviar()"
-      [disabled]="enviando()" />
-    <button
-      type="button"
-      class="entrada__enviar"
-      [disabled]="enviando()"
-      [title]="vista() === 'ayuda' ? 'Preguntar' : 'Enviar'"
-      (click)="vista() === 'ayuda' ? preguntarAyuda() : enviar()">
-      <i [class]="vista() === 'ayuda' ? 'fa-solid fa-circle-question' : 'fa-solid fa-paper-plane'" aria-hidden="true"></i>
-    </button>
-  </div>
+  @if (vista() === 'ayuda') {
+    <div class="entrada">
+      <input
+        type="text"
+        placeholder="¿Qué quieres hacer?"
+        [ngModel]="texto()"
+        (ngModelChange)="texto.set($event)"
+        (keyup.enter)="preguntarAyuda()"
+        [disabled]="enviando()" />
+      <button
+        type="button"
+        class="entrada__enviar"
+        [disabled]="enviando()"
+        title="Preguntar"
+        (click)="preguntarAyuda()">
+        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
 </div>

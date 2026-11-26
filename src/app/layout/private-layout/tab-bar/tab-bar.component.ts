@@ -50,7 +50,7 @@ export class TabBarComponent implements OnInit {
         { label: 'Mi espacio (tu landing)', icon: 'fa-solid fa-globe', ruta: '/app/empresa/espacio' },
         { label: 'Diseño (armar secciones)', icon: 'fa-solid fa-pen-ruler', ruta: '/app/empresa/lienzo' },
         { label: 'Mis diseños (componentes)', icon: 'fa-solid fa-folder-open', ruta: '/app/empresa/disenos' },
-        { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard/empresa' },
+        { label: 'Panel de la empresa', icon: 'fa-solid fa-chart-pie', ruta: '/app/panel' },
         { label: 'Equipo de la empresa', icon: 'fa-solid fa-users', ruta: '/app/empresa/ajustes?tab=equipo' },
         { label: 'Ajustes de la empresa', icon: 'fa-solid fa-gear', ruta: '/app/empresa/ajustes' },
         ...(actual
@@ -61,7 +61,7 @@ export class TabBarComponent implements OnInit {
     }
 
     return [
-      { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/dashboard' },
+      { label: 'Mi panel', icon: 'fa-solid fa-chart-pie', ruta: '/app/panel' },
       { label: 'Mapa de conexiones', icon: 'fa-solid fa-map-location-dot', ruta: '/app/ubicacion' },
       { label: 'Portafolio', icon: 'fa-solid fa-briefcase', ruta: '/app/portafolio' },
       { label: 'Proyectos', icon: 'fa-solid fa-diagram-project', ruta: '/app/proyectos' },

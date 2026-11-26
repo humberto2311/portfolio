@@ -27,10 +27,11 @@ import { Empresa } from '../../core/models/empresa.model';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { EmpresaCrearComponent } from '../empresa/empresa-crear/empresa-crear.component';
 import { GuiaComandosComponent } from '../../shared/components/guia-comandos/guia-comandos.component';
+import { MensajesProgramadosComponent } from './mensajes-programados/mensajes-programados.component';
 import { SugerenciasBotService, TipoSugerencia } from '../../core/services/sugerencias-bot.service';
 import { GitHubCuentaService } from '../../core/services/github-cuenta.service';
 
-type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'comandos';
+type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'programados' | 'comandos';
 
 const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
   { id: 'cuenta', titulo: 'Cuenta', icono: 'fa-solid fa-user' },
@@ -39,6 +40,7 @@ const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
   { id: 'diseno', titulo: 'Diseño', icono: 'fa-solid fa-palette' },
   { id: 'tarjeta', titulo: 'Tarjeta', icono: 'fa-solid fa-id-card' },
   { id: 'apariencia', titulo: 'Apariencia', icono: 'fa-solid fa-circle-half-stroke' },
+  { id: 'programados', titulo: 'Mensajes programados', icono: 'fa-regular fa-clock' },
   { id: 'comandos', titulo: 'Comandos', icono: 'fa-solid fa-terminal' },
 ];
 
@@ -47,7 +49,7 @@ const ACENTO_POR_DEFECTO = '#4a9eff';
 @Component({
   selector: 'app-ajustes-cuenta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent, GuiaComandosComponent],
+  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent, GuiaComandosComponent, MensajesProgramadosComponent],
   templateUrl: './ajustes-cuenta.component.html',
   styleUrls: ['./ajustes-cuenta.component.scss'],
 })

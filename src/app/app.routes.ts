@@ -27,7 +27,6 @@ import { EmpresaComponentesComponent } from './features/empresa/empresa-componen
 import { DisenoPublicoComponent } from './features/empresa/diseno-publico/diseno-publico.component';
 import { EspacioPublicoComponent } from './features/empresa/espacio/espacio-publico.component';
 import { EmpresaEspacioEditorComponent } from './features/empresa/espacio/empresa-espacio-editor.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { UbicacionComponent } from './features/ubicacion/ubicacion.component';
 import { EmpleoComponent } from './features/empleo/empleo.component';
 import { AccesoNativoComponent } from './features/auth/acceso-nativo/acceso-nativo.component';
@@ -109,15 +108,17 @@ export const routes: Routes = [
           import('./features/ajustes/ajustes-comandos.component').then((m) => m.AjustesComandosComponent),
         data: { anchoCompleto: true },
       },
-      { path: 'dashboard', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'personal' } },
+      // El panel es UNA sola vista: cambia de ámbito con el selector, no de ruta.
       {
         path: 'panel',
         loadComponent: () =>
           import('./features/dashboard/panel-analitica.component').then((m) => m.PanelAnaliticaComponent),
         data: { anchoCompleto: true },
       },
-      { path: 'dashboard/empresa', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa' } },
-      { path: 'dashboard/empresa/mi-actividad', component: DashboardComponent, data: { anchoCompleto: true, ambito: 'empresa-personal' } },
+      // Las rutas viejas llevan al mismo panel, con su ámbito.
+      { path: 'dashboard', redirectTo: 'panel', pathMatch: 'full' },
+      { path: 'dashboard/empresa', redirectTo: 'panel', pathMatch: 'full' },
+      { path: 'dashboard/empresa/mi-actividad', redirectTo: 'panel', pathMatch: 'full' },
       { path: 'ubicacion', component: UbicacionComponent, data: { anchoCompleto: true } },
       { path: 'empleo', component: EmpleoComponent, data: { anchoCompleto: true } },
       { path: 'empresa', component: EmpresaDashboardComponent, data: { anchoCompleto: true } },

@@ -61,6 +61,21 @@
 
     <div class="tablero__velo" aria-hidden="true"></div>
 
+    <!-- Estado de la vista: si aún no hay datos, se dice aquí y no se inventa nada. -->
+    @if (avisoEnEspera()) {
+      <div class="estado">
+        <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+        <div>
+          <strong>En espera de datos</strong>
+          <small>Aún no hay toques con ubicación. Cuando alguien toque tu tarjeta NFC o tu QR, aparecerá aquí.</small>
+        </div>
+        <button type="button" class="estado__cerrar" (click)="cerrarAviso()" title="Quitar aviso"
+                aria-label="Quitar aviso">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+
     <div class="tablero__metricas">
       <div class="tablero__barra">
         <button type="button" class="barra__btn" [class.barra__btn--activo]="!metricasAbiertas()"
@@ -75,7 +90,7 @@
         </button>
       </div>
 
-      @if (metricasAbiertas()) {
+      @if (metricasAbiertas() && !sinDatos()) {
       <section class="metricas" data-tour="mapa-metricas">
         <article class="metrica">
           <span class="metrica__icono"><i class="fa-solid fa-hand-pointer"></i></span>
@@ -117,7 +132,23 @@
       </div>
     </div>
 
-    <aside class="tablero__panel" data-tour="mapa-panel">
+    <!-- Cápsula que abre y cierra toda la columna de paneles del mapa. -->
+    <button
+      type="button"
+      class="panel-capsula"
+      [class.panel-capsula--cerrada]="!columnaAbierta()"
+      (click)="alternarColumna()"
+      [attr.aria-expanded]="columnaAbierta()"
+      [title]="columnaAbierta() ? 'Cerrar los paneles' : 'Abrir los paneles'">
+      <i class="fa-solid" [class.fa-chevron-left]="columnaAbierta()" [class.fa-chevron-right]="!columnaAbierta()"
+         aria-hidden="true"></i>
+      @if (!columnaAbierta()) {
+        <i class="fa-solid fa-store" aria-hidden="true"></i>
+        <span>Locales y toques</span>
+      }
+    </button>
+
+    <aside class="tablero__panel" data-tour="mapa-panel" [class.tablero__panel--cerrado]="!columnaAbierta()">
       <section class="panel-plegable" [class.panel-plegable--abierto]="abierto().locales">
         <header class="panel-plegable__cabecera" (click)="alternar('locales')">
           <h2><i class="fa-solid fa-store"></i> Locales registrados</h2>
@@ -228,15 +259,19 @@
         <i class="fa-solid fa-chevron-down" [class.ciudades__flecha--girada]="abierto().ciudades"></i>
       </button>
       @if (abierto().ciudades) {
-      <ul>
-        @for (ciudad of ciudades; track ciudad.ciudad) {
-          <li>
-            <span class="ciudad__nombre">{{ ciudad.ciudad }}</span>
-            <span class="ciudad__barra"><i [style.width.%]="(ciudad.toques / 19) * 100"></i></span>
-            <strong>{{ ciudad.toques }}</strong>
-          </li>
+        @if (ciudades().length) {
+          <ul>
+            @for (ciudad of ciudades(); track ciudad.ciudad) {
+              <li>
+                <span class="ciudad__nombre">{{ ciudad.ciudad }}</span>
+                <span class="ciudad__barra"><i [style.width.%]="porcentajeCiudad(ciudad.total)"></i></span>
+                <strong>{{ ciudad.total }}</strong>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="vacio">Aún no hay ciudades con toques.</p>
         }
-      </ul>
       }
     </aside>
 

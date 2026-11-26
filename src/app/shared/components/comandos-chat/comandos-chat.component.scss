@@ -370,6 +370,12 @@
   padding: 0.1rem;
 }
 
+.mensajes__ayuda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
 .mensaje {
   display: flex;
   gap: 0.4rem;

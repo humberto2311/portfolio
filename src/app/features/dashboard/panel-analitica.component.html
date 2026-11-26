@@ -1,103 +1,285 @@
 <div class="panel">
-  <header class="panel__cabecera">
-    <div class="panel__identidad">
-      <span class="panel__avatar">
-        <i class="fa-solid" [class.fa-user]="contexto() === 'personal'" [class.fa-building]="contexto() === 'empresa'" aria-hidden="true"></i>
+
+  <!-- RIEL IZQUIERDO: cada métrica con su botón. -->
+  <aside class="riel" aria-label="Métricas del panel">
+    <div class="riel__contexto">
+      <span class="riel__avatar">
+        <i class="fa-solid" [class.fa-user]="contexto() === 'personal'"
+           [class.fa-building]="contexto() === 'empresa'" aria-hidden="true"></i>
       </span>
 
-      <div class="panel__texto">
-        <button type="button" class="selector" (click)="alternarSelector()">
-          <strong>{{ datos().titulo }}</strong>
-          <i class="fa-solid" [class.fa-chevron-down]="!selectorAbierto()" [class.fa-chevron-up]="selectorAbierto()" aria-hidden="true"></i>
-        </button>
-        <small>{{ datos().subtitulo }}</small>
+      <button type="button" class="selector" (click)="alternarSelector()"
+              [attr.aria-expanded]="selectorAbierto()">
+        <span>
+          <strong>{{ contexto() === 'empresa' ? (empresaActiva()?.nombre ?? 'Mi empresa') : 'Mi cuenta' }}</strong>
+          <small>Cambiar vista</small>
+        </span>
+        <i class="fa-solid" [class.fa-chevron-down]="!selectorAbierto()"
+           [class.fa-chevron-up]="selectorAbierto()" aria-hidden="true"></i>
+      </button>
 
-        @if (selectorAbierto()) {
-          <ul class="selector__lista">
+      @if (selectorAbierto()) {
+        <ul class="selector__lista">
+          <li>
+            <button type="button" [class.activa]="contexto() === 'personal'" (click)="cambiarContexto('personal')">
+              <i class="fa-solid fa-user" aria-hidden="true"></i>
+              <span>
+                <strong>Mi panel</strong>
+                <small>Solo tus datos</small>
+              </span>
+            </button>
+          </li>
+
+          @for (empresa of empresasDisponibles(); track empresa.id) {
             <li>
-              <button type="button" [class.activa]="contexto() === 'personal'" (click)="cambiarContexto('personal')">
-                <i class="fa-solid fa-user" aria-hidden="true"></i>
+              <button type="button" [class.activa]="contexto() === 'empresa'" (click)="cambiarContexto('empresa')">
+                <i class="fa-solid fa-building" aria-hidden="true"></i>
                 <span>
-                  <strong>Mi panel</strong>
-                  <small>Solo tus datos</small>
+                  <strong>{{ empresa.nombre }}</strong>
+                  <small>{{ empresa.rolEtiqueta || empresa.rolPropio }}</small>
                 </span>
               </button>
             </li>
+          } @empty {
+            <li class="selector__vacio">No administras ninguna empresa todavía.</li>
+          }
+        </ul>
+      }
+    </div>
 
-            @for (empresa of empresasDisponibles(); track empresa.id) {
+    <div class="riel__periodo">
+      <label>
+        <span>Desde</span>
+        <input type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)" aria-label="Desde" />
+      </label>
+      <label>
+        <span>Hasta</span>
+        <input type="date" [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" aria-label="Hasta" />
+      </label>
+      <button type="button" class="riel__aplicar" (click)="cargar()">
+        <i class="fa-solid fa-rotate" aria-hidden="true"></i> Aplicar
+      </button>
+      <button type="button" class="riel__limpiar" (click)="limpiarFechas()">Todo el periodo</button>
+    </div>
+
+    <button type="button" class="riel__exportar" [disabled]="exportando()" (click)="exportar()">
+      <i class="fa-solid fa-file-export" aria-hidden="true"></i>
+      <span>{{ exportando() ? 'Preparando…' : 'Exportar contactos' }}</span>
+    </button>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="contenido">
+    <header class="cabecera">
+      <div class="cabecera__texto">
+        <!-- Desplegable: elegir la métrica individual, la de la empresa o buscar empleo. -->
+        <button type="button" class="cabecera__selector" (click)="alternarMenuMetricas()"
+                [attr.aria-expanded]="menuMetricasAbierto()">
+          <span>
+            <h1>{{ titulo() }}</h1>
+            <small>{{ subtitulo() }}</small>
+          </span>
+          <i class="fa-solid" [class.fa-chevron-down]="!menuMetricasAbierto()"
+             [class.fa-chevron-up]="menuMetricasAbierto()" aria-hidden="true"></i>
+        </button>
+
+        @if (menuMetricasAbierto()) {
+          <ul class="metricas-menu">
+            @for (item of riel(); track item.vista) {
               <li>
-                <button type="button" [class.activa]="contexto() === 'empresa'" (click)="cambiarContexto('empresa')">
-                  <i class="fa-solid fa-building" aria-hidden="true"></i>
+                <button type="button" [class.activa]="vista() === item.vista"
+                        (click)="elegirMetrica(item.vista)">
+                  <i [class]="item.icono" aria-hidden="true"></i>
                   <span>
-                    <strong>Panel de {{ empresa.nombre }}</strong>
-                    <small>{{ empresa.rolEtiqueta || empresa.rolPropio }}</small>
+                    <strong>{{ item.etiqueta }}</strong>
+                    <small>{{ item.grupo }}</small>
                   </span>
                 </button>
               </li>
-            } @empty {
-              <li class="selector__vacio">No administras ninguna empresa todavía.</li>
             }
+            <li class="metricas-menu__empleo">
+              <a routerLink="/app/empleo">
+                <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+                <span>
+                  <strong>Buscar empleo</strong>
+                  <small>Cruza vacantes con tu hoja de vida</small>
+                </span>
+              </a>
+            </li>
           </ul>
         }
       </div>
-    </div>
+    </header>
 
-    <div class="panel__acciones">
-      <input type="date" [ngModel]="desde()" (ngModelChange)="desde.set($event)" aria-label="Desde" />
-      <input type="date" [ngModel]="hasta()" (ngModelChange)="hasta.set($event)" aria-label="Hasta" />
-      <button type="button" class="boton" (click)="cargar()">
-        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
-        Aplicar
-      </button>
-      <button type="button" class="boton boton--exportar" [disabled]="exportando()" (click)="exportar()">
-        <i class="fa-solid fa-file-export" aria-hidden="true"></i>
-        Exportar contactos
-      </button>
-    </div>
-  </header>
-
-  @if (error()) {
-    <p class="aviso aviso--error">{{ error() }}</p>
-  }
-
-  @if (cargando()) {
-    <p class="aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando datos…</p>
-  }
-
-  @if (exportado(); as hoja) {
-    <div class="exportado">
-      <p>
-        <i class="fa-solid fa-table" aria-hidden="true"></i>
-        {{ hoja.titulo }}: {{ hoja.total }} filas listas.
-      </p>
-      <button type="button" class="boton" (click)="descargarCsv()">
-        <i class="fa-solid fa-download" aria-hidden="true"></i>
-        Descargar CSV
-      </button>
-    </div>
-  }
-
-  <div class="metricas">
-    @for (metrica of datos().metricas; track metrica.clave) {
-      <article class="metrica">
-        <i [class]="metrica.icono" aria-hidden="true"></i>
-        <span class="metrica__valor">{{ metrica.valor }}</span>
-        <span class="metrica__etiqueta">{{ metrica.etiqueta }}</span>
-      </article>
+    @if (error()) {
+      <p class="aviso aviso--error">{{ error() }}</p>
     }
-  </div>
 
-  <div class="graficos">
-    @for (tarjeta of datos().tarjetas; track tarjeta.id) {
-      <article class="grafico">
-        <h3>{{ tarjeta.titulo }}</h3>
-        <p>{{ tarjeta.descripcion }}</p>
-        <app-dashboard-grafico [series]="tarjeta.series" [tipo]="tarjeta.tipoGrafico" [permitidos]="tarjeta.permitidos" />
-      </article>
-    } @empty {
-      @if (!cargando()) {
-        <p class="aviso">Todavía no hay eventos en este periodo.</p>
-      }
+    @if (exportado(); as hoja) {
+      <div class="exportado">
+        <p>
+          <i class="fa-solid fa-table" aria-hidden="true"></i>
+          {{ hoja.titulo }}: {{ hoja.total }} filas listas.
+        </p>
+        <button type="button" class="boton" (click)="descargarCsv()">
+          <i class="fa-solid fa-download" aria-hidden="true"></i>
+          Descargar CSV
+        </button>
+      </div>
     }
-  </div>
+
+    @if (cargando()) {
+      <p class="aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando datos…</p>
+    }
+
+    <!-- RESUMEN -->
+    @if (vista() === 'resumen') {
+      <div class="metricas">
+        @for (metrica of metricas(); track metrica.clave) {
+          <article class="metrica">
+            <i [class]="metrica.icono" aria-hidden="true"></i>
+            <span class="metrica__valor">{{ metrica.valor }}</span>
+            <span class="metrica__etiqueta">{{ metrica.etiqueta }}</span>
+          </article>
+        } @empty {
+          @if (!cargando()) {
+            <p class="aviso">Todavía no hay eventos en este periodo.</p>
+          }
+        }
+      </div>
+    }
+
+    <!-- SEGUIMIENTO NFC -->
+    @if (vista() === 'seguimiento') {
+      <section class="seguimiento">
+        <header class="seguimiento__cabecera">
+          <div>
+            <h2>Seguimiento de contactos</h2>
+            <p>Lo que quieres hacer con cada persona que conociste por un toque NFC.</p>
+          </div>
+
+          <label class="filtro">
+            <span>Ver</span>
+            <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+              <option value="todos">Todos</option>
+              @for (estado of estados; track estado.valor) {
+                <option [value]="estado.valor">{{ estado.etiqueta }}</option>
+              }
+            </select>
+          </label>
+        </header>
+
+        @if (cargandoSeguimiento()) {
+          <p class="aviso"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Cargando contactos…</p>
+        }
+
+        <div class="contactos">
+          @for (fila of seguimientoFiltrado(); track fila.contactoId) {
+            <article class="contacto" [attr.data-estado]="fila.estado">
+              <div class="contacto__quien">
+                <span class="contacto__avatar">{{ iniciales(fila.nombre) }}</span>
+                <div>
+                  <strong>{{ fila.nombre || 'Sin nombre' }}</strong>
+                  <small>{{ fila.correo || 'Sin correo' }}</small>
+                </div>
+              </div>
+
+              <div class="contacto__estados">
+                @for (estado of estados; track estado.valor) {
+                  <button type="button" class="chip"
+                          [class.chip--activo]="fila.estado === estado.valor"
+                          [disabled]="guardando() === fila.contactoId"
+                          (click)="cambiarEstado(fila, estado.valor)">
+                    <i [class]="estado.icono" aria-hidden="true"></i>
+                    {{ estado.etiqueta }}
+                  </button>
+                }
+              </div>
+
+              <div class="contacto__detalles">
+                <label class="campo">
+                  <span>Nota</span>
+                  <input type="text" placeholder="Qué hablaron, qué te pidió…"
+                         [value]="fila.nota ?? ''"
+                         (change)="guardarNota(fila, $any($event.target).value)" />
+                </label>
+
+                <label class="campo">
+                  <span>Recordar</span>
+                  <input type="date" [value]="fila.recordarEn ? (fila.recordarEn | slice: 0:10) : ''"
+                         (change)="guardarRecordatorio(fila, $any($event.target).value)" />
+                </label>
+
+                <span class="contacto__estado">
+                  <i [class]="iconoEstado(fila.estado)" aria-hidden="true"></i>
+                  {{ etiquetaEstado(fila.estado) }}
+                </span>
+              </div>
+            </article>
+          } @empty {
+            @if (!cargandoSeguimiento()) {
+              <p class="aviso">
+                Todavía no tienes contactos con seguimiento. Cuando toquen tu tarjeta por NFC aparecerán aquí.
+              </p>
+            }
+          }
+        </div>
+      </section>
+    }
+
+    <!-- REACCIONES POR PROYECTO: el detalle de una métrica, en tabla. -->
+    @if (vista() === 'proyectos-social') {
+      <section class="reacciones">
+        <header class="seguimiento__cabecera">
+          <div>
+            <h2>Reacciones por proyecto</h2>
+            <p>Cuántas vistas, likes y comentarios recibe cada proyecto en el periodo.</p>
+          </div>
+        </header>
+
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Proyecto</th>
+              <th><i class="fa-solid fa-eye" aria-hidden="true"></i> Vistas</th>
+              <th><i class="fa-solid fa-heart" aria-hidden="true"></i> Likes</th>
+              <th><i class="fa-solid fa-comment" aria-hidden="true"></i> Comentarios</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of reaccionesPorProyecto(); track fila.proyecto) {
+              <tr>
+                <td>{{ fila.proyecto }}</td>
+                <td>{{ fila.vistas }}</td>
+                <td>{{ fila.likes }}</td>
+                <td>{{ fila.comentarios }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="tabla__vacio">Todavía no hay reacciones en este periodo.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    <!-- GRÁFICAS de la vista elegida. -->
+    @if (vista() !== 'seguimiento' && vista() !== 'proyectos-social') {
+      <div class="graficos" [class.graficos--una]="tarjetasVisibles().length === 1">
+        @for (tarjeta of tarjetasVisibles(); track tarjeta.id) {
+          <article class="grafico">
+            <h3>{{ tarjeta.titulo }}</h3>
+            <p>{{ tarjeta.descripcion }}</p>
+            <app-dashboard-grafico [series]="tarjeta.series" [tipo]="tarjeta.tipoGrafico"
+                                   [permitidos]="tarjeta.permitidos" />
+          </article>
+        } @empty {
+          @if (!cargando()) {
+            <p class="aviso">Esta métrica todavía no tiene datos en el periodo elegido.</p>
+          }
+        }
+      </div>
+    }
+  </main>
 </div>

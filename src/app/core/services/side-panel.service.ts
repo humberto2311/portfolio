@@ -410,6 +410,13 @@ export class SidePanelService {
   }
 
   /** Mensaje optimista: se pinta ya y se confirma cuando responde el backend. */
+  agregarMensaje(contactId: string, mensaje: ChatMessage): void {
+    this.chatHistories.update(h => ({
+      ...h,
+      [contactId]: [...(h[contactId] || []), mensaje],
+    }));
+  }
+
   sendMessage(text: string): void {
     const contact = this.activeContact();
     if (!contact || !text.trim()) return;

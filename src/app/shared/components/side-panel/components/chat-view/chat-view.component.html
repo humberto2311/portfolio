@@ -38,18 +38,49 @@
 
             <!-- Avatar solo en el primer mensaje del grupo, alineado abajo. -->
             @if (!grupo.mio && ultimo) {
-              <span class="msg-avatar" aria-hidden="true">
-                @if (svc.activeContact()?.avatar) {
-                  <img [src]="svc.activeContact()!.avatar!" [alt]="''" />
-                } @else {
-                  {{ iniciales(svc.activeContact()?.name) }}
-                }
-              </span>
+              @if (grupo.comando) {
+                <span class="msg-avatar msg-avatar--bot" aria-hidden="true">
+                  <i class="fa-solid fa-robot" aria-hidden="true"></i>
+                </span>
+              } @else {
+                <span class="msg-avatar" aria-hidden="true">
+                  @if (svc.activeContact()?.avatar) {
+                    <img [src]="svc.activeContact()!.avatar!" [alt]="''" />
+                  } @else {
+                    {{ iniciales(svc.activeContact()?.name) }}
+                  }
+                </span>
+              }
             } @else if (!grupo.mio) {
               <span class="msg-avatar msg-avatar--hueco" aria-hidden="true"></span>
             }
 
             <div class="msg-col">
+              @if (msg.comando) {
+                <div class="bubble bubble--comando" [class.bubble--error]="false">
+                  @if (msg.comandoNombre) {
+                    <span class="bubble__comando">
+                      <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+                      {{ msg.comandoNombre }}
+                    </span>
+                  }
+                  <p class="bubble__texto">{{ msg.text }}</p>
+
+                  @if (msg.confirmacion) {
+                    <div class="bubble__confirmacion">
+                      @for (par of (msg.parametros | keyvalue); track par.key) {
+                        <span><strong>{{ par.key }}</strong> {{ par.value }}</span>
+                      }
+                      <div class="bubble__acciones">
+                        <button type="button" class="bubble__si" [disabled]="ejecutandoComando()" (click)="confirmarComando()">
+                          Sí, ejecutar
+                        </button>
+                        <button type="button" class="bubble__no" (click)="cancelarComando()">No</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
               <div class="bubble">
                 @if (editingId() === msg.id) {
                   <textarea
@@ -81,6 +112,7 @@
 
               @if (msg.edited && !msg.deleted) {
                 <span class="msg-edited">editado</span>
+              }
               }
             </div>
 
@@ -154,31 +186,31 @@
   </div>
 }
 
-<!-- Composer: cámara a la izquierda, campo al centro y las acciones a la derecha. -->
-@if (interpreteAbierto()) {
-  <app-comandos-chat
-    class="comandos-flotante"
-    [conversacionId]="conversacionActual()"
-    (cerrar)="cerrarInterprete()" />
+<!-- Panel flotante: explica los comandos y presta la ayuda de la IA. No tapa el campo. -->
+@if (panelComandos()) {
+  <div class="panel-comandos">
+    <app-comandos-chat
+      [conversacionId]="conversacionActual()"
+      (cerrar)="cerrarPanelComandos()"
+      (usar)="escribirComando($event)" />
+  </div>
 }
 
 <form class="composer" (ngSubmit)="send()">
-  <button
-    type="button"
-    class="composer__icono composer__icono--comandos"
-    [class.composer__icono--activo]="interpreteAbierto()"
-    title="Comandos y bots"
-    aria-label="Abrir comandos y bots"
-    (click)="alternarInterprete()">
-    <i class="fa-solid fa-terminal" aria-hidden="true"></i>
-  </button>
-  <div class="composer__pildora">
-    @if (puedeEscribir) {
-      <button type="button" class="composer__icono" title="Cámara" aria-label="Adjuntar foto o vídeo" (click)="abrirCamara(campoMensaje)">
-        <i class="fa-solid fa-camera" aria-hidden="true"></i>
-      </button>
-    }
+  <div class="composer__herramientas">
+    <button
+      type="button"
+      class="composer__icono composer__icono--comandos"
+      [class.composer__icono--activo]="panelComandos()"
+      title="Comandos, bots y ayuda de la IA"
+      aria-label="Abrir comandos, bots y ayuda de la IA"
+      (click)="alternarPanelComandos()">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+    </button>
 
+  </div>
+
+  <div class="composer__pildora">
     <textarea
       #campoMensaje
       class="composer__campo"
@@ -192,8 +224,28 @@
       (input)="ajustarAlto($event)"
       (keydown)="onKeyDown($event)"></textarea>
 
+    @if (sugerenciasComando().length) {
+      <div class="sugerencias-comando">
+        @for (sugerencia of sugerenciasComando(); track sugerencia.nombre) {
+          <button type="button" class="sugerencia-comando" (click)="elegirSugerencia(sugerencia.nombre)">
+            <code>{{ sugerencia.nombre }}</code>
+            <span>{{ sugerencia.descripcion }}</span>
+          </button>
+        }
+      </div>
+    }
+
     @if (textoListo) {
-      <button type="submit" class="composer__enviar" [disabled]="sending()" aria-label="Enviar mensaje" title="Enviar">
+      <!-- Mantén pulsado para programar este mensaje. -->
+      <button
+        type="submit"
+        class="composer__enviar"
+        [disabled]="sending()"
+        aria-label="Enviar mensaje. Mantén pulsado para programarlo"
+        title="Enviar · mantén pulsado para programar"
+        (pointerdown)="empezarPulsacion($event)"
+        (pointerup)="terminarPulsacion()"
+        (pointerleave)="cancelarPulsacion()">
         <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
       </button>
     } @else {
@@ -201,16 +253,110 @@
         <button type="button" class="composer__icono" title="Grabar audio" aria-label="Grabar un mensaje de voz">
           <i class="fa-solid fa-microphone" aria-hidden="true"></i>
         </button>
+        <button type="button" class="composer__icono" title="Programar un mensaje"
+                aria-label="Programar un mensaje" (click)="abrirProgramacion()">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>
+        </button>
         <button type="button" class="composer__icono" title="Enviar imagen" aria-label="Enviar una imagen">
           <i class="fa-regular fa-image" aria-hidden="true"></i>
         </button>
         <button type="button" class="composer__icono" title="Stickers" aria-label="Enviar un sticker">
           <i class="fa-regular fa-face-smile" aria-hidden="true"></i>
         </button>
-        <button type="button" class="composer__icono" title="Me gusta" aria-label="Enviar un me gusta" (click)="enviarLike()">
-          <i class="fa-regular fa-heart" aria-hidden="true"></i>
-        </button>
       </div>
     }
   </div>
+
+  @if (programarAbierto()) {
+    <div class="programar">
+      <header class="programar__cabecera">
+        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+        <strong>Programar mensaje</strong>
+        <button type="button" class="programar__cerrar" (click)="programarAbierto.set(false)"
+                aria-label="Cerrar"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      </header>
+
+      <p class="programar__texto">
+        {{ message().trim() ? '“' + message() + '”' : 'Escribe el mensaje arriba y vuelve a programarlo.' }}
+      </p>
+
+      <div class="programar__opciones">
+        <label>Se envía
+          <select [ngModel]="tipoProgramacion()" (ngModelChange)="cambiarTipoProgramacion($event)">
+            <option value="UNA_VEZ">Una vez</option>
+            <option value="DIARIO">Cada día</option>
+            <option value="SEMANAL">Cada semana</option>
+            <option value="MENSUAL">Cada mes</option>
+          </select>
+        </label>
+
+        <label>Cuándo
+          <select [ngModel]="modoUnaVez()" (ngModelChange)="cambiarModoUnaVez($event)">
+            <option value="TIEMPO">En un rato</option>
+            <option value="FECHA">Fecha y hora exacta</option>
+          </select>
+        </label>
+      </div>
+
+      @if (modoUnaVez() === 'TIEMPO') {
+        <div class="programar__opciones">
+          <label>En cuánto
+            <select [ngModel]="minutosProgramados()" (ngModelChange)="minutosProgramados.set($event)">
+              <option [ngValue]="5">5 minutos</option>
+              <option [ngValue]="15">15 minutos</option>
+              <option [ngValue]="30">30 minutos</option>
+              <option [ngValue]="60">1 hora</option>
+              <option [ngValue]="120">2 horas</option>
+              <option [ngValue]="180">3 horas</option>
+              <option [ngValue]="1440">24 horas</option>
+            </select>
+          </label>
+          <span class="programar__preview">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+            {{ previsualizacion() }}
+          </span>
+        </div>
+      } @else {
+        <div class="programar__opciones">
+          <label>Día
+            <input type="number" min="1" max="31" [ngModel]="diaProgramado()"
+                   (ngModelChange)="diaProgramado.set($event)" />
+          </label>
+          <label>Mes
+            <input type="number" min="1" max="12" [ngModel]="mesProgramado()"
+                   (ngModelChange)="mesProgramado.set($event)" />
+          </label>
+          <label>Año
+            <input type="number" min="2024" max="2100" [ngModel]="anioProgramado()"
+                   (ngModelChange)="anioProgramado.set($event)" />
+          </label>
+          <label>Hora
+            <input type="number" min="0" max="23" [ngModel]="horaProgramada()"
+                   (ngModelChange)="horaProgramada.set($event)" />
+          </label>
+          <label>Minuto
+            <input type="number" min="0" max="59" [ngModel]="minutoProgramado()"
+                   (ngModelChange)="minutoProgramado.set($event)" />
+          </label>
+        </div>
+        <p class="programar__preview">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>
+          {{ previsualizacion() }}
+        </p>
+      }
+
+      @if (errorProgramar()) {
+        <p class="programar__error">{{ errorProgramar() }}</p>
+      }
+
+      <div class="programar__acciones">
+        <button type="button" class="programar__btn" [disabled]="guardandoProgramacion()"
+                (click)="guardarProgramacion()">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>
+          {{ guardandoProgramacion() ? 'Programando…' : 'Programar' }}
+        </button>
+        <small>Se guarda en <strong>Ajustes de cuenta → Mensajes programados</strong></small>
+      </div>
+    </div>
+  }
 </form>

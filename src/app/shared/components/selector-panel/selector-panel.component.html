@@ -1,0 +1,71 @@
+<div class="selector-panel" [class.selector-panel--abierto]="abierto()">
+  <button type="button" class="selector-panel__boton" [attr.aria-expanded]="abierto()"
+          (click)="alternar()" title="Cambiar de vista">
+    <i class="fa-solid" [class.fa-chart-pie]="!enEmpresa()" [class.fa-building]="enEmpresa()"
+       aria-hidden="true"></i>
+    <span>{{ titulo }}</span>
+    <i class="fa-solid fa-chevron-down selector-panel__flecha" aria-hidden="true"></i>
+  </button>
+
+  @if (abierto()) {
+    <div class="selector-panel__menu">
+      <a class="selector-panel__item" routerLink="/app/panel" (click)="cerrar()"
+         [class.activo]="ruta.startsWith('/app/panel') && ruta === '/app/panel'">
+        <i class="fa-solid fa-user" aria-hidden="true"></i>
+        <span>
+          <strong>Mi panel</strong>
+          <small>Lo que aportas y cómo se mueve tu cuenta</small>
+        </span>
+      </a>
+
+      @for (empresa of empresasDisponibles(); track empresa.id) {
+        <button type="button" class="selector-panel__item"
+                [class.activo]="enEmpresa() && empresaActiva()?.id === empresa.id"
+                (click)="entrarEmpresa(empresa.id)">
+          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <span>
+            <strong>{{ empresa.nombre }}</strong>
+            <small>{{ empresa.rolEtiqueta || empresa.rolPropio || 'Empresa' }}</small>
+          </span>
+        </button>
+
+        @if (enEmpresa() && empresaActiva()?.id === empresa.id) {
+          <a class="selector-panel__item selector-panel__item--hijo" routerLink="/app/panel"
+             [queryParams]="{ ambito: 'empresa' }" (click)="cerrar()">
+            <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+            <span>
+              <strong>Panel de la empresa</strong>
+              <small>Los números de todo el equipo</small>
+            </span>
+          </a>
+          <a class="selector-panel__item selector-panel__item--hijo" routerLink="/app/panel"
+             [queryParams]="{ ambito: 'mi-actividad' }" (click)="cerrar()">
+            <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+            <span>
+              <strong>Mi actividad</strong>
+              <small>Lo que aportas dentro del equipo</small>
+            </span>
+          </a>
+          <button type="button" class="selector-panel__item selector-panel__item--hijo" (click)="salirEmpresa()">
+            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+            <span>
+              <strong>Volver a personal</strong>
+              <small>Salir del modo empresa</small>
+            </span>
+          </button>
+        }
+      } @empty {
+        <p class="selector-panel__vacio">Todavía no administras ninguna empresa.</p>
+      }
+
+      <a class="selector-panel__item selector-panel__item--empleo" routerLink="/app/empleo"
+         (click)="cerrar()" [class.activo]="ruta.startsWith('/app/empleo')">
+        <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+        <span>
+          <strong>Buscar empleo</strong>
+          <small>Cruza vacantes con tu hoja de vida</small>
+        </span>
+      </a>
+    </div>
+  }
+</div>

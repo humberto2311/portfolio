@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AnaliticaPanel, HojaExportacion } from '../models/analitica.model';
+import { AnaliticaPanel, FilaSeguimiento, HojaExportacion } from '../models/analitica.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +32,18 @@ export class AnaliticaService {
     return this.http.post(`${environment.apiUrl}/api/networking/acciones`, {
       tipo, eventoId, contactoId, empresaId
     });
+  }
+
+  seguimiento(): Observable<{ filas: FilaSeguimiento[] }> {
+    return this.http.get<{ filas: FilaSeguimiento[] }>(`${environment.apiUrl}/api/analitica/seguimiento`);
+  }
+
+  guardarSeguimiento(contactoId: string, estado: string, nota?: string | null,
+                     recordarEn?: string | null): Observable<FilaSeguimiento> {
+    return this.http.post<FilaSeguimiento>(
+      `${environment.apiUrl}/api/analitica/seguimiento/${contactoId}`,
+      { estado, nota: nota ?? null, recordarEn: recordarEn ?? null }
+    );
   }
 
   registrarClic(enlace: string, empresaId: string | null): Observable<unknown> {

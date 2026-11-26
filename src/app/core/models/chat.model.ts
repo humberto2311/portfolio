@@ -8,6 +8,10 @@ export interface ChatMessage {
   edited?: boolean;
   deleted?: boolean;
   canEdit?: boolean;
+  comando?: boolean;
+  comandoNombre?: string | null;
+  confirmacion?: boolean;
+  parametros?: Record<string, unknown>;
 }
 
 export interface ChatMessageApi {

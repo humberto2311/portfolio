@@ -11,7 +11,37 @@
   <ul class="rail__lista">
     @for (item of navegacion; track item.label) {
       <li>
-        @if (item.grupo) {
+        @if (item.hijos && item.hijos.length) {
+          <!-- Panel: una fila que se despliega en sus tres vistas. -->
+          <div class="rail__grupo" [class.rail__grupo--abierto]="rielAbierto() === item.label">
+            <button
+              type="button"
+              class="rail__item"
+              [class.activo]="router.url.startsWith('/app/panel')"
+              [attr.data-tip]="item.label"
+              (click)="alternarRiel(item.label)">
+              <i class="rail__icon" [class]="item.icon" aria-hidden="true"></i>
+              <span class="rail__etiqueta">{{ item.label }}</span>
+              <i class="fa-solid fa-chevron-down rail__flecha" aria-hidden="true"></i>
+            </button>
+
+            <ul class="rail__sub">
+              @for (hijo of item.hijos; track hijo.label; let i = $index) {
+                <li>
+                  <a
+                    class="rail__subitem"
+                    [routerLink]="hijo.ruta"
+                    [queryParams]="{ modo: modoDe(i) }"
+                    [class.activo]="router.url.startsWith('/app/panel') && modoActivo() === modoDe(i)"
+                    [attr.data-tip]="hijo.nota">
+                    <i class="rail__icon" [class]="hijo.icon" aria-hidden="true"></i>
+                    <span class="rail__etiqueta">{{ hijo.label }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        } @else if (item.grupo) {
           <div class="rail__grupo" [class.rail__grupo--abierto]="grupoAbierto() === item.grupo">
             <button
               type="button"

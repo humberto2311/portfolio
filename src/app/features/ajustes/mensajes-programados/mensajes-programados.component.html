@@ -1,0 +1,64 @@
+<section class="programados">
+  <header class="programados__cabecera">
+    <div>
+      <h2><i class="fa-regular fa-clock" aria-hidden="true"></i> Mensajes programados</h2>
+      <p>Mensajes que se enviarán solos. Puedes pausarlos o eliminarlos cuando quieras.</p>
+    </div>
+    <button type="button" class="programados__refrescar" (click)="cargar()" [disabled]="cargando()">
+      <i class="fa-solid fa-rotate" aria-hidden="true"></i> Actualizar
+    </button>
+  </header>
+
+  @if (cargando()) {
+    <p class="programados__estado">Cargando tus mensajes…</p>
+  } @else if (error()) {
+    <p class="programados__estado programados__estado--error">{{ error() }}</p>
+  } @else if (!mensajes().length) {
+    <div class="programados__vacio">
+      <i class="fa-regular fa-clock" aria-hidden="true"></i>
+      <strong>Aún no tienes mensajes programados</strong>
+      <small>En el chat, mantén pulsado el botón de enviar para programar uno.</small>
+    </div>
+  } @else {
+    <ul class="lista">
+      @for (mensaje of mensajes(); track mensaje.id) {
+        <li class="fila" [class.fila--pausada]="!mensaje.activo" [class.fila--enviada]="mensaje.enviado">
+          <span class="fila__avatar">{{ iniciales(mensaje.destinatarioNombre) }}</span>
+
+          <div class="fila__datos">
+            <div class="fila__linea">
+              <strong>{{ mensaje.destinatarioNombre }}</strong>
+              <span class="etiqueta">{{ mensaje.etiqueta }}</span>
+              @if (!mensaje.activo) {
+                <span class="etiqueta etiqueta--pausa">Pausado</span>
+              }
+              @if (mensaje.enviado) {
+                <span class="etiqueta etiqueta--enviado">Enviado</span>
+              }
+            </div>
+            <p class="fila__texto">{{ mensaje.contenido }}</p>
+            <small class="fila__fecha">
+              Próximo envío: {{ fecha(mensaje.proximoEnvio) }}
+              @if (mensaje.ultimoEnvio) {
+                · Último: {{ fecha(mensaje.ultimoEnvio) }}
+              }
+            </small>
+          </div>
+
+          <div class="fila__acciones">
+            <button type="button" class="accion" [disabled]="trabajando() === mensaje.id"
+                    [title]="mensaje.activo ? 'Pausar' : 'Reanudar'"
+                    (click)="pausar(mensaje)">
+              <i class="fa-solid" [class.fa-pause]="mensaje.activo" [class.fa-play]="!mensaje.activo"
+                 aria-hidden="true"></i>
+            </button>
+            <button type="button" class="accion accion--peligro" [disabled]="trabajando() === mensaje.id"
+                    title="Eliminar" (click)="cancelar(mensaje)">
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

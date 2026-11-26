@@ -1,80 +1,110 @@
 @if (visible()) {
-  <div class="yw" [class.yw--abierto]="abierto()">
-    <button type="button" class="yw__pildora" (click)="alternar()" [attr.aria-expanded]="abierto()">
-      <i class="fa-brands fa-youtube" aria-hidden="true"></i>
-      <span class="yw__titulo">{{ video()?.titulo }}</span>
-      @if (sonando()) {
-        <span class="yw__punto" aria-hidden="true"></span>
-      }
-    </button>
+  <div
+    class="yw"
+    [class.yw--minimizado]="minimizado()"
+    [style.left.px]="posicion()?.x"
+    [style.top.px]="posicion()?.y">
 
-    @if (abierto()) {
-      <div class="yw-pop" role="dialog" aria-label="Reproductor de YouTube">
-        <header class="yw-pop__cabecera">
-          <span class="yw-pop__marca">
+    <!-- Minimizado: píldora con el ecualizador animado mientras suena. -->
+    @if (minimizado()) {
+      <div class="yw-mini">
+        <button type="button" class="yw-mini__abrir" title="Abrir el reproductor" (click)="alternar()">
+          <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+
+          <span class="yw-mini__onda" [class.yw-mini__onda--parada]="!sonando()" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </span>
+
+          <span class="yw-mini__titulo">{{ video()?.titulo }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="yw-mini__accion"
+          [title]="sonando() ? 'Pausar' : 'Reanudar'"
+          [attr.aria-label]="sonando() ? 'Pausar' : 'Reanudar'"
+          (click)="alternarSonido()">
+          <i class="fa-solid" [class.fa-pause]="sonando()" [class.fa-play]="!sonando()" aria-hidden="true"></i>
+        </button>
+
+        <button type="button" class="yw-mini__accion" title="Cerrar" aria-label="Cerrar" (click)="detener()">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+    } @else {
+      <!-- Ventana flotante completa: arrastrable por la cabecera. -->
+      <div class="yw-ventana" role="dialog" aria-label="Reproductor de YouTube">
+        <header
+          class="yw-ventana__cabecera"
+          (pointerdown)="empezarArrastre($event)"
+          (pointermove)="moverArrastre($event)"
+          (pointerup)="soltarArrastre()"
+          (pointercancel)="soltarArrastre()">
+          <span class="yw-ventana__marca">
             <i class="fa-brands fa-youtube" aria-hidden="true"></i>
             YouTube
           </span>
-          <button type="button" class="yw-pop__cerrar" aria-label="Cerrar" (click)="abierto.set(false)">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-          </button>
+
+          <div class="yw-ventana__botones">
+            <button type="button" title="Minimizar" aria-label="Minimizar" (click)="alternar()">
+              <i class="fa-solid fa-minus" aria-hidden="true"></i>
+            </button>
+            <button type="button" title="Cerrar" aria-label="Cerrar" (click)="cerrar()">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+          </div>
         </header>
 
-        @if (fuente()) {
-          <div class="yw-pop__pantalla">
-            <iframe
-              [src]="fuente()!"
-              title="Reproductor de YouTube"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen></iframe>
-          </div>
-        }
+        <div class="yw-ventana__pantalla">
+          <!-- El marco real está abajo, fijo: aquí solo se reserva el sitio. -->
+          <div class="yw-ventana__hueco"></div>
+        </div>
 
-        <div class="yw-pop__datos">
+        <div class="yw-ventana__datos">
           <strong>{{ video()?.titulo }}</strong>
           <small>{{ video()?.canal }}</small>
         </div>
 
-        <div class="yw-pop__controles">
-          @if (sonando()) {
-            <button type="button" title="Pausa" (click)="pausar()">
-              <i class="fa-solid fa-pause"></i>
-            </button>
-          } @else {
-            <button type="button" title="Reanudar" (click)="reanudar()">
-              <i class="fa-solid fa-play"></i>
-            </button>
-          }
-          <button type="button" title="Siguiente" (click)="saltar()">
-            <i class="fa-solid fa-forward-step"></i>
+        <div class="yw-ventana__controles">
+          <button
+            type="button"
+            class="yw-ventana__principal"
+            [title]="sonando() ? 'Pausar' : 'Reanudar'"
+            (click)="alternarSonido()">
+            <i class="fa-solid" [class.fa-pause]="sonando()" [class.fa-play]="!sonando()" aria-hidden="true"></i>
           </button>
-          <button type="button" title="Detener" class="yw-pop__detener" (click)="detener()">
-            <i class="fa-solid fa-stop"></i>
+
+          <button type="button" title="Siguiente" aria-label="Siguiente" (click)="saltar()">
+            <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
+          </button>
+
+          <button type="button" title="Detener" aria-label="Detener" class="yw-ventana__detener" (click)="detener()">
+            <i class="fa-solid fa-stop" aria-hidden="true"></i>
           </button>
 
           @if (estado().cola.length) {
-            <span class="yw-pop__cola">{{ estado().cola.length }} en cola</span>
+            <span class="yw-ventana__cola">{{ estado().cola.length }} en cola</span>
           }
         </div>
 
-        <div class="yw-pop__buscador">
+        <div class="yw-ventana__buscador">
           <input
             type="text"
             placeholder="Buscar otro video…"
             [value]="consulta()"
             (input)="consulta.set($any($event.target).value)"
             (keydown.enter)="buscar()" />
-          <button type="button" [disabled]="buscando()" (click)="buscar()">
+          <button type="button" [disabled]="buscando()" aria-label="Buscar" (click)="buscar()">
             @if (buscando()) {
-              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
             } @else {
-              <i class="fa-solid fa-magnifying-glass"></i>
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             }
           </button>
         </div>
 
         @if (resultados().length) {
-          <ul class="yw-pop__lista">
+          <ul class="yw-ventana__lista">
             @for (v of resultados(); track v.id) {
               <li>
                 <button type="button" (click)="poner(v)">
@@ -90,5 +120,31 @@
         }
       </div>
     }
+  </div>
+} @else if (hayAlgo()) {
+  <!-- Cerrado pero con video cargado: queda la píldora para volver a abrirlo. -->
+  <button type="button" class="yw-reabrir" title="Abrir el reproductor" (click)="reabrir()">
+    <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+  </button>
+}
+
+<!--
+  El reproductor vive SIEMPRE en el DOM, fuera de la ventana.
+  Así minimizar solo lo encoge: el iframe nunca se recarga y el audio sigue sonando.
+-->
+@if (visible()) {
+  <div
+    class="yw-marco"
+    [class.yw-marco--minimizado]="minimizado()"
+    [style.left.px]="marcoCaja()?.x"
+    [style.top.px]="marcoCaja()?.y"
+    [style.width.px]="marcoCaja()?.ancho"
+    [style.height.px]="marcoCaja() ? marcoCaja()!.ancho * 9 / 16 : null">
+    <iframe
+      #marco
+      [src]="fuente()"
+      title="Reproductor de YouTube"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>
   </div>
 }

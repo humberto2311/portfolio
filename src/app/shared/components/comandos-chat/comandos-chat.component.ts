@@ -3,18 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { BotComando, RespuestaComando } from '../../../core/models/comando.model';
+import { BotComando } from '../../../core/models/comando.model';
 import { ComandosService } from '../../../core/services/comandos.service';
-import { ToqueNfcService } from '../../../core/services/toque-nfc.service';
-import { EstadoNfc } from '../../../core/models/nfc-estado.model';
 
 interface MensajeComando {
-  autor: 'yo' | 'sistema' | 'ia';
+  autor: 'yo' | 'ia';
   texto: string;
   comando?: string | null;
-  ejemplo?: string;
-  confirmacion?: RespuestaComando;
-  nfc?: EstadoNfc;
 }
 
 @Component({
@@ -29,9 +24,9 @@ export class ComandosChatComponent implements OnInit {
   @Input() compacto = false;
 
   readonly cerrar = output<void>();
+  readonly usar = output<string>();
 
   private comandos = inject(ComandosService);
-  private toques = inject(ToqueNfcService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -42,11 +37,8 @@ export class ComandosChatComponent implements OnInit {
   readonly vista = signal<'bots' | 'ia' | 'ayuda'>('bots');
   readonly bots = signal<BotComando[]>([]);
   readonly modoIa = signal(false);
-  readonly pendiente = signal<RespuestaComando | null>(null);
   readonly copiado = signal<string | null>(null);
-  readonly estadoNfc = signal<EstadoNfc | null>(null);
 
-  readonly hayPendiente = computed(() => this.pendiente() !== null);
   readonly modoTraduciendo = computed(() => this.modoIa() && this.enviando());
   readonly hayBotsActivos = computed(() => this.bots().some((bot) => bot.activo));
 
@@ -59,36 +51,6 @@ export class ComandosChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarBots();
-  }
-
-  enviar(): void {
-    const valor = this.texto().trim();
-    if (!valor || this.enviando()) return;
-
-    this.mensajes.update((lista) => [...lista, { autor: 'yo', texto: valor }]);
-    this.texto.set('');
-    this.enviando.set(true);
-
-    this.comandos.enviarMensaje(valor, this.conversacionId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (respuesta) => this.recibir(respuesta),
-        error: () => {
-          this.enviando.set(false);
-          this.mensajes.update((lista) => [
-            ...lista,
-            { autor: 'sistema', texto: 'No se pudo enviar el comando. Inténtalo de nuevo.' }
-          ]);
-        }
-      });
-  }
-
-  confirmar(): void {
-    this.ejecutar(this.comandos.confirmar(this.conversacionId));
-  }
-
-  cancelar(): void {
-    this.ejecutar(this.comandos.cancelar(this.conversacionId));
   }
 
   abrirVista(vista: 'bots' | 'ia' | 'ayuda'): void {
@@ -143,84 +105,14 @@ export class ComandosChatComponent implements OnInit {
           this.enviando.set(false);
           this.mensajes.update((lista) => [
             ...lista,
-            { autor: 'sistema', texto: 'La ayuda con IA no respondió. Prueba más tarde.' }
+            { autor: 'ia', texto: 'La ayuda con IA no respondió. Prueba más tarde.' }
           ]);
         }
       });
   }
 
-  copiar(comando: string): void {
-    navigator.clipboard.writeText(comando).then(() => {
-      this.copiado.set(comando);
-      setTimeout(() => this.copiado.set(null), 1600);
-    });
-  }
-
-  parametrosDe(respuesta: RespuestaComando): Array<{ clave: string; valor: string }> {
-    return Object.entries(respuesta.parametros ?? {}).map(([clave, valor]) => ({
-      clave,
-      valor: typeof valor === 'object' ? JSON.stringify(valor) : String(valor)
-    }));
-  }
-
   usarComando(comando: string): void {
-    this.texto.set(comando.startsWith('@') ? comando : comando + ' ');
-  }
-
-  private ejecutar(peticion: ReturnType<ComandosService['confirmar']>): void {
-    this.enviando.set(true);
-
-    peticion.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (respuesta) => this.recibir(respuesta),
-      error: () => {
-        this.enviando.set(false);
-        this.mensajes.update((lista) => [
-          ...lista,
-          { autor: 'sistema', texto: 'No se pudo completar la acción.' }
-        ]);
-      }
-    });
-  }
-
-  private recibir(respuesta: RespuestaComando): void {
-    this.enviando.set(false);
-    this.pendiente.set(respuesta.requiereConfirmacion ? respuesta : null);
-
-    const esNfc = respuesta.comando === '/nfc-estado';
-
-    this.mensajes.update((lista) => [
-      ...lista,
-      {
-        autor: 'sistema',
-        texto: respuesta.mensaje,
-        comando: respuesta.comando,
-        confirmacion: respuesta.requiereConfirmacion ? respuesta : undefined,
-        nfc: esNfc ? this.estadoNfc() ?? undefined : undefined
-      }
-    ]);
-
-    if (esNfc) this.cargarEstadoNfc();
-  }
-
-  private cargarEstadoNfc(): void {
-    this.toques.estado()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (estado) => {
-          this.estadoNfc.set(estado);
-          this.mensajes.update((lista) => {
-            const copia = [...lista];
-            const ultimo = copia.length - 1;
-
-            if (ultimo >= 0 && copia[ultimo].comando === '/nfc-estado') {
-              copia[ultimo] = { ...copia[ultimo], nfc: estado };
-            }
-
-            return copia;
-          });
-        },
-        error: () => this.estadoNfc.set(null)
-      });
+    this.usar.emit(comando.startsWith('@') ? comando : comando + ' ');
   }
 
   activarEmision(): void {

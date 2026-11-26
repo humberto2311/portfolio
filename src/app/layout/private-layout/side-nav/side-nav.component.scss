@@ -775,3 +775,31 @@
     color: $text-light;
   }
 }
+
+/* ---------- PANEL: fila desplegable con sus tres vistas ---------- */
+
+.rail__flecha {
+  margin-left: auto;
+  font-size: 0.6rem;
+  color: $text-muted;
+  transition: transform 0.15s ease;
+}
+
+.rail__grupo--abierto .rail__flecha {
+  transform: rotate(180deg);
+}
+
+.rail__grupo > .rail__sub {
+  display: none;
+}
+
+.rail__grupo--abierto > .rail__sub {
+  display: block;
+}
+
+.rail__sub {
+  margin: 2px 0 4px 20px;
+  padding: 0 0 0 8px;
+  list-style: none;
+  border-left: 1px solid var(--border-soft);
+}

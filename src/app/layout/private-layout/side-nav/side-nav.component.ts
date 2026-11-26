@@ -12,6 +12,7 @@ import { ConfirmationModalService } from '../../../core/services/confirmation-mo
 import { Empresa } from '../../../core/models/empresa.model';
 import { LogoComponent } from '../../../shared/components/logo/logo.component';
 import { SpotifyWidgetComponent } from '../../../shared/components/spotify-widget/spotify-widget.component';
+import { YouTubeWidgetComponent } from '../../../shared/components/youtube-widget/youtube-widget.component';
 import { esSinImagen } from '../../../features/empresa/espacio/espacio-ui';
 
 interface RailItem {
@@ -72,7 +73,7 @@ const GRUPOS: Record<'cv' | 'equipo', RailItem[]> = {
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LogoComponent, SpotifyWidgetComponent],
+  imports: [RouterLink, RouterLinkActive, LogoComponent, SpotifyWidgetComponent, YouTubeWidgetComponent],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
 })

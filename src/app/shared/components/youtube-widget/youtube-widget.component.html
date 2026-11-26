@@ -1,0 +1,94 @@
+@if (visible()) {
+  <div class="yw" [class.yw--abierto]="abierto()">
+    <button type="button" class="yw__pildora" (click)="alternar()" [attr.aria-expanded]="abierto()">
+      <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+      <span class="yw__titulo">{{ video()?.titulo }}</span>
+      @if (sonando()) {
+        <span class="yw__punto" aria-hidden="true"></span>
+      }
+    </button>
+
+    @if (abierto()) {
+      <div class="yw-pop" role="dialog" aria-label="Reproductor de YouTube">
+        <header class="yw-pop__cabecera">
+          <span class="yw-pop__marca">
+            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+            YouTube
+          </span>
+          <button type="button" class="yw-pop__cerrar" aria-label="Cerrar" (click)="abierto.set(false)">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </header>
+
+        @if (fuente()) {
+          <div class="yw-pop__pantalla">
+            <iframe
+              [src]="fuente()!"
+              title="Reproductor de YouTube"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+        }
+
+        <div class="yw-pop__datos">
+          <strong>{{ video()?.titulo }}</strong>
+          <small>{{ video()?.canal }}</small>
+        </div>
+
+        <div class="yw-pop__controles">
+          @if (sonando()) {
+            <button type="button" title="Pausa" (click)="pausar()">
+              <i class="fa-solid fa-pause"></i>
+            </button>
+          } @else {
+            <button type="button" title="Reanudar" (click)="reanudar()">
+              <i class="fa-solid fa-play"></i>
+            </button>
+          }
+          <button type="button" title="Siguiente" (click)="saltar()">
+            <i class="fa-solid fa-forward-step"></i>
+          </button>
+          <button type="button" title="Detener" class="yw-pop__detener" (click)="detener()">
+            <i class="fa-solid fa-stop"></i>
+          </button>
+
+          @if (estado().cola.length) {
+            <span class="yw-pop__cola">{{ estado().cola.length }} en cola</span>
+          }
+        </div>
+
+        <div class="yw-pop__buscador">
+          <input
+            type="text"
+            placeholder="Buscar otro video…"
+            [value]="consulta()"
+            (input)="consulta.set($any($event.target).value)"
+            (keydown.enter)="buscar()" />
+          <button type="button" [disabled]="buscando()" (click)="buscar()">
+            @if (buscando()) {
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+            } @else {
+              <i class="fa-solid fa-magnifying-glass"></i>
+            }
+          </button>
+        </div>
+
+        @if (resultados().length) {
+          <ul class="yw-pop__lista">
+            @for (v of resultados(); track v.id) {
+              <li>
+                <button type="button" (click)="poner(v)">
+                  <img [src]="v.imagenUrl" alt="" loading="lazy" />
+                  <span>
+                    <strong>{{ v.titulo }}</strong>
+                    <small>{{ v.canal }}</small>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
+}

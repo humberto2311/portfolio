@@ -1,0 +1,201 @@
+:host { display: block; }
+
+.yw {
+  position: fixed;
+  right: 1.1rem;
+  bottom: 5.4rem;
+  z-index: 60;
+
+  &--abierto { z-index: 61; }
+}
+
+.yw__pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  max-width: 15rem;
+  padding: .45rem .8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft, #2a2f3a);
+  background: var(--bg-elevated, #171b22);
+  color: var(--text-primary, #e8e8e8);
+  font-size: .82rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+
+  i { color: #ff4444; }
+
+  &:hover { background: var(--bg-hover, #1e2430); }
+}
+
+.yw__titulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yw__punto {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--success, #3fb950);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success, #3fb950) 22%, transparent);
+}
+
+.yw-pop {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + .6rem);
+  width: min(22rem, calc(100vw - 2rem));
+  padding: .7rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft, #2a2f3a);
+  background: var(--bg-card, #12161d);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+}
+
+.yw-pop__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .5rem;
+}
+
+.yw-pop__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text-secondary, #a7b0bd);
+
+  i { color: #ff4444; }
+}
+
+.yw-pop__cerrar {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted, #8b95a5);
+  cursor: pointer;
+  border-radius: 8px;
+  padding: .2rem .35rem;
+
+  &:hover { color: var(--text-primary, #e8e8e8); background: var(--bg-hover, #1e2430); }
+}
+
+.yw-pop__pantalla {
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+
+  iframe { width: 100%; height: 100%; border: 0; }
+}
+
+.yw-pop__datos {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  margin: .55rem 0 .4rem;
+
+  strong {
+    font-size: .86rem;
+    color: var(--text-primary, #e8e8e8);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small { color: var(--text-muted, #8b95a5); font-size: .74rem; }
+}
+
+.yw-pop__controles {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9px;
+    border: 1px solid var(--border-soft, #2a2f3a);
+    background: var(--bg-elevated, #171b22);
+    color: var(--text-primary, #e8e8e8);
+    cursor: pointer;
+
+    &:hover { background: var(--bg-hover, #1e2430); }
+  }
+}
+
+.yw-pop__detener { color: var(--danger, #e5484d) !important; }
+
+.yw-pop__cola {
+  margin-left: auto;
+  font-size: .72rem;
+  color: var(--text-faint, #6b7484);
+}
+
+.yw-pop__buscador {
+  display: flex;
+  gap: .35rem;
+  margin-top: .55rem;
+
+  input {
+    flex: 1;
+    padding: .42rem .6rem;
+    border-radius: 9px;
+    border: 1px solid var(--border-soft, #2a2f3a);
+    background: var(--bg-input, #0f1319);
+    color: var(--text-primary, #e8e8e8);
+    font-size: .8rem;
+  }
+
+  button {
+    width: 2.2rem;
+    border-radius: 9px;
+    border: 1px solid var(--border-soft, #2a2f3a);
+    background: var(--bg-elevated, #171b22);
+    color: var(--text-primary, #e8e8e8);
+    cursor: pointer;
+  }
+}
+
+.yw-pop__lista {
+  list-style: none;
+  margin: .55rem 0 0;
+  padding: 0;
+  max-height: 12rem;
+  overflow-y: auto;
+
+  li + li { margin-top: .25rem; }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .3rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover { background: var(--bg-hover, #1e2430); }
+
+    img { width: 3.6rem; height: 2rem; border-radius: 6px; object-fit: cover; }
+
+    span { display: flex; flex-direction: column; min-width: 0; }
+
+    strong {
+      font-size: .78rem;
+      color: var(--text-primary, #e8e8e8);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small { font-size: .7rem; color: var(--text-muted, #8b95a5); }
+  }
+}

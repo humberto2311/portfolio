@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { YouTubeService, VideoYouTube } from '../../../core/services/youtube.service';
 
@@ -33,6 +34,7 @@ export class YouTubeWidgetComponent implements OnInit {
 
   private youtube = inject(YouTubeService);
   private destroyRef = inject(DestroyRef);
+  private sanitizer = inject(DomSanitizer);
 
   readonly estado = this.youtube.estado;
   readonly minimizado = signal(false);
@@ -51,12 +53,18 @@ export class YouTubeWidgetComponent implements OnInit {
   readonly visible = computed(() => !!this.video() && !this.cerrado());
 
   readonly origen = `${window.location.origin}`;
-  readonly fuente = computed(() => {
+  /**
+   * Angular bloquea un texto plano en el [src] de un iframe (NG0904) y el video no cargaba.
+   * Solo se marca como seguro después de comprobar que el id tiene el formato de YouTube,
+   * así nadie puede colar otra URL en el reproductor.
+   */
+  readonly fuente = computed<SafeResourceUrl | null>(() => {
     const actual = this.video();
-    if (!actual) return '';
+    if (!actual || !/^[A-Za-z0-9_-]{11}$/.test(actual.id)) return null;
 
-    return `https://www.youtube.com/embed/${actual.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`
+    const url = `https://www.youtube.com/embed/${actual.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`
       + `&origin=${encodeURIComponent(this.origen)}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
 
   private reproductor: any = null;

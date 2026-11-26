@@ -28,6 +28,7 @@ import { EmpresaService } from '../../core/services/empresa.service';
 import { EmpresaCrearComponent } from '../empresa/empresa-crear/empresa-crear.component';
 import { GuiaComandosComponent } from '../../shared/components/guia-comandos/guia-comandos.component';
 import { SugerenciasBotService, TipoSugerencia } from '../../core/services/sugerencias-bot.service';
+import { GitHubCuentaService } from '../../core/services/github-cuenta.service';
 
 type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'comandos';
 
@@ -64,6 +65,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   readonly diseno = inject(DisenoService);
   readonly empresas = inject(EmpresaService);
   readonly sugerenciasService = inject(SugerenciasBotService);
+  readonly githubService = inject(GitHubCuentaService);
 
   @ViewChild('tabsNav') tabsNav?: ElementRef<HTMLElement>;
 
@@ -94,6 +96,10 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   readonly nombreSugerencia = signal('');
   readonly detalleSugerencia = signal('');
   readonly enviandoSugerencia = signal(false);
+
+  readonly tokenGithub = signal('');
+  readonly guardandoGithub = signal(false);
+  readonly errorGithub = signal<string | null>(null);
 
   readonly paleta = ['#4a9eff', '#3fb950', '#f5b75e', '#e5484d', '#c297ff', '#ff7ac6', '#2dd4bf', '#e8e8e8'];
 
@@ -682,7 +688,34 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     }, 350);
   }
 
+  conectarGithub(): void {
+    const token = this.tokenGithub().trim();
+    if (!token || this.guardandoGithub()) return;
+
+    this.guardandoGithub.set(true);
+    this.errorGithub.set(null);
+
+    this.githubService
+      .conectar(token)
+      .pipe(
+        finalize(() => this.guardandoGithub.set(false)),
+        takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.tokenGithub.set(''),
+        error: (e) => this.errorGithub.set(e?.error?.mensaje ?? 'No se pudo conectar GitHub.'),
+      });
+  }
+
+  desconectarGithub(): void {
+    this.githubService
+      .desconectar()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => this.errorGithub.set('No se pudo desconectar GitHub.') });
+  }
+
   private cargarSugerencias(): void {
+    this.githubService.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => {} });
+
     this.sugerenciasService
       .cargar()
       .pipe(takeUntilDestroyed(this.destroyRef))

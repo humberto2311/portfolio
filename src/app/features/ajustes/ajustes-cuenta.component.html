@@ -695,6 +695,56 @@
       </section>
 
       <section class="card">
+        <h2><i class="fab fa-github"></i> Tu cuenta de GitHub</h2>
+        <p class="helper">
+          Los comandos de GitHub (crear repositorios, invitar, abrir issues o pull requests,
+          lanzar workflows) actúan en tu nombre, así que necesitan tu propio token.
+          Se guarda cifrado y solo lo usa el servidor.
+        </p>
+
+        @if (githubService.estado().conectada) {
+          <p class="github-estado github-estado--bien">
+            <i class="fas fa-circle-check"></i>
+            Conectado como <strong>{{ githubService.estado().login }}</strong>
+          </p>
+          <button type="button" class="btn-guardar btn-guardar--peligro" (click)="desconectarGithub()">
+            <i class="fas fa-plug-circle-xmark"></i> Desconectar GitHub
+          </button>
+        } @else {
+          <div class="field">
+            <label for="github-token">Token personal (classic o fine-grained)</label>
+            <input
+              id="github-token"
+              type="password"
+              autocomplete="off"
+              [ngModel]="tokenGithub()"
+              (ngModelChange)="tokenGithub.set($event)"
+              placeholder="ghp_…" />
+            <small class="helper">
+              En GitHub: Settings › Developer settings › Personal access tokens.
+              Marca al menos <code>repo</code> y <code>workflow</code>.
+            </small>
+          </div>
+
+          <footer class="panel__pie">
+            <span class="pie__estado pie__estado--error" *ngIf="errorGithub()">{{ errorGithub() }}</span>
+            <span class="pie__empuje"></span>
+            <button
+              type="button"
+              class="btn-guardar"
+              [disabled]="guardandoGithub() || !tokenGithub().trim()"
+              (click)="conectarGithub()">
+              @if (guardandoGithub()) {
+                <i class="fas fa-circle-notch fa-spin"></i> Comprobando…
+              } @else {
+                <i class="fas fa-link"></i> Conectar GitHub
+              }
+            </button>
+          </footer>
+        }
+      </section>
+
+      <section class="card">
         <h2><i class="fas fa-lightbulb"></i> Sugiere un bot o una herramienta</h2>
         <p class="helper">
           ¿Falta un bot (Notion, Jira, Trello, Slack…) o una herramienta para los que ya tienes?

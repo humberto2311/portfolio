@@ -891,3 +891,31 @@
     &:hover { color: var(--danger, #e5484d); background: var(--bg-card); }
   }
 }
+
+.github-estado {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem .8rem;
+  margin: 0 0 .8rem;
+  border-radius: 8px;
+  font-size: .88rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+
+  &--bien {
+    color: var(--success, #3fb950);
+    border-color: color-mix(in srgb, var(--success, #3fb950) 35%, transparent);
+  }
+}
+
+.btn-guardar--peligro {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--danger, #e5484d) 45%, transparent);
+  color: var(--danger, #e5484d);
+
+  &:hover { background: color-mix(in srgb, var(--danger, #e5484d) 12%, transparent); }
+}
+
+.pie__estado--error { color: var(--danger, #e5484d); }

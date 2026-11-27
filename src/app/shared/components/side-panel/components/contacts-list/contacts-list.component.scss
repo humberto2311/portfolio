@@ -473,6 +473,12 @@
   min-height: 0;
   background: var(--bg-sidebar);
   color: $text-light;
+
+  /* El carrusel de avatares arranca pegado a la barra "Mensajes". */
+  app-estados-carrusel {
+    display: block;
+    margin-top: -2px;
+  }
 }
 
 /* Buscador ancho de la referencia, con la lupa a la izquierda. */
@@ -579,7 +585,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 14px 4px;
+  padding: 4px 14px 0;
 
   h3 {
     margin: 0;

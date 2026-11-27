@@ -76,6 +76,8 @@ export class ChatViewComponent {
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
 
   readonly abiertoId = signal<string | null>(null);
+  readonly traducciones = signal<Record<string, string>>({});
+  readonly fijados = signal<Record<string, string>>({});
 
   readonly reacciones = signal<Record<string, string>>({});
 
@@ -275,6 +277,134 @@ export class ChatViewComponent {
     return String(msg.id ?? `${msg.time}-${msg.text}`);
   }
 
+  readonly menuId = signal<string | null>(null);
+
+  readonly menuArriba = signal(false);
+
+  /**
+   * Abre el menú de un mensaje. Si no hay sitio debajo de la burbuja se abre
+   * hacia arriba, para que nunca quede cortado por el borde del panel.
+   */
+  abrirMenu(msg: ChatMessage, evento: Event): void {
+    evento.stopPropagation();
+    const clave = this.claveDe(msg);
+    const abrir = this.menuId() !== clave;
+
+    this.menuId.set(abrir ? clave : null);
+    if (!abrir) return;
+
+    const boton = evento.currentTarget as HTMLElement | null;
+    const caja = boton?.closest('.messages')?.getBoundingClientRect();
+    const ancla = boton?.getBoundingClientRect();
+    if (!caja || !ancla) {
+      this.menuArriba.set(false);
+      return;
+    }
+
+    const altoMenu = 7 * 40 + 12;
+    this.menuArriba.set(ancla.bottom + altoMenu > caja.bottom);
+  }
+
+  cerrarMenu(): void {
+    this.menuId.set(null);
+  }
+
+  /** «Reenviar»: deja el texto en el campo para elegir a quién. */
+  reenviar(msg: ChatMessage): void {
+    this.message.set(msg.text);
+    this.cerrarMenu();
+    const campo = document.querySelector<HTMLTextAreaElement>('.composer__campo');
+    campo?.focus();
+  }
+
+  /** «Copiar»: al portapapeles, con el texto quieto si el navegador lo niega. */
+  copiar(msg: ChatMessage): void {
+    this.cerrarMenu();
+    navigator.clipboard?.writeText(msg.text).catch(() => undefined);
+  }
+
+  /** «Translate»: alterna la traducción del mensaje en el sitio. */
+  traducir(msg: ChatMessage): void {
+    this.cerrarMenu();
+    const clave = this.claveDe(msg);
+    this.traducciones.update((mapa) => {
+      const copia = { ...mapa };
+      if (copia[clave]) {
+        delete copia[clave];
+        return copia;
+      }
+      copia[clave] = this.traducirTexto(msg.text);
+      return copia;
+    });
+  }
+
+  /** «Fijar»: un solo mensaje fijado por conversación. */
+  fijar(msg: ChatMessage): void {
+    this.cerrarMenu();
+    const clave = this.claveDe(msg);
+    const contact = this.svc.activeContact();
+    if (!contact) return;
+    this.fijados.update((mapa) => {
+      const copia = { ...mapa };
+      if (copia[contact.id] === clave) delete copia[contact.id];
+      else copia[contact.id] = clave;
+      return copia;
+    });
+  }
+
+  /** «Anular envío»: solo lo propio y solo si ya existe en el servidor. */
+  anularEnvio(msg: ChatMessage): void {
+    this.cerrarMenu();
+    void this.remove(msg);
+  }
+
+  editarDesdeMenu(msg: ChatMessage): void {
+    this.cerrarMenu();
+    this.startEdit(msg);
+  }
+
+  eliminarDesdeMenu(msg: ChatMessage): void {
+    this.cerrarMenu();
+    void this.remove(msg);
+  }
+
+  esMio(msg: ChatMessage): boolean {
+    return msg.sender === 'me';
+  }
+
+  fijadoDe(msg: ChatMessage): boolean {
+    const contact = this.svc.activeContact();
+    if (!contact) return false;
+    return this.fijados()[contact.id] === this.claveDe(msg);
+  }
+
+  fijadoActual(): ChatMessage | null {
+    const contact = this.svc.activeContact();
+    const clave = contact ? this.fijados()[contact.id] : null;
+    if (!clave) return null;
+    return this.messages.find((m) => this.claveDe(m) === clave) ?? null;
+  }
+
+  translationDe(msg: ChatMessage): string | null {
+    return this.traducciones()[this.claveDe(msg)] ?? null;
+  }
+
+  /** Traducción mínima para el botón del menú, sin salir del navegador. */
+  private traducirTexto(texto: string): string {
+    const saludos: Record<string, string> = {
+      hola: 'Hello',
+      'como estas': 'How are you',
+      'como estas como te ha ido': 'How are you, how has it been',
+      'bien bien gracias a dios': 'Good, thank God',
+      'como vas': 'How is it going',
+      'bien y tu': 'Good, and you',
+      hi: 'Hola',
+    };
+
+    const limpio = texto.trim().toLowerCase();
+    return saludos[limpio] ?? `(sin traducir) ${texto}`;
+  }
+
   reaccionDe(msg: ChatMessage): string | null {
     return this.reacciones()[this.claveDe(msg)] ?? null;
   }
@@ -309,13 +439,25 @@ export class ChatViewComponent {
 
   ajustarAlto(evento: Event): void {
     const campo = evento.target as HTMLTextAreaElement;
+    // Se mide con el ancho real del campo ya pintado: sin esto, al primer
+    // carácter el navegador mide antes de que el texto se acomode y el campo
+    // salta de alto con cada tecla.
+    const ancho = campo.clientWidth;
+
+    if (ancho <= 0) return;
+
     campo.style.height = 'auto';
-    const maximo = 4 * 20 + 20;
-    campo.style.height = `${Math.min(campo.scrollHeight, maximo)}px`;
+    campo.style.width = `${ancho}px`;
+
+    const alto = Math.ceil(campo.scrollHeight);
+    const maximo = 3 * 20 + 12;
+
+    campo.style.width = '';
+    campo.style.height = `${Math.min(alto, maximo)}px`;
   }
 
   get grupos(): Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> {
-    const lista = this.messages;
+    const lista = [...this.messages].sort((a, b) => this.momentoDe(a) - this.momentoDe(b));
     const porDia: Array<{ clave: string; etiqueta: string; grupos: GrupoMensajes[] }> = [];
 
     for (const msg of lista) {
@@ -351,6 +493,41 @@ export class ChatViewComponent {
     if (!valor) return null;
     const fecha = new Date(valor);
     return Number.isNaN(fecha.getTime()) ? null : fecha;
+  }
+
+  /**
+   * Marca de tiempo para ordenar. Los mensajes optimistas todavía no tienen
+   * `createdAt`, y si se ordenaran como 0 se irían al principio del hilo:
+   * el del servidor manda, el local usa `createdAt` o la hora que muestra.
+   */
+  private momentoDe(msg: ChatMessage): number {
+    const fecha = this.fechaDe(msg);
+    if (fecha) return fecha.getTime();
+
+    if (msg.time) {
+      const [hora, minuto] = msg.time.split(':').map((parte) => Number(parte));
+      if (!Number.isNaN(hora) && !Number.isNaN(minuto)) {
+        const hoy = new Date();
+        hoy.setHours(hora, minuto, 0, 0);
+        return hoy.getTime();
+      }
+    }
+
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  /** «24 oct. 2026, 17:25» sobre cada mensaje, como en la referencia. */
+  fechaLarga(msg: ChatMessage): string {
+    const fecha = this.fechaDe(msg);
+    if (!fecha) return msg.time ?? '';
+
+    const dia = fecha.toLocaleDateString('es-CO', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    return `${dia}, ${msg.time}`;
   }
 
   private etiquetaDia(fecha: Date | null): string {
@@ -495,6 +672,7 @@ export class ChatViewComponent {
       sender: 'me',
       text: texto,
       time: this.hora(new Date().toISOString()),
+      createdAt: new Date().toISOString(),
     } as any);
 
     this.message.set('');
@@ -514,6 +692,7 @@ export class ChatViewComponent {
             sender: 'them',
             text: 'No pude ejecutar ese comando. Inténtalo otra vez.',
             time: this.hora(new Date().toISOString()),
+            createdAt: new Date().toISOString(),
             comando: true,
           } as any);
         },

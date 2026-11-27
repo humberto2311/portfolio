@@ -25,6 +25,13 @@ export class PerfilService {
   private readonly API_URL = `${environment.apiUrl}/api/users`;
 
   perfil = signal<PerfilData | null>(null);
+
+  /**
+   * Perfil propio, aparte del perfil que se esté viendo. Las partes de la app que
+   * necesitan "mis datos" (estados, mi avatar, mi hoja de vida) leen de aquí, para
+   * no pisar el perfil ajeno que está en pantalla.
+   */
+  readonly miPerfil = signal<PerfilData | null>(null);
   publicaciones = signal<Publicacion[]>([]);
   cargando = signal<boolean>(false);
 
@@ -54,6 +61,22 @@ export class PerfilService {
   });
 
   // ====== PERFIL ======
+  /**
+   * Lee el perfil de otra persona para un dato suelto (su nota) sin tocar la
+   * señal `perfil`, que es la que pinta la pantalla del perfil.
+   */
+  leerPerfil(username: string): Observable<PerfilData | null> {
+    const esId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(username);
+    const url = esId
+      ? `${this.API_URL}/perfil-completo/${username}`
+      : `${this.API_URL}/perfil-completo/username/${encodeURIComponent(username)}`;
+
+    return this.http.get<any>(url).pipe(
+      map((data) => (data ? this.mapearPerfil(data) : null)),
+      catchError(() => of(null))
+    );
+  }
+
   cargarPerfil(username?: string | null): Observable<PerfilData | null> {
     this.cargando.set(true);
     this.perfil.set(null);
@@ -72,7 +95,9 @@ export class PerfilService {
     return this.http.get<any>(url).pipe(
       tap((data) => {
         if (data) {
-          this.perfil.set(this.mapearPerfil(data));
+          const perfil = this.mapearPerfil(data);
+          this.perfil.set(perfil);
+          if (!username) this.miPerfil.set(perfil);
           this.completarRolConCv();
         }
         this.cargando.set(false);

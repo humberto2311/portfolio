@@ -37,7 +37,7 @@
           <span class="anillo__mas" aria-hidden="true"><i class="fa-solid fa-plus"></i></span>
         }
       </span>
-      @if (notaPropia(); as nota) {
+      @if (conNota() && notaPropia(); as nota) {
         <span class="estado-tarjeta__burbuja">{{ nota }}</span>
       }
       <span class="estado-tarjeta__nombre">{{ propiaEsNota() ? 'Tu nota' : etiquetaPropia() }}</span>
@@ -45,9 +45,9 @@
 
     @for (grupo of otros(); track grupo.usuarioId) {
       <div class="estado-tarjeta" [class.estado-tarjeta--sin-nota]="!textoDe(grupo)">
-        <button type="button" class="estado-tarjeta__anillo" (click)="chatear(grupo)"
-                [title]="'Abrir el chat con ' + grupo.nombre"
-                [attr.aria-label]="'Abrir el chat con ' + grupo.nombre">
+        <button type="button" class="estado-tarjeta__anillo" (click)="ver(grupo)"
+                [title]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre"
+                [attr.aria-label]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre">
         <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
           @if (grupo.avatar && !roto(grupo.usuarioId)) {
             <img [src]="grupo.avatar" [alt]="grupo.nombre" (error)="marcarRoto(grupo.usuarioId)" />
@@ -56,17 +56,13 @@
           }
         </span>
         </button>
-        @if (textoDe(grupo); as nota) {
+        @if (conNota() && notaDe(grupo); as nota) {
           <span class="estado-tarjeta__burbuja">{{ nota }}</span>
         }
         <button type="button" class="estado-tarjeta__nombre estado-tarjeta__nombre--boton"
                 (click)="chatear(grupo)" [title]="'Abrir el chat con ' + grupo.nombre">
           {{ grupo.nombre.split(' ')[0] }}
         </button>
-        @if (grupo.estados.length) {
-          <button type="button" class="estado-tarjeta__historia" (click)="ver(grupo)"
-                  [title]="'Ver la historia de ' + grupo.nombre">Ver historia</button>
-        }
       </div>
     }
 

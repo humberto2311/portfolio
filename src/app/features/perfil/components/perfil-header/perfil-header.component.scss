@@ -65,16 +65,21 @@
   // sin que `overflow: hidden` lo recorte.
   overflow: visible;
   margin-bottom: 16px;
-  // `overflow: visible` quitó también el recorte de las esquinas: la portada es
-  // cuadrada y se veía el corte. Con `clip-path` se redondea el borde sin volver
-  // a recortar los menús que salen de la tarjeta.
-  clip-path: inset(0 round 16px);
+  // Sin `clip-path`: recortaba el menú de tres puntos contra el borde inferior.
+  // Las esquinas las redondea el navegador con `border-radius` sobre el fondo y
+  // el borde, y el menú puede salir de la tarjeta. La portada lleva su propio
+  // redondeo arriba para no dejar esquinas cuadradas.
+  position: relative;
 }
 
 .cover-banner {
   height: 220px;
   background: $bg-elevated no-repeat center / cover;
   position: relative;
+  // La portada va dentro de la tarjeta: se redondea arriba para que no asome
+  // cuadrada ahora que la tarjeta ya no se recorta con `clip-path`.
+  border-radius: 15px 15px 0 0;
+  overflow: hidden;
 
   &.abrible {
     cursor: zoom-in;

@@ -7,6 +7,7 @@ import {
   OnInit,
   PLATFORM_ID,
   ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -28,28 +29,67 @@ import { EmpresaService } from '../../core/services/empresa.service';
 import { EmpresaCrearComponent } from '../empresa/empresa-crear/empresa-crear.component';
 import { GuiaComandosComponent } from '../../shared/components/guia-comandos/guia-comandos.component';
 import { MensajesProgramadosComponent } from './mensajes-programados/mensajes-programados.component';
+import { AjustesPrivacidadComponent } from './ajustes-privacidad.component';
 import { SugerenciasBotService, TipoSugerencia } from '../../core/services/sugerencias-bot.service';
 import { GitHubCuentaService } from '../../core/services/github-cuenta.service';
 
-type TabAjustes = 'cuenta' | 'clave' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'programados' | 'comandos';
+type TabAjustes = 'cuenta' | 'clave' | 'privacidad' | 'empresas' | 'diseno' | 'tarjeta' | 'apariencia' | 'programados' | 'comandos';
 
-const TABS: { id: TabAjustes; titulo: string; icono: string }[] = [
-  { id: 'cuenta', titulo: 'Cuenta', icono: 'fa-solid fa-user' },
-  { id: 'clave', titulo: 'Contraseña', icono: 'fa-solid fa-key' },
-  { id: 'empresas', titulo: 'Empresas', icono: 'fa-solid fa-building' },
-  { id: 'diseno', titulo: 'Diseño', icono: 'fa-solid fa-palette' },
-  { id: 'tarjeta', titulo: 'Tarjeta', icono: 'fa-solid fa-id-card' },
-  { id: 'apariencia', titulo: 'Apariencia', icono: 'fa-solid fa-circle-half-stroke' },
-  { id: 'programados', titulo: 'Mensajes programados', icono: 'fa-regular fa-clock' },
-  { id: 'comandos', titulo: 'Comandos', icono: 'fa-solid fa-terminal' },
+interface GrupoAjustes {
+  id: string;
+  titulo: string;
+  icono: string;
+  tabs: Array<{ id: TabAjustes; titulo: string; icono: string }>;
+}
+
+const GRUPOS: GrupoAjustes[] = [
+  {
+    id: 'perfil',
+    titulo: 'Perfil',
+    icono: 'fa-solid fa-user',
+    tabs: [
+      { id: 'cuenta', titulo: 'Cuenta', icono: 'fa-solid fa-user' },
+      { id: 'empresas', titulo: 'Empresas', icono: 'fa-solid fa-building' }
+    ]
+  },
+  {
+    id: 'diseno',
+    titulo: 'Diseño',
+    icono: 'fa-solid fa-palette',
+    tabs: [
+      { id: 'diseno', titulo: 'Mi diseño', icono: 'fa-solid fa-palette' },
+      { id: 'tarjeta', titulo: 'Tarjeta', icono: 'fa-solid fa-id-card' },
+      { id: 'apariencia', titulo: 'Apariencia', icono: 'fa-solid fa-circle-half-stroke' }
+    ]
+  },
+  {
+    id: 'seguridad',
+    titulo: 'Seguridad',
+    icono: 'fa-solid fa-shield-halved',
+    tabs: [
+      { id: 'clave', titulo: 'Contraseña', icono: 'fa-solid fa-key' },
+      { id: 'privacidad', titulo: 'Privacidad', icono: 'fa-solid fa-user-shield' }
+    ]
+  },
+  {
+    id: 'chat',
+    titulo: 'Chat',
+    icono: 'fa-solid fa-comments',
+    tabs: [
+      { id: 'programados', titulo: 'Programados', icono: 'fa-regular fa-clock' },
+      { id: 'comandos', titulo: 'Comandos', icono: 'fa-solid fa-terminal' }
+    ]
+  }
 ];
+
+const TABS: Array<{ id: TabAjustes; titulo: string; icono: string }> = GRUPOS.flatMap((grupo) => grupo.tabs);
 
 const ACENTO_POR_DEFECTO = '#4a9eff';
 
 @Component({
   selector: 'app-ajustes-cuenta',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent, GuiaComandosComponent, MensajesProgramadosComponent],
+  imports: [CommonModule, FormsModule, RouterLink, EmpresaCrearComponent, GuiaComandosComponent, MensajesProgramadosComponent, AjustesPrivacidadComponent],
   templateUrl: './ajustes-cuenta.component.html',
   styleUrls: ['./ajustes-cuenta.component.scss'],
 })
@@ -72,6 +112,25 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   @ViewChild('tabsNav') tabsNav?: ElementRef<HTMLElement>;
 
   readonly tabs = TABS;
+  readonly grupos = GRUPOS;
+
+  /** El grupo al que pertenece la pestaña abierta. */
+  readonly grupoActivo = computed(() => {
+    const actual = this.tab();
+    return GRUPOS.find((grupo) => grupo.tabs.some((t) => t.id === actual))?.id ?? 'perfil';
+  });
+
+  /** Las pestañas del grupo abierto: la barra muestra solo esas. */
+  readonly tabsDelGrupo = computed(() => {
+    const grupo = GRUPOS.find((g) => g.id === this.grupoActivo());
+    return grupo ? grupo.tabs : [];
+  });
+
+  /** Abre un grupo y, si la pestaña actual no es suya, la primera de él. */
+  abrirGrupo(grupo: GrupoAjustes): void {
+    const yaEsSuya = grupo.tabs.some((t) => t.id === this.tab());
+    if (!yaEsSuya) this.cambiarTab(grupo.tabs[0].id);
+  }
   readonly tab = signal<TabAjustes>('cuenta');
   readonly mostrarCrear = signal(false);
   readonly cargandoCuenta = signal(true);

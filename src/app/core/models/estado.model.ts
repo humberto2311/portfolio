@@ -25,6 +25,13 @@ export interface Estado {
   soloMejoresAmigos?: boolean;
 }
 
+export interface Espectador {
+  usuarioId: string;
+  nombre: string;
+  avatar: string | null;
+  vistoEn: string | null;
+}
+
 export interface GrupoEstados {
   usuarioId: string;
   nombre: string;

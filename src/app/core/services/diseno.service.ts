@@ -164,11 +164,14 @@ export class DisenoService {
 
     const css = await this.compilar(diseno.css);
 
+    // Mi CSS se escribe con alcance, igual que el de los demás: con selectores
+    // sueltos se colaba en el perfil de cualquiera que visitara. Las variables
+    // sí van en :root porque son el tema de la app.
     const texto = [
-      this.bloque(diseno, ':root', false),
-      this.bloque(diseno, ":root[data-tema='claro']", true),
+      this.bloque(diseno, `.${CLASE_VISITA}`, false),
+      this.bloque(diseno, `[data-tema='claro'] .${CLASE_VISITA}`, true),
       this.velo(diseno, CLASE_VISITA),
-      css ?? '',
+      css ? this.escopar(css, CLASE_VISITA) : '',
     ]
       .filter(Boolean)
       .join('\n');

@@ -36,7 +36,7 @@
       @if (svc.activeContact(); as contact) {
         <!-- Header de DM: atrás, avatar 40px, nombre + estado, y llamada/vídeo/info. -->
         <div class="header-inner header-dm">
-          <button type="button" class="back-btn" aria-label="Volver a Mensajes" title="Volver a Mensajes" (click)="svc.backToContacts()">
+          <button type="button" class="back-btn" aria-label="Volver a Mensajes" title="Volver a Mensajes" (click)="volverAMensajes()">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
           <div class="avatar-wrap clickable" (click)="svc.abrirPerfilDe(contact)" title="Ver perfil">
@@ -86,20 +86,10 @@
         </button>
       }
 
-      <!-- Dentro de un chat: llamada, videollamada e info, como en Instagram. -->
+      <!-- Dentro de un chat: un solo icono de llamada. -->
       @if (svc.activeView() === 'chat') {
-        <button type="button" class="close-btn" title="Llamada de voz" aria-label="Iniciar llamada de voz">
+        <button type="button" class="close-btn" title="Llamar" aria-label="Llamar">
           <i class="fa-solid fa-phone" aria-hidden="true"></i>
-        </button>
-        <button type="button" class="close-btn" title="Videollamada" aria-label="Iniciar videollamada">
-          <i class="fa-solid fa-video" aria-hidden="true"></i>
-        </button>
-        <button type="button" class="close-btn" title="Información de la conversación" aria-label="Información de la conversación"
-          (click)="svc.abrirPerfilDe(svc.activeContact()!)">
-          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-        </button>
-        <button type="button" class="close-btn" title="Ir al último mensaje" aria-label="Ir al último mensaje" (click)="svc.irAlFinal()">
-          <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
         </button>
       }
     </div>

@@ -127,6 +127,12 @@ export class SidePanelService {
   }
 
   readonly activeView = signal<ActiveView>('contacts');
+
+  /**
+   * La URL exacta donde estabas al abrir el chat. Volver desde un chat devuelve
+   * a esa vista (tu perfil, el de otra persona, una empresa…) y no a una cualquiera.
+   */
+  private readonly vistaAlAbrirChat = signal<string | null>(null);
   readonly activeContact = signal<Contact | null>(null);
   readonly typing = signal(false);
   readonly typingName = signal('');
@@ -342,6 +348,10 @@ export class SidePanelService {
   }
 
   openChat(contact: Contact): void {
+    if (isPlatformBrowser(this.platformId) && this.router.url.startsWith('/app')) {
+      this.vistaAlAbrirChat.set(this.router.url);
+    }
+
     this.buscadorAbierto.set(false);
     this.vistaNueva.set(false);
     this.busqueda.set('');
@@ -409,6 +419,22 @@ export class SidePanelService {
     this.cargarConversaciones();
   }
 
+  /**
+   * Volver desde el chat: si se abrió estando en una vista de la app, se vuelve a
+   * esa misma vista. Solo se muestra la bandeja cuando el panel se abrió sin estar
+   * en el área privada.
+   */
+  volverAMensajes(): void {
+    const origen = this.vistaAlAbrirChat();
+    const actual = isPlatformBrowser(this.platformId) ? this.router.url : '';
+
+    this.backToContacts();
+
+    if (origen && actual !== origen) {
+      this.router.navigateByUrl(origen);
+    }
+  }
+
   /** Mensaje optimista: se pinta ya y se confirma cuando responde el backend. */
   agregarMensaje(contactId: string, mensaje: ChatMessage): void {
     this.chatHistories.update(h => ({
@@ -421,12 +447,13 @@ export class SidePanelService {
     const contact = this.activeContact();
     if (!contact || !text.trim()) return;
 
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const ahora = new Date();
+    const time = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const id = contact.id;
 
     this.chatHistories.update(h => ({
       ...h,
-      [id]: [...(h[id] || []), { sender: 'me', text, time }],
+      [id]: [...(h[id] || []), { sender: 'me', text, time, createdAt: ahora.toISOString() }],
     }));
 
     this.contacts.update(list =>
@@ -623,6 +650,7 @@ export class SidePanelService {
       avatar: nuevo.avatar || previo.avatar,
       status: nuevo.status ?? previo.status,
       statusText: nuevo.statusText || previo.statusText,
+      nota: nuevo.nota || previo.nota,
       lastMsg: nuevo.lastMsg || previo.lastMsg,
       time: nuevo.time || previo.time,
       gitUsername: nuevo.gitUsername ?? previo.gitUsername,
@@ -693,7 +721,7 @@ export class SidePanelService {
 
   mensajeAUi(m: ChatMessageApi, contraparteId: string): ChatMessage {
     return {
-      sender: m.senderId === contraparteId ? 'them' : 'me',
+      sender: this.deQuien(m, contraparteId),
       text: m.eliminado ? 'Mensaje eliminado' : m.content,
       time: this.hora(m.createdAt),
       id: m.id,
@@ -703,6 +731,17 @@ export class SidePanelService {
       deleted: m.eliminado ?? false,
       canEdit: m.puedeEditar ?? false,
     };
+  }
+
+  /**
+   * Quién manda el mensaje. Comparar contra la contraparte falla si su id no
+   * llega o llega con otro formato: en ese caso hasta lo propio salía ajeno.
+   * Manda siempre mi id; la contraparte es el respaldo.
+   */
+  private deQuien(m: ChatMessageApi, contraparteId: string): 'me' | 'them' {
+    const yo = this.miId;
+    if (yo && m.senderId) return String(m.senderId) === yo ? 'me' : 'them';
+    return String(m.senderId) === String(contraparteId) ? 'them' : 'me';
   }
 
   private textoEstado(c: Conversacion): string {

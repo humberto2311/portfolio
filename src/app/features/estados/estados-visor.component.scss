@@ -5,6 +5,20 @@
   display: flex;
   flex-direction: column;
   background: #05070a;
+
+  /* El visor es oscuro siempre: aquí el tema se fuerza a oscuro, sin tocar el
+     resto de la app. El monograma toma su color del diseño del usuario. */
+  --text-primary: #f5f7fa;
+  --text-secondary: #cfd6de;
+  --text-muted: #98a2ae;
+  --text-faint: #6f7883;
+  --bg-card: #14181d;
+  --bg-elevated: #1b2027;
+  --bg-hover: #232a32;
+  --bg-border: #2c333c;
+  --bg-input: #1b2027;
+
+  color-scheme: dark;
 }
 
 // Logo y cerrar: logo más grande, pegado a la izquierda; la X separada del borde.
@@ -18,9 +32,7 @@
 
   app-logo {
     display: block;
-    transform: scale(1.45);
-    transform-origin: left center;
-    margin-left: 0.4rem;
+    margin-left: 0.2rem;
   }
 }
 
@@ -412,4 +424,147 @@
   .visor__escenario {
     padding: 0;
   }
+}
+
+/* El ojo del autor: único control del pie en su propia historia. */
+.pie__ojo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  align-self: center;
+  min-width: 62px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease;
+
+  &:hover,
+  &.activo {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+}
+
+/* Quiénes vieron: hoja redondeada dentro de la tarjeta, como en la referencia. */
+.espectadores {
+  display: flex;
+  flex-direction: column;
+  max-height: 62%;
+  min-height: 0;
+  margin: 0 0.55rem 0.55rem;
+  border: 1px solid var(--bg-border);
+  border-radius: 14px;
+  background: #14181d;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.espectadores__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.75rem 0.55rem;
+
+  strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  button {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+
+    &:hover { color: var(--accent); }
+  }
+}
+
+/* Carrusel hacia abajo: la lista crece con scroll, sin empujar la historia. */
+.espectadores__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.35rem 0.4rem 0.5rem;
+  list-style: none;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: var(--bg-border);
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.5rem 0.4rem;
+    border-radius: 8px;
+
+    &:hover { background: var(--bg-hover); }
+  }
+}
+
+.espectadores__avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-elevated);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-primary);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.espectadores__datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.espectadores__nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.espectadores__hora {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.espectadores__vacio {
+  margin: 0;
+  padding: 0.9rem 0.8rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
 }

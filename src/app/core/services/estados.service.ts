@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CrearEstado, Estado, GrupoEstados, PistaMusica } from '../models/estado.model';
+import { CrearEstado, Espectador, Estado, GrupoEstados, PistaMusica } from '../models/estado.model';
 import { AudienciaContenido, VisibilidadContenido } from '../models/privacidad.model';
 
 export type { PistaMusica };
@@ -66,6 +66,12 @@ export class EstadosService {
 
     return this.http.post<{ url: string }>(`${environment.apiUrl}/api/archivos`, datos)
       .pipe(map((respuesta) => `${environment.apiUrl}${respuesta.url}`));
+  }
+
+  /** Quién vio una historia. Solo el autor la recibe (403 para los demás). */
+  espectadores(estadoId: string): Observable<Espectador[]> {
+    return this.http.get<Espectador[]>(`${this.base}/${estadoId}/espectadores`)
+      .pipe(catchError(() => of([])));
   }
 
   publicar(estado: CrearEstado): Observable<Estado> {

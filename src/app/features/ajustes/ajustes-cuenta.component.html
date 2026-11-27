@@ -5,8 +5,24 @@
     <p>Tus datos, tu contraseña, tus empresas, cómo se ven tu perfil y tu tarjeta, y los comandos de los bots.</p>
   </header>
 
+  <nav class="grupos" role="tablist" aria-label="Grupos de ajustes">
+    @for (grupo of grupos; track grupo.id) {
+      <button
+        type="button"
+        role="tab"
+        class="grupo"
+        [class.activo]="grupoActivo() === grupo.id"
+        [attr.aria-selected]="grupoActivo() === grupo.id"
+        (click)="abrirGrupo(grupo)"
+      >
+        <i [class]="grupo.icono"></i>
+        <span>{{ grupo.titulo }}</span>
+      </button>
+    }
+  </nav>
+
   <nav class="tabs" role="tablist" #tabsNav>
-    @for (item of tabs; track item.id) {
+    @for (item of tabsDelGrupo(); track item.id) {
       <button
         type="button"
         role="tab"
@@ -222,6 +238,10 @@
           <a class="btn-ghost" routerLink="/app/ajustes/seguridad">Ver estado de la cuenta y sesiones</a>
         </div>
       </section>
+    }
+
+    @case ('privacidad') {
+      <app-ajustes-privacidad />
     }
 
     @case ('empresas') {

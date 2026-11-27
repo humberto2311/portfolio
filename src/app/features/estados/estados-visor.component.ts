@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EstadosService } from '../../core/services/estados.service';
-import { Estado, GrupoEstados } from '../../core/models/estado.model';
+import { Espectador, Estado, GrupoEstados } from '../../core/models/estado.model';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { ToastService } from '../../core/services/toast.service';
 
@@ -34,12 +34,67 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
 
   readonly reacciones = ['❤️', '🔥', '👏', '😮', '😂', '🎯'];
 
+  /** El ojo del autor: abre y cierra la lista de quienes vieron. */
+  readonly viendoEspectadores = signal(false);
+  readonly espectadores = signal<Espectador[]>([]);
+  readonly cargandoEspectadores = signal(false);
+
+  /** Solo el autor ve el ojo. */
+  readonly esPropia = computed(() => !!this.actual()?.propio);
+
+  readonly actual = computed<Estado | null>(() => this.grupo().estados[this.indice()] ?? null);
+
+  /** Pausa o reanuda y, si se pausa, muestra quién la vio. */
+  tocarOjo(): void {
+    if (this.pausado()) {
+      this.viendoEspectadores.set(false);
+      this.pausado.set(false);
+      this.reproducir();
+      return;
+    }
+
+    this.pausado.set(true);
+    this.detener();
+    this.viendoEspectadores.set(true);
+    this.cargarEspectadores();
+  }
+
+  /** "Hoy a las 11:05 PM", "Ayer a las 9:20 AM" o "12 mar, 3:40 PM". */
+  cuandoVio(iso: string | null): string {
+    if (!iso) return '';
+
+    const fecha = new Date(iso);
+    if (isNaN(fecha.getTime())) return '';
+
+    const hora = fecha.toLocaleTimeString('es', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const hoy = new Date();
+    const dias = Math.floor((new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime()
+      - new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate()).getTime()) / 86400000);
+
+    if (dias === 0) return `Hoy a las ${hora}`;
+    if (dias === 1) return `Ayer a las ${hora}`;
+
+    const dia = fecha.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+
+    return `${dia}, ${hora}`;
+  }
+
+  cargarEspectadores(): void {
+    const estado = this.actual();
+    if (!estado) return;
+
+    this.cargandoEspectadores.set(true);
+    this.estados.espectadores(estado.id).subscribe((gente) => {
+      this.espectadores.set(gente);
+      this.cargandoEspectadores.set(false);
+    });
+  }
+
   @ViewChild('cajaRespuesta') cajaRespuesta?: ElementRef<HTMLInputElement>;
 
   private temporizador: ReturnType<typeof setInterval> | null = null;
   private audio: HTMLAudioElement | null = null;
 
-  readonly actual = computed<Estado | null>(() => this.grupo().estados[this.indice()] ?? null);
   readonly duracion = computed(() => this.actual()?.duracionSegundos ?? 10);
   readonly anterior = computed<GrupoEstados | null>(() => this.vecino(-1));
   readonly siguiente = computed<GrupoEstados | null>(() => this.vecino(1));
@@ -56,6 +111,12 @@ export class EstadosVisorComponent implements OnInit, OnDestroy {
   /** Escape cierra el visor. */
   @HostListener('document:keydown.escape')
   alPulsarEscape(): void {
+    // Primero cierra la lista de quienes vieron; si ya está cerrada, sale del visor.
+    if (this.viendoEspectadores()) {
+      this.viendoEspectadores.set(false);
+      return;
+    }
+
     this.cerrar.emit();
   }
 

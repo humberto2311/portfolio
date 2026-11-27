@@ -37,7 +37,7 @@ export class EstadosCreadorComponent implements OnInit {
   });
 
   readonly avatarPropio = computed(() =>
-    this.perfiles.avatar() ?? this.perfilSvc.perfil()?.avatarUrl ?? null);
+    this.perfiles.avatar() ?? this.perfilSvc.miPerfil()?.avatarUrl ?? null);
 
   readonly iniciales = computed(() => {
     const nombre = this.auth.currentUser()?.fullName ?? 'Yo';

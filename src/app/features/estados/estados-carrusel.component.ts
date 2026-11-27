@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { PerfilService } from '../../core/services/perfil.service';
 import { SidePanelService } from '../../core/services/side-panel.service';
+import { NotasPersonasService } from '../../core/services/notas-personas.service';
 
 @Component({
   selector: 'app-estados-carrusel',
@@ -21,6 +22,7 @@ export class EstadosCarruselComponent implements OnInit {
   private auth = inject(AuthService);
   private perfiles = inject(UserProfileService);
   private perfilSvc = inject(PerfilService);
+  private notas = inject(NotasPersonasService);
   private svc = inject(SidePanelService);
 
   readonly recarga = input<number>(0);
@@ -31,6 +33,9 @@ export class EstadosCarruselComponent implements OnInit {
   readonly mapa = input(false);
   /** El avatar propio no abre la historia: muestra y edita la nota. */
   readonly propiaEsNota = input(false);
+  /** Pinta la nota encima de cada avatar. Solo en Mensajes; en Inicio va apagado. */
+  readonly conNota = input(false);
+
   /** Si es false, la nota propia se muestra pero no se edita (solo lectura). */
   readonly editarPropia = input(true);
   readonly cargados = output<GrupoEstados[]>();
@@ -68,6 +73,14 @@ export class EstadosCarruselComponent implements OnInit {
 
   readonly avatarPropio = computed(() => this.perfiles.avatar() ?? null);
 
+  notaDe(grupo: GrupoEstados | null): string {
+    if (!grupo) return '';
+
+    this.notas.pedir(grupo.usuarioId);
+
+    return this.notas.nota(grupo.usuarioId);
+  }
+
   /** La nota del propio usuario (el servidor la devuelve dentro de su historia). */
   /**
    * La nota propia: la de la historia, la del perfil o la que acaba de guardar
@@ -76,7 +89,7 @@ export class EstadosCarruselComponent implements OnInit {
   readonly notaPropia = computed(() =>
     this.notaGuardada()
     || this.textoDe(this.mio())
-    || (this.perfilSvc.perfil()?.nota?.trim() || '')
+    || (this.perfilSvc.miPerfil()?.nota?.trim() || '')
     || (this.svc.notaPropia() || ''));
 
   /** Nombre del propio usuario, para el nombre del avatar. */
@@ -132,8 +145,10 @@ export class EstadosCarruselComponent implements OnInit {
   ngOnInit(): void {
     this.cargar();
     this.perfiles.cargarMiAvatar();
-    // El perfil propio trae la nota; así se pinta aunque no haya historia creada.
-    this.perfilSvc.cargarPerfil().subscribe({ error: () => undefined });
+    // El perfil propio trae la nota; se lee de miPerfil para no pisar un perfil ajeno abierto.
+    if (!this.perfilSvc.miPerfil()) {
+      this.perfilSvc.cargarPerfil().subscribe({ error: () => undefined });
+    }
   }
 
   cargar(): void {

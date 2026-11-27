@@ -56,13 +56,56 @@
   color: var(--success);
 }
 
-.tabs {
+/* Cuatro grupos: Perfil · Diseño · Seguridad · Chat. */
+.grupos {
   display: flex;
+  justify-content: center;
   gap: .3rem;
   padding: .3rem;
   border-radius: 13px;
   border: 1px solid var(--border-soft);
   background: var(--bg-elevated);
+  overflow-x: auto;
+}
+
+.grupo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  flex: 0 1 auto;
+  padding: .55rem .9rem;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: .16s;
+
+  i { font-size: .78rem; opacity: .85; }
+
+  &:hover { color: var(--text-primary); }
+
+  &.activo {
+    background: var(--bg-card);
+    color: var(--accent-cyan);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+
+    i { opacity: 1; }
+  }
+}
+
+/* Solo las pestañas del grupo abierto: sin caja, para no anidar barras. */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: .3rem;
+  padding: 0 .2rem;
+  margin-top: -.35rem;
   overflow-x: auto;
   scroll-margin-top: .75rem;
 }

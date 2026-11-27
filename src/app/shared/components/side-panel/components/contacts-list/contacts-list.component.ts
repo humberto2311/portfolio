@@ -18,6 +18,7 @@ import { EstadosCarruselComponent } from '../../../../../features/estados/estado
 })
 export class ContactsListComponent implements OnInit, OnDestroy {
   svc = inject(SidePanelService);
+
   private chat = inject(ChatService);
   private estados = inject(EstadosService);
 

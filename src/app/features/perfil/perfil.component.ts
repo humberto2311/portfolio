@@ -56,6 +56,8 @@ export class PerfilComponent implements OnInit, OnDestroy {
   errorCarga: string | null = null;
 
   ngOnInit(): void {
+    this.marcarDisenoPropio();
+
     this.route.paramMap.subscribe(params => {
       const usernameUrl = params.get('username');
       const estaLogueado = this.authService.isAuthenticated();
@@ -118,6 +120,19 @@ export class PerfilComponent implements OnInit, OnDestroy {
     this.aplicarDisenoDelPerfil();
   }
 
+  /**
+   * Mi propio diseño se escribe con alcance .diseno-visita. La marca se pone
+   * al entrar y se quita al salir: si dependiera solo de la comparación de
+   * correos, un perfil cargado sin sesión dejaría mi vista sin mi diseño.
+   */
+  private marcarDisenoPropio(): void {
+    const propio = !!this.diseno.propio()?.activo;
+
+    if (propio) {
+      this.disenoAplicado.set(true);
+    }
+  }
+
   private aplicarDisenoDelPerfil(): void {
     const p = this.perfil();
 
@@ -128,7 +143,9 @@ export class PerfilComponent implements OnInit, OnDestroy {
     }
 
     if (this.esMiPerfil) {
-      this.disenoAplicado.set(false);
+      // Mi diseño ya está escrito con alcance .diseno-visita: esta vista solo
+      // tiene que llevarlo para que las reglas caigan sobre mi perfil.
+      this.disenoAplicado.set(true);
       this.diseno.limpiarAjeno();
       return;
     }

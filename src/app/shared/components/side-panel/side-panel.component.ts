@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { NotasPersonasService } from '../../../core/services/notas-personas.service';
 import { SidePanelService } from '../../../core/services/side-panel.service';
 import { FloatingButtonsComponent } from './components/floating-buttons/floating-buttons.component';
 import { ContactsListComponent } from './components/contacts-list/contacts-list.component';
@@ -12,6 +13,16 @@ import { ChatViewComponent } from './components/chat-view/chat-view.component';
   styleUrls: ['./side-panel.component.scss'],
 })
 export class SidePanelComponent {
+
+  private readonly notas = inject(NotasPersonasService);
+
+  notaDe(contact: { id: string } | null): string {
+    if (!contact) return '';
+
+    this.notas.pedir(contact.id);
+
+    return this.notas.nota(contact.id);
+  }
   svc = inject(SidePanelService);
 
   /**
@@ -30,5 +41,9 @@ export class SidePanelComponent {
 
   alternarAmpliado(): void {
     this.svc.alternarModoVentana();
+  }
+
+  volverAMensajes(): void {
+    this.svc.volverAMensajes();
   }
 }

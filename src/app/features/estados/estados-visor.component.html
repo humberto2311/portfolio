@@ -1,6 +1,6 @@
 <div class="visor" role="dialog" aria-modal="true" aria-label="Historia">
   <header class="visor__barra">
-    <app-logo [alto]="28" partes="completo" />
+    <app-logo [alto]="26" partes="completo" />
 
     <button type="button" class="visor__cerrar" (click)="cerrar.emit()" aria-label="Cerrar">
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
@@ -103,6 +103,15 @@
       </div>
 
       <footer class="tarjeta__pie">
+        @if (esPropia()) {
+          <button type="button" class="pie__ojo" (click)="tocarOjo()"
+                  [class.activo]="viendoEspectadores()"
+                  [attr.aria-label]="viendoEspectadores() ? 'Ocultar quién la vio' : 'Ver quién la vio'"
+                  [title]="viendoEspectadores() ? 'Ocultar quién la vio' : 'Ver quién la vio'">
+            <i class="fa-solid" [class.fa-eye]="!viendoEspectadores()" [class.fa-eye-slash]="viendoEspectadores()" aria-hidden="true"></i>
+            <span>{{ actual()?.vistas ?? 0 }}</span>
+          </button>
+        } @else {
         @if (reaccion(); as emoji) {
           <span class="pie__reaccion">{{ emoji }}</span>
         }
@@ -127,7 +136,45 @@
             <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
           </button>
         </div>
+        }
       </footer>
+
+      @if (esPropia() && viendoEspectadores()) {
+        <section class="espectadores" aria-label="Quiénes vieron esta historia">
+          <header class="espectadores__cabecera">
+            <button type="button" (click)="tocarOjo()" aria-label="Cerrar la lista">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+            <strong>Visto por {{ espectadores().length }}</strong>
+          </header>
+
+          @if (cargandoEspectadores()) {
+            <p class="espectadores__vacio">Cargando…</p>
+          } @else if (espectadores().length === 0) {
+            <p class="espectadores__vacio">Todavía nadie ha visto esta historia.</p>
+          } @else {
+            <ul class="espectadores__lista">
+              @for (persona of espectadores(); track persona.usuarioId) {
+                <li>
+                  <span class="espectadores__avatar">
+                    @if (persona.avatar) {
+                      <img [src]="persona.avatar" [alt]="persona.nombre" />
+                    } @else {
+                      <span>{{ persona.nombre.slice(0, 2).toUpperCase() }}</span>
+                    }
+                  </span>
+                  <span class="espectadores__datos">
+                    <span class="espectadores__nombre">{{ persona.nombre }}</span>
+                    @if (persona.vistoEn) {
+                    <span class="espectadores__hora">{{ cuandoVio(persona.vistoEn) }}</span>
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
     </article>
 
     @if (siguiente(); as proximo) {

@@ -26,14 +26,34 @@
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform 0.28s ease-out, width 0.22s ease, border-radius 0.2s ease;
+  transition:
+    transform 0.28s ease-out,
+    opacity 0.2s ease,
+    visibility 0s linear 0.28s,
+    width 0.22s ease,
+    border-radius 0.2s ease;
   background: $bg-sidebar;
   border-left: 1px solid $bg-border;
   box-shadow: -16px 0 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 
+  /* Cerrado: fuera de la pantalla y fuera del flujo visual. Sin esto la
+     sombra y el borde seguían asomando por el lateral derecho. */
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+
   &.open {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transition:
+      transform 0.28s ease-out,
+      opacity 0.2s ease,
+      visibility 0s,
+      width 0.22s ease,
+      border-radius 0.2s ease;
   }
 }
 
@@ -46,6 +66,7 @@
   .side-panel:not(.side-panel--ampliado) {
     top: auto;
     bottom: 24px;
+    right: 28px;
     height: min(640px, calc(100dvh - #{$topbar-height} - 48px));
     border: 1px solid $bg-border;
     border-radius: 16px;
@@ -65,9 +86,40 @@
 .panel-acciones {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   flex-shrink: 0;
   margin-left: auto;
+}
+
+/* Un solo icono de llamada: más aire y el icono algo más grande. */
+.panel-header:has(.header-dm) .panel-acciones .close-btn {
+  @include touch-target(38px);
+
+  i {
+    font-size: 1.05rem;
+  }
+}
+
+/* La flecha de volver, con su círculo: se ve pulsable sin ocupar de más. */
+.header-dm .back-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid $bg-border;
+  background: transparent;
+  color: $text-light;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+
+  &:hover {
+    background: $bg-hover;
+    border-color: $accent;
+    color: $accent;
+  }
 }
 
 .close-btn.activo {
@@ -457,4 +509,17 @@
   .panel-header {
     min-height: 56px;
   }
+}
+
+/* La nota de la persona, encima de su nombre en la cabecera del chat. */
+.header-nota {
+  display: block;
+  max-width: 240px;
+  margin-bottom: 1px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: $accent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

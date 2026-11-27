@@ -1,4 +1,4 @@
-<div class="messages" #messagesContainer>
+<div class="messages" #messagesContainer (click)="cerrarMenu()">
   @if (cargando()) {
     <p class="chat-status"><i class="fa-solid fa-circle-notch fa-spin"></i> Cargando…</p>
   }
@@ -24,11 +24,15 @@
     <p class="dia">{{ grupoDia.etiqueta }}</p>
 
     @for (grupo of grupoDia.grupos; track grupo.clave) {
-      <div class="msg-grupo" [class.msg-grupo--mine]="grupo.mio">
-        @for (msg of grupo.mensajes; track trackMsg(msg, $index); let ultimo = $last) {
+      <div class="msg-grupo" [class.msg-grupo--mine]="grupo.mio" [attr.data-grupo]="grupo.mio ? 'mio' : 'ajeno'">
+        @for (msg of grupo.mensajes; track trackMsg(msg, i); let ultimo = $last; let i = $index) {
+          @if (i === 0 || (grupo.mensajes[i - 1].time !== msg.time)) {
+            <p class="msg-fecha">{{ fechaLarga(msg) }}</p>
+          }
           <div
             class="msg"
             [class.msg--mine]="msg.sender === 'me'"
+            [attr.data-sender]="msg.sender"
             [class.msg--ai]="msg.sender === 'them' && svc.activeContact()?.isAi"
             [class.msg--deleted]="msg.deleted"
             [class.msg--abierto]="abiertoId() === claveDe(msg)"
@@ -99,6 +103,12 @@
                   </div>
                 } @else {
                   <span class="text">{{ msg.text }}</span>
+                  @if (translationDe(msg); as traducido) {
+                    <span class="bubble__traduccion">
+                      <i class="fa-solid fa-language" aria-hidden="true"></i>
+                      {{ traducido }}
+                    </span>
+                  }
                 }
 
                 <!-- Hora al pasar el ratón (o al tocar en móvil). -->
@@ -116,17 +126,71 @@
               }
             </div>
 
-            <!-- Editar / eliminar: aparecen al pasar el ratón, fuera de la burbuja. -->
-            @if (msg.sender === 'me' && msg.id && !msg.deleted && editingId() !== msg.id) {
+            <!-- Al lado de la burbuja: reaccionar, responder y el menú de tres puntos. -->
+            @if (!msg.deleted && editingId() !== msg.id) {
               <div class="msg-acciones">
-                @if (msg.canEdit) {
-                  <button type="button" class="accion" title="Editar" aria-label="Editar mensaje" (click)="startEdit(msg)">
+                <button
+                  type="button"
+                  class="accion"
+                  title="Reaccionar"
+                  aria-label="Reaccionar"
+                  (click)="alternarReaccion(msg, $event)">
+                  <i class="fa-regular fa-face-smile" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="accion"
+                  title="Responder"
+                  aria-label="Responder"
+                  (click)="reenviar(msg)">
+                  <i class="fa-solid fa-reply" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="accion"
+                  [class.accion--activa]="menuId() === claveDe(msg)"
+                  title="Más opciones"
+                  aria-label="Más opciones"
+                  (click)="abrirMenu(msg, $event)">
+                  <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                </button>
+
+              </div>
+            }
+
+            @if (menuId() === claveDe(msg)) {
+              <div
+                class="menu-mensaje"
+                [class.menu-mensaje--arriba]="menuArriba()"
+                (click)="$event.stopPropagation()">
+                <button type="button" (click)="reenviar(msg)">
+                  <span>Reenviar</span>
+                  <i class="fa-solid fa-share" aria-hidden="true"></i>
+                </button>
+                <button type="button" (click)="copiar(msg)">
+                  <span>Copiar</span>
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                </button>
+                <button type="button" (click)="traducir(msg)">
+                  <span>Translate</span>
+                  <i class="fa-solid fa-language" aria-hidden="true"></i>
+                </button>
+                <button type="button" (click)="fijar(msg)">
+                  <span>{{ fijadoDe(msg) ? 'Soltar' : 'Fijar' }}</span>
+                  <i class="fa-solid fa-thumbtack" aria-hidden="true"></i>
+                </button>
+                @if (esMio(msg) && msg.canEdit && !msg.deleted) {
+                  <button type="button" (click)="editarDesdeMenu(msg)">
+                    <span>Editar</span>
                     <i class="fa-solid fa-pen" aria-hidden="true"></i>
                   </button>
                 }
-                <button type="button" class="accion accion--danger" title="Eliminar" aria-label="Eliminar mensaje" (click)="remove(msg)">
-                  <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                </button>
+                @if (esMio(msg) && msg.id) {
+                  <button type="button" class="menu-mensaje__peligro" (click)="anularEnvio(msg)">
+                    <span>Eliminar</span>
+                    <i class="fa-solid fa-reply" aria-hidden="true"></i>
+                  </button>
+                }
               </div>
             }
           </div>

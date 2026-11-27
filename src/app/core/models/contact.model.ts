@@ -16,6 +16,8 @@ export interface Contact {
   isAi?: boolean;
   responses?: string[];
   fotoUrl?: string;
+  /** La nota vigente de esa persona (24 h), para mostrarla en la cabecera del chat. */
+  nota?: string;
   gitUsername?: string;
   /** Id de la conversación en /api/chats; ausente mientras todavía no existe. */
   conversationId?: string;

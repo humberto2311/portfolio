@@ -604,6 +604,24 @@ export class SidePanelService {
     return this.contacts().find(c => c.id === id);
   }
 
+  /** Aviso centrado en el hilo: "Has enviado un zumbido." o "X te ha enviado un zumbido." */
+  agregarZumbido(deMi: boolean, nombre = ''): void {
+    const contacto = this.activeContact();
+    if (!contacto) return;
+
+    const mensaje: ChatMessage = {
+      sender: deMi ? 'me' : 'them',
+      text: deMi ? 'Has enviado un zumbido.' : `${nombre} te ha enviado un zumbido.`,
+      time: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      id: `zumbido-${Date.now()}`,
+      zumbido: true,
+    };
+
+    const previos = this.chatHistories()[contacto.id] ?? [];
+    this.setHistorial(contacto.id, [...previos, mensaje]);
+  }
+
   setHistorial(contactId: string, mensajes: ChatMessage[]): void {
     this.chatHistories.update(h => ({ ...h, [contactId]: mensajes }));
   }

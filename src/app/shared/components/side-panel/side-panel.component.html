@@ -91,6 +91,22 @@
         <button type="button" class="close-btn" title="Llamar" aria-label="Llamar">
           <i class="fa-solid fa-phone" aria-hidden="true"></i>
         </button>
+
+        <button
+          type="button"
+          class="close-btn zumbido-btn"
+          [class.zumbido-btn--espera]="zumbido.enEspera"
+          [disabled]="zumbido.enEspera || !svc.activeContact()?.conversationId"
+          [attr.title]="zumbido.enEspera ? 'Espera ' + zumbido.espera() + ' s' : 'Enviar zumbido'"
+          [attr.aria-label]="zumbido.enEspera ? 'Zumbido en espera' : 'Enviar zumbido'"
+          (click)="enviarZumbido()"
+        >
+          @if (zumbido.enEspera) {
+            <span class="zumbido-btn__espera">{{ zumbido.espera() }}</span>
+          } @else {
+            <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          }
+        </button>
       }
     </div>
   </header>

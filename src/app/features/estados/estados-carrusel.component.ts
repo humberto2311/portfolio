@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { EstadosService } from '../../core/services/estados.service';
@@ -8,6 +8,7 @@ import { UserProfileService } from '../../core/services/user-profile.service';
 import { PerfilService } from '../../core/services/perfil.service';
 import { SidePanelService } from '../../core/services/side-panel.service';
 import { NotasPersonasService } from '../../core/services/notas-personas.service';
+import { DisenoService } from '../../core/services/diseno.service';
 
 @Component({
   selector: 'app-estados-carrusel',
@@ -16,13 +17,14 @@ import { NotasPersonasService } from '../../core/services/notas-personas.service
   templateUrl: './estados-carrusel.component.html',
   styleUrls: ['./estados-carrusel.component.scss']
 })
-export class EstadosCarruselComponent implements OnInit {
+export class EstadosCarruselComponent implements OnInit, OnDestroy {
 
   private estados = inject(EstadosService);
   private auth = inject(AuthService);
   private perfiles = inject(UserProfileService);
   private perfilSvc = inject(PerfilService);
   private notas = inject(NotasPersonasService);
+  private diseno = inject(DisenoService);
   private svc = inject(SidePanelService);
 
   readonly recarga = input<number>(0);
@@ -72,6 +74,9 @@ export class EstadosCarruselComponent implements OnInit {
   });
 
   readonly avatarPropio = computed(() => this.perfiles.avatar() ?? null);
+
+  /** Solo mi avatar lleva mi diseño: el de los demás no debe heredarlo. */
+  readonly disenoPropio = computed(() => !!this.diseno.propio()?.activo);
 
   notaDe(grupo: GrupoEstados | null): string {
     if (!grupo) return '';
@@ -151,14 +156,22 @@ export class EstadosCarruselComponent implements OnInit {
     }
   }
 
+  private destruido = false;
+
+  ngOnDestroy(): void {
+    this.destruido = true;
+  }
+
   cargar(): void {
     this.estados.bandeja().subscribe({
       next: (grupos) => {
         const lista = grupos ?? [];
 
         this.grupos.set(lista);
-        this.cargados.emit(lista);
         this.cargando.set(false);
+
+        // Si el carrusel ya se destruyó (se cambió de vista), emitir rompe Angular.
+        if (!this.destruido) this.cargados.emit(lista);
       },
       error: () => {
         this.grupos.set([]);

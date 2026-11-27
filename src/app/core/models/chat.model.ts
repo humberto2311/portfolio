@@ -12,6 +12,8 @@ export interface ChatMessage {
   comandoNombre?: string | null;
   confirmacion?: boolean;
   parametros?: Record<string, unknown>;
+  /** Línea de aviso en el hilo (por ahora, los zumbidos). */
+  zumbido?: boolean;
 }
 
 export interface ChatMessageApi {

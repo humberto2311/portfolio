@@ -19,7 +19,7 @@ import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfileService } from '../../core/services/user-profile.service';
 import { TemaService } from '../../core/services/tema.service';
-import { Diseno, DisenoService } from '../../core/services/diseno.service';
+import { ClaseDiseno, Diseno, DisenoEnLista, DisenoService } from '../../core/services/diseno.service';
 import { UserPhotoService, FotoPerfil } from '../../core/services/user-photo.service';
 import { ResumeService } from '../../core/services/resume.service';
 import { ResumeSaveService } from '../../core/services/resume-save.service';
@@ -189,6 +189,10 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   acentoTarjeta = '';
   secundarioTarjeta = '';
   cssTarjeta = '';
+  fondoTarjetaUrl: string | null = null;
+  readonly disenosGuardados = signal<DisenoEnLista[]>([]);
+  nombreDiseno = '';
+  guardandoLista = false;
   erroresDiseno: string[] = [];
   guardandoDiseno = false;
 
@@ -196,7 +200,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   fuentesBase = { gitlab: '' };
   private disenoBase: Diseno | null = null;
   private disenoFotoBase = JSON.stringify([ACENTO_POR_DEFECTO, '', '', '']);
-  private tarjetaFotoBase = JSON.stringify(['', '', '']);
+  private tarjetaFotoBase = JSON.stringify(['', '', '', '']);
   private borradorTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
@@ -513,6 +517,141 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.previsualizar();
   }
 
+  elegirFondoTarjeta(url: string | null): void {
+    this.fondoTarjetaUrl = url;
+    this.previsualizar();
+  }
+
+  fondoTarjetaDesdeArchivo(input: HTMLInputElement): void {
+    const archivo = input.files?.[0];
+    input.value = '';
+
+    if (!archivo) return;
+
+    if (!/^image\/(png|jpeg|webp)$/.test(archivo.type)) {
+      this.erroresDiseno = ['Usa una imagen PNG, JPG o WEBP.'];
+      return;
+    }
+    if (archivo.size > 1_500_000) {
+      this.erroresDiseno = ['La imagen pesa demasiado: usa una de hasta 1,5 MB.'];
+      return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = () => {
+      this.erroresDiseno = [];
+      this.elegirFondoTarjeta(String(lector.result));
+    };
+    lector.onerror = () => (this.erroresDiseno = ['No se pudo leer la imagen.']);
+    lector.readAsDataURL(archivo);
+  }
+
+  disenosDe(clase: ClaseDiseno): DisenoEnLista[] {
+    return this.disenosGuardados().filter((d) => d.clase === clase);
+  }
+
+  puedeGuardarOtro(clase: ClaseDiseno): boolean {
+    return this.disenosDe(clase).length < 5;
+  }
+
+  guardarDisenoEnLista(clase: ClaseDiseno): void {
+    if (!this.puedeGuardarOtro(clase)) {
+      this.erroresDiseno = ['Solo puedes tener 5 diseños guardados de cada tipo. Elimina uno primero.'];
+      return;
+    }
+
+    this.guardandoLista = true;
+    this.erroresDiseno = [];
+    this.error.set(null);
+
+    const datos: Partial<Diseno> =
+      clase === 'tarjeta'
+        ? {
+            acento: this.acento,
+            secundario: this.secundario,
+            css: this.css,
+            acentoTarjeta: this.acentoTarjeta,
+            secundarioTarjeta: this.secundarioTarjeta,
+            tarjetaFondoUrl: this.fondoTarjetaUrl,
+            cssTarjeta: this.cssTarjeta,
+          }
+        : {
+            acento: this.acento,
+            secundario: this.secundario,
+            fondoUrl: this.fondoUrl,
+            css: this.css,
+            acentoTarjeta: this.acentoTarjeta,
+            secundarioTarjeta: this.secundarioTarjeta,
+            tarjetaFondoUrl: this.fondoTarjetaUrl,
+            cssTarjeta: this.cssTarjeta,
+          };
+
+    this.diseno
+      .guardarEnLista(clase, this.nombreDiseno, datos)
+      .pipe(finalize(() => (this.guardandoLista = false)))
+      .subscribe({
+        next: (respuesta) => {
+          if (respuesta?.errores?.length) {
+            this.erroresDiseno = respuesta.errores;
+            return;
+          }
+          this.disenoBase = this.diseno.propio();
+          this.disenosGuardados.set(this.disenoBase?.guardados ?? []);
+          this.nombreDiseno = '';
+          this.exito.set('Diseño guardado en tu lista.');
+        },
+        error: (err) => {
+          this.erroresDiseno = err?.error?.errores?.length
+            ? err.error.errores
+            : ['No se pudo guardar el diseño en tu lista.'];
+        },
+      });
+  }
+
+  usarDisenoGuardado(diseno: DisenoEnLista): void {
+    this.guardandoLista = true;
+    this.error.set(null);
+
+    this.diseno
+      .activarGuardado(diseno.id)
+      .pipe(finalize(() => (this.guardandoLista = false)))
+      .subscribe({
+        next: (respuesta) => {
+          if (respuesta?.errores?.length) {
+            this.erroresDiseno = respuesta.errores;
+            return;
+          }
+          this.disenoBase = this.diseno.propio();
+          this.disenosGuardados.set(this.disenoBase?.guardados ?? []);
+          this.aplicarDiseno(this.disenoBase);
+          this.exito.set(`Ahora usas «${diseno.nombre}».`);
+        },
+        error: () => this.error.set('No se pudo activar ese diseño.'),
+      });
+  }
+
+  borrarDisenoGuardado(diseno: DisenoEnLista): void {
+    if (!confirm(`¿Eliminar «${diseno.nombre}»? No se puede deshacer.`)) return;
+
+    this.guardandoLista = true;
+
+    this.diseno
+      .borrarGuardado(diseno.id)
+      .pipe(finalize(() => (this.guardandoLista = false)))
+      .subscribe({
+        next: (respuesta) => {
+          if (respuesta?.errores?.length) {
+            this.erroresDiseno = respuesta.errores;
+            return;
+          }
+          this.disenoBase = this.diseno.propio();
+          this.disenosGuardados.set(this.disenoBase?.guardados ?? []);
+          this.exito.set('Diseño eliminado de tu lista.');
+        },
+        error: () => this.error.set('No se pudo eliminar ese diseño.'),
+      });
+  }
+
   inicialesPrevias(): string {
     const partes = this.nombre.trim().split(/\s+/).filter(Boolean);
 
@@ -566,6 +705,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.acentoTarjeta = this.disenoBase?.acentoTarjeta ?? '';
     this.secundarioTarjeta = this.disenoBase?.secundarioTarjeta ?? '';
     this.cssTarjeta = this.disenoBase?.cssTarjeta ?? '';
+    this.fondoTarjetaUrl = this.disenoBase?.tarjetaFondoUrl ?? null;
     this.tarjetaFotoBase = this.fotoTarjeta();
     this.limpiarAvisosDiseno();
     this.previsualizar();
@@ -589,11 +729,11 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.exito.set(null);
 
-    const { acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta } =
+    const { acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta, tarjetaFondoUrl } =
       this.coleccion();
 
     this.diseno
-      .guardar({ acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta })
+      .guardar({ acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta, tarjetaFondoUrl })
       .pipe(finalize(() => (this.guardandoDiseno = false)))
       .subscribe({
         next: () => {
@@ -633,6 +773,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.acentoTarjeta = '';
     this.secundarioTarjeta = '';
     this.cssTarjeta = '';
+    this.fondoTarjetaUrl = null;
     this.previsualizar();
     this.guardarDiseno('Tu tarjeta vuelve a usar el diseño de tu perfil.');
   }
@@ -679,6 +820,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   private cargarDiseno(): void {
     this.diseno.cargarPropio().subscribe((d) => {
       this.disenoBase = d;
+      this.disenosGuardados.set(d.guardados ?? []);
       if (!this.disenoSucio && !this.tarjetaSucia) this.aplicarDiseno(d);
       this.previsualizar();
 
@@ -700,6 +842,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     this.acentoTarjeta = d.acentoTarjeta ?? '';
     this.secundarioTarjeta = d.secundarioTarjeta ?? '';
     this.cssTarjeta = d.cssTarjeta ?? '';
+    this.fondoTarjetaUrl = d.tarjetaFondoUrl ?? null;
     this.disenoFotoBase = this.fotoDiseno();
     this.tarjetaFotoBase = this.fotoTarjeta();
   }
@@ -718,7 +861,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
   }
 
   private fotoTarjeta(): string {
-    return JSON.stringify([this.acentoTarjeta, this.secundarioTarjeta, this.cssTarjeta]);
+    return JSON.stringify([this.acentoTarjeta, this.secundarioTarjeta, this.fondoTarjetaUrl ?? '', this.cssTarjeta]);
   }
 
   private esHex(valor: string): boolean {
@@ -735,7 +878,10 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
       acentoTarjeta: this.esHex(this.acentoTarjeta) ? this.acentoTarjeta.trim() : null,
       secundarioTarjeta: this.esHex(this.secundarioTarjeta) ? this.secundarioTarjeta.trim() : null,
       cssTarjeta: this.cssTarjeta.trim() || null,
-      tarjetaActivo: Boolean(this.acentoTarjeta || this.secundarioTarjeta || this.cssTarjeta),
+      tarjetaFondoUrl: this.fondoTarjetaUrl,
+      tarjetaActivo: Boolean(
+        this.acentoTarjeta || this.secundarioTarjeta || this.cssTarjeta || this.fondoTarjetaUrl
+      ),
     };
   }
 

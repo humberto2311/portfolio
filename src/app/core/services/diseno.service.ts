@@ -13,12 +13,35 @@ export interface Diseno {
   acentoTarjeta?: string | null;
   secundarioTarjeta?: string | null;
   cssTarjeta?: string | null;
+  tarjetaFondoUrl?: string | null;
   tarjetaActivo?: boolean;
+  activoId?: string | null;
+  tarjetaActivoId?: string | null;
+  guardados?: DisenoEnLista[];
 }
 
 export interface DisenoGuardado extends Diseno {
   errores?: string[];
 }
+
+export interface DisenoEnLista {
+  id: string;
+  clase: string;
+  nombre: string;
+  acento: string | null;
+  secundario: string | null;
+  fondoUrl: string | null;
+  css: string | null;
+  acentoTarjeta: string | null;
+  secundarioTarjeta: string | null;
+  tarjetaFondoUrl: string | null;
+  cssTarjeta: string | null;
+  activo: boolean;
+  activoTarjeta: boolean;
+  creadoEn: string | null;
+}
+
+export type ClaseDiseno = 'perfil' | 'tarjeta';
 
 const VACIO: Diseno = {
   acento: null,
@@ -29,7 +52,11 @@ const VACIO: Diseno = {
   acentoTarjeta: null,
   secundarioTarjeta: null,
   cssTarjeta: null,
+  tarjetaFondoUrl: null,
   tarjetaActivo: false,
+  activoId: null,
+  tarjetaActivoId: null,
+  guardados: [],
 };
 const HOJA_PROPIA = 'diseno-propio';
 const HOJA_AJENA = 'diseno-ajeno';
@@ -69,6 +96,39 @@ export class DisenoService {
 
   guardar(cambio: Partial<Diseno>): Observable<DisenoGuardado> {
     return this.http.post<DisenoGuardado>(`${this.raiz}/me`, cambio).pipe(
+      tap((respuesta) => {
+        if (respuesta?.errores?.length) return;
+        this.propio.set(this.normalizar(respuesta));
+        void this.aplicarPropio();
+      }),
+    );
+  }
+
+  guardarEnLista(clase: ClaseDiseno, nombre: string, diseno: Partial<Diseno>): Observable<DisenoGuardado> {
+    return this.http
+      .post<DisenoGuardado>(`${this.raiz}/me/guardados`, diseno, {
+        params: { clase, nombre },
+      })
+      .pipe(
+        tap((respuesta) => {
+          if (respuesta?.errores?.length) return;
+          this.propio.set(this.normalizar(respuesta));
+        }),
+      );
+  }
+
+  activarGuardado(id: string): Observable<DisenoGuardado> {
+    return this.http.post<DisenoGuardado>(`${this.raiz}/me/guardados/${id}/activar`, {}).pipe(
+      tap((respuesta) => {
+        if (respuesta?.errores?.length) return;
+        this.propio.set(this.normalizar(respuesta));
+        void this.aplicarPropio();
+      }),
+    );
+  }
+
+  borrarGuardado(id: string): Observable<DisenoGuardado> {
+    return this.http.delete<DisenoGuardado>(`${this.raiz}/me/guardados/${id}`).pipe(
       tap((respuesta) => {
         if (respuesta?.errores?.length) return;
         this.propio.set(this.normalizar(respuesta));
@@ -117,7 +177,7 @@ export class DisenoService {
     return {
       acento: diseno.acentoTarjeta ?? diseno.acento,
       secundario: diseno.secundarioTarjeta ?? diseno.secundario,
-      fondoUrl: diseno.fondoUrl,
+      fondoUrl: diseno.tarjetaFondoUrl ?? null,
       css: diseno.cssTarjeta ?? diseno.css,
       activo: diseno.activo || Boolean(diseno.tarjetaActivo),
       acentoTarjeta: null,
@@ -189,7 +249,11 @@ export class DisenoService {
       acentoTarjeta: diseno.acentoTarjeta ?? null,
       secundarioTarjeta: diseno.secundarioTarjeta ?? null,
       cssTarjeta: diseno.cssTarjeta ?? null,
+      tarjetaFondoUrl: diseno.tarjetaFondoUrl ?? null,
       tarjetaActivo: Boolean(diseno.tarjetaActivo),
+      activoId: diseno.activoId ?? null,
+      tarjetaActivoId: diseno.tarjetaActivoId ?? null,
+      guardados: diseno.guardados ?? [],
     };
   }
 

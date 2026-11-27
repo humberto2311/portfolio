@@ -11,6 +11,16 @@ import {
   MensajeEmpresa,
 } from '../models/chat.model';
 
+export interface Zumbido {
+  conversacionId: string;
+  deId: string;
+  deNombre: string;
+  paraId: string;
+  paraNombre: string;
+  enviadoEn: string;
+  cooldownSegundos: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private http = inject(HttpClient);
@@ -63,6 +73,10 @@ export class ChatService {
 
   responder(id: string, contenido: string): Observable<Conversacion> {
     return this.http.post<Conversacion>(`${this.baseChats}/${id}/mensajes`, { contenido });
+  }
+
+  zumbido(conversacionId: string): Observable<Zumbido> {
+    return this.http.post<Zumbido>(`${this.baseChats}/${conversacionId}/zumbido`, {});
   }
 
   aceptar(id: string): Observable<Conversacion> {

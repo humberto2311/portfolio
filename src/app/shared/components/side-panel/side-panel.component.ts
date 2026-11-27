@@ -1,6 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { NotasPersonasService } from '../../../core/services/notas-personas.service';
+import { take } from 'rxjs/operators';
 import { SidePanelService } from '../../../core/services/side-panel.service';
+import { ZumbidoService } from '../../../core/services/zumbido.service';
+import { ChatService } from '../../../core/services/chat.service';
 import { FloatingButtonsComponent } from './components/floating-buttons/floating-buttons.component';
 import { ContactsListComponent } from './components/contacts-list/contacts-list.component';
 import { ChatViewComponent } from './components/chat-view/chat-view.component';
@@ -14,6 +17,24 @@ import { ChatViewComponent } from './components/chat-view/chat-view.component';
 })
 export class SidePanelComponent {
 
+  enviarZumbido(): void {
+    const contacto = this.svc.activeContact();
+    const conversacionId = contacto?.conversationId;
+
+    if (!conversacionId || this.zumbido.enEspera) return;
+
+    this.zumbido.enviar(contacto?.name ?? '');
+    this.svc.agregarZumbido(true);
+
+    this.chat
+      .zumbido(conversacionId)
+      .pipe(take(1))
+      .subscribe({
+        error: () => this.zumbido.espera.set(0),
+      });
+  }
+
+
   private readonly notas = inject(NotasPersonasService);
 
   notaDe(contact: { id: string } | null): string {
@@ -24,6 +45,8 @@ export class SidePanelComponent {
     return this.notas.nota(contact.id);
   }
   svc = inject(SidePanelService);
+  readonly zumbido = inject(ZumbidoService);
+  private readonly chat = inject(ChatService);
 
   /**
    * Dos estados: la ventana (420 px, con el fondo a la vista), o pantalla

@@ -26,6 +26,12 @@
     @for (grupo of grupoDia.grupos; track grupo.clave) {
       <div class="msg-grupo" [class.msg-grupo--mine]="grupo.mio" [attr.data-grupo]="grupo.mio ? 'mio' : 'ajeno'">
         @for (msg of grupo.mensajes; track trackMsg(msg, i); let ultimo = $last; let i = $index) {
+          @if (msg.zumbido) {
+            <p class="zumbido-aviso">
+              <i class="fa-solid fa-bell" aria-hidden="true"></i>
+              {{ msg.text }}
+            </p>
+          }
           @if (i === 0 || (grupo.mensajes[i - 1].time !== msg.time)) {
             <p class="msg-fecha">{{ fechaLarga(msg) }}</p>
           }

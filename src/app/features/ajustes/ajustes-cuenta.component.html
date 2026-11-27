@@ -433,6 +433,49 @@
           </ul>
         </details>
 
+        <div class="field">
+          <label>Mis diseños de perfil <small>({{ disenosDe('perfil').length }} de 5)</small></label>
+
+          <div class="lista-disenos" *ngIf="disenosDe('perfil').length; else sinListaPerfil">
+            <article class="diseno-item" *ngFor="let d of disenosDe('perfil')" [class.en-uso]="d.activo">
+              <div class="diseno-item__muestra" [style.background]="d.acento || '#4a9eff'"></div>
+              <div class="diseno-item__texto">
+                <strong>{{ d.nombre }}</strong>
+                <small>{{ d.activo ? 'En uso ahora' : 'Guardado' }}</small>
+              </div>
+              <button type="button" class="btn-ghost" [disabled]="guardandoLista || d.activo" (click)="usarDisenoGuardado(d)">
+                Usar
+              </button>
+              <button type="button" class="btn-ghost" [disabled]="guardandoLista" (click)="borrarDisenoGuardado(d)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </article>
+          </div>
+          <ng-template #sinListaPerfil>
+            <small>Todavía no has guardado ningún diseño de perfil.</small>
+          </ng-template>
+
+          <div class="actions">
+            <input
+              class="hex nombre-diseno"
+              type="text"
+              maxlength="60"
+              spellcheck="false"
+              [(ngModel)]="nombreDiseno"
+              placeholder="Nombre del diseño"
+            >
+            <button
+              type="button"
+              class="btn-ghost"
+              [disabled]="guardandoLista || !puedeGuardarOtro('perfil')"
+              (click)="guardarDisenoEnLista('perfil')"
+            >
+              Guardar como diseño
+            </button>
+          </div>
+          <small>Puedes guardar hasta 5 diseños de perfil y cambiar entre ellos cuando quieras.</small>
+        </div>
+
         <div class="vista-previa diseno-visita" *ngIf="acento || css || fondoUrl">
           <div class="previa__portada"></div>
           <div class="previa__cuerpo">
@@ -550,6 +593,34 @@
         </div>
 
         <div class="field">
+          <label>Fondo de la tarjeta <small>(solo la tarjeta)</small></label>
+
+          <div class="fondos" *ngIf="galeria().length; else sinFondosTarjeta">
+            <button
+              type="button"
+              class="fondo"
+              *ngFor="let foto of galeria()"
+              [class.activo]="fondoTarjetaUrl === foto.url"
+              (click)="elegirFondoTarjeta(foto.url)"
+            >
+              <img [src]="foto.url" [alt]="foto.textoAlternativo || 'Fondo de la tarjeta'">
+            </button>
+          </div>
+          <ng-template #sinFondosTarjeta>
+            <small>Aún no tienes fotos en tu galería. Puedes subir una imagen aquí mismo.</small>
+          </ng-template>
+
+          <div class="actions">
+            <label class="btn-ghost">
+              <input type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="fondoTarjetaDesdeArchivo($any($event.target))">
+              Subir imagen
+            </label>
+            <button type="button" class="btn-ghost" *ngIf="fondoTarjetaUrl" (click)="elegirFondoTarjeta(null)">Sin fondo</button>
+          </div>
+          <small>Solo se ve en la página de la tarjeta: tu perfil conserva su propio fondo.</small>
+        </div>
+
+        <div class="field">
           <label for="tarjeta-css">CSS de la tarjeta</label>
           <textarea
             id="tarjeta-css"
@@ -586,6 +657,49 @@
             <li><code>.pista</code><span>El texto que queda bajo la tarjeta</span></li>
           </ul>
         </details>
+
+        <div class="field">
+          <label>Mis diseños de tarjeta <small>({{ disenosDe('tarjeta').length }} de 5)</small></label>
+
+          <div class="lista-disenos" *ngIf="disenosDe('tarjeta').length; else sinListaTarjeta">
+            <article class="diseno-item" *ngFor="let d of disenosDe('tarjeta')" [class.en-uso]="d.activoTarjeta">
+              <div class="diseno-item__muestra" [style.background]="d.acentoTarjeta || d.acento || '#4a9eff'"></div>
+              <div class="diseno-item__texto">
+                <strong>{{ d.nombre }}</strong>
+                <small>{{ d.activoTarjeta ? 'En uso ahora' : 'Guardado' }}</small>
+              </div>
+              <button type="button" class="btn-ghost" [disabled]="guardandoLista || d.activoTarjeta" (click)="usarDisenoGuardado(d)">
+                Usar
+              </button>
+              <button type="button" class="btn-ghost" [disabled]="guardandoLista" (click)="borrarDisenoGuardado(d)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </article>
+          </div>
+          <ng-template #sinListaTarjeta>
+            <small>Todavía no has guardado ningún diseño de tarjeta.</small>
+          </ng-template>
+
+          <div class="actions">
+            <input
+              class="hex nombre-diseno"
+              type="text"
+              maxlength="60"
+              spellcheck="false"
+              [(ngModel)]="nombreDiseno"
+              placeholder="Nombre del diseño"
+            >
+            <button
+              type="button"
+              class="btn-ghost"
+              [disabled]="guardandoLista || !puedeGuardarOtro('tarjeta')"
+              (click)="guardarDisenoEnLista('tarjeta')"
+            >
+              Guardar como diseño
+            </button>
+          </div>
+          <small>Puedes guardar hasta 5 diseños de tarjeta y cambiar entre ellos cuando quieras.</small>
+        </div>
 
         <div class="tarjeta-previa diseno-previa">
           <article class="tarjeta">

@@ -23,7 +23,7 @@
 
     <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="tocarPropio()"
             [title]="propiaEsNota() ? 'Escribe o edita tu nota' : 'Ver tu historia'">
-      <span class="anillo anillo--crear" [class.anillo--propio]="mio()">
+      <span class="anillo anillo--crear" [class.anillo--propio]="mio()" [class.diseno-visita]="disenoPropio()">
         @if (avatarPropio(); as foto) {
           @if (!avatarRoto()) {
             <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />
@@ -48,7 +48,7 @@
         <button type="button" class="estado-tarjeta__anillo" (click)="ver(grupo)"
                 [title]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre"
                 [attr.aria-label]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre">
-        <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
+        <span class="anillo" [class.anillo--visto]="grupo.todosVistos" [class.diseno-visita]="disenoPropio()">
           @if (grupo.avatar && !roto(grupo.usuarioId)) {
             <img [src]="grupo.avatar" [alt]="grupo.nombre" (error)="marcarRoto(grupo.usuarioId)" />
           } @else {

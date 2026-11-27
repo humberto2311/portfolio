@@ -962,3 +962,58 @@
 }
 
 .pie__estado--error { color: var(--danger, #e5484d); }
+
+.lista-disenos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.diseno-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+
+  &.en-uso {
+    border-color: var(--accent-cyan);
+    background: var(--accent-soft);
+  }
+}
+
+.diseno-item__muestra {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+}
+
+.diseno-item__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+
+  strong {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  small {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+}
+
+.nombre-diseno {
+  min-width: 180px;
+}

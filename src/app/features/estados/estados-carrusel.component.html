@@ -48,7 +48,7 @@
         <button type="button" class="estado-tarjeta__anillo" (click)="ver(grupo)"
                 [title]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre"
                 [attr.aria-label]="grupo.estados.length ? 'Ver la historia de ' + grupo.nombre : 'Abrir el chat con ' + grupo.nombre">
-        <span class="anillo" [class.anillo--visto]="grupo.todosVistos" [class.diseno-visita]="disenoPropio()">
+        <span class="anillo" [class.anillo--visto]="grupo.todosVistos">
           @if (grupo.avatar && !roto(grupo.usuarioId)) {
             <img [src]="grupo.avatar" [alt]="grupo.nombre" (error)="marcarRoto(grupo.usuarioId)" />
           } @else {

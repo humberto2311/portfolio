@@ -23,7 +23,7 @@
 
     <button type="button" class="estado-tarjeta estado-tarjeta--crear" (click)="tocarPropio()"
             [title]="propiaEsNota() ? 'Escribe o edita tu nota' : 'Ver tu historia'">
-      <span class="anillo anillo--crear" [class.anillo--propio]="mio()" [class.diseno-visita]="disenoPropio()">
+      <span class="anillo anillo--crear" [class.anillo--propio]="mio()">
         @if (avatarPropio(); as foto) {
           @if (!avatarRoto()) {
             <img [src]="foto" alt="Tu foto" (error)="avatarRoto.set(true)" />

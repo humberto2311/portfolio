@@ -23,7 +23,7 @@
       @for (contacto of contactosNuevo; track contacto.id) {
         <div class="fila" [class.fila--elegida]="estaElegido(contacto.id)">
           <button type="button" class="fila__persona" (click)="select(contacto)">
-            <span class="fila__avatar" [class.diseno-visita]="esMiAvatar(contacto.id)">
+            <span class="fila__avatar">
               @if (contacto.avatar && !avatarRoto(contacto.id)) {
                 <img [src]="contacto.avatar" [alt]="contacto.name" (error)="marcarRoto(contacto.id)" />
               }

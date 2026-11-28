@@ -19,10 +19,6 @@ import { EstadosCarruselComponent } from '../../../../../features/estados/estado
 export class ContactsListComponent implements OnInit, OnDestroy {
   svc = inject(SidePanelService);
 
-  esMiAvatar(id: string | undefined): boolean {
-    return !!id && id === this.svc.miId;
-  }
-
   private chat = inject(ChatService);
   private estados = inject(EstadosService);
 

@@ -429,6 +429,16 @@ export class DisenoService {
     return reglas;
   }
 
+  /**
+   * Un diseño puede traer medidas pensadas para la portada del perfil. Dentro de un avatar
+   * rompen el tamaño de cada vista (mensajes, historias, carrusel), así que se descartan.
+   */
+  private sinMedidas(texto: string): string {
+    return texto
+      .replace(/\b(width|height|min-width|min-height|max-width|max-height|aspect-ratio|inset|top|right|bottom|left|position|margin|padding|display|font-size|line-height)\s*:[^;}]*;?/gi, '')
+      .replace(/\{\s*\}/g, '{}');
+  }
+
   private escribir(id: string, texto: string | null): void {
     const existente = this.documento.getElementById(id);
 
@@ -440,7 +450,7 @@ export class DisenoService {
     const hoja = existente ?? this.documento.createElement('style');
 
     hoja.id = id;
-    hoja.textContent = texto;
+    hoja.textContent = this.sinMedidas(texto);
 
     if (!existente) {
       this.documento.head.appendChild(hoja);

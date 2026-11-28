@@ -603,7 +603,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.erroresDiseno = err?.error?.errores?.length
             ? err.error.errores
-            : ['No se pudo guardar el diseño en tu lista.'];
+            : [`No se pudo guardar el diseño en tu lista (${err?.status ?? 'sin respuesta'}).`];
         },
       });
   }
@@ -732,8 +732,23 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
     const { acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta, tarjetaFondoUrl } =
       this.coleccion();
 
+    // Al guardar una edición de un diseño de la lista, se queda como el que está en uso.
+    const activoId = this.disenosDe('perfil').find((d) => d.activo)?.id ?? null;
+    const tarjetaActivoId = this.disenosDe('tarjeta').find((d) => d.activoTarjeta)?.id ?? null;
+
     this.diseno
-      .guardar({ acento, secundario, fondoUrl, css, acentoTarjeta, secundarioTarjeta, cssTarjeta, tarjetaFondoUrl })
+      .guardar({
+        acento,
+        secundario,
+        fondoUrl,
+        css,
+        acentoTarjeta,
+        secundarioTarjeta,
+        cssTarjeta,
+        tarjetaFondoUrl,
+        activoId,
+        tarjetaActivoId,
+      })
       .pipe(finalize(() => (this.guardandoDiseno = false)))
       .subscribe({
         next: () => {
@@ -743,7 +758,7 @@ export class AjustesCuentaComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.erroresDiseno = err?.error?.errores?.length
             ? err.error.errores
-            : ['No se pudo guardar el diseño.'];
+            : [`No se pudo guardar el diseño (${err?.status ?? 'sin respuesta'}).`];
         },
       });
   }

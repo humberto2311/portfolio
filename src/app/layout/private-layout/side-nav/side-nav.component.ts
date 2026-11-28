@@ -261,6 +261,9 @@ export class SideNavComponent {
   /** Grupo desplegado en la barra lateral ('cv' o 'equipo'). */
   readonly grupoAbierto = signal<'cv' | 'equipo' | null>(null);
 
+  /** Altura donde arranca el desplegable del grupo en miniatura (pegado a su fila). */
+  readonly altoSubmenu = signal(0);
+
   hijos(grupo: 'cv' | 'equipo'): RailItem[] {
     return GRUPOS[grupo];
   }
@@ -270,9 +273,15 @@ export class SideNavComponent {
     this.grupoAbierto.set(null);
   }
 
-  alternarGrupo(grupo: 'cv' | 'equipo'): void {
-    this.grupoAbierto.update((actual) => (actual === grupo ? null : grupo));
+  alternarGrupo(grupo: 'cv' | 'equipo', fila?: EventTarget | null): void {
+    const abrir = this.grupoAbierto() !== grupo;
+    this.grupoAbierto.set(abrir ? grupo : null);
     this.espaciosAbiertos.set(false);
+
+    if (abrir && this.rail.colapsado() && fila instanceof HTMLElement) {
+      // En miniatura el desplegable se cuelga de la fila pulsada, por encima del contenido.
+      this.altoSubmenu.set(Math.round(fila.getBoundingClientRect().top));
+    }
   }
 
   /** Hay un grupo abierto: el riel no se puede colapsar o el desplegable se perdería. */

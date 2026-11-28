@@ -17,13 +17,44 @@
   }
 }
 
+/* El contenedor ocupa TODO el alto y el ancho del área de la vista: así el color o la
+   imagen de fondo del diseño llegan de extremo a extremo, sin franjas negras alrededor.
+   `100dvh` menos la barra superior es el alto justo bajo ella (y en móvil se descuenta la
+   tab-bar de abajo). */
 .perfil-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  /* Las dos alturas las pone el layout en `:host`: aquí solo se leen. Tenerlas duplicadas
+     era lo que dejaba bandas cuando la barra o la tab-bar medían otra cosa. */
+  position: relative;
+  max-width: none;
+  width: 100%;
+  margin: 0;
   padding: 1rem 1.5rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
+  min-height: calc(100dvh - var(--layout-alto-barra, 60px) - var(--layout-alto-tabbar, 0px));
+  box-sizing: border-box;
+  /* Con diseño, el color de fondo lo pone la marca de diseño (styles.scss): así el fondo
+     llega hasta el último píxel, también cuando la tarjeta es más corta que la pantalla. */
+  background-color: transparent;
+}
+
+/* Con diseño (propio o visitado) el fondo lo pone `styles.scss` con las variables del
+   diseño: aquí no se pinta nada para que no se mezclen dos fondos. */
+.perfil-container.diseno-visita {
+  background-color: transparent;
+}
+
+/* La tarjeta se centra DENTRO del contenedor: el fondo sigue cubriendo el 100% y en
+   pantallas muy anchas el texto no se estira de lado a lado. */
+.perfil-centro {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
   min-width: 0;
 }
 

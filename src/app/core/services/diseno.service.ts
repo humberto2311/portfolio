@@ -64,6 +64,14 @@ const HOJA_PREVIA = 'diseno-previa-tarjeta';
 export const CLASE_VISITA = 'diseno-visita';
 export const CLASE_PREVIA = 'diseno-previa';
 
+/**
+ * Cuando alguien abre un perfil con diseño, el diseño manda: el tema claro u oscuro de la
+ * app no se pinta encima de él (cambiaba los colores y dejaba letras sin contraste). Este
+ * atributo se pone en <html> mientras haya un diseño a la vista y `styles.scss` lo usa
+ * para rendirse.
+ */
+export const ATRIBUTO_DISENO = 'data-diseno';
+
 const SUPERFICIES: [string, number, string, number][] = [
   ['--bg-main', 7, 'main', 92],
   ['--bg-elevated', 14, 'elevated', 86],
@@ -72,6 +80,90 @@ const SUPERFICIES: [string, number, string, number][] = [
   ['--bg-input', 6, 'input', 90],
   ['--bg-hover', 20, 'hover', 78],
 ];
+
+/**
+ * Cuántos diseños hay a la vista (el propio y/o el del perfil que se visita). Va como valor de
+ * `data-diseno`: mientras sea mayor que 0 el tema se rinde. `styles.scss` usa `[data-diseno]`
+ * (cualquier valor) para ceder, y el diseño propio, para el `padding` de `.perfil-container`,
+ * usa un valor mayor que 1 — así, al visitar un perfil SIN diseño, la página recupera su aire.
+ */
+export const MARCA_DISENO_VISITA = 'visita';
+
+/**
+ * Marca en <html> mientras la vista de perfil está abierta, tenga diseño o no. `styles.scss`
+ * la usa para pintar el fondo del perfil directamente en <body>: así no queda ninguna franja
+ * del tema alrededor de la tarjeta, venga de donde venga el contenedor intermedio.
+ */
+export const ATRIBUTO_VISTA_PERFIL = 'data-vista-perfil';
+
+/** Lo que un diseño propio necesita para que se vea igual con el tema claro y el oscuro. */
+const NEUTROS = '--text-secondary: #5a646f; --text-muted: #5a646f; --text-faint: #666f7a;'
+  + ' --warning: #8a5a12; --danger: #b42318; --success: #157347;'
+  + ' --bg-navbar: rgba(255, 255, 255, 0.92); --bg-navbar-scrolled: #ffffff;'
+  + ' color-scheme: light;';
+
+/**
+ * Propiedades que se le quitan a las reglas de un diseño. Ojo: aquí no están `position`,
+ * `margin`, `padding`, `font-size` ni `top/left` — quitarlas rompía el diseño del perfil
+ * (el avatar dejaba de apoyarse centrado sobre la portada y los botones perdían su sitio).
+ */
+const MEDIDAS = /(^|[{;])\s*(width|height|min-width|min-height|max-width|max-height|aspect-ratio|inset)\s*:[^;}]*;?/gi;
+
+/**
+ * Reglas del perfil que quedan anuladas mientras haya un diseño activo, para que el diseño
+ * sea el que decide el sitio del avatar y el solapamiento con la portada.
+ */
+const NEUTRALIZADO = `
+html[${ATRIBUTO_DISENO}] .perfil-container .header-card,
+html[${ATRIBUTO_DISENO}] .perfil-container .cover-banner {
+  clip-path: none !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .header-card {
+  margin-top: 0 !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .header-row {
+  margin-top: -55px !important;
+  align-items: flex-end !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-block {
+  align-self: flex-start !important;
+  align-items: flex-start !important;
+  width: fit-content !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-block app-notas-usuario {
+  width: 100% !important;
+  max-width: 128px !important;
+  margin: 0 auto 4px !important;
+  text-align: center !important;
+}
+/* El avatar y el anillo van en el mismo sitio que sin diseño: el círculo no se mueve. */
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-eleccion {
+  display: block !important;
+  position: relative !important;
+  width: fit-content !important;
+  margin: 0 !important;
+  align-self: flex-start !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-estado {
+  display: block !important;
+  padding: 0 !important;
+  background: none !important;
+  border-radius: 0 !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-wrapper {
+  width: 128px !important;
+  height: 128px !important;
+  box-sizing: content-box !important;
+  margin: 0 !important;
+  position: relative !important;
+}
+html[${ATRIBUTO_DISENO}] .perfil-container .avatar-wrapper .profile-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+`;
 
 @Injectable({ providedIn: 'root' })
 export class DisenoService {
@@ -82,6 +174,62 @@ export class DisenoService {
   readonly propio = signal<Diseno>(VACIO);
   readonly ajeno = signal<Diseno | null>(null);
   readonly previa = signal<Diseno | null>(null);
+
+  /** La marca que le dice a `styles.scss` que el diseño va por encima del tema. */
+  readonly mandando = signal(false);
+
+  /** Si el diseño que manda es el propio (no el de un perfil que se está visitando). */
+  readonly esPropio = signal(true);
+
+  /** Mientras es `true`, la página es un perfil: su fondo se pinta en <body>. */
+  readonly enVistaPerfil = signal(false);
+
+  constructor() {
+    // La marca se vuelve a poner si el <style> desaparece (una recarga de la app). En el
+    // servidor (SSR/prerender) no hay MutationObserver ni <html> que marcar.
+    const vista = this.documento.defaultView;
+
+    if (typeof vista?.MutationObserver !== 'function') return;
+
+    const observador = new vista.MutationObserver(() => this.marcarSiFalta());
+    observador.observe(this.documento.head, { childList: true });
+  }
+
+  /**
+   * Pone o quita la marca que hace que el diseño mande sobre el tema claro/oscuro.
+   * `propio` dice si el diseño a la vista es el del dueño de la sesión o el de un perfil
+   * visitado: el `padding` de `.perfil-container` solo se anula para el propio.
+   */
+  ponerMarca(activa: boolean, propio = true): void {
+    if (this.mandando() === activa && this.esPropio() === propio) {
+      this.marcarSiFalta();
+      return;
+    }
+
+    this.mandando.set(activa);
+    this.esPropio.set(propio);
+    this.marcarSiFalta();
+  }
+
+  /**
+   * Entra o sale de la vista de perfil. Al salir se quita la marca y <body> recupera su fondo
+   * normal, para no dejar el diseño pegado en el feed, proyectos o ajustes.
+   */
+  ponerVistaPerfil(activa: boolean): void {
+    if (this.enVistaPerfil() === activa) return;
+
+    this.enVistaPerfil.set(activa);
+
+    const raiz = this.documento?.documentElement;
+
+    if (!raiz) return;
+
+    if (activa) {
+      raiz.setAttribute(ATRIBUTO_VISTA_PERFIL, 'si');
+    } else {
+      raiz.removeAttribute(ATRIBUTO_VISTA_PERFIL);
+    }
+  }
 
   cargarPropio(): Observable<Diseno> {
     return this.http.get<Diseno>(`${this.raiz}/me`).pipe(
@@ -201,16 +349,7 @@ export class DisenoService {
     void this.compilar(diseno.css).then((css) => {
       if (vigente() !== diseno) return;
 
-      const texto = [
-        this.bloque(diseno, `.${alcance}`, false),
-        this.bloque(diseno, `[data-tema='claro'] .${alcance}`, true),
-        this.velo(diseno, alcance),
-        css ? this.escopar(css, alcance) : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
-
-      this.escribir(hoja, texto);
+      this.escribir(hoja, this.hojaDelDiseno(diseno, alcance, css));
     });
   }
 
@@ -224,19 +363,28 @@ export class DisenoService {
 
     const css = await this.compilar(diseno.css);
 
-    // Mi CSS se escribe con alcance, igual que el de los demás: con selectores
-    // sueltos se colaba en el perfil de cualquiera que visitara. Las variables
-    // sí van en :root porque son el tema de la app.
-    const texto = [
-      this.bloque(diseno, `.${CLASE_VISITA}`, false),
-      this.bloque(diseno, `[data-tema='claro'] .${CLASE_VISITA}`, true),
-      this.velo(diseno, CLASE_VISITA),
-      css ? this.escopar(css, CLASE_VISITA) : '',
+    this.escribir(HOJA_PROPIA, this.hojaDelDiseno(diseno, CLASE_VISITA, css));
+  }
+
+  /**
+   * El diseño es dueño de toda la hoja del perfil: sus variables se escriben sin el prefijo
+   * del tema claro (antes el tema del visitante pintaba encima y descuadraba colores y
+   * letras) y su CSS se escribe sin envolverlo en ningún `@media`, con el alcance de la
+   * vista para no colarse en el perfil de otros.
+   */
+  private hojaDelDiseno(diseno: Diseno, alcance: string, css: string | null): string {
+    const variables = this.bloque(diseno, `.${alcance}`, false, true);
+
+    return [
+      variables,
+      this.velo(diseno, alcance),
+      css ? this.escopar(css, alcance) : '',
+      `html[${ATRIBUTO_DISENO}] .perfil-container.${alcance},`
+        + ` html[${ATRIBUTO_DISENO}] .tarjeta-page.${alcance} {\n  ${NEUTROS}\n}`,
+      NEUTRALIZADO,
     ]
       .filter(Boolean)
       .join('\n');
-
-    this.escribir(HOJA_PROPIA, texto);
   }
 
   private normalizar(diseno: DisenoGuardado): Diseno {
@@ -257,7 +405,7 @@ export class DisenoService {
     };
   }
 
-  private bloque(diseno: Diseno, selector: string, claro: boolean): string {
+  private bloque(diseno: Diseno, selector: string, claro: boolean, soloClaro = false): string {
     const acento = diseno.acento?.trim();
     const secundario = diseno.secundario?.trim() || acento;
 
@@ -286,10 +434,13 @@ export class DisenoService {
       );
     }
 
-    if (secundario || diseno.fondoUrl) {
+    // Las superficies se mezclan con la base clara cuando el diseño va sin tema: así el
+    // mismo diseño se ve igual con el modo claro y con el oscuro de la app.
+    if (secundario || diseno.fondoUrl || soloClaro) {
       for (const [token, matiz, base] of SUPERFICIES) {
+        const raiz = soloClaro ? `--base-claro-${base}` : `--base-${base}`;
         variables.push(
-          `${token}: ${secundario ? `color-mix(in srgb, ${secundario} ${matiz}%, var(--base-${base}))` : `var(--base-${base})`};`,
+          `${token}: ${secundario ? `color-mix(in srgb, ${secundario} ${matiz}%, var(${raiz}))` : `var(${raiz})`};`,
         );
       }
     }
@@ -364,38 +515,65 @@ export class DisenoService {
       return '';
     }
 
-    return Array.from(hoja.cssRules).map((regla) => this.escoparRegla(regla.cssText, alcance)).join('\n');
-  }
+    const reglas: string[] = [];
 
-  private escoparRegla(texto: string, alcance: string): string {
-    const soporte = /^@(supports|media)\b/i.exec(texto);
+    for (let i = 0; i < hoja.cssRules.length; i++) {
+      const regla = hoja.cssRules[i];
 
-    if (!soporte) {
-      if (/^@/.test(texto)) return texto;
+      if (!regla) continue;
 
-      const corte = texto.indexOf('{');
-      if (corte < 0) return '';
-
-      const selectores = texto.slice(0, corte).split(',').map((s) => s.trim()).filter(Boolean);
-      const cuerpo = texto.slice(corte + 1, -1).trim();
-
-      if (!selectores.length || !cuerpo) return '';
-
-      const prefijados = selectores.map((selector) => this.escoparSelector(selector, alcance)).join(', ');
-      return `${prefijados} { ${cuerpo.replace(/position:\s*fixed/gi, 'position: absolute')} }`;
+      reglas.push(this.escoparRegla(regla, alcance));
     }
 
-    const cabecera = texto.slice(0, soporte[0].length);
-    const resto = texto.slice(soporte[0].length);
-    const apertura = resto.indexOf('{');
-    const interior = resto.slice(apertura + 1, resto.lastIndexOf('}'));
+    return reglas.join('\n');
+  }
 
-    const reglasInternas = this.dividirReglas(interior)
-      .map((fragmento) => this.escoparRegla(fragmento, alcance))
-      .filter(Boolean)
-      .join('\n');
+  private escoparRegla(regla: CSSRule, alcance: string): string {
+    const anidada = regla as CSSRule & { cssRules?: CSSRuleList; conditionText?: string };
 
-    return `${cabecera} { ${reglasInternas} }`;
+    if (/^CSS(Media|Supports|Layer|Container)Rule$/.test(regla.constructor.name) && anidada.cssRules) {
+      const cabecera = regla.constructor.name === 'CSSMediaRule'
+        ? `@media ${anidada.conditionText ?? ''}`
+        : regla.constructor.name === 'CSSSupportsRule'
+          ? `@supports ${anidada.conditionText ?? ''}`
+          : regla.constructor.name === 'CSSLayerRule'
+            ? `@layer ${(anidada as { name?: string }).name ?? ''}`
+            : `@container ${anidada.conditionText ?? ''}`;
+
+      const dentro: string[] = [];
+
+      for (let i = 0; i < anidada.cssRules.length; i++) {
+        const hija = anidada.cssRules[i];
+        if (hija) dentro.push(this.escoparRegla(hija, alcance));
+      }
+
+      return `${cabecera} {\n${dentro.filter(Boolean).join('\n')}\n}`;
+    }
+
+    // Keyframes, font-face y demás reglas de arroba se quedan tal cual.
+    if (/^@/.test(regla.cssText)) return regla.cssText;
+
+    const texto = regla.cssText;
+    const corte = texto.indexOf('{');
+
+    if (corte < 0) return '';
+
+    const selectores = texto.slice(0, corte).split(',').map((s) => s.trim()).filter(Boolean);
+    const cuerpo = texto.slice(corte + 1, -1).trim();
+
+    if (!selectores.length || !cuerpo) return '';
+
+    const prefijados = selectores.map((selector) => this.escoparSelector(selector, alcance)).join(', ');
+    return `${prefijados} { ${this.sinCubrir(cuerpo)} }`;
+  }
+
+  /**
+   * `fixed`/`sticky` tapaban la interfaz global (riel, barra superior, panel de mensajes): un
+   * bloque del perfil se quedaba encima y no se podía navegar. Se convierten en `absolute`,
+   * que se mueve con la página y solo ocupa el perfil.
+   */
+  private sinCubrir(cuerpo: string): string {
+    return cuerpo.replace(/position\s*:\s*(fixed|sticky)/gi, 'position: absolute');
   }
 
   private escoparSelector(selector: string, alcance: string): string {
@@ -404,39 +582,17 @@ export class DisenoService {
     return `.${alcance}${limpio ? ` ${limpio}` : ''}`;
   }
 
-  private dividirReglas(texto: string): string[] {
-    const reglas: string[] = [];
-    let profundidad = 0;
-    let actual = '';
-
-    for (const caracter of texto) {
-      if (caracter === '{') profundidad++;
-
-      if (caracter === '}' && profundidad > 0) {
-        profundidad--;
-        actual += caracter;
-        if (profundidad === 0) {
-          reglas.push(actual.trim());
-          actual = '';
-          continue;
-        }
-        continue;
-      }
-
-      actual += caracter;
-    }
-
-    return reglas;
-  }
-
   /**
    * Un diseño puede traer medidas pensadas para la portada del perfil. Dentro de un avatar
    * rompen el tamaño de cada vista (mensajes, historias, carrusel), así que se descartan.
+   *
+   * Solo se descartan medidas de tamaño, y solo cuando van en declaraciones completas: antes
+   * la expresión cortaba desde cualquier palabra (`margin-top` quedaba en `margin-`,
+   * `border-left` en `border-`) y ese texto roto anulaba la regla siguiente, que era justo
+   * la que dejaba el avatar centrado sobre la portada.
    */
   private sinMedidas(texto: string): string {
-    return texto
-      .replace(/\b(width|height|min-width|min-height|max-width|max-height|aspect-ratio|inset|top|right|bottom|left|position|margin|padding|display|font-size|line-height)\s*:[^;}]*;?/gi, '')
-      .replace(/\{\s*\}/g, '{}');
+    return texto.replace(MEDIDAS, '$1').replace(/\{\s*\}/g, '{}');
   }
 
   private escribir(id: string, texto: string | null): void {
@@ -455,6 +611,59 @@ export class DisenoService {
     if (!existente) {
       this.documento.head.appendChild(hoja);
     }
+  }
+
+  /** Pone la marca en <html> para que el tema claro/oscuro no se mezcle con el diseño. */
+  private marcarSiFalta(): void {
+    if (!this.documento?.documentElement) return;
+
+    const raiz = this.documento.documentElement;
+    const hoja = this.documento.getElementById('diseno-marca');
+    const debe = this.mandando();
+
+    if (!debe) {
+      raiz.removeAttribute(ATRIBUTO_DISENO);
+      hoja?.remove();
+      return;
+    }
+
+    const marca = this.esPropio() ? 'si' : MARCA_DISENO_VISITA;
+
+    if (raiz.getAttribute(ATRIBUTO_DISENO) !== marca) {
+      raiz.setAttribute(ATRIBUTO_DISENO, marca);
+    }
+
+    if (!hoja) {
+      const estilo = this.documento.createElement('style');
+      estilo.id = 'diseno-marca';
+      // Rinde el tema de la app mientras haya un diseño: ni el claro ni el oscuro pintan
+      // encima, y los colores de la interfaz dentro del perfil quedan fijos y legibles.
+      estilo.textContent = this.temaNeutro();
+      this.documento.head.appendChild(estilo);
+    }
+  }
+
+  private temaNeutro(): string {
+    return [
+      `:root[${ATRIBUTO_DISENO}] {`,
+      '  color-scheme: light;',
+      '  --base-main: #f5f6f8; --base-elevated: #eef0f4; --base-card: #ffffff;',
+      '  --base-sidebar: #eef0f4; --base-input: #ffffff; --base-hover: #e7eaef;',
+      '  --base-border: #d9dee5;',
+      '  --base-claro-main: #f5f6f8; --base-claro-elevated: #eef0f4; --base-claro-card: #ffffff;',
+      '  --base-claro-sidebar: #eef0f4; --base-claro-input: #ffffff; --base-claro-hover: #e7eaef;',
+      '  --text-primary: #161a1f; --text-secondary: #5a646f; --text-muted: #5a646f;',
+      '  --text-faint: #666f7a;',
+      '  --bg-navbar: rgba(255, 255, 255, 0.92); --bg-navbar-scrolled: #ffffff;',
+      '}',
+      `:root[${ATRIBUTO_DISENO}][data-tema='claro'] {`,
+      '  --base-main: #f5f6f8; --base-elevated: #eef0f4; --base-card: #ffffff;',
+      '  --base-sidebar: #eef0f4; --base-input: #ffffff; --base-hover: #e7eaef;',
+      '  --base-border: #d9dee5;',
+      '  --text-primary: #161a1f; --text-secondary: #5a646f; --text-muted: #5a646f;',
+      '  --text-faint: #666f7a;',
+      '}',
+    ].join('\n');
   }
 
   private textoSobre(color: string): string {

@@ -6,6 +6,9 @@
     </div>
   } @else {
     @if (perfil(); as p) {
+      <!-- Contenedor interno: el fondo del perfil cubre toda la pantalla y la tarjeta se
+           centra dentro con un ancho cómodo de leer. -->
+      <div class="perfil-centro">
       <app-perfil-header 
         [perfil]="p" 
         [esMiPerfil]="esMiPerfil"
@@ -28,6 +31,7 @@
           @case ('empresa') { <app-tab-empresa /> }
           @case ('enlaces') { <app-tab-enlaces /> }
         }
+      </div>
       </div>
     } @else {
       <div class="error-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 50vh; color: var(--text-primary);">

@@ -1,6 +1,32 @@
 @import '../../shared/styles/variables';
 
+/* Riel flotante: separación con los bordes y esquinas (las mismas del riel). El contenido
+   reserva a la izquierda el ancho del riel MÁS ese margen, y no cambia al abrir/cerrar. */
+:host {
+  --rail-margen: 12px;
+  --rail-radio: 16px;
+  /* Los dos únicos números que decide el layout. El resto de la página (perfil incluido)
+     se deriva de ellos: si no coinciden, aparece una franja del tema alrededor. */
+  --layout-alto-barra: #{$topbar-height};
+  --layout-alto-tabbar: 0px;
+}
+
+@media (max-width: 1023.98px) {
+  :host {
+    --layout-alto-tabbar: #{$tabbar-height};
+  }
+}
+
+/* Con un diseño de perfil activo, la hoja se pinta en el contenedor del perfil (debajo de la
+   barra superior, del riel y del aviso de cuenta): el diseño llena ese espacio completo y no
+   un cuadro, sin dejar franjas del tema. La marca `data-diseno` la pone DisenoService. */
+:host-context([data-diseno]) .shell {
+  background-image: none;
+}
+
 .shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   background: $bg-main;
   background-image: var(--fondo-imagen);
@@ -26,6 +52,13 @@
   min-width: 0;
 }
 
+/* En la vista de perfil el alto lo pone el shell: el cuerpo no añade otro 100dvh encima, que
+   era lo que empujaba el contenido y dejaba una banda abajo. */
+:host-context([data-vista-perfil]) .shell__body {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .shell__main {
   flex: 1;
   width: 100%;
@@ -35,24 +68,27 @@
   padding: 16px 14px calc(#{$tabbar-height} + 28px + var(--safe-bottom));
 }
 
+/* El hueco del riel es fijo: el ancho de la miniatura más su margen. Cuando el riel se
+   expande con el ratón, flota sobre el contenido en vez de empujarlo. */
 @media (min-width: $bp-desktop) {
   .shell__body {
-    padding-left: $rail-mini;
+    padding-left: calc(#{$rail-mini} + (var(--rail-margen) * 2));
   }
 
   .shell__main {
     max-width: 900px;
     padding: 24px 24px 72px;
   }
-}
 
-@media (min-width: 1181px) {
-  .shell__body {
-    padding-left: $rail-width;
-  }
-
-  .shell--rail-mini .shell__body {
-    padding-left: $rail-mini;
+  /* En la vista de perfil no se recorta el ancho ni se añade padding lateral: eso era el
+     marco que rodeaba la tarjeta. Va DESPUÉS de la regla de 900px para ganarle. */
+  :host-context([data-vista-perfil]) .shell__main,
+  :host-context([data-diseno]) .shell__main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    padding-bottom: var(--layout-alto-tabbar);
   }
 }
 
@@ -61,11 +97,71 @@
     max-width: 1000px;
     padding: 32px 40px 88px;
   }
+
+  /* En la vista de perfil, esta regla volvía a encerrar la hoja en 1000px centrados: era la
+     franja gris de los lados en monitores anchos. Va después para ganarle. */
+  :host-context([data-vista-perfil]) .shell__main,
+  :host-context([data-diseno]) .shell__main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    padding-bottom: var(--layout-alto-tabbar);
+  }
 }
 
 .shell__main--full {
   max-width: none;
   padding: 12px 12px calc(#{$tabbar-height} + 24px + var(--safe-bottom));
+}
+
+/* En la vista de perfil (con diseño o con el estilo por defecto) la hoja ocupa TODO el
+   hueco: sin ancho máximo ni padding. Antes quedaba en 900–1000px centrados, y ese sobra era
+   el marco del tema que se veía alrededor de la tarjeta. También se descuenta la tab-bar de
+   abajo, que si no dejaba una banda bajo el contenido en pantallas estrechas. */
+:host-context([data-vista-perfil]) .shell__main,
+:host-context([data-diseno]) .shell__main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  /* Sin margen superior ni inferior: empalma con la barra de arriba y con el borde de
+     abajo (el pie se oculta en esta vista). */
+  margin: 0;
+  padding: 0;
+  padding-bottom: var(--layout-alto-tabbar);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Con diseño, la hoja del layout no pinta fondo: así no asoma ninguna franja del tema
+   alrededor del diseño (ni a los lados, ni abajo, ni bajo el riel). */
+:host-context([data-diseno]) .shell__body {
+  background: transparent;
+}
+
+/* El aviso de cuenta va a sangre: su margen lateral se veía como un marco del tema. */
+:host-context([data-vista-perfil]) .shell__cuenta {
+  margin: 0;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+
+:host-context([data-vista-perfil]) .shell__main > *,
+:host-context([data-diseno]) .shell__main > * {
+  flex: 1 1 auto;
+  /* El alto justo bajo la barra superior y por encima de la tab-bar (si la hay): ni un
+     píxel de más ni de menos, para que no quede banda del tema al pie. */
+  min-height: calc(100dvh - var(--layout-alto-barra) - var(--layout-alto-tabbar));
+}
+
+/* El pie no se pinta sobre el perfil: tapaba el fondo con una franja del tema. */
+:host-context([data-vista-perfil]) .shell__footer,
+:host-context([data-diseno]) .shell__footer {
+  display: none;
 }
 
 .shell__footer {

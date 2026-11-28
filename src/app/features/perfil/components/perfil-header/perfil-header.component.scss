@@ -473,12 +473,14 @@
   align-items: flex-start;
   gap: 8px;
 
-  // El pensamiento va encima del avatar, centrado con él y sin pasar de su ancho.
+  // El pensamiento va encima del avatar y sin pasar de su ancho. El ancho se
+  // ajusta al avatar (no 100%): la burbuja tiene que quedar centrada con el
+  // círculo, y con el bloque a 100% se iba a la izquierda al desactivar el diseño.
   app-notas-usuario {
     display: block;
-    width: 100%;
+    width: fit-content;
     max-width: 128px;
-    margin: 0 auto 4px;
+    margin: 0 0 4px;
     text-align: center;
   }
 }

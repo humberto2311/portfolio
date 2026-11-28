@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PerfilService } from '../../core/services/perfil.service';
@@ -51,6 +51,20 @@ export class PerfilComponent implements OnInit, OnDestroy {
   seccionActiva: TabId = 'publicaciones';
   esMiPerfil = false;
   disenoAplicado = signal(false);
+
+  // Mientras haya un diseño a la vista, el tema claro/oscuro de la app no se pinta encima y
+  // la hoja del layout ocupa todo el hueco: el diseño llega de borde a borde.
+  private marcaDiseno = effect(() => {
+    const activo = this.disenoAplicado() || !!this.diseno.propio()?.activo;
+    this.diseno.ponerMarca(activo, this.esMiPerfil || !this.disenoAplicado());
+  });
+
+  // La vista de perfil pinta su fondo en <body> (con diseño o con el estilo por defecto):
+  // así no queda ningún marco del tema alrededor. Al salir de la ruta se quita.
+  private marcaVista = effect(() => {
+    this.diseno.ponerVistaPerfil(true);
+  });
+
   mostrarEmpresa = false;
 
   errorCarga: string | null = null;
@@ -184,8 +198,10 @@ export class PerfilComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.diseno.ponerVistaPerfil(false);
     this.disenoAplicado.set(false);
     this.diseno.limpiarAjeno();
+    this.diseno.ponerMarca(false);
   }
 
   cambiarSeccion(tab: TabId): void {

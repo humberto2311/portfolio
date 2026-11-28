@@ -411,7 +411,8 @@
             (input)="cambiarCss($any($event.target).value)"
             placeholder=".header-card { border-radius: 24px; }"></textarea>
           <small>
-            Solo estilos. Se rechazan importaciones, URLs externas, scripts y todo lo que pueda tapar la interfaz de otras personas.
+            Solo estilos. Se rechazan importaciones, URLs externas, scripts y todo lo que pueda tapar la interfaz de otras personas
+            (<code>position: fixed</code> y <code>sticky</code> se convierten en <code>absolute</code>, para que el perfil no tape el menú ni la barra de arriba).
           </small>
         </div>
 
@@ -419,17 +420,43 @@
           <summary>Nombres que puedes usar en el CSS</summary>
           <p class="referencia__titulo">La miniatura de abajo solo muestra colores y fondo: para ver el CSS abre tu perfil.</p>
           <ul>
-            <li><code>.perfil-container</code><span>Toda la página del perfil</span></li>
+            <li><code>.perfil-container</code><span>Toda la página del perfil (fondo de extremo a extremo)</span></li>
+            <li><code>.perfil-centro</code><span>La columna centrada con la tarjeta</span></li>
+
             <li><code>.cover-banner</code><span>La portada</span></li>
+            <li><code>.cover-actions</code><span>Los botones de la portada (Cambiar, Acomodar, Quitar)</span></li>
             <li><code>.header-card</code><span>El cuadro con tus datos</span></li>
+            <li><code>.header-body</code><span>La parte blanca del cuadro, bajo la portada</span></li>
+            <li><code>.header-row</code><span>La fila con la foto, el nombre y el rol</span></li>
+
+            <li><code>.avatar-block</code><span>La columna de la foto</span></li>
             <li><code>.avatar-wrapper</code><span>El círculo de la foto</span></li>
             <li><code>.profile-img</code><span>Tu foto de perfil</span></li>
             <li><code>.initials</code><span>Las letras cuando no hay foto</span></li>
-            <li><code>.user-info</code><span>Nombre, rol y estadísticas</span></li>
+
+            <li><code>.user-info</code><span>Nombre, rol y estado</span></li>
+            <li><code>.name-row h1</code><span>Tu nombre</span></li>
+            <li><code>.verified</code><span>La palomita de verificado</span></li>
             <li><code>.rol</code><span>El texto del rol</span></li>
-            <li><code>.btn-follow</code><span>El botón Seguir</span></li>
-            <li><code>.actions</code><span>Los botones del encabezado</span></li>
+            <li><code>.badge-status</code><span>La insignia de estado (DISPONIBLE)</span></li>
+            <li><code>.badge-status .dot</code><span>El puntito de esa insignia</span></li>
+
+            <li><code>.actions</code><span>La fila de botones del encabezado</span></li>
+            <li><code>.btn-follow</code><span>El botón Seguir / Siguiendo</span></li>
+            <li><code>.btn-primary</code><span>El botón Hoja de Vida</span></li>
+            <li><code>.btn-outline</code><span>Los botones Mensaje y Proyectos</span></li>
+            <li><code>.btn-mas</code><span>El botón de tres puntos</span></li>
+            <li><code>.menu</code><span>El menú que abre ese botón</span></li>
+
+            <li><code>.tabs-nav</code><span>La barra de pestañas</span></li>
+            <li><code>.tab-btn</code><span>Cada pestaña</span></li>
+            <li><code>.tab-btn.active</code><span>La pestaña abierta</span></li>
+
             <li><code>.tab-content</code><span>Lo que hay dentro de las pestañas</span></li>
+            <li><code>.info-card</code><span>Las tarjetas de Información</span></li>
+            <li><code>.entry</code><span>Cada experiencia o estudio</span></li>
+            <li><code>.chips</code><span>El grupo de habilidades o idiomas</span></li>
+            <li><code>.chip</code><span>Cada habilidad o idioma</span></li>
           </ul>
         </details>
 

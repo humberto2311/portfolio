@@ -14,6 +14,15 @@
   --base-hover: #1a1e24;
   --base-border: #23282f;
 
+  // Base clara fija. Un diseño de perfil mezcla sus superficies con esta base y no con la
+  // del tema: así se ve igual con el modo oscuro y con el claro de la app.
+  --base-claro-main: #f5f6f8;
+  --base-claro-elevated: #eef0f4;
+  --base-claro-card: #ffffff;
+  --base-claro-sidebar: #eef0f4;
+  --base-claro-input: #ffffff;
+  --base-claro-hover: #e7eaef;
+
   --bg-main: var(--base-main);
   --bg-dark: var(--base-main);
   --bg-navbar: rgba(11, 13, 16, 0.92);
@@ -162,4 +171,98 @@ select optgroup {
 select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* Un perfil con diseño manda sobre el tema: la app no pinta ni el modo oscuro ni el claro
+   encima del diseño (antes se mezclaban los colores y quedaban letras sin contraste).
+   Mientras `data-diseno` esté en <html>, las reglas del tema se rinden. */
+:root[data-diseno] {
+  color-scheme: light;
+
+  --bg-main: var(--base-main);
+  --bg-dark: var(--base-main);
+  --bg-elevated: var(--base-elevated);
+  --bg-card: var(--base-card);
+  --bg-sidebar: var(--base-sidebar);
+  --bg-input: var(--base-input);
+  --bg-hover: var(--base-hover);
+  --bg-border: var(--base-border);
+  --border-soft: var(--base-border);
+  --bg-navbar: rgba(255, 255, 255, 0.92);
+  --bg-navbar-scrolled: #ffffff;
+
+  --text-primary: #161a1f;
+  --text-secondary: #5a646f;
+  --text-muted: #5a646f;
+  --text-faint: #666f7a;
+}
+
+:root[data-diseno] select {
+  color-scheme: light;
+}
+
+/* El diseño cubre toda la hoja del perfil y no un cuadro: el fondo del diseño (imagen o
+   color) llena todo el espacio entre el riel, la barra superior y el borde de abajo, y la
+   tarjeta va centrada encima. La hoja del layout deja de pintar su propio fondo. */
+:root[data-diseno] .perfil-container {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  min-height: calc(100dvh - var(--layout-alto-barra, 60px) - var(--layout-alto-tabbar, 0px));
+  /* El fondo del diseño llega hasta el último píxel del hueco, aunque la tarjeta sea más
+     corta que la pantalla. Sin `attachment: fixed`: esa regla se recortaba al propio
+     contenedor y dejaba ver el fondo del tema por los bordes. */
+  background-color: var(--bg-main);
+  background-image: var(--fondo-imagen);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Sin aire extra a los lados: el diseño propio llega hasta el hueco del riel flotante, que ya
+   deja su margen. Así no queda ninguna franja del tema alrededor. */
+:root[data-diseno] .shell__main {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* El aire arriba y abajo va dentro de la columna centrada (`.perfil-centro`), no en el
+   contenedor: así el fondo del diseño sigue llegando a los bordes. */
+:root[data-diseno] .perfil-centro {
+  padding-top: 1rem;
+  padding-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  :root[data-diseno] .perfil-container {
+    padding: 0;
+    min-height: calc(100dvh - var(--layout-alto-barra, 60px) - var(--layout-alto-tabbar, 0px));
+  }
+
+  :root[data-diseno] .perfil-centro {
+    padding-top: 0.75rem;
+    padding-bottom: 2.5rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+}
+
+/* ---------- Fondo del perfil en <body> ---------- */
+
+/* Mientras se ve un perfil (con diseño guardado o con el estilo por defecto), el fondo del
+   perfil se pinta en el propio <body>. Así el color llega hasta el último píxel y no queda
+   ningún marco del tema alrededor de la tarjeta, venga el contenedor que venga. La marca
+   `data-vista-perfil` la pone DisenoService al entrar y se quita al salir. */
+:root[data-vista-perfil] body {
+  background-color: var(--bg-main);
+  background-image: var(--fondo-imagen);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* La hoja del layout tampoco pinta fondo: si lo pintara, taparía el de <body>. */
+:root[data-vista-perfil] .shell {
+  background-color: transparent;
+  background-image: none;
 }

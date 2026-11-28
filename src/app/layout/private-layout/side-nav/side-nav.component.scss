@@ -2,7 +2,7 @@
 
 @mixin rail-mini {
   width: $rail-mini;
-  padding: 16px 8px calc(16px + var(--safe-bottom));
+  padding: 14px 8px 10px;
 
   /* En miniatura el logo baja de tamaño pero se lee completo. */
   .rail__marca {
@@ -43,6 +43,10 @@
 
 :host {
   display: none;
+
+  /* Separación del riel con los bordes de la pantalla y radio de sus esquinas. */
+  --rail-margen: 12px;
+  --rail-radio: 16px;
 }
 
 @media (min-width: $bp-desktop) {
@@ -51,20 +55,25 @@
   }
 }
 
+/* Riel flotante: separado de los bordes, con esquinas redondeadas y sombra. Va `fixed`, así
+   abrirse o contraerse no cambia el ancho de la página ni empuja el contenido. */
 .rail {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  top: var(--rail-margen);
+  bottom: var(--rail-margen);
+  left: var(--rail-margen);
   width: $rail-width;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 16px 10px calc(16px + var(--safe-bottom));
-  background: $bg-main;
-  border-right: 1px solid $bg-border;
+  padding: 14px 10px 12px;
+  background: $bg-sidebar;
+  border: 1px solid $bg-border;
+  border-radius: var(--rail-radio);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.75);
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   z-index: 940;
 
   ul {
@@ -305,7 +314,7 @@
 /* Igual que la hoja de "Más": pegado al riel, asomando solo por sus esquinas. */
 .rail__espacios {
   position: fixed;
-  left: calc(#{$rail-width} - 8px);
+  left: calc(var(--rail-margen) + #{$rail-width} - 4px);
   bottom: var(--espacios-abajo, calc(16px + var(--safe-bottom)));
   z-index: 120;
   display: grid;
@@ -324,7 +333,7 @@
 }
 
 .rail--mini .rail__espacios {
-  left: calc(#{$rail-mini} - 8px);
+  left: calc(var(--rail-margen) + #{$rail-mini} - 4px);
 }
 
 .rail__cambiar-caja:has(.rail__espacios) {
@@ -533,6 +542,21 @@
 
 /* ---------- Riel estilo Instagram: miniatura que se despliega al acercarse ---------- */
 
+/* El desplegable del riel en miniatura va por encima del contenido y no dentro del flujo:
+   antes acababa empujando la página hacia la derecha al abrirlo. */
+.rail--mini .rail__grupo--abierto .rail__submenu {
+  position: fixed;
+  left: calc(var(--rail-margen) + #{$rail-mini} + 8px);
+  z-index: 950;
+  width: 208px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid $bg-border;
+  border-radius: 12px;
+  background: $bg-card;
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.75);
+}
+
 /* La fila del perfil usa el avatar como icono (como Instagram). */
 .rail__subitem--salir {
   color: $danger;
@@ -546,7 +570,7 @@
 }
 
 .rail {
-  transition: width 0.18s ease;
+  transition: width 0.18s ease, box-shadow 0.18s ease;
 }
 
 /* Miniatura: solo iconos, centrados y con tooltip propio. */
@@ -558,12 +582,13 @@
     position: relative;
   }
 
-  /* Tooltip al pasar el ratón: el `title` nativo tarda y tapa el desplegado. */
-  .rail__item[data-tip]:hover::after,
+  /* Tooltip al pasar el ratón: el `title` nativo tarda y tapa el desplegado.
+     Nunca sobre la fila de un grupo: tapaba el desplegable recién abierto. */
+  .rail__item[data-tip]:not(.rail__item--grupo):hover::after,
   .rail__subitem[data-tip]:hover::after {
     content: attr(data-tip);
     position: fixed;
-    left: calc(#{$rail-mini} + 8px);
+    left: calc(var(--rail-margen) + #{$rail-mini} + 10px);
     z-index: 300;
     padding: 6px 10px;
     background: $bg-card;
@@ -578,18 +603,22 @@
   }
 }
 
-.rail__mas {
-  position: relative;
+.rail__item--mas {
   margin-top: 4px;
 }
 
-/* Hoja de "Más": panel flotante, al costado del riel cuando está en miniatura. */
+/* Hoja de "Más": flota al costado del riel, igual que el panel de Mensajes. Va `fixed`
+   (fuera del flujo del riel), así abrirla no cambia su tamaño ni desplaza la página. */
 .rail__hoja {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 140;
-  width: 100%;
+  position: fixed;
+  left: calc(var(--rail-margen) + #{$rail-width} + 8px);
+  bottom: calc(16px + var(--safe-bottom));
+  z-index: 950;
+  width: 248px;
+  max-width: calc(100vw - 24px);
+  max-height: min(70dvh, 520px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px;
   border: 1px solid $bg-border;
   border-radius: 16px;
@@ -598,10 +627,11 @@
 }
 
 .rail--mini .rail__hoja {
-  left: calc(#{$rail-mini} + 6px);
-  bottom: 0;
+  left: calc(var(--rail-margen) + #{$rail-mini} + 8px);
   width: 232px;
 }
+
+
 
 .rail__hoja-lista {
   display: flex;
